@@ -372,11 +372,11 @@
             background-color: var(--secondary-bg);
             border: 1px solid var(--outline-color);
             border-radius: var(--radius);
-            max-width: 600px;
+            max-width: 500px;
             width: 100%;
             max-height: 80vh;
             overflow-y: auto;
-            padding: 24px;
+            padding: 20px;
             position: relative;
             animation: modalSlideIn 0.3s ease;
         }
@@ -403,13 +403,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
             border-bottom: 1px solid var(--outline-color);
         }
 
         .modal-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: var(--primary-text);
         }
@@ -440,9 +440,9 @@
         }
 
         .modal-body h3 {
-            font-size: 16px;
-            margin-top: 20px;
-            margin-bottom: 12px;
+            font-size: 14px;
+            margin-top: 12px;
+            margin-bottom: 8px;
             color: var(--accent-color);
         }
 
@@ -451,31 +451,31 @@
         }
 
         .modal-body p {
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 12px;
-            color: var(--secondary-text);
-        }
-
-        .modal-body ul {
-            margin-left: 20px;
-            margin-bottom: 12px;
-        }
-
-        .modal-body li {
-            font-size: 14px;
-            line-height: 1.6;
+            font-size: 12px;
+            line-height: 1.5;
             margin-bottom: 8px;
             color: var(--secondary-text);
         }
 
+        .modal-body ul {
+            margin-left: 16px;
+            margin-bottom: 8px;
+        }
+
+        .modal-body li {
+            font-size: 12px;
+            line-height: 1.5;
+            margin-bottom: 4px;
+            color: var(--secondary-text);
+        }
+
         .modal-footer {
-            margin-top: 20px;
-            padding-top: 16px;
+            margin-top: 16px;
+            padding-top: 12px;
             border-top: 1px solid var(--outline-color);
             text-align: center;
             color: var(--secondary-text);
-            font-size: 12px;
+            font-size: 11px;
         }
 
         @keyframes modalSlideIn {
@@ -489,63 +489,177 @@
             }
         }
 
-        /* ===== RESPONSIVE ===== */
+        /* ===== RESPONSIVE - MOBILE ===== */
         @media (max-width: 768px) {
-            .timezone-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .section-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-container {
-                max-width: 100%;
-            }
-
-            .input-row {
-                flex-direction: column;
-            }
-
-            .time-input-container {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .timezone-dropdown {
-                width: 100%;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .action-buttons .btn {
-                width: 100%;
-            }
-
-            .timezone-scroll-container {
-                max-height: 400px;
-            }
-
-            .modal-content {
-                padding: 20px;
-                margin: 10px;
-            }
-        }
-
-        @media (max-width: 480px) {
             body {
-                padding: 16px 8px;
+                padding: 12px 8px;
             }
 
             .time-converter-container {
                 padding: 16px 12px;
             }
 
+            /* Compact input section */
+            .input-section {
+                padding: 16px 12px;
+                margin-bottom: 16px;
+            }
+
+            .input-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .time-input-container {
+                width: 100%;
+                justify-content: center;
+                padding: 10px 12px;
+            }
+
+            .time-input-container label {
+                font-size: 12px;
+            }
+
+            .timezone-dropdown {
+                width: 100%;
+                min-width: auto;
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+
+            /* Compact buttons */
+            .action-buttons {
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+
+            .action-buttons .btn:not(.help-btn) {
+                flex: 1;
+                min-width: auto;
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .help-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+
+            /* Compact section headers */
+            .section-header {
+                margin-bottom: 12px;
+            }
+
+            .section-title {
+                font-size: 16px;
+            }
+
+            .separator {
+                margin: 16px 0;
+            }
+
+            /* Mobile grid - 2 columns */
+            .timezone-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            /* Compact time cards */
+            .time-card {
+                padding: 10px;
+            }
+
             .time-display {
-                font-size: 18px;
+                font-size: 16px;
+                margin-bottom: 6px;
+            }
+
+            .timezone-abbr {
+                font-size: 12px;
+            }
+
+            .timezone-name {
+                font-size: 10px;
+            }
+
+            .remove-btn {
+                opacity: 1;
+                font-size: 16px;
+                top: 6px;
+                right: 6px;
+            }
+
+            /* Compact search */
+            .search-container {
+                max-width: 100%;
+                min-width: auto;
+            }
+
+            .search-input {
+                font-size: 12px;
+                padding: 8px 12px 8px 36px;
+            }
+
+            .search-icon {
+                font-size: 14px;
+                left: 12px;
+            }
+
+            /* Compact scroll container */
+            .timezone-scroll-container {
+                max-height: 300px;
+                padding: 8px;
+            }
+
+            /* Modal adjustments */
+            .modal-content {
+                padding: 16px;
+                margin: 8px;
+            }
+
+            .modal-title {
+                font-size: 16px;
+            }
+
+            .no-results {
+                padding: 20px 12px;
+                font-size: 12px;
+            }
+        }
+
+        /* Extra small screens - even more compact */
+        @media (max-width: 400px) {
+            .timezone-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+
+            .time-card {
+                padding: 8px;
+            }
+
+            .time-display {
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+
+            .timezone-abbr {
+                font-size: 11px;
+            }
+
+            .timezone-name {
+                font-size: 9px;
+            }
+
+            .action-buttons .btn:not(.help-btn) {
+                padding: 8px 10px;
+                font-size: 11px;
+            }
+
+            .help-btn {
+                width: 34px;
+                height: 34px;
             }
         }
     </style>
@@ -605,48 +719,26 @@
     <div class="modal-overlay" id="help-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Help & Information</h2>
+                <h2 class="modal-title">Help & Info</h2>
                 <button class="modal-close" id="modal-close">×</button>
             </div>
             <div class="modal-body">
-                <h3>🌍 How to Use</h3>
-                <p>This tool helps you convert time across different timezones instantly.</p>
-                
-                <h3>⏰ Setting Your Time</h3>
-                <ul>
-                    <li>Select the time and timezone you want to convert from</li>
-                    <li>The tool will automatically calculate times in all your selected timezones</li>
-                </ul>
+                <h3>⏰ Setting Time</h3>
+                <p>Select time and timezone. All selected timezones update automatically.</p>
                 
                 <h3>➕ Adding Timezones</h3>
-                <ul>
-                    <li>Click on any timezone card in the "Add Timezones" section to add it to your list</li>
-                    <li>Use the search bar to find cities (e.g., "London", "Tokyo", "New York")</li>
-                    <li>Scroll through the list to see all available timezones</li>
-                </ul>
+                <p>Click any timezone card to add. Search by city (London, Tokyo), country (Japan, UK), or abbreviation (GMT, EST).</p>
                 
                 <h3>➖ Removing Timezones</h3>
-                <ul>
-                    <li>Hover over a timezone in "Your Timezones" and click the × button</li>
-                </ul>
+                <p>Click the × button on any timezone in "Your Timezones".</p>
                 
-                <h3>🔍 Search Tips</h3>
-                <ul>
-                    <li>Search by city name: "Paris", "Sydney", "Dubai"</li>
-                    <li>Search by country: "Japan", "Germany", "Brazil"</li>
-                    <li>Search by region: "California", "Scotland"</li>
-                    <li>Search by abbreviation: "GMT", "EST", "PST"</li>
-                </ul>
+                <h3>💾 Buttons</h3>
+                <p><strong>Copy:</strong> Creates shareable URL<br>
+                <strong>Save:</strong> Saves selections locally<br>
+                <strong>Reset:</strong> Returns to defaults</p>
                 
-                <h3>💾 Saving & Sharing</h3>
-                <ul>
-                    <li><strong>Copy:</strong> Creates a shareable URL with your current time and timezone selections</li>
-                    <li><strong>Save:</strong> Saves your timezone selections locally in your browser</li>
-                    <li><strong>Reset:</strong> Returns to the default timezone selection</li>
-                </ul>
-                
-                <h3>🕐 Time Abbreviations</h3>
-                <p>Each timezone shows its standard abbreviation (e.g., GMT for London, EST/EDT for New York). These automatically switch between standard and daylight saving time.</p>
+                <h3>🕐 Abbreviations</h3>
+                <p>Each timezone shows standard abbreviations (GMT, EST, PST) that switch automatically for daylight saving time.</p>
             </div>
             <div class="modal-footer">
                 Version 1.0
@@ -1114,8 +1206,9 @@
                 if (e.target === helpModal) closeModal();
             });
 
-            // Initial render
+            // Initial render and URL update
             render();
+            updateURL();
         }
 
         function populateFromDropdown() {
