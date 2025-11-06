@@ -572,9 +572,9 @@
 
         <!-- ACTION BUTTONS -->
         <div class="action-buttons">
-            <button class="btn" id="share-btn">📋 Copy Share Link</button>
-            <button class="btn" id="save-btn">💾 Save Preferences</button>
-            <button class="btn" id="reset-btn">🔄 Reset to Defaults</button>
+            <button class="btn" id="share-btn">Copy</button>
+            <button class="btn" id="save-btn">Save</button>
+            <button class="btn" id="reset-btn">Reset</button>
             <button class="btn help-btn" id="help-btn">?</button>
         </div>
 
@@ -640,16 +640,16 @@
                 
                 <h3>💾 Saving & Sharing</h3>
                 <ul>
-                    <li><strong>Copy Share Link:</strong> Creates a URL with your current time and timezone selections</li>
-                    <li><strong>Save Preferences:</strong> Saves your timezone selections locally in your browser</li>
-                    <li><strong>Reset to Defaults:</strong> Returns to the default timezone selection</li>
+                    <li><strong>Copy:</strong> Creates a shareable URL with your current time and timezone selections</li>
+                    <li><strong>Save:</strong> Saves your timezone selections locally in your browser</li>
+                    <li><strong>Reset:</strong> Returns to the default timezone selection</li>
                 </ul>
                 
                 <h3>🕐 Time Abbreviations</h3>
                 <p>Each timezone shows its standard abbreviation (e.g., GMT for London, EST/EDT for New York). These automatically switch between standard and daylight saving time.</p>
             </div>
             <div class="modal-footer">
-                Version 1.1.0
+                Version 1.0
             </div>
         </div>
     </div>
@@ -658,7 +658,7 @@
         const { DateTime } = luxon;
 
         // ===== VERSION =====
-        const VERSION = '1.1.0';
+        const VERSION = '1.0';
         console.log(`Timezone Converter - Version ${VERSION}`);
 
         // ===== TIMEZONE DATA =====
@@ -1088,10 +1088,22 @@
             loadState();
 
             // Event listeners
-            inputHour.addEventListener('change', render);
-            inputMinute.addEventListener('change', render);
-            inputAmPm.addEventListener('change', render);
-            fromSelect.addEventListener('change', render);
+            inputHour.addEventListener('change', () => {
+                updateURL();
+                render();
+            });
+            inputMinute.addEventListener('change', () => {
+                updateURL();
+                render();
+            });
+            inputAmPm.addEventListener('change', () => {
+                updateURL();
+                render();
+            });
+            fromSelect.addEventListener('change', () => {
+                updateURL();
+                render();
+            });
             searchInput.addEventListener('input', render);
             shareBtn.addEventListener('click', shareLink);
             saveBtn.addEventListener('click', savePreferences);
@@ -1141,6 +1153,16 @@
             inputHour.value = String(hour).padStart(2, '0');
             inputMinute.value = String(Math.floor(now.minute / 5) * 5).padStart(2, '0');
             inputAmPm.value = ampm;
+        }
+
+        // ===== URL MANAGEMENT =====
+        function updateURL() {
+            const time = `${inputHour.value}:${inputMinute.value} ${inputAmPm.value}`;
+            const from = encodeURIComponent(fromSelect.value);
+            const zones = encodeURIComponent(Array.from(selectedTimezones).join(','));
+            
+            const url = `?t=${time}&from=${from}&zones=${zones}`;
+            window.history.replaceState({}, '', url);
         }
 
         // ===== MODAL FUNCTIONS =====
@@ -1204,7 +1226,7 @@
                 from: fromSelect.value
             };
             localStorage.setItem('timezone_preferences', JSON.stringify(data));
-            showNotification('✅ Preferences saved!');
+            showNotification('✅ Saved!');
         }
 
         function resetToDefaults() {
@@ -1212,9 +1234,9 @@
             fromSelect.value = 'Etc/UTC';
             setCurrentTime();
             localStorage.removeItem('timezone_preferences');
-            window.history.replaceState({}, '', window.location.pathname);
+            updateURL();
             render();
-            showNotification('🔄 Reset to defaults');
+            showNotification('🔄 Reset!');
         }
 
         function shareLink() {
@@ -1225,9 +1247,9 @@
             const url = `${window.location.origin}${window.location.pathname}?t=${time}&from=${from}&zones=${zones}`;
             
             navigator.clipboard.writeText(url).then(() => {
-                showNotification('📋 Link copied to clipboard!');
+                showNotification('📋 Copied!');
             }).catch(() => {
-                showNotification('❌ Failed to copy link');
+                showNotification('❌ Failed');
             });
         }
 
@@ -1367,11 +1389,13 @@
                 card.querySelector('.remove-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
                     selectedTimezones.delete(timezone);
+                    updateURL();
                     render();
                 });
             } else {
                 card.addEventListener('click', () => {
                     selectedTimezones.add(timezone);
+                    updateURL();
                     render();
                 });
             }
