@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Affiliate Link Card Generator | HeroVibes</title>
+  <style>
+    /* ===== ROOT VARIABLES (DESIGN SYSTEM) ===== */
+    :root {
+      --primary-bg: #191919;
+      --secondary-bg: #1F1F1F;
+      --hover-color: #323232;
+      --outline-color: #323232;
+      --accent-color: #87A9FF;
+      --primary-text: #D4D4D4;
+      --secondary-text: #8C8C8C;
+      --radius: 8px;
+      --padding-v: 24px;
+      --padding-h: 16px;
+    }
+
+    /* ===== GLOBAL STYLES ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: sans-serif;
+      background: var(--primary-bg);
+      color: var(--primary-text);
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    .tool-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ===== LAYOUT GRID ===== */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* ===== CARD STYLES ===== */
+    .card {
+      background: var(--secondary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      padding: var(--padding-v) var(--padding-h);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: var(--primary-text);
+    }
+
+    /* ===== INPUT SECTION ===== */
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 12px;
+      color: var(--secondary-text);
+      margin-bottom: 6px;
+    }
+
+    .input-field,
+    .textarea-field {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--primary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      color: var(--primary-text);
+      font-size: 12px;
+      font-family: sans-serif;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .input-field:focus,
+    .textarea-field:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      background: var(--hover-color);
+    }
+
+    .textarea-field {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    /* ===== MODE TOGGLE ===== */
+    .mode-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      background: var(--primary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      color: var(--primary-text);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-btn:hover {
+      background: var(--hover-color);
+    }
+
+    .mode-btn.active {
+      background: var(--accent-color);
+      color: var(--primary-bg);
+      border-color: var(--accent-color);
+    }
+
+    /* ===== SHIMMER BUTTON ===== */
+    .shimmer-btn {
+      position: relative;
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--secondary-bg);
+      color: var(--primary-text);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .shimmer-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .shimmer-btn:hover {
+      background: var(--hover-color);
+    }
+
+    .shimmer-btn:hover::before {
+      left: 125%;
+    }
+
+    .shimmer-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* ===== PREVIEW SECTION ===== */
+    #cardPreview {
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-placeholder {
+      text-align: center;
+      color: var(--secondary-text);
+      font-size: 12px;
+    }
+
+    /* ===== CODE OUTPUT SECTION ===== */
+    .code-output {
+      background: var(--primary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      padding: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--secondary-text);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* ===== CUSTOM SCROLLBAR ===== */
+    .code-output::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .code-output::-webkit-scrollbar-track {
+      background: var(--primary-bg);
+      border-radius: 4px;
+    }
+
+    .code-output::-webkit-scrollbar-thumb {
+      background: var(--hover-color);
+      border-radius: 4px;
+    }
+
+    .code-output::-webkit-scrollbar-thumb:hover {
+      background: var(--outline-color);
+    }
+
+    /* ===== TROUBLESHOOTING SECTION ===== */
+    .troubleshoot {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--secondary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+    }
+
+    .troubleshoot-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--accent-color);
+      margin-bottom: 8px;
+    }
+
+    .troubleshoot-item {
+      font-size: 11px;
+      color: var(--secondary-text);
+      margin-bottom: 4px;
+      padding-left: 12px;
+      position: relative;
+    }
+
+    .troubleshoot-item::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--accent-color);
+    }
+
+    /* ===== RESPONSIVE MOBILE OPTIMIZATION ===== */
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+
+      .tool-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 20px 12px;
+      }
+
+      .mode-toggle {
+        flex-direction: column;
+      }
+
+      .code-output {
+        max-height: 200px;
+        font-size: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .input-field,
+      .textarea-field {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== TOOL CONTAINER ===== -->
+  <div class="tool-container">
+
+    <!-- ===== MAIN GRID ===== -->
+    <div class="tool-grid">
+      
+      <!-- ===== USER INPUT CARD ===== -->
+      <div class="card">
+        <div class="card-title">Card Settings</div>
+        
+        <div class="input-group">
+          <label class="input-label" for="productName">Product Title</label>
+          <input type="text" id="productName" class="input-field" placeholder="Enter product name...">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="productDescription">Product Description</label>
+          <textarea id="productDescription" class="textarea-field" placeholder="Enter product description..."></textarea>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="productImage">Product Image URL</label>
+          <input type="text" id="productImage" class="input-field" placeholder="https://example.com/image.jpg">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="affiliateLink1">Affiliate Link 1</label>
+          <input type="text" id="affiliateLink1" class="input-field" placeholder="https://affiliate-link-1.com">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="affiliateButtonText1">Button Text 1</label>
+          <input type="text" id="affiliateButtonText1" class="input-field" placeholder="Buy Now">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="affiliateLink2">Affiliate Link 2 (Optional)</label>
+          <input type="text" id="affiliateLink2" class="input-field" placeholder="https://affiliate-link-2.com">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="affiliateButtonText2">Button Text 2 (Optional)</label>
+          <input type="text" id="affiliateButtonText2" class="input-field" placeholder="Learn More">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Card Theme</label>
+          <div class="mode-toggle">
+            <button id="lightMode" class="mode-btn">Light Mode</button>
+            <button id="darkMode" class="mode-btn active">Dark Mode</button>
+          </div>
+        </div>
+
+        <button id="copyCode" class="shimmer-btn">Copy HTML Code</button>
+      </div>
+
+      <!-- ===== PREVIEW CARD ===== -->
+      <div class="card">
+        <div class="card-title">Live Preview</div>
+        <div id="cardPreview">
+          <div class="preview-placeholder">Your card preview will appear here</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CODE OUTPUT CARD ===== -->
+    <div class="card">
+      <div class="card-title">Generated HTML Code</div>
+      <div id="generatedCode" class="code-output">// Your generated code will appear here...</div>
+    </div>
+
+    <!-- ===== TROUBLESHOOTING SECTION ===== -->
+    <div class="troubleshoot">
+      <div class="troubleshoot-title">Troubleshooting Tips</div>
+      <div class="troubleshoot-item">Image not showing? Ensure the URL is publicly accessible and uses HTTPS</div>
+      <div class="troubleshoot-item">Card layout broken? The layout works best with square or portrait images</div>
+      <div class="troubleshoot-item">Buttons not appearing? Make sure both link and button text are provided</div>
+      <div class="troubleshoot-item">Copy not working? Try manually selecting and copying the code from the output area</div>
+    </div>
+  </div>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // ===== ELEMENT REFERENCES =====
+    const productNameInput = document.getElementById('productName');
+    const productDescInput = document.getElementById('productDescription');
+    const productImageInput = document.getElementById('productImage');
+    const affiliateLink1Input = document.getElementById('affiliateLink1');
+    const affiliateButtonText1Input = document.getElementById('affiliateButtonText1');
+    const affiliateLink2Input = document.getElementById('affiliateLink2');
+    const affiliateButtonText2Input = document.getElementById('affiliateButtonText2');
+    const lightModeBtn = document.getElementById('lightMode');
+    const darkModeBtn = document.getElementById('darkMode');
+    const copyCodeBtn = document.getElementById('copyCode');
+    const previewArea = document.getElementById('cardPreview');
+    const codeOutput = document.getElementById('generatedCode');
+
+    // ===== STATE MANAGEMENT =====
+    let cardTheme = {
+      backgroundColor: '#1F1F1F',
+      textColor: '#D4D4D4',
+      descriptionColor: '#8C8C8C',
+      buttonColor1: '#87A9FF',
+      buttonColor2: '#E74C3C',
+      dividerColor: 'rgba(135, 169, 255, 0.2)'
+    };
+
+    // ===== CARD UPDATE FUNCTION =====
+    function updateCard() {
+      const productName = productNameInput.value.trim();
+      const productDesc = productDescInput.value.trim();
+      const productImage = productImageInput.value.trim();
+      const affLink1 = affiliateLink1Input.value.trim();
+      const affButtonText1 = affiliateButtonText1Input.value.trim();
+      const affLink2 = affiliateLink2Input.value.trim();
+      const affButtonText2 = affiliateButtonText2Input.value.trim();
+
+      // ===== VALIDATION & TROUBLESHOOTING =====
+      if (!productName || !productDesc || !productImage || !affLink1 || !affButtonText1) {
+        previewArea.innerHTML = '<div class="preview-placeholder">Please fill in required fields: Title, Description, Image, and at least one affiliate link with button text</div>';
+        codeOutput.textContent = '// Fill in all required fields to generate code...';
+        return;
+      }
+
+      // ===== GENERATE CARD HTML WITH IMAGE LEFT, CONTENT RIGHT, BUTTONS BOTTOM =====
+      const cardHTML = `<div style="width: 100%; max-width: 600px; margin: 0 auto; background: ${cardTheme.backgroundColor}; color: ${cardTheme.textColor}; border-radius: 12px; font-family: sans-serif; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); overflow: hidden;">
+  <!-- Top Section: Image (25%) + Text (75%) -->
+  <div style="display: flex; flex-direction: row;">
+    <!-- Image Section -->
+    <a href="${affLink1}" target="_blank" rel="noopener noreferrer" style="flex: 0 0 25%; display: flex; align-items: center; justify-content: center; padding: 20px; background: ${cardTheme.backgroundColor}; text-decoration: none;">
+      <img src="${productImage}" alt="${productName}" style="width: 100%; height: auto; max-width: 120px; object-fit: contain; border-radius: 8px;" onerror="this.style.display='none'" />
+    </a>
+    
+    <!-- Text Content Section -->
+    <div style="flex: 1; padding: 20px 20px 20px 0; display: flex; flex-direction: column; justify-content: center;">
+      <h2 style="font-size: 18px; font-weight: bold; margin: 0 0 8px 0; overflow-wrap: break-word; color: ${cardTheme.textColor};">${productName}</h2>
+      <p style="font-size: 13px; margin: 0; color: ${cardTheme.descriptionColor}; line-height: 1.4; overflow-wrap: break-word;">${productDesc}</p>
+    </div>
+  </div>
+  
+  <!-- Divider -->
+  <div style="height: 1px; background: ${cardTheme.dividerColor}; margin: 0 20px;"></div>
+  
+  <!-- Bottom Section: Buttons (Full Width) -->
+  <div style="padding: 16px 20px 20px 20px; display: flex; flex-direction: column; gap: 8px;">
+    <a href="${affLink1}" target="_blank" rel="noopener noreferrer" style="display: block; padding: 12px 20px; color: #FFFFFF; text-decoration: none; border-radius: 8px; background: ${cardTheme.buttonColor1}; font-size: 14px; font-weight: 600; text-align: center; transition: opacity 0.2s;">${affButtonText1}</a>${affLink2 && affButtonText2 ? `
+    <a href="${affLink2}" target="_blank" rel="noopener noreferrer" style="display: block; padding: 12px 20px; color: #FFFFFF; text-decoration: none; border-radius: 8px; background: ${cardTheme.buttonColor2}; font-size: 14px; font-weight: 600; text-align: center; transition: opacity 0.2s;">${affButtonText2}</a>` : ''}
+  </div>
+</div>`;
+
+      // ===== UPDATE PREVIEW & CODE OUTPUT =====
+      previewArea.innerHTML = cardHTML;
+      codeOutput.textContent = cardHTML;
+    }
+
+    // ===== MODE TOGGLE FUNCTIONS =====
+    function setLightMode() {
+      cardTheme = {
+        backgroundColor: '#FFFFFF',
+        textColor: '#1F1F1F',
+        descriptionColor: '#666666',
+        buttonColor1: '#87A9FF',
+        buttonColor2: '#E74C3C',
+        dividerColor: 'rgba(0, 0, 0, 0.1)'
+      };
+      lightModeBtn.classList.add('active');
+      darkModeBtn.classList.remove('active');
+      updateCard();
+    }
+
+    function setDarkMode() {
+      cardTheme = {
+        backgroundColor: '#1F1F1F',
+        textColor: '#D4D4D4',
+        descriptionColor: '#8C8C8C',
+        buttonColor1: '#87A9FF',
+        buttonColor2: '#E74C3C',
+        dividerColor: 'rgba(135, 169, 255, 0.2)'
+      };
+      darkModeBtn.classList.add('active');
+      lightModeBtn.classList.remove('active');
+      updateCard();
+    }
+
+    // ===== COPY TO CLIPBOARD FUNCTION =====
+    function copyToClipboard() {
+      const codeText = codeOutput.textContent;
+      
+      if (!codeText || codeText.includes('Fill in all required fields')) {
+        alert('Please generate a card first before copying!');
+        return;
+      }
+
+      // Modern clipboard API with fallback
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(codeText)
+          .then(() => {
+            showCopyFeedback();
+          })
+          .catch(() => {
+            fallbackCopy(codeText);
+          });
+      } else {
+        fallbackCopy(codeText);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showCopyFeedback();
+      } catch (err) {
+        alert('Copy failed. Please manually select and copy the code.');
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function showCopyFeedback() {
+      const originalText = copyCodeBtn.textContent;
+      copyCodeBtn.textContent = 'Copied!';
+      copyCodeBtn.style.background = '#87A9FF';
+      setTimeout(() => {
+        copyCodeBtn.textContent = originalText;
+        copyCodeBtn.style.background = '';
+      }, 2000);
+    }
+
+    // ===== EVENT LISTENERS =====
+    productNameInput.addEventListener('input', updateCard);
+    productDescInput.addEventListener('input', updateCard);
+    productImageInput.addEventListener('input', updateCard);
+    affiliateLink1Input.addEventListener('input', updateCard);
+    affiliateButtonText1Input.addEventListener('input', updateCard);
+    affiliateLink2Input.addEventListener('input', updateCard);
+    affiliateButtonText2Input.addEventListener('input', updateCard);
+    lightModeBtn.addEventListener('click', setLightMode);
+    darkModeBtn.addEventListener('click', setDarkMode);
+    copyCodeBtn.addEventListener('click', copyToClipboard);
+
+    // ===== INITIALIZE ON LOAD =====
+    window.addEventListener('load', () => {
+      setDarkMode(); // Start with dark mode active
+      updateCard();
+    });
+  </script>
+</body>
+</html>
