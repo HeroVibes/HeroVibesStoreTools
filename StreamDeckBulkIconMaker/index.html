@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Deck Icon Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        /* ===== ROOT VARIABLES ===== */
+        :root {
+            --bg-primary: #191919;
+            --bg-secondary: #1F1F1F;
+            --bg-hover: #323232;
+            --outline: #323232;
+            --accent: #87A9FF;
+            --text-primary: #D4D4D4;
+            --text-secondary: #8C8C8C;
+            --success: #4CAF50;
+            --radius: 8px;
+        }
+
+        /* ===== GLOBAL STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 24px 16px;
+            min-height: 100vh;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .main-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 24px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* ===== COLLAPSIBLE SECTIONS ===== */
+        .collapsible-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .collapsible-section:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 16px rgba(135, 169, 255, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.3s ease;
+        }
+
+        .section-header:hover {
+            background: var(--bg-hover);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .section-title i {
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        .toggle-icon {
+            color: var(--text-secondary);
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 0 24px 24px 24px;
+            max-height: 2000px;
+            opacity: 1;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .section-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding: 0 24px;
+        }
+
+        /* ===== PREVIEW SECTION ===== */
+        .preview-section {
+            position: sticky;
+            top: 24px;
+            height: fit-content;
+        }
+
+        .preview-container {
+            position: relative;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: var(--radius);
+            padding: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border: 1px solid var(--outline);
+            overflow: hidden;
+        }
+
+        .preview-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(135, 169, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .preview-area {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+        #iconPreview {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .preview-overlay-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-align: center;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .preview-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card.clickable {
+            cursor: pointer;
+        }
+
+        .stat-card.clickable:hover {
+            border-color: var(--accent);
+            background: var(--bg-hover);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        /* ===== CONTROLS SECTION ===== */
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        /* ===== INPUT STYLES ===== */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.1);
+        }
+
+        /* ===== CHECKBOX STYLES ===== */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--outline);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .checkbox-item input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--bg-primary);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .checkbox-item label {
+            font-size: 12px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        /* ===== COLOR PICKER STYLES ===== */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .color-picker-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .color-picker-item label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .color-input-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 48px;
+            border: 2px solid var(--outline);
+            border-radius: var(--radius);
+            cursor: pointer;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        input[type="color"]:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.1);
+        }
+
+        .hex-input {
+            width: 100%;
+            padding: 6px 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .hex-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.1);
+        }
+
+        /* Gradient Warning */
+        .gradient-warning {
+            display: none;
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: var(--radius);
+            padding: 8px 12px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: #FFA500;
+            line-height: 1.4;
+        }
+
+        .gradient-warning.active {
+            display: block;
+        }
+
+        /* ===== BUTTON STYLES ===== */
+        .btn {
+            position: relative;
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--outline);
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
+        }
+
+        .btn:hover::before {
+            left: 125%;
+        }
+
+        .btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+        }
+
+        .btn-success {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+            font-weight: 700;
+        }
+
+        .btn-success:hover {
+            background: #5cb85f;
+            border-color: #5cb85f;
+            box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== TAB NAVIGATION ===== */
+        .tab-navigation {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg-primary);
+            box-shadow: 0 4px 12px rgba(135, 169, 255, 0.2);
+        }
+
+        /* ===== GRID CONTENT ===== */
+        .content-wrapper {
+            position: relative;
+            min-height: 400px;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 16px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .content-grid:not(.active) {
+            display: none;
+        }
+
+        /* Custom Scrollbar */
+        .content-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .content-grid::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 4px;
+        }
+
+        .content-grid::-webkit-scrollbar-thumb {
+            background: var(--outline);
+            border-radius: 4px;
+        }
+
+        .content-grid::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* ===== GRID ITEMS ===== */
+        .grid-item {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-secondary);
+            border: 2px solid var(--outline);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(135, 169, 255, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .grid-item:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(135, 169, 255, 0.2);
+        }
+
+        .grid-item:hover::before {
+            opacity: 1;
+        }
+
+        .grid-item.selected {
+            border-color: var(--accent);
+            background: rgba(135, 169, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.2);
+        }
+
+        .grid-item i {
+            font-size: 32px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            z-index: 1;
+        }
+
+        .grid-item img {
+            max-width: 50%;
+            max-height: 50%;
+            object-fit: contain;
+            margin-bottom: 8px;
+            z-index: 1;
+        }
+
+        .icon-name {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-align: center;
+            z-index: 1;
+            line-height: 1.2;
+        }
+
+        .background-name-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: var(--text-primary);
+            font-size: 10px;
+            padding: 8px 4px 4px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* ===== UPLOAD AREA ===== */
+        .upload-area {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+            border: 2px dashed var(--success);
+            position: relative;
+        }
+
+        .upload-area:hover {
+            background: rgba(76, 175, 80, 0.15);
+            border-color: #5cb85f;
+        }
+
+        .upload-area label {
+            color: var(--success);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 1;
+        }
+
+        .upload-area input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-section {
+                position: static;
+            }
+
+            .color-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px 12px;
+            }
+
+            .preview-area {
+                width: 250px;
+                height: 250px;
+            }
+
+            .checkbox-grid,
+            .color-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content-grid {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="container">
+            <!-- LEFT COLUMN -->
+            <div class="preview-section">
+                <!-- LIVE PREVIEW -->
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <i class="fas fa-eye"></i>
+                            <span>Preview</span>
+                        </div>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="preview-container">
+                            <div class="preview-area">
+                                <canvas id="iconPreview" width="300" height="300"></canvas>
+                                <div class="preview-overlay-text">SELECT AN ICON</div>
+                            </div>
+                        </div>
+                        <div class="preview-stats">
+                            <div class="stat-card">
+                                <div class="stat-label">Icons Selected</div>
+                                <div class="stat-value" id="selectedCount">0</div>
+                            </div>
+                            <div class="stat-card clickable" id="sizeCard">
+                                <div class="stat-label">Resolution</div>
+                                <div class="stat-value">
+                                    <span id="currentSize">144</span>px
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTENT -->
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <i class="fas fa-images"></i>
+                            <span>Content</span>
+                        </div>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="tab-navigation">
+                            <button class="tab-btn active" id="showIconsBtn">Icons</button>
+                            <button class="tab-btn" id="showTxBtn">Textures</button>
+                            <button class="tab-btn" id="showBgBtn">Gradients</button>
+                        </div>
+                        <div class="content-wrapper">
+                            <div id="iconsContent" class="content-grid active">
+                                <div class="grid-item upload-area">
+                                    <label for="uploadIcon">+ Upload</label>
+                                    <input type="file" id="uploadIcon" accept="image/*,.svg">
+                                </div>
+                            </div>
+                            <div id="txContent" class="content-grid">
+                                <div class="grid-item upload-area">
+                                    <label for="uploadTx">+ Upload</label>
+                                    <input type="file" id="uploadTx" accept="image/*">
+                                </div>
+                            </div>
+                            <div id="bgContent" class="content-grid">
+                                <div class="grid-item upload-area">
+                                    <label for="uploadBg">+ Upload</label>
+                                    <input type="file" id="uploadBg" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SETTINGS -->
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <i class="fas fa-sliders-h"></i>
+                            <span>Settings</span>
+                        </div>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="input-group">
+                            <label for="iconName">Icon Name</label>
+                            <input type="text" id="iconName" value="Custom Icon" placeholder="Enter icon name...">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Options</label>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="saveAsZip">
+                                    <label for="saveAsZip">Multi-Size & ZIP</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="edgeOnOff" checked>
+                                    <label for="edgeOnOff">Edge On/Off</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="edgeGlowOnOff" checked>
+                                    <label for="edgeGlowOnOff">Edge Glow</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="logoGlowOnOff">
+                                    <label for="logoGlowOnOff">Logo Glow</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <div class="color-grid">
+                                <div class="color-picker-item">
+                                    <label for="iconColor">Icon</label>
+                                    <div class="color-input-wrapper">
+                                        <input type="color" id="iconColor" value="#FFFFFF">
+                                        <input type="text" id="iconColorHex" value="#FFFFFF" class="hex-input" maxlength="7">
+                                    </div>
+                                </div>
+                                <div class="color-picker-item">
+                                    <label for="backgroundColor">Background</label>
+                                    <div class="color-input-wrapper">
+                                        <input type="color" id="backgroundColor" value="#000000">
+                                        <input type="text" id="backgroundColorHex" value="#000000" class="hex-input" maxlength="7">
+                                    </div>
+                                </div>
+                                <div class="color-picker-item">
+                                    <label for="glowColor">Glow</label>
+                                    <div class="color-input-wrapper">
+                                        <input type="color" id="glowColor" value="#87A9FF">
+                                        <input type="text" id="glowColorHex" value="#87A9FF" class="hex-input" maxlength="7">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="gradient-warning" id="gradientWarning">
+                                ⚠️ A gradient is active. Turn off the gradient first to use a solid background color.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="controls-section">
+                <!-- DOWNLOAD BUTTON -->
+                <button id="downloadBtn" class="btn btn-success">
+                    <i class="fas fa-download"></i> Download Icons
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== COLLAPSIBLE SECTIONS =====
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.toggle-icon');
+            
+            content.classList.toggle('collapsed');
+            icon.classList.toggle('collapsed');
+        }
+
+        // ===== SIZE CYCLER =====
+        const sizeCard = document.getElementById('sizeCard');
+        const currentSizeEl = document.getElementById('currentSize');
+        const sizes = [72, 96, 144, 288, 500];
+        let currentSizeIndex = 2; // Start at 144px
+        let selectedSize = sizes[currentSizeIndex];
+
+        sizeCard.addEventListener('click', () => {
+            currentSizeIndex = (currentSizeIndex + 1) % sizes.length;
+            selectedSize = sizes[currentSizeIndex];
+            currentSizeEl.textContent = selectedSize;
+        });
+
+        // ===== ELEMENTS =====
+        const iconPreview = document.getElementById('iconPreview');
+        const ctx = iconPreview.getContext('2d');
+        const showIconsBtn = document.getElementById('showIconsBtn');
+        const showTxBtn = document.getElementById('showTxBtn');
+        const showBgBtn = document.getElementById('showBgBtn');
+        const iconsContent = document.getElementById('iconsContent');
+        const txContent = document.getElementById('txContent');
+        const bgContent = document.getElementById('bgContent');
+        
+        const iconColorInput = document.getElementById('iconColor');
+        const backgroundColorInput = document.getElementById('backgroundColor');
+        const glowColorInput = document.getElementById('glowColor');
+        
+        const iconColorHexInput = document.getElementById('iconColorHex');
+        const backgroundColorHexInput = document.getElementById('backgroundColorHex');
+        const glowColorHexInput = document.getElementById('glowColorHex');
+
+        const edgeOnOffCheckbox = document.getElementById('edgeOnOff');
+        const edgeGlowOnOffCheckbox = document.getElementById('edgeGlowOnOff');
+        const logoGlowOnOffCheckbox = document.getElementById('logoGlowOnOff');
+        const previewOverlayText = document.querySelector('.preview-overlay-text');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const iconNameInput = document.getElementById('iconName');
+        const selectedCountEl = document.getElementById('selectedCount');
+        const gradientWarning = document.getElementById('gradientWarning');
+
+        let customIconCount = 0;
+        let customTextureCount = 0;
+        let customBackgroundCount = 0;
+
+        // ===== DATA =====
+        const iconsData = [
+            { id: 'elgato', name: 'Elgato', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/589c087f59e6f87cec82c8e0497b0bca894926fe/SD_Icon_Maker/Images/Elgato.svg' },
+            { id: 'youtube', name: 'YouTube', type: 'fa-icon', class: 'fa-brands fa-youtube', unicode: '\uf167' },
+            { id: 'x', name: 'X', type: 'fa-icon', class: 'fa-brands fa-x-twitter', unicode: '\ue61b' },
+            { id: 'instagram', name: 'Instagram', type: 'fa-icon', class: 'fa-brands fa-instagram', unicode: '\uf16d' },
+            { id: 'chrome', name: 'Chrome', type: 'fa-icon', class: 'fa-brands fa-chrome', unicode: '\uf268' },
+            { id: 'twitch', name: 'Twitch', type: 'fa-icon', class: 'fa-brands fa-twitch', unicode: '\uf1e8' },
+            { id: 'discord', name: 'Discord', type: 'fa-icon', class: 'fa-brands fa-discord', unicode: '\uf392' },
+            { id: 'spotify', name: 'Spotify', type: 'fa-icon', class: 'fa-brands fa-spotify', unicode: '\uf1bc' },
+            { id: 'reddit', name: 'Reddit', type: 'fa-icon', class: 'fa-brands fa-reddit', unicode: '\uf1a1' },
+            { id: 'github', name: 'GitHub', type: 'fa-icon', class: 'fa-brands fa-github', unicode: '\uf09b' },
+            { id: 'steam', name: 'Steam', type: 'fa-icon', class: 'fa-brands fa-steam', unicode: '\uf1b6' },
+            { id: 'vlc', name: 'VLC', type: 'fa-icon', class: 'fa-solid fa-play', unicode: '\uf04b' },
+            { id: 'vs_code', name: 'VS Code', type: 'fa-icon', class: 'fa-solid fa-code', unicode: '\uf121' },
+            { id: 'obs', name: 'OBS', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/OBSIcon.svg' },
+            { id: 'photoshop', name: 'Photoshop', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/PhotoshopIcon.svg' },
+            { id: 'illustrator', name: 'Illustrator', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/IllustratorIcon.svg' },
+            { id: 'premiere', name: 'Premiere', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/PremiereIcon.svg' },
+            { id: 'lightroom', name: 'Lightroom', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/LightroomIcon.svg' },
+            { id: 'firefox', name: 'Firefox', type: 'fa-icon', class: 'fa-brands fa-firefox', unicode: '\uf269' },
+            { id: 'safari', name: 'Safari', type: 'fa-icon', class: 'fa-brands fa-safari', unicode: '\uf267' },
+            { id: 'edge', name: 'Edge', type: 'fa-icon', class: 'fa-brands fa-edge', unicode: '\uf282' },
+            { id: 'slack', name: 'Slack', type: 'fa-icon', class: 'fa-brands fa-slack', unicode: '\uf198' },
+            { id: 'zoom', name: 'Zoom', type: 'fa-icon', class: 'fa-solid fa-video', unicode: '\uf03d' },
+            { id: 'google_meet', name: 'Google Meet', type: 'fa-icon', class: 'fa-solid fa-users', unicode: '\uf0c0' },
+            { id: 'word', name: 'Word', type: 'fa-icon', class: 'fa-solid fa-file-word', unicode: '\uf1c2' },
+            { id: 'excel', name: 'Excel', type: 'fa-icon', class: 'fa-solid fa-file-excel', unicode: '\uf1c3' },
+            { id: 'powerpoint', name: 'Powerpoint', type: 'fa-icon', class: 'fa-solid fa-file-powerpoint', unicode: '\uf1c4' },
+            { id: 'figma', name: 'Figma', type: 'fa-icon', class: 'fa-brands fa-figma', unicode: '\uf799' },
+            { id: 'notion', name: 'Notion', type: 'fa-icon', class: 'fa-solid fa-lightbulb', unicode: '\uf0eb' },
+            { id: 'trello', name: 'Trello', type: 'fa-icon', class: 'fa-brands fa-trello', unicode: '\uf181' },
+            { id: 'dropbox', name: 'Dropbox', type: 'fa-icon', class: 'fa-brands fa-dropbox', unicode: '\uf16b' },
+            { id: 'google_drive', name: 'Google Drive', type: 'fa-icon', class: 'fa-brands fa-google-drive', unicode: '\uf3aa' },
+            { id: 'outlook', name: 'Outlook', type: 'fa-icon', class: 'fa-solid fa-envelope', unicode: '\uf0e0' },
+            { id: 'onenote', name: 'OneNote', type: 'fa-icon', class: 'fa-solid fa-book', unicode: '\uf02d' },
+            { id: 'google_docs', name: 'Docs', type: 'fa-icon', class: 'fa-solid fa-file-alt', unicode: '\uf15c' },
+            { id: 'google_sheets', name: 'Sheets', type: 'fa-icon', class: 'fa-solid fa-table', unicode: '\uf0ce' },
+        ];
+
+        const backgroundsData = [
+            { id: 'off', name: 'Off', type: 'color', value: '#333333' },
+            { id: 'gradient_blue', name: 'Blue Grad', type: 'gradient', colors: ['#007bff', '#66bbff'] },
+            { id: 'gradient_green', name: 'Green Grad', type: 'gradient', colors: ['#28a745', '#76e091'] },
+            { id: 'gradient_purple', name: 'Purple Grad', type: 'gradient', colors: ['#6f42c1', '#b388ff'] },
+            { id: 'gradient_red', name: 'Red Grad', type: 'gradient', colors: ['#dc3545', '#ff7f8c'] },
+            { id: 'gradient_orange', name: 'Orange Grad', type: 'gradient', colors: ['#fd7e14', '#ffc107'] },
+            { id: 'gradient_teal', name: 'Teal Grad', type: 'gradient', colors: ['#20c997', '#6eead7'] },
+            { id: 'gradient_grey', name: 'Grey Grad', type: 'gradient', colors: ['#6c757d', '#adb5bd'] },
+            { id: 'gradient_pink', name: 'Pink Grad', type: 'gradient', colors: ['#e83e8c', '#ff85d2'] },
+            { id: 'gradient_brown', name: 'Brown Grad', type: 'gradient', colors: ['#795548', '#a1887f'] },
+            { id: 'gradient_gold', name: 'Gold Grad', type: 'gradient', colors: ['#FFD700', '#FFA500'] },
+            { id: 'gradient_indigo', name: 'Indigo Grad', type: 'gradient', colors: ['#4b0082', '#8a2be2'] },
+            { id: 'gradient_emerald', name: 'Emerald Grad', type: 'gradient', colors: ['#50C878', '#3D9970'] },
+            { id: 'gradient_violet', name: 'Violet Grad', type: 'gradient', colors: ['#EE82EE', '#D8BFD8'] },
+            { id: 'gradient_sky', name: 'Sky Grad', type: 'gradient', colors: ['#87CEEB', '#ADD8E6'] },
+            { id: 'gradient_forest', name: 'Forest Grad', type: 'gradient', colors: ['#228B22', '#6B8E23'] },
+            { id: 'gradient_sunset', name: 'Sunset Grad', type: 'gradient', colors: ['#FF6B6B', '#FFE66B'] },
+            { id: 'gradient_ocean', name: 'Ocean Grad', type: 'gradient', colors: ['#1A2980', '#26D0CE'] },
+            { id: 'gradient_spring', name: 'Spring Grad', type: 'gradient', colors: ['#00FF87', '#60BF60'] },
+            { id: 'gradient_autumn', name: 'Autumn Grad', type: 'gradient', colors: ['#C79081', '#F29C6B'] },
+            { id: 'gradient_dawn', name: 'Dawn Grad', type: 'gradient', colors: ['#FFC371', '#FF5F6D'] },
+            { id: 'gradient_twilight', name: 'Twilight Grad', type: 'gradient', colors: ['#5F2C82', '#49A09D'] },
+            { id: 'gradient_royal', name: 'Royal Grad', type: 'gradient', colors: ['#4C4C4C', '#5C5C5C'] },
+            { id: 'gradient_electric', name: 'Electric Grad', type: 'gradient', colors: ['#6A057F', '#88B04B'] },
+            { id: 'gradient_softblue', name: 'Soft Blue Grad', type: 'gradient', colors: ['#D6E6F2', '#B9D7EA'] },
+            { id: 'gradient_warmgrey', name: 'Warm Grey Grad', type: 'gradient', colors: ['#D3CFCF', '#EAEAEA'] },
+            { id: 'gradient_coolgrey', name: 'Cool Grey Grad', type: 'gradient', colors: ['#ECEFF1', '#CFD8DC'] },
+            { id: 'gradient_deepblue', name: 'Deep Blue Grad', type: 'gradient', colors: ['#213A50', '#07244D'] },
+            { id: 'gradient_darkred', name: 'Dark Red Grad', type: 'gradient', colors: ['#8B0000', '#CD5C5C'] },
+            { id: 'gradient_lime', name: 'Lime Grad', type: 'gradient', colors: ['#8BC34A', '#CDDC39'] },
+            { id: 'gradient_peach', name: 'Peach Grad', type: 'gradient', colors: ['#FFCBA4', '#FFAB91'] },
+            { id: 'gradient_mint', name: 'Mint Grad', type: 'gradient', colors: ['#98FB98', '#66CDAA'] },
+            { id: 'gradient_lavender', name: 'Lavender Grad', type: 'gradient', colors: ['#E6E6FA', '#D8BFD8'] },
+            { id: 'gradient_chocolate', name: 'Choco Grad', type: 'gradient', colors: ['#5C3317', '#A0522D'] },
+            { id: 'gradient_charcoal', name: 'Charcoal Grad', type: 'gradient', colors: ['#36454F', '#525252'] }
+        ];
+
+        const texturesData = [
+            { id: 'off_texture', name: 'Off', type: 'texture', textureOpacity: 0 },
+            { id: 'texture_dots_light', name: 'Dots Light', type: 'texture', pattern: 'dots', textureOpacity: 0.08, dotSize: 1, dotGap: 15 },
+            { id: 'texture_dots_medium', name: 'Dots Med', type: 'texture', pattern: 'dots', textureOpacity: 0.15, dotSize: 2, dotGap: 10 },
+            { id: 'texture_dots_dense', name: 'Dots Dense', type: 'texture', pattern: 'dots', textureOpacity: 0.2, dotSize: 1.5, dotGap: 8 },
+            { id: 'texture_stripes_thin', name: 'Stripes Thin', type: 'texture', pattern: 'stripes', width: 3, gap: 10, textureOpacity: 0.1 },
+            { id: 'texture_stripes_thick', name: 'Stripes Thick', type: 'texture', pattern: 'stripes', width: 8, gap: 18, textureOpacity: 0.1 },
+            { id: 'texture_lines_horizontal', name: 'H Lines', type: 'texture', pattern: 'lines', thickness: 3, spacing: 15, textureOpacity: 0.1 },
+            { id: 'texture_lines_vertical', name: 'V Lines', type: 'texture', pattern: 'lines_v', thickness: 3, spacing: 15, textureOpacity: 0.1 },
+            { id: 'texture_crosshatch', name: 'Crosshatch', type: 'texture', pattern: 'crosshatch', textureOpacity: 0.1, lineThickness: 2, lineSpacing: 10 },
+            { id: 'texture_squares', name: 'Squares', type: 'texture', pattern: 'squares', textureOpacity: 0.08, squareSize: 10, squareGap: 20 },
+            { id: 'texture_grid', name: 'Grid', type: 'texture', pattern: 'grid', textureOpacity: 0.12, lineThickness: 2, lineSpacing: 15 },
+            { id: 'texture_diamond', name: 'Diamond', type: 'texture', pattern: 'diamond', textureOpacity: 0.1, diamondSize: 10, spacing: 20 },
+            { id: 'texture_noise', name: 'Noise', type: 'texture', pattern: 'noise', textureOpacity: 0.05 },
+            { id: 'texture_diagonal_stripes', name: 'Diag Stripes', type: 'texture', pattern: 'diagonal_stripes', width: 4, gap: 12, textureOpacity: 0.1 },
+            { id: 'texture_checkerboard', name: 'Checkerboard', type: 'texture', pattern: 'checkerboard', squareSize: 15, textureOpacity: 0.05 },
+            { id: 'texture_wave', name: 'Wave', type: 'texture', pattern: 'wave', textureOpacity: 0.07 },
+            { id: 'texture_honeycomb', name: 'Honeycomb', type: 'texture', pattern: 'honeycomb', textureOpacity: 0.09 },
+            { id: 'texture_circles', name: 'Circles', type: 'texture', pattern: 'circles', textureOpacity: 0.07, circleRadius: 5, circleGap: 20 },
+            { id: 'texture_hex_grid', name: 'Hex Grid', type: 'texture', pattern: 'hex_grid', textureOpacity: 0.08, hexSize: 10 },
+            { id: 'texture_pyramids', name: 'Pyramids', type: 'texture', pattern: 'pyramids', textureOpacity: 0.06 },
+            { id: 'texture_concentric', name: 'Concentric', type: 'texture', pattern: 'concentric', textureOpacity: 0.08, ringCount: 3, ringGap: 5 },
+            { id: 'texture_diagonal_cross', name: 'Diag Cross', type: 'texture', pattern: 'diagonal_cross', textureOpacity: 0.1, lineThickness: 3, lineSpacing: 15 },
+            { id: 'texture_woven', name: 'Woven', type: 'texture', pattern: 'woven', textureOpacity: 0.1, weaveSize: 8 },
+            { id: 'texture_brick', name: 'Brick', type: 'texture', pattern: 'brick', textureOpacity: 0.09, brickWidth: 25, brickHeight: 12 },
+            { id: 'texture_fish_scale', name: 'Fish Scale', type: 'texture', pattern: 'fish_scale', textureOpacity: 0.07, scaleRadius: 10 },
+            { id: 'texture_stars', name: 'Stars', type: 'texture', pattern: 'stars', textureOpacity: 0.06, starSize: 3, starCount: 15 },
+            { id: 'texture_doodle', name: 'Doodle', type: 'texture', pattern: 'doodle', textureOpacity: 0.05 },
+            { id: 'texture_bubble', name: 'Bubble', type: 'texture', pattern: 'bubble', textureOpacity: 0.08, bubbleSize: 6, bubbleCount: 10 },
+            { id: 'texture_cloud', name: 'Cloud', type: 'texture', pattern: 'cloud', textureOpacity: 0.04 },
+            { id: 'texture_mesh', name: 'Mesh', type: 'texture', pattern: 'mesh', textureOpacity: 0.1, meshDensity: 10 },
+            { id: 'texture_ripples', name: 'Ripples', type: 'texture', pattern: 'ripples', textureOpacity: 0.07, rippleStrength: 5 },
+            { id: 'texture_fractal', name: 'Fractal', type: 'texture', pattern: 'fractal', textureOpacity: 0.06 },
+            { id: 'texture_circuit', name: 'Circuit', type: 'texture', pattern: 'circuit', textureOpacity: 0.09 },
+            { id: 'texture_camo', name: 'Camo', type: 'texture', pattern: 'camo', textureOpacity: 0.12 }
+        ];
+
+        let selectedIcons = [];
+        let latestSelectedIconId = null;
+        let selectedTextureId = 'off_texture';
+        let selectedBackgroundId = 'off';
+
+        // ===== GRADIENT WARNING CHECK =====
+        function checkGradientWarning() {
+            const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
+            if (currentBg && currentBg.type === 'gradient') {
+                gradientWarning.classList.add('active');
+            } else {
+                gradientWarning.classList.remove('active');
+            }
+        }
+
+        // Add listener to background color inputs
+        backgroundColorInput.addEventListener('click', checkGradientWarning);
+        backgroundColorHexInput.addEventListener('focus', checkGradientWarning);
+
+        // ===== HELPER FUNCTIONS =====
+        function clearSelection(elements) {
+            elements.forEach(el => el.classList.remove('selected'));
+        }
+
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = (e) => reject(new Error(`Failed to load image: ${src}`));
+                img.src = src;
+            });
+        }
+
+        const svgCache = {};
+
+        async function getSvgText(svgUrl) {
+            if (svgCache[svgUrl]) {
+                return svgCache[svgUrl];
+            }
+            try {
+                const response = await fetch(svgUrl);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch SVG: ${response.statusText}`);
+                }
+                const svgText = await response.text();
+                svgCache[svgUrl] = svgText;
+                return svgText;
+            } catch (error) {
+                console.error(`Error fetching SVG from ${svgUrl}:`, error);
+                throw error;
+            }
+        }
+
+        async function renderSvgIcon(svgUrl, targetColor) {
+            try {
+                let originalSvgText = await getSvgText(svgUrl);
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(originalSvgText, 'image/svg+xml');
+                const svgElement = svgDoc.documentElement;
+
+                const referenceSizeForImage = 300;
+                svgElement.setAttribute('width', `${referenceSizeForImage}px`);
+                svgElement.setAttribute('height', `${referenceSizeForImage}px`);
+                svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+                svgElement.querySelectorAll('style').forEach(styleTag => {
+                    styleTag.remove();
+                });
+
+                svgElement.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, text, g').forEach(shape => {
+                    const currentFill = shape.getAttribute('fill');
+                    const currentStroke = shape.getAttribute('stroke');
+                    
+                    shape.removeAttribute('fill');
+                    shape.removeAttribute('stroke');
+                    shape.removeAttribute('style');
+
+                    if (currentFill === 'none') {
+                        shape.setAttribute('fill', 'none');
+                    } else {
+                        if (shape.tagName !== 'g' || shape.hasAttribute('fill')) {
+                           shape.setAttribute('fill', targetColor);
+                        }
+                    }
+                    
+                    if (currentStroke === 'none') {
+                        shape.setAttribute('stroke', 'none');
+                    } else if (currentStroke) {
+                        shape.setAttribute('stroke', targetColor);
+                    }
+                });
+
+                if (svgElement.getAttribute('fill') !== 'none') {
+                     svgElement.setAttribute('fill', targetColor);
+                } else if (!svgElement.hasAttribute('fill')) {
+                    svgElement.setAttribute('fill', targetColor);
+                }
+
+                const modifiedSvgText = new XMLSerializer().serializeToString(svgDoc);
+                const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(modifiedSvgText)}`;
+
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = (e) => {
+                        console.error(`Failed to load modified SVG as image for ${svgUrl}`);
+                        reject(new Error(`Could not load SVG as image for ${svgUrl}.`));
+                    }
+                    img.src = svgDataUrl;
+                });
+
+            } catch (error) {
+                console.error(`Error in renderSvgIcon for ${svgUrl}:`, error);
+                return Promise.reject(error);
+            }
+        }
+        
+        const patternDrawers = {
+            dots: (ctx, item, scaleFactor) => {
+                ctx.beginPath();
+                ctx.arc((item.dotGap || 5) * scaleFactor, (item.dotGap || 5) * scaleFactor, (item.dotSize || 1) * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(((item.dotGap * 4) || 20) * scaleFactor, ((item.dotGap * 3) || 15) * scaleFactor, (item.dotSize || 1) * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(((item.dotGap * 2) || 10) * scaleFactor, ((item.dotGap * 5) || 25) * scaleFactor, (item.dotSize || 1) * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            stripes: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.fillRect(0, 0, (item.width || 5) * scaleFactor, canvasHeight);
+                ctx.fillRect((item.gap || 15) * scaleFactor, 0, (item.width || 5) * scaleFactor, canvasHeight);
+            },
+            lines: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.fillRect(0, 0, canvasWidth, (item.thickness || 5) * scaleFactor);
+                ctx.fillRect(0, (item.spacing || 15) * scaleFactor, canvasWidth, (item.thickness || 5) * scaleFactor);
+            },
+            lines_v: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.fillRect(0, 0, (item.thickness || 5) * scaleFactor, canvasHeight);
+                ctx.fillRect((item.spacing || 15) * scaleFactor, 0, (item.thickness || 5) * scaleFactor, canvasHeight);
+            },
+            crosshatch: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.fillRect(0, 0, canvasWidth, (item.lineThickness || 2) * scaleFactor);
+                ctx.fillRect(0, (item.lineSpacing || 10) * scaleFactor, canvasWidth, (item.lineThickness || 2) * scaleFactor);
+                ctx.fillRect(0, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
+                ctx.fillRect((item.lineSpacing || 10) * scaleFactor, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
+            },
+            squares: (ctx, item, scaleFactor) => {
+                ctx.fillRect(0, 0, (item.squareSize || 10) * scaleFactor, (item.squareSize || 10) * scaleFactor);
+                ctx.fillRect((item.squareGap || 20) * scaleFactor, (item.squareGap || 20) * scaleFactor, (item.squareSize || 10) * scaleFactor, (item.squareSize || 10) * scaleFactor);
+            },
+            grid: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.fillRect(0, 0, canvasWidth, (item.lineThickness || 2) * scaleFactor);
+                ctx.fillRect(0, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
+                ctx.fillRect(canvasWidth - ((item.lineThickness || 2) * scaleFactor), 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
+                ctx.fillRect(0, canvasHeight - ((item.lineThickness || 2) * scaleFactor), canvasWidth, (item.lineThickness || 2) * scaleFactor);
+                ctx.fillRect(canvasWidth/2 - ((item.lineThickness || 2) * scaleFactor)/2, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
+                ctx.fillRect(0, canvasHeight/2 - ((item.lineThickness || 2) * scaleFactor)/2, canvasWidth, (item.lineThickness || 2) * scaleFactor);
+            },
+            diamond: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.save();
+                ctx.translate(canvasWidth / 2, canvasHeight / 2);
+                ctx.rotate(Math.PI / 4);
+                ctx.fillRect(-(item.diamondSize || 5) * scaleFactor, -(item.diamondSize || 5) * scaleFactor, (item.diamondSize || 10) * scaleFactor, (item.diamondSize || 10) * scaleFactor);
+                ctx.restore();
+            },
+            noise: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                for (let i = 0; i < canvasWidth * canvasHeight / 5; i++) {
+                    const x = Math.random() * canvasWidth;
+                    const y = Math.random() * canvasHeight;
+                    const size = Math.random() * 1.5 * scaleFactor;
+                    ctx.fillRect(x, y, size, size);
+                }
+            },
+            diagonal_stripes: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.save();
+                ctx.rotate(45 * Math.PI / 180);
+                ctx.fillRect(0, -canvasHeight, (item.width || 4) * scaleFactor, canvasHeight * 2);
+                ctx.fillRect((item.gap || 12) * scaleFactor, -canvasHeight, (item.width || 4) * scaleFactor, canvasHeight * 2);
+                ctx.restore();
+            },
+            checkerboard: (ctx, item, scaleFactor) => {
+                const squareSize = (item.squareSize || 15) * scaleFactor;
+                ctx.fillRect(0, 0, squareSize, squareSize);
+                ctx.fillRect(squareSize, squareSize, squareSize, squareSize);
+            },
+            wave: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.beginPath();
+                ctx.moveTo(0, canvasHeight / 2);
+                ctx.bezierCurveTo(canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, 3 * canvasHeight / 4, canvasWidth, canvasHeight / 2);
+                ctx.lineWidth = 2 * scaleFactor;
+                ctx.stroke();
+            },
+            honeycomb: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                const hexSize = (item.hexSize || 8) * scaleFactor;
+                const hexWidth = hexSize * Math.sqrt(3);
+                const hexHeight = hexSize * 2;
+                function drawHex(cx, cy) {
+                    ctx.beginPath();
+                    for (let i = 0; i < 6; i++) {
+                        ctx.lineTo(cx + hexSize * Math.cos(i * Math.PI / 3), cy + hexSize * Math.sin(i * Math.PI / 3));
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                ctx.fillStyle = `rgba(255,255,255,${item.textureOpacity || 0.09})`;
+                drawHex(hexWidth / 2, hexHeight / 2);
+                drawHex(hexWidth / 2, hexHeight / 2 + hexHeight * 3 / 2);
+                drawHex(hexWidth / 2 + hexWidth * 3 / 2, hexHeight / 2 + hexHeight * 3 / 4);
+            },
+            circles: (ctx, item, scaleFactor) => {
+                ctx.beginPath();
+                ctx.arc((item.circleGap || 10) * scaleFactor, (item.circleGap || 10) * scaleFactor, (item.circleRadius || 5) * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(((item.circleGap * 2) || 20) * scaleFactor, (item.circleGap || 10) * scaleFactor, (item.circleRadius || 5) * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            hex_grid: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                const hexSize = (item.hexSize || 10) * scaleFactor;
+                const hexWidth = hexSize * Math.sqrt(3);
+                const hexHeight = hexSize * 2;
+                function drawHexOutline(cx, cy) {
+                    ctx.beginPath();
+                    for (let i = 0; i < 6; i++) {
+                        ctx.lineTo(cx + hexSize * Math.cos(i * Math.PI / 3), cy + hexSize * Math.sin(i * Math.PI / 3));
+                    }
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.08})`;
+                drawHexOutline(hexWidth / 2, hexHeight / 2);
+                drawHexOutline(hexWidth / 2, hexHeight / 2 + hexHeight * 3 / 2);
+            },
+            pyramids: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.save();
+                ctx.translate(canvasWidth / 2, canvasHeight / 2);
+                ctx.beginPath();
+                ctx.moveTo(-10 * scaleFactor, 10 * scaleFactor);
+                ctx.lineTo(0, -10 * scaleFactor);
+                ctx.lineTo(10 * scaleFactor, 10 * scaleFactor);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            },
+            concentric: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.beginPath();
+                for (let i = 0; i < (item.ringCount || 3); i++) {
+                    ctx.arc(canvasWidth / 2, canvasHeight / 2, (i + 1) * (item.ringGap || 5) * scaleFactor, 0, Math.PI * 2);
+                }
+                ctx.stroke();
+            },
+            diagonal_cross: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.fillRect(0, 0, (item.lineThickness || 3) * scaleFactor, canvasHeight);
+                ctx.fillRect((item.lineSpacing || 15) * scaleFactor, 0, (item.lineThickness || 3) * scaleFactor, canvasHeight);
+                ctx.save();
+                ctx.rotate(90 * Math.PI / 180);
+                ctx.fillRect(0, -(item.lineSpacing || 15) * scaleFactor, (item.lineThickness || 3) * scaleFactor, canvasHeight);
+                ctx.fillRect(0, 0, (item.lineThickness || 3) * scaleFactor, canvasHeight);
+                ctx.restore();
+            },
+            woven: (ctx, item, scaleFactor) => {
+                ctx.fillRect(0, 0, (item.weaveSize || 8) * scaleFactor, (item.weaveSize * 2 || 16) * scaleFactor);
+                ctx.fillRect((item.weaveSize * 2 || 16) * scaleFactor, (item.weaveSize || 8) * scaleFactor, (item.weaveSize || 8) * scaleFactor, (item.weaveSize * 2 || 16) * scaleFactor);
+            },
+            brick: (ctx, item, scaleFactor) => {
+                ctx.fillRect(0, 0, (item.brickWidth || 25) * scaleFactor, (item.brickHeight || 12) * scaleFactor);
+                ctx.fillRect(item.brickWidth / 2 * scaleFactor, (item.brickHeight || 12) * scaleFactor, (item.brickWidth || 25) * scaleFactor, (item.brickHeight || 12) * scaleFactor);
+            },
+            fish_scale: (ctx, item, scaleFactor) => {
+                ctx.beginPath();
+                ctx.arc((item.scaleRadius || 10) * scaleFactor, 0, (item.scaleRadius || 10) * scaleFactor, 0, Math.PI, true);
+                ctx.arc((item.scaleRadius * 3 || 30) * scaleFactor, 0, (item.scaleRadius || 10) * scaleFactor, 0, Math.PI, true);
+                ctx.fill();
+            },
+            stars: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                for (let i = 0; i < (item.starCount || 5); i++) {
+                    const x = Math.random() * canvasWidth;
+                    const y = Math.random() * canvasHeight;
+                    const size = (item.starSize || 3) * scaleFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y + size);
+                    for (let j = 0; j < 5; j++) {
+                        ctx.lineTo(x + size * Math.sin(j * Math.PI * 2 / 5), y + size * Math.cos(j * Math.PI * 2 / 5));
+                        ctx.lineTo(x + size / 2 * Math.sin((j + 0.5) * Math.PI * 2 / 5), y + size / 2 * Math.cos((j + 0.5) * Math.PI * 2 / 5));
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            },
+            doodle: (ctx, item, scaleFactor) => {
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(10 * scaleFactor, 20 * scaleFactor, 20 * scaleFactor, 0, 30 * scaleFactor, 20 * scaleFactor);
+                ctx.bezierCurveTo(10 * scaleFactor, 0, 0, 20 * scaleFactor, 0, 0);
+                ctx.stroke();
+            },
+            bubble: (ctx, item, scaleFactor) => {
+                ctx.beginPath();
+                ctx.arc((item.bubbleSize || 6) * scaleFactor, (item.bubbleSize || 6) * scaleFactor, (item.bubbleSize || 6) * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(((item.bubbleSize * 3) || 18) * scaleFactor, ((item.bubbleSize * 2) || 12) * scaleFactor, (item.bubbleSize || 6) * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            cloud: (ctx, item, scaleFactor) => {
+                ctx.beginPath();
+                ctx.arc(5 * scaleFactor, 10 * scaleFactor, 5 * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(15 * scaleFactor, 8 * scaleFactor, 7 * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(25 * scaleFactor, 10 * scaleFactor, 5 * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            mesh: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.1})`;
+                ctx.lineWidth = 1 * scaleFactor;
+                for (let i = 0; i < canvasWidth; i += (item.meshDensity || 10) * scaleFactor) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, canvasHeight);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(canvasWidth, i);
+                    ctx.stroke();
+                }
+            },
+            ripples: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.07})`;
+                ctx.lineWidth = 1.5 * scaleFactor;
+                ctx.beginPath();
+                ctx.arc(canvasWidth / 2, canvasHeight / 2, (item.rippleStrength || 5) * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(canvasWidth / 2, canvasWidth / 2, (item.rippleStrength || 5) * 2 * scaleFactor, 0, Math.PI * 2);
+                ctx.stroke();
+            },
+            fractal: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.06})`;
+                ctx.lineWidth = 1 * scaleFactor;
+                function drawLine(x1, y1, x2, y2, depth) {
+                    if (depth > 3) return;
+                    const dx = x2 - x1;
+                    const dy = y2 - y1;
+                    const len = Math.sqrt(dx * dx + dy * dy);
+                    if (len < 5 * scaleFactor) return;
+
+                    const midX = (x1 + x2) / 2;
+                    const midY = (y1 + y2) / 2;
+
+                    const perpX = midX + dy * 0.1 * Math.random() * scaleFactor;
+                    const perpY = midY - dx * 0.1 * Math.random() * scaleFactor;
+
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(perpX, perpY);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+
+                    drawLine(x1, y1, perpX, perpY, depth + 1);
+                    drawLine(perpX, perpY, x2, y2, depth + 1);
+                }
+                drawLine(0, 0, canvasWidth, canvasHeight, 0);
+                drawLine(canvasWidth, 0, 0, canvasHeight, 0);
+            },
+            circuit: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.09})`;
+                ctx.lineWidth = 1 * scaleFactor;
+                for (let i = 0; i < canvasWidth; i += 5 * scaleFactor) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, Math.random() * canvasHeight);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(i, Math.random() * canvasHeight, 2 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            },
+            camo: (ctx, item, scaleFactor) => {
+                ctx.fillStyle = `rgba(0,0,0,${item.textureOpacity || 0.12})`;
+                ctx.beginPath();
+                ctx.arc(5 * scaleFactor, 5 * scaleFactor, 10 * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(20 * scaleFactor, 10 * scaleFactor, 8 * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(10 * scaleFactor, 20 * scaleFactor, 12 * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        };
+
+        function drawPattern(ctx, itemData, scaleFactor, canvasWidth, canvasHeight, isTexturePreview = false) {
+            if (!itemData || itemData.textureOpacity === 0) return;
+
+            const tempPatternCanvas = document.createElement('canvas');
+            const tempPatternCtx = tempPatternCanvas.getContext('2d');
+            tempPatternCanvas.width = 30 * scaleFactor;
+            tempPatternCanvas.height = 30 * scaleFactor;
+
+            if (isTexturePreview) {
+                tempPatternCtx.fillStyle = `rgba(0,0,0,${itemData.textureOpacity || 0.1})`;
+                tempPatternCtx.strokeStyle = `rgba(0,0,0,${itemData.textureOpacity || 0.1})`;
+            } else {
+                tempPatternCtx.fillStyle = `rgba(255,255,255,${itemData.textureOpacity || 0.1})`;
+                tempPatternCtx.strokeStyle = `rgba(255,255,255,${itemData.textureOpacity || 0.1})`;
+            }
+            tempPatternCtx.lineWidth = 1 * scaleFactor;
+
+            const drawer = patternDrawers[itemData.pattern];
+            if (drawer) {
+                tempPatternCtx.save();
+                drawer(tempPatternCtx, itemData, scaleFactor, tempPatternCanvas.width, tempPatternCanvas.height);
+                tempPatternCtx.restore();
+            }
+
+            const pattern = ctx.createPattern(tempPatternCanvas, 'repeat');
+            ctx.fillStyle = pattern;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        }
+
+        function renderPatternToMiniCanvas(itemData, targetCanvas, targetCtx, size, type) {
+            targetCtx.clearRect(0, 0, size, size);
+
+            let baseColor = '#333333';
+            if (type === 'texture') {
+                baseColor = '#888888';
+            }
+
+            targetCtx.fillStyle = baseColor;
+            targetCtx.fillRect(0, 0, size, size);
+
+            if (itemData.type === 'color') {
+                targetCtx.fillStyle = itemData.value || baseColor;
+                targetCtx.fillRect(0, 0, size, size);
+            } else if (itemData.type === 'gradient') {
+                const gradient = targetCtx.createLinearGradient(0, 0, size, size);
+                gradient.addColorStop(0, itemData.colors[0]);
+                gradient.addColorStop(1, itemData.colors[1]);
+                targetCtx.fillStyle = gradient;
+                targetCtx.fillRect(0, 0, size, size);
+            } else if (itemData.type === 'texture') {
+                drawPattern(targetCtx, itemData, size / 30, size, size, true);
+            } else if (itemData.type === 'custom-image') {
+                loadImage(itemData.src).then(img => {
+                    targetCtx.drawImage(img, 0, 0, size, size);
+                }).catch(e => console.error("Error loading custom image for preview:", e));
+            }
+        }
+
+        async function populateGrid(container, data, type) {
+            const uploadArea = container.querySelector('.upload-area');
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
+
+            const fragment = document.createDocumentFragment();
+            if (uploadArea) {
+                fragment.appendChild(uploadArea);
+            }
+
+            for (const item of data) {
+                const div = document.createElement('div');
+                div.classList.add('grid-item');
+                div.dataset.id = item.id;
+                div.dataset.type = type;
+
+                if (item.type === 'fa-icon') {
+                    div.innerHTML = `<i class="${item.class}"></i><span class="icon-name">${item.name}</span>`;
+                } else if (item.type === 'custom-image') {
+                    const img = document.createElement('img');
+                    img.src = item.src;
+                    img.alt = item.name;
+                    div.appendChild(img);
+                    const nameSpan = document.createElement('span');
+                    nameSpan.classList.add('icon-name');
+                    nameSpan.textContent = item.name;
+                    div.appendChild(nameSpan);
+                } else if (item.type === 'custom-svg') {
+                    const img = document.createElement('img');
+                    img.alt = item.name;
+                    try {
+                        const whiteSvgImage = await renderSvgIcon(item.src, '#FFFFFF');
+                        img.src = whiteSvgImage.src;
+                    } catch (e) {
+                        console.error(`Error loading white SVG for grid preview (${item.name}):`, e);
+                        img.src = item.src;
+                    }
+                    div.appendChild(img);
+                    const nameSpan = document.createElement('span');
+                    nameSpan.classList.add('icon-name');
+                    nameSpan.textContent = item.name;
+                    div.appendChild(nameSpan);
+                } else if (type === 'background' || type === 'texture') {
+                    const miniCanvas = document.createElement('canvas');
+                    miniCanvas.width = 60;
+                    miniCanvas.height = 60;
+                    const miniCtx = miniCanvas.getContext('2d');
+                    renderPatternToMiniCanvas(item, miniCanvas, miniCtx, 60, type);
+
+                    div.style.backgroundImage = `url(${miniCanvas.toDataURL()})`;
+                    div.style.backgroundSize = 'cover';
+                    div.style.backgroundPosition = 'center';
+                    div.style.position = 'relative';
+
+                    if (item.type === 'custom-image') {
+                        try {
+                            const img = await loadImage(item.src);
+                            miniCtx.clearRect(0, 0, 60, 60);
+                            miniCtx.drawImage(img, 0, 0, 60, 60);
+                            div.style.backgroundImage = `url(${miniCanvas.toDataURL()})`;
+                        } catch (e) {
+                            console.error(`Error loading custom ${type} preview for grid:`, e);
+                            div.style.backgroundColor = '#ccc';
+                        }
+                    }
+                    const nameOverlay = document.createElement('span');
+                    nameOverlay.classList.add('background-name-overlay');
+                    nameOverlay.textContent = item.name;
+                    div.appendChild(nameOverlay);
+                }
+
+                if (type === 'icon' && selectedIcons.includes(item.id)) {
+                    div.classList.add('selected');
+                } else if (type === 'background' && selectedBackgroundId === item.id) {
+                    div.classList.add('selected');
+                } else if (type === 'texture' && selectedTextureId === item.id) {
+                    div.classList.add('selected');
+                }
+
+                div.addEventListener('click', () => handleGridItemClick(item, div, type));
+                fragment.appendChild(div);
+            }
+
+            container.appendChild(fragment);
+        }
+
+        function handleGridItemClick(item, element, type) {
+            if (type === 'icon') {
+                if (element.classList.contains('selected')) {
+                    element.classList.remove('selected');
+                    selectedIcons = selectedIcons.filter(id => id !== item.id);
+                    if (latestSelectedIconId === item.id) {
+                        latestSelectedIconId = selectedIcons.length > 0 ? selectedIcons[selectedIcons.length - 1] : null;
+                    }
+                } else {
+                    element.classList.add('selected');
+                    selectedIcons.push(item.id);
+                    latestSelectedIconId = item.id;
+                }
+                updateSelectedCount();
+            } else if (type === 'background') {
+                clearSelection(bgContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                element.classList.add('selected');
+                selectedBackgroundId = item.id;
+                checkGradientWarning();
+            } else if (type === 'texture') {
+                clearSelection(txContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                element.classList.add('selected');
+                selectedTextureId = item.id;
+            }
+            debouncedDrawPreview();
+        }
+
+        function updateSelectedCount() {
+            selectedCountEl.textContent = selectedIcons.length;
+        }
+
+        async function renderIconToCanvas(iconData, backgroundData, textureData, iconColor, bgColor, glowColor, edgeOn, logoGlowOn, edgeGlowOn, targetCanvas, targetCtx, targetSize) {
+            targetCtx.shadowBlur = 0;
+            targetCtx.shadowColor = 'transparent';
+            targetCtx.shadowOffsetX = 0;
+            targetCtx.shadowOffsetY = 0;
+            targetCtx.clearRect(0, 0, targetSize, targetSize);
+
+            const baseIconFontSize = 150;
+            const iconRenderSizeRatio = 0.7;
+            const baseEdgeLineWidth = 6;
+            const baseEdgeOffset = 20;
+            const baseEdgeLineLength = 55;
+
+            let iconFontSize = baseIconFontSize * (targetSize / 300);
+            let iconImageDrawSize = targetSize * iconRenderSizeRatio;
+
+            if (backgroundData && backgroundData.id === 'off') {
+                targetCtx.fillStyle = bgColor;
+                targetCtx.fillRect(0, 0, targetSize, targetSize);
+            } else if (backgroundData) {
+                if (backgroundData.type === 'color') {
+                    targetCtx.fillStyle = backgroundData.value;
+                    targetCtx.fillRect(0, 0, targetSize, targetSize);
+                } else if (backgroundData.type === 'gradient') {
+                    const gradient = targetCtx.createLinearGradient(0, 0, targetSize, targetSize);
+                    gradient.addColorStop(0, backgroundData.colors[0]);
+                    gradient.addColorStop(1, backgroundData.colors[1]);
+                    targetCtx.fillStyle = gradient;
+                    targetCtx.fillRect(0, 0, targetSize, targetSize);
+                } else if (backgroundData.type === 'custom-image') {
+                    try {
+                        const img = await loadImage(backgroundData.src);
+                        targetCtx.drawImage(img, 0, 0, targetSize, targetSize);
+                    } catch (error) {
+                        console.error('Error drawing custom background image:', error);
+                        targetCtx.fillStyle = bgColor;
+                        targetCtx.fillRect(0, 0, targetSize, targetSize);
+                    }
+                }
+            } else {
+                targetCtx.fillStyle = bgColor;
+                targetCtx.fillRect(0, 0, targetSize, targetSize);
+            }
+
+            if (textureData && textureData.textureOpacity > 0) {
+                drawPattern(targetCtx, textureData, targetSize / 300, targetSize, targetSize, false);
+            } else if (textureData && textureData.type === 'custom-image') {
+                try {
+                    const img = await loadImage(textureData.src);
+                    targetCtx.globalAlpha = textureData.textureOpacity || 1;
+                    targetCtx.drawImage(img, 0, 0, targetSize, targetSize);
+                    targetCtx.globalAlpha = 1;
+                } catch (error) {
+                    console.error('Error drawing custom texture image:', error);
+                }
+            }
+
+            if (iconData) {
+                if (logoGlowOn) {
+                    targetCtx.shadowColor = glowColor;
+                    targetCtx.shadowBlur = 15 * (targetSize / 300);
+                    targetCtx.shadowOffsetX = 0;
+                    targetCtx.shadowOffsetY = 0;
+                }
+
+                if (iconData.type === 'fa-icon') {
+                    targetCtx.fillStyle = iconColor;
+                    const fontFamily = iconData.class.includes('fa-brands') ? '"Font Awesome 6 Brands"' : '"Font Awesome 6 Free"';
+                    targetCtx.font = `900 ${iconFontSize}px ${fontFamily}`;
+                    targetCtx.textAlign = 'center';
+                    targetCtx.textBaseline = 'middle';
+                    targetCtx.fillText(iconData.unicode, targetSize / 2, targetSize / 2);
+                } else if (iconData.type === 'custom-image') {
+                    try {
+                        const img = await loadImage(iconData.src);
+                        const imgAspectRatio = img.width / img.height;
+                        let drawWidth = iconImageDrawSize;
+                        let drawHeight = iconImageDrawSize;
+                        if (imgAspectRatio > 1) { 
+                            drawHeight = drawWidth / imgAspectRatio;
+                        } else { 
+                            drawWidth = drawHeight * imgAspectRatio;
+                        }
+                        const drawX = (targetSize - drawWidth) / 2;
+                        const drawY = (targetSize - drawHeight) / 2;
+                        targetCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                    } catch (error) {
+                        console.error('Error drawing custom icon image:', error);
+                        targetCtx.fillStyle = iconColor;
+                        targetCtx.font = `bold ${50 * (targetSize / 300)}px Arial`;
+                        targetCtx.textAlign = 'center';
+                        targetCtx.textBaseline = 'middle';
+                        targetCtx.fillText('?', targetSize / 2, targetSize / 2);
+                    }
+                } else if (iconData.type === 'custom-svg') {
+                    try {
+                        const img = await renderSvgIcon(iconData.src, iconColor); 
+                        const imgAspectRatio = img.width / img.height; 
+                        let drawWidth = iconImageDrawSize;
+                        let drawHeight = iconImageDrawSize;
+                        if (imgAspectRatio > 1) { 
+                            drawHeight = drawWidth / imgAspectRatio;
+                        } else { 
+                            drawWidth = drawHeight * imgAspectRatio;
+                        }
+                        const drawX = (targetSize - drawWidth) / 2;
+                        const drawY = (targetSize - drawHeight) / 2;
+                        targetCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                    } catch (error) {
+                        console.error('Error drawing custom SVG icon:', error);
+                        targetCtx.fillStyle = iconColor;
+                        targetCtx.font = `bold ${50 * (targetSize / 300)}px Arial`;
+                        targetCtx.textAlign = 'center';
+                        targetCtx.textBaseline = 'middle';
+                        targetCtx.fillText('SVG?', targetSize / 2, targetSize / 2);
+                    }
+                }
+                targetCtx.shadowBlur = 0;
+                targetCtx.shadowColor = 'transparent';
+                targetCtx.shadowOffsetX = 0;
+                targetCtx.shadowOffsetY = 0;
+            }
+
+            if (edgeOn) {
+                if (edgeGlowOn) {
+                    targetCtx.shadowColor = glowColor;
+                    targetCtx.shadowBlur = 15 * (targetSize / 300);
+                    targetCtx.shadowOffsetX = 0;
+                    targetCtx.shadowOffsetY = 0;
+                }
+
+                targetCtx.strokeStyle = glowColor;
+                targetCtx.lineWidth = baseEdgeLineWidth * (targetSize / 300);
+                targetCtx.lineCap = 'round';
+                targetCtx.lineJoin = 'round';
+
+                const offset = baseEdgeOffset * (targetSize / 300);
+                const lineLength = baseEdgeLineLength * (targetSize / 300);
+
+                targetCtx.beginPath();
+                targetCtx.moveTo(offset, offset + lineLength);
+                targetCtx.lineTo(offset, offset);
+                targetCtx.lineTo(offset + lineLength, offset);
+                targetCtx.moveTo(targetSize - offset - lineLength, offset);
+                targetCtx.lineTo(targetSize - offset, offset);
+                targetCtx.lineTo(targetSize - offset, offset + lineLength);
+                targetCtx.moveTo(targetSize - offset, targetSize - offset - lineLength);
+                targetCtx.lineTo(targetSize - offset, targetSize - offset);
+                targetCtx.lineTo(targetSize - offset - lineLength, targetSize - offset);
+                targetCtx.moveTo(offset + lineLength, targetSize - offset);
+                targetCtx.lineTo(offset, targetSize - offset);
+                targetCtx.lineTo(offset, targetSize - offset - lineLength); 
+                targetCtx.stroke();
+
+                targetCtx.shadowBlur = 0;
+                targetCtx.shadowColor = 'transparent';
+                targetCtx.shadowOffsetX = 0;
+                targetCtx.shadowOffsetY = 0;
+            }
+        }
+
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        const debouncedDrawPreview = debounce(() => {
+            document.fonts.ready.then(drawPreview);
+        }, 100);
+
+        async function drawPreview() {
+            const currentBg = backgrounds
