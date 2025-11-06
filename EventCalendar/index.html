@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HeroVibes Event Calendar</title>
+  <style>
+    /* ==================== DESIGN TOKENS ==================== */
+    :root {
+      --bg-primary: #191919;
+      --bg-secondary: #1F1F1F;
+      --bg-hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+      --padding-v: 24px;
+      --padding-h: 16px;
+    }
+
+    /* ==================== GLOBAL STYLES ==================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 20px;
+      line-height: 1.5;
+    }
+
+    /* ==================== CALENDAR HEADER ==================== */
+    .calendar-header {
+      max-width: 800px;
+      margin: 0 auto 24px;
+      padding: 0 10px;
+    }
+
+    .header-content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header-text {
+      text-align: center;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .header-description {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ==================== SUBSCRIBE BUTTON (WITH SHIMMER) ==================== */
+    #subscribe-button {
+      position: relative;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      font-family: sans-serif;
+      transition: transform 0.2s ease;
+      width: 100%;
+    }
+
+    #subscribe-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    #subscribe-button:hover::before {
+      left: 125%;
+    }
+
+    #subscribe-button:hover {
+      transform: translateY(-1px);
+    }
+
+    #subscribe-button:active {
+      transform: translateY(0);
+    }
+
+    #subscribe-button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
+
+    /* ==================== EVENT LIST CONTAINER ==================== */
+    #event-list {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 0 10px;
+    }
+
+    #event-list > p {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+      padding: 40px 20px;
+    }
+
+    /* ==================== EVENT CARD ==================== */
+    .event-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .event-card:hover {
+      border-color: var(--bg-hover);
+      transform: translateY(-2px);
+    }
+
+    /* ==================== IMAGE CONTAINER ==================== */
+    .image-container {
+      position: relative;
+      width: 311px;
+      height: 175px;
+      flex-shrink: 0;
+      background: var(--bg-primary);
+      overflow: hidden;
+    }
+
+    .event-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ==================== EVENT DETAILS ==================== */
+    .event-details {
+      position: relative;
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .event-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--accent);
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    .event-date {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .event-description {
+      font-size: 12px;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* ==================== DESCRIPTION TRUNCATION (DESKTOP) ==================== */
+    .event-description.truncated {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .event-description.truncated::after {
+      content: '...';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      padding-left: 4px;
+    }
+
+    .event-card.is-expanded .event-description.truncated {
+      -webkit-line-clamp: unset;
+      overflow: visible;
+      cursor: default;
+    }
+
+    .event-card.is-expanded .event-description.truncated::after {
+      display: none;
+    }
+
+    /* ==================== HASHTAG INDICATOR ==================== */
+    .hashtag-indicator {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 32px;
+      height: 32px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .hashtag-indicator img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    /* ==================== MOBILE OPTIMIZATION ==================== */
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+
+      .calendar-header {
+        margin-bottom: 16px;
+      }
+
+      .header-content {
+        padding: 16px;
+        gap: 10px;
+      }
+
+      .header-title {
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      .header-description {
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      #subscribe-button {
+        padding: 12px;
+        font-size: 13px;
+      }
+
+      #event-list {
+        max-width: 500px;
+        gap: 12px;
+      }
+
+      /* MOBILE: Stack layout */
+      .event-card {
+        flex-direction: column;
+      }
+
+      .image-container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 21 / 9;
+        cursor: pointer;
+      }
+
+      .image-container:active {
+        opacity: 0.9;
+      }
+
+      .event-details {
+        padding: 16px;
+        gap: 6px;
+        max-height: 150px;
+        transition: max-height 0.3s ease;
+      }
+
+      .event-card.is-expanded .event-details {
+        max-height: 800px;
+      }
+
+      .event-title {
+        font-size: 16px;
+        line-height: 1.3;
+      }
+
+      .event-date {
+        font-size: 11px;
+      }
+
+      .event-description {
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      /* MOBILE: Truncate at 80 chars */
+      .event-description.truncated-mobile {
+        cursor: pointer;
+      }
+
+      /* MOBILE: Hashtag indicator on image */
+      .image-container .hashtag-indicator {
+        top: 8px;
+        right: 8px;
+        width: 28px;
+        height: 28px;
+      }
+
+      .image-container .hashtag-indicator img {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== CALENDAR HEADER ==================== -->
+  <div class="calendar-header">
+    <div class="header-content">
+      <div class="header-text">
+        <div class="header-title">HeroVibes Events</div>
+        <div class="header-description">
+          Stay updated with upcoming streams, premieres, and gaming sessions. Subscribe to add these events directly to your calendar.
+        </div>
+      </div>
+      <button id="subscribe-button" type="button">Subscribe to Calendar</button>
+    </div>
+  </div>
+
+  <!-- ==================== EVENT LIST ==================== -->
+  <div id="event-list">
+    <p>Loading events...</p>
+  </div>
+
+  <script>
+    /* ==================== CONFIGURATION ==================== */
+    const CONFIG = {
+      calendarId: "5b6c141009f0e8c7bff0c2416f928a6d75ebed7e1be796c9383503f0725e93c8@group.calendar.google.com",
+      apiKey: "AIzaSyDa06CzfLs8lKW7qyEHW7yxSefQAYzIUBA",
+      daysAhead: 28,
+      refreshInterval: 300000 // 5 minutes
+    };
+
+    /* ==================== HASHTAG ICONS ==================== */
+    const HASHTAG_ICONS = {
+      "#movie": "https://contactherovibes.wordpress.com/wp-content/uploads/2025/06/popcorn-32.png",
+      "#gaming": "https://contactherovibes.wordpress.com/wp-content/uploads/2025/06/daco_109320.png",
+      "#series": "https://contactherovibes.wordpress.com/wp-content/uploads/2025/06/tv-24.png",
+      "#event": "https://contactherovibes.wordpress.com/wp-content/uploads/2025/06/daco_4131967.png"
+    };
+
+    /* ==================== DOM ELEMENTS ==================== */
+    const eventList = document.getElementById("event-list");
+    const subscribeButton = document.getElementById("subscribe-button");
+
+    /* ==================== SUBSCRIBE BUTTON ==================== */
+    const subscribeUrl = `https://calendar.google.com/calendar/u/0/r?cid=${encodeURIComponent(CONFIG.calendarId)}`;
+    subscribeButton.addEventListener("click", () => {
+      window.open(subscribeUrl, '_blank');
+    });
+
+    /* ==================== UTILITY: CHECK IF MOBILE ==================== */
+    function isMobile() {
+      return window.innerWidth <= 768;
+    }
+
+    /* ==================== UTILITY: DETECT & EXTRACT HASHTAG ==================== */
+    function detectHashtag(description) {
+      for (const [hashtag, iconUrl] of Object.entries(HASHTAG_ICONS)) {
+        const regex = new RegExp(`(?:^|\\s)(${hashtag})\\b`, 'i');
+        if (regex.test(description)) {
+          const cleanedDesc = description.replace(regex, ' ').trim();
+          return { hashtag, iconUrl, cleanedDesc };
+        }
+      }
+      return { hashtag: null, iconUrl: null, cleanedDesc: description };
+    }
+
+    /* ==================== UTILITY: CLEAN DESCRIPTION ==================== */
+    function cleanDescription(desc) {
+      return desc
+        .replace(/(https?:\/\/[^\s<>"']*\.(webp|jpg|jpeg|png|gif))/gi, "") // Remove image URLs
+        .replace(/<br\s*\/?>/gi, "\n") // Convert <br> to newlines
+        .replace(/(\r\n|\r|\n)/g, "\n") // Normalize newlines
+        .replace(/<[^>]*>/g, "") // Remove HTML tags
+        .trim();
+    }
+
+    /* ==================== FETCH EVENTS FROM GOOGLE CALENDAR ==================== */
+    async function fetchEvents() {
+      const now = new Date().toISOString();
+      const maxDate = new Date();
+      maxDate.setDate(maxDate.getDate() + CONFIG.daysAhead);
+      const maxTime = maxDate.toISOString();
+
+      const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CONFIG.calendarId)}/events?key=${CONFIG.apiKey}&timeMin=${now}&timeMax=${maxTime}&singleEvents=true&orderBy=startTime`;
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'No details' }));
+          throw new Error(`Failed to fetch events: ${errorData.error?.message || errorData.message}`);
+        }
+
+        const data = await response.json();
+        renderEvents(data.items || []);
+      } catch (error) {
+        eventList.innerHTML = `<p style="color:#FF6B6B;">Error loading events: ${error.message}</p>`;
+        console.error('Calendar Error:', error);
+      }
+    }
+
+    /* ==================== RENDER EVENTS ==================== */
+    function renderEvents(events) {
+      if (events.length === 0) {
+        eventList.innerHTML = "<p>No upcoming events in the next 28 days.</p>";
+        return;
+      }
+
+      eventList.innerHTML = "";
+
+      events.forEach(event => {
+        const card = createEventCard(event);
+        eventList.appendChild(card);
+      });
+    }
+
+    /* ==================== CREATE EVENT CARD ==================== */
+    function createEventCard(event) {
+      // Parse event data
+      const start = new Date(event.start.dateTime || event.start.date);
+      const rawDescription = event.description || "";
+      
+      // Extract image URL
+      const imageMatch = rawDescription.match(/(https?:\/\/[^\s<>"']*\.(webp|jpg|jpeg|png|gif))/i);
+      const imageUrl = imageMatch ? imageMatch[1] : null;
+
+      // Clean description
+      let cleanedDesc = cleanDescription(rawDescription);
+
+      // Detect hashtag
+      const { hashtag, iconUrl, cleanedDesc: finalDesc } = detectHashtag(cleanedDesc);
+
+      // Check truncation needs
+      const mobile = isMobile();
+      const needsTruncation = mobile ? finalDesc.length > 80 : finalDesc.split('\n').filter(l => l.trim()).length > 3;
+
+      // Create card
+      const card = document.createElement("div");
+      card.className = "event-card";
+
+      // Create image (if exists)
+      if (imageUrl) {
+        const imgContainer = document.createElement("div");
+        imgContainer.className = "image-container";
+
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.alt = "Event Image";
+        img.loading = "lazy";
+        img.className = "event-image";
+
+        imgContainer.appendChild(img);
+
+        // Add hashtag indicator to image on mobile
+        if (mobile && iconUrl) {
+          const indicator = createHashtagIndicator(iconUrl, hashtag);
+          imgContainer.appendChild(indicator);
+        }
+
+        // Mobile: click image to expand
+        if (mobile) {
+          imgContainer.addEventListener('click', () => toggleExpand(card, finalDesc, needsTruncation, mobile));
+        }
+
+        card.appendChild(imgContainer);
+      }
+
+      // Create details section
+      const details = document.createElement("div");
+      details.className = "event-details";
+
+      // Add hashtag indicator to details on desktop (or mobile if no image)
+      if (iconUrl && (!mobile || !imageUrl)) {
+        const indicator = createHashtagIndicator(iconUrl, hashtag);
+        details.appendChild(indicator);
+      }
+
+      // Title
+      const title = document.createElement("h2");
+      title.className = "event-title";
+      title.textContent = event.summary || "Untitled Event";
+
+      // Date
+      const dateEl = document.createElement("p");
+      dateEl.className = "event-date";
+      dateEl.textContent = formatEventDate(start, event.start.dateTime);
+
+      // Description
+      const desc = document.createElement("p");
+      desc.className = "event-description";
+      desc.setAttribute('data-full', finalDesc);
+      
+      if (needsTruncation) {
+        if (mobile) {
+          desc.textContent = finalDesc.substring(0, 80) + "...";
+          desc.classList.add('truncated-mobile');
+        } else {
+          desc.textContent = finalDesc;
+          desc.classList.add('truncated');
+        }
+        desc.addEventListener('click', () => toggleExpand(card, finalDesc, needsTruncation, mobile));
+      } else {
+        desc.textContent = finalDesc;
+      }
+
+      details.appendChild(title);
+      details.appendChild(dateEl);
+      details.appendChild(desc);
+
+      card.appendChild(details);
+
+      return card;
+    }
+
+    /* ==================== CREATE HASHTAG INDICATOR ==================== */
+    function createHashtagIndicator(iconUrl, hashtag) {
+      const indicator = document.createElement("div");
+      indicator.className = "hashtag-indicator";
+
+      const img = document.createElement("img");
+      img.src = iconUrl;
+      img.alt = `${hashtag} icon`;
+
+      indicator.appendChild(img);
+      return indicator;
+    }
+
+    /* ==================== FORMAT EVENT DATE ==================== */
+    function formatEventDate(date, hasTime) {
+      const dateOptions = { weekday: "short", year: "numeric", month: "short", day: "numeric" };
+      let formatted = date.toLocaleDateString("en-GB", dateOptions);
+      
+      if (hasTime) {
+        const timeOptions = { hour: "2-digit", minute: "2-digit" };
+        formatted += " @ " + date.toLocaleTimeString("en-GB", timeOptions);
+      }
+      
+      return formatted;
+    }
+
+    /* ==================== TOGGLE EXPAND/COLLAPSE ==================== */
+    function toggleExpand(card, fullDesc, needsTruncation, mobile) {
+      if (!needsTruncation) return;
+
+      const desc = card.querySelector('.event-description');
+      const isExpanded = card.classList.contains('is-expanded');
+
+      if (isExpanded) {
+        card.classList.remove('is-expanded');
+        if (mobile) {
+          desc.textContent = fullDesc.substring(0, 80) + "...";
+        }
+      } else {
+        card.classList.add('is-expanded');
+        desc.textContent = fullDesc;
+      }
+    }
+
+    /* ==================== INITIALIZE ==================== */
+    fetchEvents();
+    setInterval(fetchEvents, CONFIG.refreshInterval);
+
+    // Re-render on resize (to handle mobile/desktop switch)
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (eventList.children.length > 0 && eventList.children[0].classList.contains('event-card')) {
+          fetchEvents();
+        }
+      }, 250);
+    });
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    function sendHeight() {
+      var height = document.body.scrollHeight;
+      window.parent.postMessage({ frameHeight: height }, '*');
+    }
+
+    window.onload = sendHeight;
+    window.onresize = sendHeight;
+  </script>
+
+</body>
+</html>
