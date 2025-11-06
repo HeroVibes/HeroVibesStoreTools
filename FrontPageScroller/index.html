@@ -460,10 +460,10 @@
     <div class="showcase-header">
       <div class="title-section">
         <h2 class="showcase-title">
-          Creator Tools
+          Free Creator Tools
           <span class="title-badge">Free Forever</span>
         </h2>
-        <p class="showcase-subtitle">Speed up your workflow with premium tools - no subscriptions required.</p>
+        <p class="showcase-subtitle">Speed up your workflow with premium tools—no subscriptions required</p>
       </div>
       <a href="https://herovibes.store/pages/tools" class="view-all-btn">
         <span>View All Tools</span>
@@ -689,6 +689,17 @@
     </div>
 
   </div>
+
+  <script>
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    function sendHeight() {
+      var height = document.body.scrollHeight;
+      window.parent.postMessage({ frameHeight: height }, '*');
+    }
+
+    window.onload = sendHeight;
+    window.onresize = sendHeight;
+  </script>
 
 </body>
 </html>
