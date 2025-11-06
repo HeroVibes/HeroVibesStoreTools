@@ -27,7 +27,7 @@
             background: var(--primary-bg);
             color: var(--primary-text);
             padding: 24px 16px;
-            min-height: 100vh;
+            min-height: auto;
         }
 
         /* ===== MAIN CONTAINER ===== */
@@ -329,6 +329,10 @@
 
         /* ===== MOBILE RESPONSIVE ===== */
         @media (max-width: 768px) {
+            body {
+                padding: 16px 12px;
+            }
+
             .sd-icon-grid {
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
                 gap: 12px;
