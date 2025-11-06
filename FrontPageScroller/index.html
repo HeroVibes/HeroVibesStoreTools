@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HeroVibes Tool Showcase</title>
+  <style>
+    /* ===== VARIABLES ===== */
+    :root {
+      --bg-primary: #191919;
+      --bg-secondary: #1F1F1F;
+      --bg-hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --gold: #FFD700;
+      --radius: 12px;
+      --card-width: 280px;
+      --card-width-mobile: 240px;
+    }
+
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg-primary);
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+
+    /* ===== SHOWCASE CONTAINER ===== */
+    .tool-showcase {
+      width: 100%;
+      background: var(--bg-primary);
+      padding: 40px 0;
+      position: relative;
+    }
+
+    /* ===== HEADER SECTION ===== */
+    .showcase-header {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .title-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .showcase-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(135, 169, 255, 0.12);
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .showcase-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    /* ===== VIEW ALL BUTTON ===== */
+    .view-all-btn {
+      position: relative;
+      padding: 12px 24px;
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--outline);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .view-all-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(135, 169, 255, 0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .view-all-btn:hover {
+      background: var(--bg-hover);
+      border-color: rgba(135, 169, 255, 0.4);
+      color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .view-all-btn:hover::before {
+      left: 125%;
+    }
+
+    .btn-icon {
+      font-size: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .view-all-btn:hover .btn-icon {
+      transform: translateX(4px);
+    }
+
+    /* ===== SCROLL CONTAINER ===== */
+    .scroll-container {
+      overflow: visible;
+      position: relative;
+      padding: 16px 24px;
+      margin: -16px 0;
+    }
+
+    /* ===== CARD TRACK WITH AUTO-SCROLL ===== */
+    .card-track {
+      display: flex;
+      gap: 16px;
+      animation: scroll-left 100s linear infinite;
+      width: fit-content;
+    }
+
+    .card-track:hover {
+      animation-play-state: paused;
+    }
+
+    @keyframes scroll-left {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(calc(-1 * (var(--card-width) + 16px) * 10));
+      }
+    }
+
+    /* ===== TOOL CARD ===== */
+    .tool-card {
+      flex: 0 0 var(--card-width);
+      width: var(--card-width);
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* NEW CARD - Golden border */
+    .tool-card.new-tool {
+      border-color: rgba(255, 215, 0, 0.3);
+    }
+
+    /* Top accent bar */
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), rgba(135, 169, 255, 0.4));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+      border-radius: var(--radius) var(--radius) 0 0;
+      z-index: 2;
+    }
+
+    /* NEW CARD - Golden accent bar */
+    .tool-card.new-tool::before {
+      background: linear-gradient(90deg, var(--gold), rgba(255, 215, 0, 0.4));
+    }
+
+    /* Shimmer effect */
+    .tool-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(135, 169, 255, 0.15) 50%, transparent 100%);
+      transform: translateX(-100%) skewX(-25deg);
+      transition: none;
+      border-radius: var(--radius);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* NEW CARD - Golden shimmer */
+    .tool-card.new-tool::after {
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 215, 0, 0.15) 50%, transparent 100%);
+    }
+
+    .tool-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(135, 169, 255, 0.4);
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(135, 169, 255, 0.05) 100%);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    /* NEW CARD - Golden hover */
+    .tool-card.new-tool:hover {
+      border-color: rgba(255, 215, 0, 0.5);
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(255, 215, 0, 0.05) 100%);
+    }
+
+    .tool-card:hover::after {
+      animation: shimmer 0.8s ease-in-out;
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%) skewX(-25deg);
+      }
+      100% {
+        transform: translateX(200%) skewX(-25deg);
+      }
+    }
+
+    .tool-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .tool-card > * {
+      position: relative;
+      z-index: 3;
+    }
+
+    /* ===== CARD ICON ===== */
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, rgba(135, 169, 255, 0.15), rgba(135, 169, 255, 0.05));
+      border: 1px solid rgba(135, 169, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .tool-card:hover .card-icon {
+      background: linear-gradient(135deg, rgba(135, 169, 255, 0.25), rgba(135, 169, 255, 0.1));
+      border-color: var(--accent);
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    /* NEW CARD - Golden icon */
+    .tool-card.new-tool .card-icon {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+      border-color: rgba(255, 215, 0, 0.3);
+    }
+
+    .tool-card.new-tool:hover .card-icon {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.1));
+      border-color: var(--gold);
+    }
+
+    /* ===== CARD TEXT ===== */
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .card-description {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    /* ===== CARD TAGS ===== */
+    .card-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card-tag {
+      display: inline-block;
+      font-size: 11px;
+      color: var(--accent);
+      background: rgba(135, 169, 255, 0.1);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    /* NEW TAG - Golden styling */
+    .card-tag.new-tag {
+      color: var(--gold);
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      animation: pulse-gold 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-gold {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 0 4px rgba(255, 215, 0, 0);
+      }
+    }
+
+    /* ===== MOBILE RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .tool-showcase {
+        padding: 28px 0;
+      }
+
+      .showcase-header {
+        padding: 0 16px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .showcase-title {
+        font-size: 20px;
+      }
+
+      .title-badge {
+        font-size: 10px;
+        padding: 3px 8px;
+      }
+
+      .showcase-subtitle {
+        font-size: 12px;
+      }
+
+      .view-all-btn {
+        padding: 10px 18px;
+        font-size: 13px;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .scroll-container {
+        padding: 16px 16px;
+      }
+
+      .card-track {
+        gap: 12px;
+      }
+
+      .tool-card {
+        flex: 0 0 var(--card-width-mobile);
+        width: var(--card-width-mobile);
+        padding: 16px;
+      }
+
+      .card-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        margin-bottom: 12px;
+      }
+
+      .card-title {
+        font-size: 15px;
+      }
+
+      .card-description {
+        font-size: 12px;
+      }
+
+      @keyframes scroll-left {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(calc(-1 * (var(--card-width-mobile) + 12px) * 10));
+        }
+      }
+    }
+
+    /* ===== FADE EDGES ===== */
+    .scroll-container::before,
+    .scroll-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 80px;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .scroll-container::before {
+      left: 0;
+      background: linear-gradient(to right, var(--bg-primary), transparent);
+    }
+
+    .scroll-container::after {
+      right: 0;
+      background: linear-gradient(to left, var(--bg-primary), transparent);
+    }
+
+    @media (max-width: 768px) {
+      .scroll-container::before,
+      .scroll-container::after {
+        width: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== TOOL SHOWCASE SECTION ===== -->
+  <div class="tool-showcase">
+    
+    <!-- ===== HEADER ===== -->
+    <div class="showcase-header">
+      <div class="title-section">
+        <h2 class="showcase-title">
+          Creator Tools
+          <span class="title-badge">Free Forever</span>
+        </h2>
+        <p class="showcase-subtitle">Speed up your workflow with premium tools - no subscriptions required.</p>
+      </div>
+      <a href="https://herovibes.store/pages/tools" class="view-all-btn">
+        <span>View All Tools</span>
+        <span class="btn-icon">→</span>
+      </a>
+    </div>
+
+    <!-- ===== AUTO-SCROLLING CONTAINER ===== -->
+    <div class="scroll-container">
+      <div class="card-track">
+
+        <!-- ===== TOOL CARD TEMPLATE =====
+        
+        TO ADD A NEW TOOL (Because I'll forget lol):
+        1. Copy this entire card block
+        2. Update the href with your tool URL
+        3. Add class="new-tool" to the <a> tag if it's new (optional)
+        4. Change the emoji in card-icon
+        5. Update card-title with tool name
+        6. Update card-description with tool description
+        7. Add <span class="card-tag new-tag">NEW</span> if it's a new tool (optional)
+        
+        -->
+
+        <!-- TOOL 1: Event Calendar -->
+        <a href="https://herovibes.store/pages/calendar" class="tool-card">
+          <div class="card-icon">📅</div>
+          <h3 class="card-title">Event Calendar</h3>
+          <p class="card-description">Never miss another release date or event, sync with your own calendar.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <!-- TOOL 2: Bulk Image Editor -->
+        <a href="https://herovibes.store/pages/image-editor" class="tool-card new-tool">
+          <div class="card-icon">🖼️</div>
+          <h3 class="card-title">Bulk Image Editor</h3>
+          <p class="card-description">Instantly crop, compress and convert your images.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+            <span class="card-tag new-tag">NEW</span>
+          </div>
+        </a>
+
+        <!-- TOOL 3: Markers to Timestamps -->
+        <a href="https://herovibes.store/pages/markers-to-timestamps" class="tool-card">
+          <div class="card-icon">⏱️</div>
+          <h3 class="card-title">Markers to Timestamps</h3>
+          <p class="card-description">Convert your Premiere or Davinci markers to YT Timestamps in seconds.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <!-- TOOL 4: Media Kit Maker -->
+        <a href="https://herovibes.store/pages/media-kit-maker" class="tool-card new-tool">
+          <div class="card-icon">📊</div>
+          <h3 class="card-title">Media Kit Maker</h3>
+          <p class="card-description">Generate your own brand media kit in under a minute.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+            <span class="card-tag new-tag">NEW</span>
+          </div>
+        </a>
+
+        <!-- TOOL 5: QR Code Generator -->
+        <a href="https://herovibes.store/pages/qr-generator" class="tool-card">
+          <div class="card-icon">📱</div>
+          <h3 class="card-title">QR Code Generator</h3>
+          <p class="card-description">Create your own custom QR codes with unique colours, backgrounds and more.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <!-- TOOL 6: Steganography Embedder -->
+        <a href="https://herovibes.store/pages/steganography-password-creator" class="tool-card">
+          <div class="card-icon">🔐</div>
+          <h3 class="card-title">Steganography Embedder</h3>
+          <p class="card-description">Stash a secret password or message inside of an image - no coding required.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <!-- TOOL 7: Stream Deck Icon Maker -->
+        <a href="https://herovibes.store/pages/stream-deck-icon-maker" class="tool-card">
+          <div class="card-icon">🎮</div>
+          <h3 class="card-title">Stream Deck Icon Maker</h3>
+          <p class="card-description">Batch-create icons for the Elgato Stream Deck that fit with your aesthetic.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <!-- TOOL 8: Thumbnail Downloader -->
+        <a href="https://herovibes.store/pages/thumbnail-downloader" class="tool-card">
+          <div class="card-icon">📥</div>
+          <h3 class="card-title">Thumbnail Downloader</h3>
+          <p class="card-description">Grab any thumbnail from any YouTube video - all you need is a link!</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <!-- TOOL 9: Whiteboard -->
+        <a href="https://herovibes.store/pages/whiteboard" class="tool-card new-tool">
+          <div class="card-icon">📝</div>
+          <h3 class="card-title">Whiteboard</h3>
+          <p class="card-description">Organise your images, code, links and more in-browser with a virtual whiteboard.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+            <span class="card-tag new-tag">NEW</span>
+          </div>
+        </a>
+
+        <!-- TOOL 10: Writer's Toolkit -->
+        <a href="https://herovibes.store/pages/writers-toolkit" class="tool-card">
+          <div class="card-icon">✍️</div>
+          <h3 class="card-title">Writer's Toolkit</h3>
+          <p class="card-description">A simple writing tool that bulk-replaces words, removes AI characters and converts to/from markdown.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <!-- DUPLICATE SET FOR SEAMLESS INFINITE SCROLL -->
+        <a href="https://herovibes.store/pages/calendar" class="tool-card">
+          <div class="card-icon">📅</div>
+          <h3 class="card-title">Event Calendar</h3>
+          <p class="card-description">Never miss another release date or event, sync with your own calendar.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <a href="https://herovibes.store/pages/image-editor" class="tool-card new-tool">
+          <div class="card-icon">🖼️</div>
+          <h3 class="card-title">Bulk Image Editor</h3>
+          <p class="card-description">Instantly crop, compress and convert your images.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+            <span class="card-tag new-tag">NEW</span>
+          </div>
+        </a>
+
+        <a href="https://herovibes.store/pages/markers-to-timestamps" class="tool-card">
+          <div class="card-icon">⏱️</div>
+          <h3 class="card-title">Markers to Timestamps</h3>
+          <p class="card-description">Convert your Premiere or Davinci markers to YT Timestamps in seconds.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <a href="https://herovibes.store/pages/media-kit-maker" class="tool-card new-tool">
+          <div class="card-icon">📊</div>
+          <h3 class="card-title">Media Kit Maker</h3>
+          <p class="card-description">Generate your own brand media kit in under a minute.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+            <span class="card-tag new-tag">NEW</span>
+          </div>
+        </a>
+
+        <a href="https://herovibes.store/pages/qr-generator" class="tool-card">
+          <div class="card-icon">📱</div>
+          <h3 class="card-title">QR Code Generator</h3>
+          <p class="card-description">Create your own custom QR codes with unique colours, backgrounds and more.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <a href="https://herovibes.store/pages/steganography-password-creator" class="tool-card">
+          <div class="card-icon">🔐</div>
+          <h3 class="card-title">Steganography Embedder</h3>
+          <p class="card-description">Stash a secret password or message inside of an image - no coding required.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <a href="https://herovibes.store/pages/stream-deck-icon-maker" class="tool-card">
+          <div class="card-icon">🎮</div>
+          <h3 class="card-title">Stream Deck Icon Maker</h3>
+          <p class="card-description">Batch-create icons for the Elgato Stream Deck that fit with your aesthetic.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <a href="https://herovibes.store/pages/thumbnail-downloader" class="tool-card">
+          <div class="card-icon">📥</div>
+          <h3 class="card-title">Thumbnail Downloader</h3>
+          <p class="card-description">Grab any thumbnail from any YouTube video - all you need is a link!</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+        <a href="https://herovibes.store/pages/whiteboard" class="tool-card new-tool">
+          <div class="card-icon">📝</div>
+          <h3 class="card-title">Whiteboard</h3>
+          <p class="card-description">Organise your images, code, links and more in-browser with a virtual whiteboard.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+            <span class="card-tag new-tag">NEW</span>
+          </div>
+        </a>
+
+        <a href="https://herovibes.store/pages/writers-toolkit" class="tool-card">
+          <div class="card-icon">✍️</div>
+          <h3 class="card-title">Writer's Toolkit</h3>
+          <p class="card-description">A simple writing tool that bulk-replaces words, removes AI characters and converts to/from markdown.</p>
+          <div class="card-tags">
+            <span class="card-tag">FREE</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
