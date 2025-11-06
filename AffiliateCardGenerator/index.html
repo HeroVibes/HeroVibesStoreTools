@@ -535,6 +535,16 @@
       setDarkMode(); // Start with dark mode active
       updateCard();
     });
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    function sendHeight() {
+    var height = document.body.scrollHeight;
+    window.parent.postMessage({ frameHeight: height }, '*');
+    }
+
+    window.onload = sendHeight;
+    window.onresize = sendHeight;
+
   </script>
 </body>
 </html>
