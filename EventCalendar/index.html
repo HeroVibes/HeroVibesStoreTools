@@ -386,6 +386,12 @@
     const eventList = document.getElementById("event-list");
     const subscribeButton = document.getElementById("subscribe-button");
 
+    /* ==================== FOURTHWALL SCROLLBAR FIX ==================== */
+    function sendHeight() {
+      var height = document.body.scrollHeight;
+      window.parent.postMessage({ frameHeight: height }, '*');
+    }
+
     /* ==================== SUBSCRIBE BUTTON ==================== */
     const subscribeUrl = `https://calendar.google.com/calendar/u/0/r?cid=${encodeURIComponent(CONFIG.calendarId)}`;
     subscribeButton.addEventListener("click", () => {
@@ -440,6 +446,7 @@
       } catch (error) {
         eventList.innerHTML = `<p style="color:#FF6B6B;">Error loading events: ${error.message}</p>`;
         console.error('Calendar Error:', error);
+        sendHeight(); // Update height even on error
       }
     }
 
@@ -447,6 +454,7 @@
     function renderEvents(events) {
       if (events.length === 0) {
         eventList.innerHTML = "<p>No upcoming events in the next 28 days.</p>";
+        sendHeight(); // Update height after rendering
         return;
       }
 
@@ -456,6 +464,10 @@
         const card = createEventCard(event);
         eventList.appendChild(card);
       });
+
+      // Update height after all events are rendered
+      // Use setTimeout to ensure DOM has updated
+      setTimeout(sendHeight, 100);
     }
 
     /* ==================== CREATE EVENT CARD ==================== */
@@ -598,6 +610,9 @@
         card.classList.add('is-expanded');
         desc.textContent = fullDesc;
       }
+
+      // Update height after expansion/collapse animation completes
+      setTimeout(sendHeight, 350);
     }
 
     /* ==================== INITIALIZE ==================== */
@@ -615,12 +630,7 @@
       }, 250);
     });
 
-    // ===== FOURTHWALL SCROLLBAR FIX =====
-    function sendHeight() {
-      var height = document.body.scrollHeight;
-      window.parent.postMessage({ frameHeight: height }, '*');
-    }
-
+    // Initial height send and setup resize listener
     window.onload = sendHeight;
     window.onresize = sendHeight;
   </script>
