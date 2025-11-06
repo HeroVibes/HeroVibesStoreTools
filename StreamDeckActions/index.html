@@ -143,6 +143,14 @@
             height: 80px;
             border-radius: 12px;
             object-fit: cover;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .sd-detail-header img:hover {
+            border-color: var(--accent-color);
+            transform: scale(1.05);
         }
 
         .sd-detail-title {
@@ -376,7 +384,7 @@
         <!-- DETAIL VIEW (Hidden by default) -->
         <div class="sd-detail-view" id="detailView">
             <div class="sd-detail-header">
-                <img id="detailIcon" src="" alt="Action Icon">
+                <img id="detailIcon" src="" alt="Action Icon" onclick="closeDetail()" title="Click to return to actions">
                 <div class="sd-detail-title">
                     <h2 id="detailTitle"></h2>
                     <p id="detailDescription"></p>
@@ -449,7 +457,7 @@
             
             //PLACE HERE
 
-            // 📝 COPY THIS
+            // 📝 COPY THIS TEMPLATE
             // {
             //     order: 2,
             //     title: "Your Action Name",
