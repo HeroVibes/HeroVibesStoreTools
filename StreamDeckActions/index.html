@@ -36,23 +36,6 @@
             margin: 0 auto;
         }
 
-        .sd-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .sd-header h1 {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--primary-text);
-            margin-bottom: 8px;
-        }
-
-        .sd-header p {
-            font-size: 14px;
-            color: var(--secondary-text);
-        }
-
         /* ===== ICON GRID VIEW ===== */
         .sd-icon-grid {
             display: grid;
@@ -113,6 +96,31 @@
         .sd-icon-card p {
             font-size: 12px;
             color: var(--secondary-text);
+        }
+
+        /* Coming Soon Badge */
+        .sd-icon-card.coming-soon::after {
+            content: 'COMING SOON';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--accent-color);
+            color: var(--primary-bg);
+            font-size: 10px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .sd-icon-card.coming-soon {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .sd-icon-card.coming-soon:hover {
+            transform: none;
+            border-color: var(--outline-color);
         }
 
         /* ===== DETAIL VIEW ===== */
@@ -379,12 +387,6 @@
 <body>
     <!-- MAIN CONTAINER -->
     <div class="sd-main-container">
-        <!-- HEADER -->
-        <div class="sd-header">
-            <h1>Stream Deck Actions</h1>
-            <p>Click any action below to view setup instructions and downloads</p>
-        </div>
-
         <!-- DETAIL VIEW (Hidden by default) -->
         <div class="sd-detail-view" id="detailView">
             <div class="sd-detail-header">
@@ -422,13 +424,18 @@
 
     <script>
         /* ========================================
-           📦 ACTION CONFIGURATIONS & TEMPLATE STRUCT
+           📦 ACTION DATABASE
            ======================================== */
 
         const streamDeckActions = [
-            // ACTION TEMPLATE - Copy everything from { to }, (including comma)
+            
+            // ============================================================
+            // ACTIVE ACTIONS - Ready to use
+            // ============================================================
+            
             {
                 order: 1,
+                comingSoon: false,
                 title: "Empty Recycle Bin",
                 icon: "https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Actions/Empty%20Recycle%20Bin/Images/Recycle%20Bin%20Icon.png",
                 description: "One-press solution to empty your Windows Recycle Bin",
@@ -458,31 +465,140 @@
                     If the key doesn't work, double-check that the file path in the Stream Deck action is 100% correct. Ensure no antivirus software is blocking the script from running.</p>
                 `
             },
-            
-            //PLACE HERE
 
-            // 📝 COPY THIS TEMPLATE
-            // {
-            //     order: 2,
-            //     title: "Your Action Name",
-            //     icon: "https://www.example.com/icon.png",
-            //     description: "Brief description of what this action does",
-            //     downloads: [
-            //         { name: "Download 1", url: "https://example.com/file1.zip" },
-            //         { name: "Download 2", url: "https://example.com/file2.png", filename: "custom-name.png" }
-            //     ],
-            //     plugins: [
-            //         { name: "Plugin Name", url: "https://example.com/plugin" }
-            //     ],
-            //     tutorial: `
-            //         <p>Your tutorial content goes here. Use HTML for formatting!</p>
-            //         <p><strong>Step 1:</strong> Do this...</p>
-            //         <p><strong>Step 2:</strong> Then do that...</p>
-            //     `
-            // },
+            // ============================================================
+            // COMING SOON ACTIONS - Placeholders for future actions
+            // ============================================================
             
+            {
+                order: 2,
+                comingSoon: true,
+                title: "Quick Screenshot",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=📸",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 3,
+                comingSoon: true,
+                title: "Mute Microphone",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=🎤",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 4,
+                comingSoon: true,
+                title: "Toggle Camera",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=📹",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 5,
+                comingSoon: true,
+                title: "System Sleep",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=💤",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 6,
+                comingSoon: true,
+                title: "Lock PC",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=🔒",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 7,
+                comingSoon: true,
+                title: "Volume Control",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=🔊",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 8,
+                comingSoon: true,
+                title: "Stream Marker",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=📍",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 9,
+                comingSoon: true,
+                title: "Quick Notes",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=📝",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 10,
+                comingSoon: true,
+                title: "Timer Control",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=⏱️",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 11,
+                comingSoon: true,
+                title: "Focus Mode",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=🎯",
+                description: "Coming soon"
+            }
 
         ];
+
+        /* ========================================
+           📝 HOW TO ADD NEW ACTIONS
+           ========================================
+           
+           1. Copy the template below (everything between the curly braces)
+           2. Paste it into either the "ACTIVE ACTIONS" or "COMING SOON" section
+           3. Update the values:
+              - order: Sequential number (next available number)
+              - comingSoon: false for active, true for coming soon
+              - title: Name of your action
+              - icon: URL to the icon image
+              - description: Short description
+              - downloads: Array of download links (only for active actions)
+              - plugins: Array of required plugins (only for active actions)
+              - tutorial: HTML content with setup instructions (only for active actions)
+           
+           ACTIVE ACTION TEMPLATE:
+           {
+               order: 99,
+               comingSoon: false,
+               title: "Your Action Name",
+               icon: "https://www.example.com/icon.png",
+               description: "Brief description of what this action does",
+               downloads: [
+                   { name: "SD Action", url: "https://example.com/action.streamDeckAction" },
+                   { name: "Custom Icon", url: "https://example.com/icon.png", filename: "icon.png" }
+               ],
+               plugins: [
+                   { name: "Plugin Name", url: "https://example.com/plugin" }
+               ],
+               tutorial: `
+                   <p>Your tutorial content goes here.</p>
+                   <p><strong>Step 1:</strong> Do this...</p>
+                   <p><strong>Step 2:</strong> Then do that...</p>
+               `
+           },
+           
+           COMING SOON TEMPLATE:
+           {
+               order: 99,
+               comingSoon: true,
+               title: "Your Action Name",
+               icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=📦",
+               description: "Coming soon"
+           },
+           
+           ======================================== */
 
         /* ========================================
            CORE FUNCTIONALITY
@@ -503,11 +619,17 @@
             streamDeckActions.sort((a, b) => a.order - b.order).forEach((action, index) => {
                 const card = document.createElement('div');
                 card.className = 'sd-icon-card';
-                card.onclick = () => openDetail(index);
+                
+                if (action.comingSoon) {
+                    card.classList.add('coming-soon');
+                } else {
+                    card.onclick = () => openDetail(index);
+                }
+                
                 card.innerHTML = `
                     <img src="${action.icon}" alt="${action.title}">
                     <h3>${action.title}</h3>
-                    <p>Click to view</p>
+                    <p>${action.comingSoon ? 'Coming soon' : 'Click to view'}</p>
                 `;
                 grid.appendChild(card);
             });
@@ -516,6 +638,9 @@
         // Open detail view
         function openDetail(index) {
             const action = streamDeckActions[index];
+            
+            // Don't open if coming soon
+            if (action.comingSoon) return;
             
             document.getElementById('detailIcon').src = action.icon;
             document.getElementById('detailTitle').textContent = action.title;
