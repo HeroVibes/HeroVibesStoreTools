@@ -621,13 +621,25 @@
         });
 
         // ===== FOURTHWALL SCROLLBAR FIX =====
+        let lastHeight = 0;
+        
         function sendHeight() {
             var height = document.body.scrollHeight;
-            window.parent.postMessage({ frameHeight: height }, '*');
+            // Only send if height has changed to prevent feedback loop
+            if (height !== lastHeight) {
+                lastHeight = height;
+                window.parent.postMessage({ frameHeight: height }, '*');
+            }
         }
 
         window.onload = sendHeight;
-        window.onresize = sendHeight;
+        
+        // Use ResizeObserver instead of window.onresize to prevent feedback loop
+        const resizeObserver = new ResizeObserver(() => {
+            sendHeight();
+        });
+        
+        resizeObserver.observe(document.body);
     </script>
 </body>
 </html>
