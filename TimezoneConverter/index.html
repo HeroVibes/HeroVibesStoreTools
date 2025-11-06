@@ -173,13 +173,40 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             gap: 12px;
+        }
+
+        .timezone-scroll-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 12px;
+            background-color: var(--primary-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--outline-color);
             margin-bottom: 24px;
+        }
+
+        .timezone-scroll-container::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .timezone-scroll-container::-webkit-scrollbar-track {
+            background: var(--secondary-bg);
+            border-radius: 5px;
+        }
+
+        .timezone-scroll-container::-webkit-scrollbar-thumb {
+            background: var(--outline-color);
+            border-radius: 5px;
+        }
+
+        .timezone-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
         }
 
         /* ===== TIME CARD ===== */
         .time-card {
             position: relative;
-            background-color: var(--primary-bg);
+            background-color: var(--secondary-bg);
             border: 1px solid var(--outline-color);
             border-radius: var(--radius);
             padding: 16px;
@@ -284,9 +311,16 @@
             box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
         }
 
-        .see-more-btn {
-            width: 100%;
-            margin-top: 12px;
+        .help-btn {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            flex-shrink: 0;
         }
 
         /* ===== UTILITY ===== */
@@ -310,14 +344,149 @@
             flex-wrap: wrap;
         }
 
-        /* ===== VERSION NUMBER ===== */
-        .version-number {
+        .action-buttons .btn:not(.help-btn) {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        /* ===== MODAL/POPUP ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--outline-color);
+            border-radius: var(--radius);
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 24px;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: var(--primary-bg);
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--outline-color);
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--outline-color);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-text);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--secondary-text);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background-color: var(--hover-color);
+            color: var(--primary-text);
+        }
+
+        .modal-body {
+            color: var(--primary-text);
+        }
+
+        .modal-body h3 {
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 12px;
+            color: var(--accent-color);
+        }
+
+        .modal-body h3:first-child {
+            margin-top: 0;
+        }
+
+        .modal-body p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: var(--secondary-text);
+        }
+
+        .modal-body ul {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .modal-body li {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+            color: var(--secondary-text);
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--outline-color);
             text-align: center;
-            padding: 16px 0 0 0;
             color: var(--secondary-text);
             font-size: 12px;
-            border-top: 1px solid var(--outline-color);
-            margin-top: 24px;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* ===== RESPONSIVE ===== */
@@ -352,8 +521,17 @@
                 flex-direction: column;
             }
 
-            .btn {
+            .action-buttons .btn {
                 width: 100%;
+            }
+
+            .timezone-scroll-container {
+                max-height: 400px;
+            }
+
+            .modal-content {
+                padding: 20px;
+                margin: 10px;
             }
         }
 
@@ -397,6 +575,7 @@
             <button class="btn" id="share-btn">📋 Copy Share Link</button>
             <button class="btn" id="save-btn">💾 Save Preferences</button>
             <button class="btn" id="reset-btn">🔄 Reset to Defaults</button>
+            <button class="btn help-btn" id="help-btn">?</button>
         </div>
 
         <hr class="separator">
@@ -417,18 +596,69 @@
                 <input type="text" id="timezone-search" class="search-input" placeholder="Search by city or timezone...">
             </div>
         </div>
-        <div class="timezone-grid" id="all-grid"></div>
-        <button class="btn see-more-btn" id="see-more-btn" style="display: none;">See More Timezones</button>
+        <div class="timezone-scroll-container">
+            <div class="timezone-grid" id="all-grid"></div>
+        </div>
+    </div>
 
-        <!-- VERSION NUMBER -->
-        <div class="version-number">Version 1.0.0</div>
+    <!-- HELP MODAL -->
+    <div class="modal-overlay" id="help-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Help & Information</h2>
+                <button class="modal-close" id="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>🌍 How to Use</h3>
+                <p>This tool helps you convert time across different timezones instantly.</p>
+                
+                <h3>⏰ Setting Your Time</h3>
+                <ul>
+                    <li>Select the time and timezone you want to convert from</li>
+                    <li>The tool will automatically calculate times in all your selected timezones</li>
+                </ul>
+                
+                <h3>➕ Adding Timezones</h3>
+                <ul>
+                    <li>Click on any timezone card in the "Add Timezones" section to add it to your list</li>
+                    <li>Use the search bar to find cities (e.g., "London", "Tokyo", "New York")</li>
+                    <li>Scroll through the list to see all available timezones</li>
+                </ul>
+                
+                <h3>➖ Removing Timezones</h3>
+                <ul>
+                    <li>Hover over a timezone in "Your Timezones" and click the × button</li>
+                </ul>
+                
+                <h3>🔍 Search Tips</h3>
+                <ul>
+                    <li>Search by city name: "Paris", "Sydney", "Dubai"</li>
+                    <li>Search by country: "Japan", "Germany", "Brazil"</li>
+                    <li>Search by region: "California", "Scotland"</li>
+                    <li>Search by abbreviation: "GMT", "EST", "PST"</li>
+                </ul>
+                
+                <h3>💾 Saving & Sharing</h3>
+                <ul>
+                    <li><strong>Copy Share Link:</strong> Creates a URL with your current time and timezone selections</li>
+                    <li><strong>Save Preferences:</strong> Saves your timezone selections locally in your browser</li>
+                    <li><strong>Reset to Defaults:</strong> Returns to the default timezone selection</li>
+                </ul>
+                
+                <h3>🕐 Time Abbreviations</h3>
+                <p>Each timezone shows its standard abbreviation (e.g., GMT for London, EST/EDT for New York). These automatically switch between standard and daylight saving time.</p>
+            </div>
+            <div class="modal-footer">
+                Version 1.1.0
+            </div>
+        </div>
     </div>
 
     <script>
         const { DateTime } = luxon;
 
         // ===== VERSION =====
-        const VERSION = '1.0.0';
+        const VERSION = '1.1.0';
         console.log(`Timezone Converter - Version ${VERSION}`);
 
         // ===== TIMEZONE DATA =====
@@ -789,8 +1019,6 @@
         // ===== STATE =====
         let selectedTimezones = new Set(POPULAR_TIMEZONES);
         let allTimezones = [];
-        let showAllTimezones = false;
-        const INITIAL_DISPLAY_LIMIT = 20;
 
         // ===== DOM ELEMENTS =====
         const inputHour = document.getElementById('input-hour');
@@ -803,7 +1031,9 @@
         const shareBtn = document.getElementById('share-btn');
         const saveBtn = document.getElementById('save-btn');
         const resetBtn = document.getElementById('reset-btn');
-        const seeMoreBtn = document.getElementById('see-more-btn');
+        const helpBtn = document.getElementById('help-btn');
+        const helpModal = document.getElementById('help-modal');
+        const modalClose = document.getElementById('modal-close');
 
         // ===== INITIALIZATION =====
         function init() {
@@ -862,16 +1092,14 @@
             inputMinute.addEventListener('change', render);
             inputAmPm.addEventListener('change', render);
             fromSelect.addEventListener('change', render);
-            searchInput.addEventListener('input', () => {
-                showAllTimezones = false;
-                render();
-            });
+            searchInput.addEventListener('input', render);
             shareBtn.addEventListener('click', shareLink);
             saveBtn.addEventListener('click', savePreferences);
             resetBtn.addEventListener('click', resetToDefaults);
-            seeMoreBtn.addEventListener('click', () => {
-                showAllTimezones = true;
-                render();
+            helpBtn.addEventListener('click', openModal);
+            modalClose.addEventListener('click', closeModal);
+            helpModal.addEventListener('click', (e) => {
+                if (e.target === helpModal) closeModal();
             });
 
             // Initial render
@@ -913,6 +1141,17 @@
             inputHour.value = String(hour).padStart(2, '0');
             inputMinute.value = String(Math.floor(now.minute / 5) * 5).padStart(2, '0');
             inputAmPm.value = ampm;
+        }
+
+        // ===== MODAL FUNCTIONS =====
+        function openModal() {
+            helpModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            helpModal.classList.remove('active');
+            document.body.style.overflow = '';
         }
 
         // ===== STATE MANAGEMENT =====
@@ -972,7 +1211,6 @@
             selectedTimezones = new Set(POPULAR_TIMEZONES);
             fromSelect.value = 'Etc/UTC';
             setCurrentTime();
-            showAllTimezones = false;
             localStorage.removeItem('timezone_preferences');
             window.history.replaceState({}, '', window.location.pathname);
             render();
@@ -1063,34 +1301,30 @@
             let matchedTimezones = new Set();
 
             if (searchTerm) {
-                console.log('Searching for:', searchTerm);
-                
-                // Check location search index
-                for (const [locationKey, timezoneId] of Object.entries(LOCATION_SEARCH_INDEX)) {
-                    if (locationKey.includes(searchTerm) || searchTerm.includes(locationKey)) {
+                // Check location search index - look for matches
+                Object.entries(LOCATION_SEARCH_INDEX).forEach(([locationKey, timezoneId]) => {
+                    if (locationKey.toLowerCase().includes(searchTerm)) {
                         if (allTimezones.includes(timezoneId)) {
                             matchedTimezones.add(timezoneId);
-                            console.log('Found via location index:', locationKey, '->', timezoneId);
                         }
                     }
-                }
+                });
 
-                // Also check timezone IDs and display names
+                // Also check timezone IDs, display names, and abbreviations
                 allTimezones.forEach(tz => {
                     const displayName = getDisplayName(tz, baseTime).toLowerCase();
                     const friendlyName = getFriendlyName(tz).toLowerCase();
                     const tzLower = tz.toLowerCase();
+                    const abbr = getTimezoneAbbr(tz, baseTime).toLowerCase();
                     
                     if (tzLower.includes(searchTerm) || 
                         displayName.includes(searchTerm) || 
-                        friendlyName.includes(searchTerm)) {
+                        friendlyName.includes(searchTerm) ||
+                        abbr.includes(searchTerm)) {
                         matchedTimezones.add(tz);
                     }
                 });
 
-                console.log('Total matches found:', matchedTimezones.size);
-
-                // Remove already selected timezones
                 var filtered = Array.from(matchedTimezones).filter(tz => !selectedTimezones.has(tz));
             } else {
                 // No search term - show all unselected timezones
@@ -1099,28 +1333,15 @@
 
             if (filtered.length === 0) {
                 allGrid.innerHTML = '<div class="no-results">No matching timezones found. Try searching for a city name like "London", "New York", or "Tokyo".</div>';
-                seeMoreBtn.style.display = 'none';
                 return;
             }
 
             filtered.sort((a, b) => getDisplayName(a, baseTime).localeCompare(getDisplayName(b, baseTime)));
 
-            // Determine how many to show
-            const limit = (showAllTimezones || searchTerm) ? filtered.length : INITIAL_DISPLAY_LIMIT;
-            const toDisplay = filtered.slice(0, limit);
-
-            toDisplay.forEach(tz => {
+            filtered.forEach(tz => {
                 const card = createTimeCard(tz, baseTime, false);
                 allGrid.appendChild(card);
             });
-
-            // Show "See More" button if there are more results
-            if (!showAllTimezones && !searchTerm && filtered.length > INITIAL_DISPLAY_LIMIT) {
-                seeMoreBtn.style.display = 'block';
-                seeMoreBtn.textContent = `See More Timezones (${filtered.length - INITIAL_DISPLAY_LIMIT} more)`;
-            } else {
-                seeMoreBtn.style.display = 'none';
-            }
         }
 
         function createTimeCard(timezone, baseTime, isSelected) {
@@ -1151,7 +1372,6 @@
             } else {
                 card.addEventListener('click', () => {
                     selectedTimezones.add(timezone);
-                    showAllTimezones = false;
                     render();
                 });
             }
