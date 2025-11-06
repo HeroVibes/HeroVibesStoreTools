@@ -310,6 +310,16 @@
             flex-wrap: wrap;
         }
 
+        /* ===== VERSION NUMBER ===== */
+        .version-number {
+            text-align: center;
+            padding: 16px 0 0 0;
+            color: var(--secondary-text);
+            font-size: 12px;
+            border-top: 1px solid var(--outline-color);
+            margin-top: 24px;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .timezone-grid {
@@ -409,10 +419,17 @@
         </div>
         <div class="timezone-grid" id="all-grid"></div>
         <button class="btn see-more-btn" id="see-more-btn" style="display: none;">See More Timezones</button>
+
+        <!-- VERSION NUMBER -->
+        <div class="version-number">Version 1.0.0</div>
     </div>
 
     <script>
         const { DateTime } = luxon;
+
+        // ===== VERSION =====
+        const VERSION = '1.0.0';
+        console.log(`Timezone Converter - Version ${VERSION}`);
 
         // ===== TIMEZONE DATA =====
         const POPULAR_TIMEZONES = [
@@ -430,230 +447,230 @@
             'Asia/Dubai'
         ];
 
-        // Comprehensive location aliases - maps search terms to timezone IDs
-        const LOCATION_ALIASES = {
+        // Comprehensive location search index - maps search terms to timezone IDs
+        const LOCATION_SEARCH_INDEX = {
             // UTC/GMT
-            'utc': ['Etc/UTC'],
-            'universal': ['Etc/UTC'],
-            'gmt': ['Europe/London'],
+            'utc': 'Etc/UTC',
+            'universal': 'Etc/UTC',
+            'gmt': 'Europe/London',
             
             // United Kingdom
-            'london': ['Europe/London'],
-            'uk': ['Europe/London'],
-            'united kingdom': ['Europe/London'],
-            'england': ['Europe/London'],
-            'britain': ['Europe/London'],
-            'great britain': ['Europe/London'],
-            'manchester': ['Europe/London'],
-            'birmingham': ['Europe/London'],
-            'liverpool': ['Europe/London'],
-            'edinburgh': ['Europe/London'],
-            'scotland': ['Europe/London'],
-            'glasgow': ['Europe/London'],
-            'cardiff': ['Europe/London'],
-            'wales': ['Europe/London'],
-            'belfast': ['Europe/London'],
-            'dublin': ['Europe/Dublin'],
-            'ireland': ['Europe/Dublin'],
+            'london': 'Europe/London',
+            'uk': 'Europe/London',
+            'united kingdom': 'Europe/London',
+            'england': 'Europe/London',
+            'britain': 'Europe/London',
+            'great britain': 'Europe/London',
+            'manchester': 'Europe/London',
+            'birmingham': 'Europe/London',
+            'liverpool': 'Europe/London',
+            'edinburgh': 'Europe/London',
+            'scotland': 'Europe/London',
+            'glasgow': 'Europe/London',
+            'cardiff': 'Europe/London',
+            'wales': 'Europe/London',
+            'belfast': 'Europe/London',
+            'dublin': 'Europe/Dublin',
+            'ireland': 'Europe/Dublin',
             
             // United States - East Coast
-            'new york': ['America/New_York'],
-            'nyc': ['America/New_York'],
-            'ny': ['America/New_York'],
-            'new york city': ['America/New_York'],
-            'manhattan': ['America/New_York'],
-            'brooklyn': ['America/New_York'],
-            'boston': ['America/New_York'],
-            'philadelphia': ['America/New_York'],
-            'philly': ['America/New_York'],
-            'washington': ['America/New_York'],
-            'dc': ['America/New_York'],
-            'washington dc': ['America/New_York'],
-            'miami': ['America/New_York'],
-            'orlando': ['America/New_York'],
-            'atlanta': ['America/New_York'],
-            'detroit': ['America/New_York'],
-            'pittsburgh': ['America/New_York'],
-            'baltimore': ['America/New_York'],
+            'new york': 'America/New_York',
+            'nyc': 'America/New_York',
+            'ny': 'America/New_York',
+            'new york city': 'America/New_York',
+            'manhattan': 'America/New_York',
+            'brooklyn': 'America/New_York',
+            'boston': 'America/New_York',
+            'philadelphia': 'America/New_York',
+            'philly': 'America/New_York',
+            'washington': 'America/New_York',
+            'dc': 'America/New_York',
+            'washington dc': 'America/New_York',
+            'miami': 'America/New_York',
+            'orlando': 'America/New_York',
+            'atlanta': 'America/New_York',
+            'detroit': 'America/New_York',
+            'pittsburgh': 'America/New_York',
+            'baltimore': 'America/New_York',
             
             // United States - West Coast
-            'los angeles': ['America/Los_Angeles'],
-            'la': ['America/Los_Angeles'],
-            'california': ['America/Los_Angeles'],
-            'san francisco': ['America/Los_Angeles'],
-            'sf': ['America/Los_Angeles'],
-            'san diego': ['America/Los_Angeles'],
-            'san jose': ['America/Los_Angeles'],
-            'sacramento': ['America/Los_Angeles'],
-            'oakland': ['America/Los_Angeles'],
-            'seattle': ['America/Los_Angeles'],
-            'portland': ['America/Los_Angeles'],
-            'las vegas': ['America/Los_Angeles'],
-            'vegas': ['America/Los_Angeles'],
+            'los angeles': 'America/Los_Angeles',
+            'la': 'America/Los_Angeles',
+            'california': 'America/Los_Angeles',
+            'san francisco': 'America/Los_Angeles',
+            'sf': 'America/Los_Angeles',
+            'san diego': 'America/Los_Angeles',
+            'san jose': 'America/Los_Angeles',
+            'sacramento': 'America/Los_Angeles',
+            'oakland': 'America/Los_Angeles',
+            'seattle': 'America/Los_Angeles',
+            'portland': 'America/Los_Angeles',
+            'las vegas': 'America/Los_Angeles',
+            'vegas': 'America/Los_Angeles',
             
             // United States - Central
-            'chicago': ['America/Chicago'],
-            'dallas': ['America/Chicago'],
-            'houston': ['America/Chicago'],
-            'austin': ['America/Chicago'],
-            'san antonio': ['America/Chicago'],
-            'nashville': ['America/Chicago'],
-            'memphis': ['America/Chicago'],
-            'new orleans': ['America/Chicago'],
-            'milwaukee': ['America/Chicago'],
-            'minneapolis': ['America/Chicago'],
-            'st louis': ['America/Chicago'],
-            'kansas city': ['America/Chicago'],
+            'chicago': 'America/Chicago',
+            'dallas': 'America/Chicago',
+            'houston': 'America/Chicago',
+            'austin': 'America/Chicago',
+            'san antonio': 'America/Chicago',
+            'nashville': 'America/Chicago',
+            'memphis': 'America/Chicago',
+            'new orleans': 'America/Chicago',
+            'milwaukee': 'America/Chicago',
+            'minneapolis': 'America/Chicago',
+            'st louis': 'America/Chicago',
+            'kansas city': 'America/Chicago',
             
             // United States - Mountain
-            'denver': ['America/Denver'],
-            'phoenix': ['America/Phoenix'],
-            'salt lake city': ['America/Denver'],
-            'albuquerque': ['America/Denver'],
+            'denver': 'America/Denver',
+            'phoenix': 'America/Phoenix',
+            'salt lake city': 'America/Denver',
+            'albuquerque': 'America/Denver',
             
             // United States - Other
-            'anchorage': ['America/Anchorage'],
-            'alaska': ['America/Anchorage'],
-            'honolulu': ['Pacific/Honolulu'],
-            'hawaii': ['Pacific/Honolulu'],
+            'anchorage': 'America/Anchorage',
+            'alaska': 'America/Anchorage',
+            'honolulu': 'Pacific/Honolulu',
+            'hawaii': 'Pacific/Honolulu',
             
             // Canada
-            'toronto': ['America/Toronto'],
-            'montreal': ['America/Toronto'],
-            'ottawa': ['America/Toronto'],
-            'vancouver': ['America/Vancouver'],
-            'calgary': ['America/Edmonton'],
-            'edmonton': ['America/Edmonton'],
-            'winnipeg': ['America/Winnipeg'],
-            'quebec': ['America/Toronto'],
-            'canada': ['America/Toronto'],
+            'toronto': 'America/Toronto',
+            'montreal': 'America/Toronto',
+            'ottawa': 'America/Toronto',
+            'vancouver': 'America/Vancouver',
+            'calgary': 'America/Edmonton',
+            'edmonton': 'America/Edmonton',
+            'winnipeg': 'America/Winnipeg',
+            'quebec': 'America/Toronto',
+            'canada': 'America/Toronto',
             
             // Europe - Major Cities
-            'paris': ['Europe/Paris'],
-            'france': ['Europe/Paris'],
-            'berlin': ['Europe/Berlin'],
-            'germany': ['Europe/Berlin'],
-            'munich': ['Europe/Berlin'],
-            'frankfurt': ['Europe/Berlin'],
-            'rome': ['Europe/Rome'],
-            'italy': ['Europe/Rome'],
-            'milan': ['Europe/Rome'],
-            'madrid': ['Europe/Madrid'],
-            'spain': ['Europe/Madrid'],
-            'barcelona': ['Europe/Madrid'],
-            'amsterdam': ['Europe/Amsterdam'],
-            'netherlands': ['Europe/Amsterdam'],
-            'brussels': ['Europe/Brussels'],
-            'belgium': ['Europe/Brussels'],
-            'vienna': ['Europe/Vienna'],
-            'austria': ['Europe/Vienna'],
-            'zurich': ['Europe/Zurich'],
-            'switzerland': ['Europe/Zurich'],
-            'geneva': ['Europe/Zurich'],
-            'stockholm': ['Europe/Stockholm'],
-            'sweden': ['Europe/Stockholm'],
-            'oslo': ['Europe/Oslo'],
-            'norway': ['Europe/Oslo'],
-            'copenhagen': ['Europe/Copenhagen'],
-            'denmark': ['Europe/Copenhagen'],
-            'helsinki': ['Europe/Helsinki'],
-            'finland': ['Europe/Helsinki'],
-            'warsaw': ['Europe/Warsaw'],
-            'poland': ['Europe/Warsaw'],
-            'prague': ['Europe/Prague'],
-            'czech': ['Europe/Prague'],
-            'budapest': ['Europe/Budapest'],
-            'hungary': ['Europe/Budapest'],
-            'athens': ['Europe/Athens'],
-            'greece': ['Europe/Athens'],
-            'lisbon': ['Europe/Lisbon'],
-            'portugal': ['Europe/Lisbon'],
-            'moscow': ['Europe/Moscow'],
-            'russia': ['Europe/Moscow'],
-            'istanbul': ['Europe/Istanbul'],
-            'turkey': ['Europe/Istanbul'],
+            'paris': 'Europe/Paris',
+            'france': 'Europe/Paris',
+            'berlin': 'Europe/Berlin',
+            'germany': 'Europe/Berlin',
+            'munich': 'Europe/Berlin',
+            'frankfurt': 'Europe/Berlin',
+            'rome': 'Europe/Rome',
+            'italy': 'Europe/Rome',
+            'milan': 'Europe/Rome',
+            'madrid': 'Europe/Madrid',
+            'spain': 'Europe/Madrid',
+            'barcelona': 'Europe/Madrid',
+            'amsterdam': 'Europe/Amsterdam',
+            'netherlands': 'Europe/Amsterdam',
+            'brussels': 'Europe/Brussels',
+            'belgium': 'Europe/Brussels',
+            'vienna': 'Europe/Vienna',
+            'austria': 'Europe/Vienna',
+            'zurich': 'Europe/Zurich',
+            'switzerland': 'Europe/Zurich',
+            'geneva': 'Europe/Zurich',
+            'stockholm': 'Europe/Stockholm',
+            'sweden': 'Europe/Stockholm',
+            'oslo': 'Europe/Oslo',
+            'norway': 'Europe/Oslo',
+            'copenhagen': 'Europe/Copenhagen',
+            'denmark': 'Europe/Copenhagen',
+            'helsinki': 'Europe/Helsinki',
+            'finland': 'Europe/Helsinki',
+            'warsaw': 'Europe/Warsaw',
+            'poland': 'Europe/Warsaw',
+            'prague': 'Europe/Prague',
+            'czech': 'Europe/Prague',
+            'budapest': 'Europe/Budapest',
+            'hungary': 'Europe/Budapest',
+            'athens': 'Europe/Athens',
+            'greece': 'Europe/Athens',
+            'lisbon': 'Europe/Lisbon',
+            'portugal': 'Europe/Lisbon',
+            'moscow': 'Europe/Moscow',
+            'russia': 'Europe/Moscow',
+            'istanbul': 'Europe/Istanbul',
+            'turkey': 'Europe/Istanbul',
             
             // Asia - Major Cities
-            'tokyo': ['Asia/Tokyo'],
-            'japan': ['Asia/Tokyo'],
-            'osaka': ['Asia/Tokyo'],
-            'beijing': ['Asia/Shanghai'],
-            'shanghai': ['Asia/Shanghai'],
-            'china': ['Asia/Shanghai'],
-            'hong kong': ['Asia/Hong_Kong'],
-            'hk': ['Asia/Hong_Kong'],
-            'singapore': ['Asia/Singapore'],
-            'seoul': ['Asia/Seoul'],
-            'korea': ['Asia/Seoul'],
-            'south korea': ['Asia/Seoul'],
-            'taipei': ['Asia/Taipei'],
-            'taiwan': ['Asia/Taipei'],
-            'bangkok': ['Asia/Bangkok'],
-            'thailand': ['Asia/Bangkok'],
-            'manila': ['Asia/Manila'],
-            'philippines': ['Asia/Manila'],
-            'jakarta': ['Asia/Jakarta'],
-            'indonesia': ['Asia/Jakarta'],
-            'kuala lumpur': ['Asia/Kuala_Lumpur'],
-            'malaysia': ['Asia/Kuala_Lumpur'],
-            'hanoi': ['Asia/Ho_Chi_Minh'],
-            'vietnam': ['Asia/Ho_Chi_Minh'],
-            'dubai': ['Asia/Dubai'],
-            'uae': ['Asia/Dubai'],
-            'abu dhabi': ['Asia/Dubai'],
-            'mumbai': ['Asia/Kolkata'],
-            'india': ['Asia/Kolkata'],
-            'delhi': ['Asia/Kolkata'],
-            'bangalore': ['Asia/Kolkata'],
-            'kolkata': ['Asia/Kolkata'],
-            'chennai': ['Asia/Kolkata'],
+            'tokyo': 'Asia/Tokyo',
+            'japan': 'Asia/Tokyo',
+            'osaka': 'Asia/Tokyo',
+            'beijing': 'Asia/Shanghai',
+            'shanghai': 'Asia/Shanghai',
+            'china': 'Asia/Shanghai',
+            'hong kong': 'Asia/Hong_Kong',
+            'hk': 'Asia/Hong_Kong',
+            'singapore': 'Asia/Singapore',
+            'seoul': 'Asia/Seoul',
+            'korea': 'Asia/Seoul',
+            'south korea': 'Asia/Seoul',
+            'taipei': 'Asia/Taipei',
+            'taiwan': 'Asia/Taipei',
+            'bangkok': 'Asia/Bangkok',
+            'thailand': 'Asia/Bangkok',
+            'manila': 'Asia/Manila',
+            'philippines': 'Asia/Manila',
+            'jakarta': 'Asia/Jakarta',
+            'indonesia': 'Asia/Jakarta',
+            'kuala lumpur': 'Asia/Kuala_Lumpur',
+            'malaysia': 'Asia/Kuala_Lumpur',
+            'hanoi': 'Asia/Ho_Chi_Minh',
+            'vietnam': 'Asia/Ho_Chi_Minh',
+            'dubai': 'Asia/Dubai',
+            'uae': 'Asia/Dubai',
+            'abu dhabi': 'Asia/Dubai',
+            'mumbai': 'Asia/Kolkata',
+            'india': 'Asia/Kolkata',
+            'delhi': 'Asia/Kolkata',
+            'bangalore': 'Asia/Kolkata',
+            'kolkata': 'Asia/Kolkata',
+            'chennai': 'Asia/Kolkata',
             
             // Australia & New Zealand
-            'sydney': ['Australia/Sydney'],
-            'melbourne': ['Australia/Melbourne'],
-            'brisbane': ['Australia/Brisbane'],
-            'perth': ['Australia/Perth'],
-            'adelaide': ['Australia/Adelaide'],
-            'australia': ['Australia/Sydney', 'Australia/Melbourne', 'Australia/Brisbane', 'Australia/Perth', 'Australia/Adelaide'],
-            'auckland': ['Pacific/Auckland'],
-            'new zealand': ['Pacific/Auckland'],
-            'wellington': ['Pacific/Auckland'],
+            'sydney': 'Australia/Sydney',
+            'melbourne': 'Australia/Melbourne',
+            'brisbane': 'Australia/Brisbane',
+            'perth': 'Australia/Perth',
+            'adelaide': 'Australia/Adelaide',
+            'australia': 'Australia/Sydney',
+            'auckland': 'Pacific/Auckland',
+            'new zealand': 'Pacific/Auckland',
+            'wellington': 'Pacific/Auckland',
             
             // Middle East
-            'riyadh': ['Asia/Riyadh'],
-            'saudi arabia': ['Asia/Riyadh'],
-            'doha': ['Asia/Qatar'],
-            'qatar': ['Asia/Qatar'],
-            'kuwait': ['Asia/Kuwait'],
-            'tel aviv': ['Asia/Jerusalem'],
-            'jerusalem': ['Asia/Jerusalem'],
-            'israel': ['Asia/Jerusalem'],
+            'riyadh': 'Asia/Riyadh',
+            'saudi arabia': 'Asia/Riyadh',
+            'doha': 'Asia/Qatar',
+            'qatar': 'Asia/Qatar',
+            'kuwait': 'Asia/Kuwait',
+            'tel aviv': 'Asia/Jerusalem',
+            'jerusalem': 'Asia/Jerusalem',
+            'israel': 'Asia/Jerusalem',
             
             // South America
-            'sao paulo': ['America/Sao_Paulo'],
-            'brazil': ['America/Sao_Paulo'],
-            'rio': ['America/Sao_Paulo'],
-            'buenos aires': ['America/Argentina/Buenos_Aires'],
-            'argentina': ['America/Argentina/Buenos_Aires'],
-            'santiago': ['America/Santiago'],
-            'chile': ['America/Santiago'],
-            'bogota': ['America/Bogota'],
-            'colombia': ['America/Bogota'],
-            'lima': ['America/Lima'],
-            'peru': ['America/Lima'],
-            'mexico city': ['America/Mexico_City'],
-            'mexico': ['America/Mexico_City'],
+            'sao paulo': 'America/Sao_Paulo',
+            'brazil': 'America/Sao_Paulo',
+            'rio': 'America/Sao_Paulo',
+            'buenos aires': 'America/Argentina/Buenos_Aires',
+            'argentina': 'America/Argentina/Buenos_Aires',
+            'santiago': 'America/Santiago',
+            'chile': 'America/Santiago',
+            'bogota': 'America/Bogota',
+            'colombia': 'America/Bogota',
+            'lima': 'America/Lima',
+            'peru': 'America/Lima',
+            'mexico city': 'America/Mexico_City',
+            'mexico': 'America/Mexico_City',
             
             // Africa
-            'cairo': ['Africa/Cairo'],
-            'egypt': ['Africa/Cairo'],
-            'johannesburg': ['Africa/Johannesburg'],
-            'south africa': ['Africa/Johannesburg'],
-            'cape town': ['Africa/Johannesburg'],
-            'lagos': ['Africa/Lagos'],
-            'nigeria': ['Africa/Lagos'],
-            'nairobi': ['Africa/Nairobi'],
-            'kenya': ['Africa/Nairobi']
+            'cairo': 'Africa/Cairo',
+            'egypt': 'Africa/Cairo',
+            'johannesburg': 'Africa/Johannesburg',
+            'south africa': 'Africa/Johannesburg',
+            'cape town': 'Africa/Johannesburg',
+            'lagos': 'Africa/Lagos',
+            'nigeria': 'Africa/Lagos',
+            'nairobi': 'Africa/Nairobi',
+            'kenya': 'Africa/Nairobi'
         };
 
         // Timezone abbreviations map
@@ -1046,17 +1063,20 @@
             let matchedTimezones = new Set();
 
             if (searchTerm) {
-                // First, check location aliases
-                for (const [alias, timezones] of Object.entries(LOCATION_ALIASES)) {
-                    if (alias.includes(searchTerm)) {
-                        timezones.forEach(tz => matchedTimezones.add(tz));
+                console.log('Searching for:', searchTerm);
+                
+                // Check location search index
+                for (const [locationKey, timezoneId] of Object.entries(LOCATION_SEARCH_INDEX)) {
+                    if (locationKey.includes(searchTerm) || searchTerm.includes(locationKey)) {
+                        if (allTimezones.includes(timezoneId)) {
+                            matchedTimezones.add(timezoneId);
+                            console.log('Found via location index:', locationKey, '->', timezoneId);
+                        }
                     }
                 }
 
-                // Then check timezone IDs and display names
+                // Also check timezone IDs and display names
                 allTimezones.forEach(tz => {
-                    if (selectedTimezones.has(tz)) return;
-                    
                     const displayName = getDisplayName(tz, baseTime).toLowerCase();
                     const friendlyName = getFriendlyName(tz).toLowerCase();
                     const tzLower = tz.toLowerCase();
@@ -1068,7 +1088,9 @@
                     }
                 });
 
-                // Convert to array and remove already selected
+                console.log('Total matches found:', matchedTimezones.size);
+
+                // Remove already selected timezones
                 var filtered = Array.from(matchedTimezones).filter(tz => !selectedTimezones.has(tz));
             } else {
                 // No search term - show all unselected timezones
