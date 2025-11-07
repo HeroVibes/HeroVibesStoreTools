@@ -29,6 +29,12 @@
       box-sizing: border-box;
     }
 
+    body {
+      margin: 0;
+      padding: 0;
+      background: #191919;
+    }
+
     .hv-password-generator {
       font-family: sans-serif;
       background: var(--primary-bg);
@@ -466,7 +472,7 @@
   <div class="hv-password-generator">
     <div class="container">
     <!-- ========== VERSION NUMBER ========== -->
-    <div class="version">v1.0.0</div>
+    <div class="version">v1.0.1</div>
 
     <!-- ========== PASSWORD DISPLAY AREA ========== -->
     <div class="password-wrapper">
@@ -564,6 +570,48 @@
   </div>
 
   <script>
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      // Only send message if height has *actually* changed
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
+    function scheduleHeightCheck() {
+        // Clear any pending checks
+        clearTimeout(resizeTimer);
+        // Schedule a new check
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    // Send height on initial load (with a slight delay)
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    // Send height on window resize (debounced)
+    window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
+        scheduleHeightCheck();
+    });
+    
+    // ===== END OF SCROLLBAR FIX =====
+
     // ========== DOM ELEMENTS ==========
     const passwordField = document.getElementById('password');
     const lengthRange = document.getElementById('lengthRange');
@@ -856,48 +904,6 @@
 
     // ========== INITIALIZE ==========
     update();
-
-    // ===== FOURTHWALL SCROLLBAR FIX =====
-    let lastHeight = 0;
-    let resizeTimer;
-
-    /**
-     * Sends the current scrollHeight to the parent window if it has changed.
-     * This is the *only* function that should send a postMessage.
-     */
-    function sendHeight() {
-      const height = document.body.scrollHeight;
-      
-      // Only send message if height has *actually* changed
-      if (height !== lastHeight) {
-        lastHeight = height;
-        window.parent.postMessage({ frameHeight: height }, '*');
-      }
-    }
-
-    /**
-     * A debounced version of sendHeight() to be called on content changes.
-     * This ensures we don't spam messages during rapid changes.
-     */
-    function scheduleHeightCheck() {
-        // Clear any pending checks
-        clearTimeout(resizeTimer);
-        // Schedule a new check
-        resizeTimer = setTimeout(sendHeight, 150);
-    }
-
-    // Send height on initial load (with a slight delay)
-    window.addEventListener('load', () => {
-        setTimeout(sendHeight, 100);
-    });
-
-    // Send height on window resize (debounced)
-    window.addEventListener('resize', () => {
-        // Use scheduleHeightCheck for built-in debounce
-        scheduleHeightCheck();
-    });
-    
-    // ===== END OF SCROLLBAR FIX =====
   </script>
 </body>
 </html>
