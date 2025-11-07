@@ -21,6 +21,7 @@
             --card-youtube: #9c06bb;
             --card-code: #272822;
             --bottom-glow: rgba(135,169,255,0.3);
+            --delete-red: #ff5f57;
         }
 
         /* ===== GLOBAL STYLES ===== */
@@ -248,6 +249,12 @@
             background-color: var(--accent-color);
             border-radius: 50%;
             box-shadow: 0 0 8px var(--accent-color);
+            transition: background-color 0.2s;
+        }
+
+        .page-item:hover.active::before {
+            background-color: var(--delete-red);
+            box-shadow: 0 0 8px var(--delete-red);
         }
 
         .page-rename-input {
@@ -316,6 +323,7 @@
             align-items: center;
             padding: 0 12px;
             border-radius: var(--radius) var(--radius) 0 0;
+            position: relative;
         }
 
         .card-header:active {
@@ -328,8 +336,26 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: var(--secondary-text);
+            cursor: text;
+            user-select: none;
+            transition: color 0.2s;
         }
 
+        .card-type-label[contenteditable="true"] {
+            color: var(--primary-text);
+            outline: 1px solid var(--accent-color);
+            border-radius: 3px;
+            padding: 0 4px;
+            margin: -1px 0;
+        }
+
+        .card-note .card-header { border-left: 4px solid var(--card-note); }
+        .card-image .card-header { border-left: 4px solid var(--card-image); }
+        .card-link .card-header { border-left: 4px solid var(--card-link); }
+        .card-youtube .card-header { border-left: 4px solid var(--card-youtube); }
+        .card-code .card-header { border-left: 4px solid var(--card-code); background: #1e1e1e; }
+
+        /* ===== CARD CONTENT STYLES ===== */
         .card-body {
             flex-grow: 1;
             display: flex;
@@ -349,14 +375,6 @@
             background: #272822;
         }
 
-        /* Card type specific colors */
-        .card-note .card-header { border-left: 4px solid var(--card-note); }
-        .card-image .card-header { border-left: 4px solid var(--card-image); }
-        .card-link .card-header { border-left: 4px solid var(--card-link); }
-        .card-youtube .card-header { border-left: 4px solid var(--card-youtube); }
-        .card-code .card-header { border-left: 4px solid var(--card-code); background: #1e1e1e; }
-
-        /* ===== CARD CONTENT STYLES ===== */
         .card-text-content {
             background: transparent;
             border: none;
@@ -539,38 +557,103 @@
             z-index: 10000;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(4px);
         }
 
         .modal-content {
             background: var(--secondary-bg);
-            padding: 20px;
+            padding: 24px;
             border-radius: var(--radius);
-            max-width: 80%;
-            max-height: 80vh;
+            max-width: 90%;
+            max-height: 85vh;
             overflow: auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            border: 1px solid var(--outline-color);
         }
 
         .modal-content h2 {
-            font-size: 18px;
-            margin: 0 0 12px;
+            font-size: 20px;
+            margin: 0 0 16px;
+            color: var(--accent-color);
+        }
+
+        .modal-content p, .modal-content li {
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 12px;
         }
 
         .modal-content ul {
-            padding-left: 20px;
-            margin: 0 0 12px;
+            padding-left: 24px;
+            margin: 0 0 16px;
         }
 
         .modal-content li {
-            margin-bottom: 8px;
-            font-size: 14px;
+            margin-bottom: 10px;
         }
 
         .modal-content .version {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--secondary-text);
             text-align: right;
-            margin: 0;
+            margin: 16px 0 0;
+            font-style: italic;
+        }
+
+        /* ===== CONFIRM MODAL ===== */
+        #confirm-modal {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .confirm-content {
+            background: var(--secondary-bg);
+            padding: 20px;
+            border-radius: var(--radius);
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            border: 1px solid var(--outline-color);
+            max-width: 320px;
+        }
+
+        .confirm-content p {
+            margin: 0 0 16px;
+            font-size: 15px;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 80px;
+        }
+
+        .confirm-yes {
+            background: var(--delete-red);
+            color: white;
+            border: none;
+        }
+
+        .confirm-no {
+            background: var(--secondary-bg);
+            color: var(--primary-text);
+            border: 1px solid var(--outline-color);
         }
 
         /* ===== MOBILE RESPONSIVE ===== */
@@ -684,20 +767,49 @@
     <!-- HELP MODAL -->
     <div id="help-modal">
         <div class="modal-content">
-            <h2>Tips & How to Use</h2>
+            <h2>How to Use Your Scratchpad</h2>
+            <p><strong>Add Content:</strong></p>
             <ul>
-                <li>Add a note by clicking 'Add Note' or pressing 'N'.</li>
-                <li>Paste links, code snippets, or images directly using Ctrl+V (or Cmd+V on Mac).</li>
-                <li>Drag cards by their header to reposition them.</li>
-                <li>Double-click on code cards to edit the code.</li>
-                <li>Add new pages using the '+' button in the page controls.</li>
-                <li>Double-click a page name in the list to rename it.</li>
-                <li>Export or import your layout as JSON using the buttons.</li>
-                <li>Use the reset button to clear everything (confirmation required).</li>
-                <li>Download individual card content using the arrow button.</li>
+                <li>Click <strong>Add Note</strong> or press <strong>N</strong> to create a text note.</li>
+                <li><strong>Paste</strong> any link, code, or text — it auto-detects type!</li>
+                <li><strong>Drag & drop</strong> images or use the <strong>Upload</strong> button.</li>
             </ul>
-            <p class="version">Version 1.2</p>
-            <button id="close-help" class="btn">Close</button>
+            <p><strong>Organize:</strong></p>
+            <ul>
+                <li>Drag cards by the top bar to move them.</li>
+                <li>Double-click <strong>Code</strong> cards to edit inline.</li>
+                <li>Rename cards by clicking their label (Note, Code, etc.).</li>
+            </ul>
+            <p><strong>Pages:</strong></p>
+            <ul>
+                <li>Add new pages with the <strong>+</strong> button.</li>
+                <li>Double-click page name to rename.</li>
+                <li>Hover active page dot → turns red → click to delete (with confirmation).</li>
+            </ul>
+            <p><strong>Save & Share:</strong></p>
+            <ul>
+                <li><strong>Export</strong> saves your entire whiteboard as a <code>.json</code> file.</li>
+                <li><strong>Import</strong> loads it back — perfect for sharing with friends!</li>
+            </ul>
+            <p><strong>Per-Card Actions:</strong></p>
+            <ul>
+                <li><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download content</li>
+                <li><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg> Copy to clipboard</li>
+                <li><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Delete card</li>
+            </ul>
+            <p class="version">Version 1.0.3</p>
+            <button id="close-help" class="btn">Got it!</button>
+        </div>
+    </div>
+
+    <!-- CONFIRM DELETE PAGE MODAL -->
+    <div id="confirm-modal">
+        <div class="confirm-content">
+            <p>Delete this page and all its cards?</p>
+            <div class="confirm-buttons">
+                <button id="confirm-yes" class="confirm-btn confirm-yes">Yes</button>
+                <button id="confirm-no" class="confirm-btn confirm-no">No</button>
+            </div>
         </div>
     </div>
 
@@ -724,11 +836,15 @@
             };
             const helpModal = document.getElementById('help-modal');
             const closeHelp = document.getElementById('close-help');
+            const confirmModal = document.getElementById('confirm-modal');
+            const confirmYes = document.getElementById('confirm-yes');
+            const confirmNo = document.getElementById('confirm-no');
 
             // ===== STATE MANAGEMENT =====
             let appState = {};
             let highestZ = 0;
             const gridSize = 20;
+            let pendingDeletePageId = null;
             
             // ===== ICONS =====
             const icons = {
@@ -753,6 +869,17 @@
                     cards: []
                 };
                 switchPage(newPageId, true);
+            };
+
+            const deletePage = (pageId) => {
+                if (Object.keys(appState.pages).length <= 1) {
+                    alert("Can't delete the last page!");
+                    return;
+                }
+                delete appState.pages[pageId];
+                const pageIds = Object.keys(appState.pages);
+                switchPage(pageIds[0]);
+                saveState();
             };
 
             const switchPage = (pageId, isNew = false) => {
@@ -784,24 +911,37 @@
                 Object.values(appState.pages).forEach(page => {
                     const li = document.createElement('li');
                     li.className = 'page-item';
-                    li.textContent = page.name;
                     if (page.id === appState.currentPageId) li.classList.add('active');
                     
-                    li.addEventListener('click', () => switchPage(page.id));
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = page.name;
+                    li.appendChild(nameSpan);
+                    
+                    li.addEventListener('click', (e) => {
+                        if (li.classList.contains('active') && e.target === li.querySelector('::before') || e.target === li) {
+                            pendingDeletePageId = page.id;
+                            confirmModal.style.display = 'flex';
+                        } else {
+                            switchPage(page.id);
+                        }
+                    });
                     
                     li.addEventListener('dblclick', () => {
-                        li.innerHTML = `<input type="text" class="page-rename-input" value="${page.name}" />`;
-                        const input = li.querySelector('input');
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.className = 'page-rename-input';
+                        input.value = page.name;
+                        li.innerHTML = '';
+                        li.appendChild(input);
                         input.focus();
                         input.select();
                         
-                        const finishRename = () => {
+                        const finish = () => {
                             renamePage(page.id, input.value);
                         };
-                        
-                        input.addEventListener('blur', finishRename);
+                        input.addEventListener('blur', finish);
                         input.addEventListener('keydown', e => {
-                            if (e.key === 'Enter') finishRename();
+                            if (e.key === 'Enter') finish();
                             else if (e.key === 'Escape') renderPageList();
                         });
                     });
@@ -874,6 +1014,7 @@
                 const cardData = {
                     id: `card-${Date.now()}`,
                     type: data.type,
+                    customName: data.customName || getCardTypeLabel(data.type),
                     content: data.content || '',
                     x: `${(currentPage.cards.length % 8) * 40 + 40}px`,
                     y: `${(currentPage.cards.length % 8) * 40 + 60}px`,
@@ -929,7 +1070,7 @@
                 
                 card.innerHTML = `
                     <div class="card-header">
-                        <span class="card-type-label">${getCardTypeLabel(cardData.type)}</span>
+                        <span class="card-type-label" contenteditable="false">${cardData.customName || getCardTypeLabel(cardData.type)}</span>
                     </div>
                     <div class="card-body">${contentHtml}</div>
                     <div class="card-footer">
@@ -942,7 +1083,35 @@
                 
                 canvas.appendChild(card);
                 
-                card.querySelector('.card-header').addEventListener('mousedown', (e) => startDrag(e, cardData, card));
+                const label = card.querySelector('.card-type-label');
+                label.addEventListener('click', () => {
+                    if (label.isContentEditable) return;
+                    label.contentEditable = true;
+                    label.focus();
+                    document.execCommand('selectAll', false, null);
+                });
+
+                label.addEventListener('blur', () => {
+                    cardData.customName = label.textContent.trim() || getCardTypeLabel(cardData.type);
+                    label.contentEditable = false;
+                    saveState();
+                });
+
+                label.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        label.blur();
+                    } else if (e.key === 'Escape') {
+                        label.textContent = cardData.customName || getCardTypeLabel(cardData.type);
+                        label.blur();
+                    }
+                });
+
+                card.querySelector('.card-header').addEventListener('mousedown', (e) => {
+                    if (e.target === label) return;
+                    startDrag(e, cardData, card);
+                });
+
                 card.querySelector('.delete-btn').addEventListener('click', () => deleteCard(cardData.id));
                 card.querySelector('.copy-btn').addEventListener('click', (e) => copyCardContent(e.currentTarget, cardData));
                 card.querySelector('.download-btn').addEventListener('click', (e) => downloadCardContent(e.currentTarget, cardData));
@@ -1075,17 +1244,17 @@
             const downloadCardContent = async (downloadBtn, cardData) => {
                 if (downloadBtn.classList.contains('confirmed')) return;
 
-                let blob, filename, type;
+                let blob, filename;
 
                 try {
                     switch (cardData.type) {
                         case 'note':
                             blob = new Blob([cardData.content], { type: 'text/plain' });
-                            filename = `note-${Date.now()}.txt`;
+                            filename = `${cardData.customName.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'note'}-${Date.now()}.txt`;
                             break;
                         case 'code':
                             blob = new Blob([cardData.content], { type: 'text/plain' });
-                            filename = `code-${Date.now()}.js`;
+                            filename = `${cardData.customName.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'code'}-${Date.now()}.js`;
                             break;
                         case 'link':
                             blob = new Blob([cardData.content], { type: 'text/plain' });
@@ -1094,7 +1263,8 @@
                         case 'image':
                             const response = await fetch(cardData.content);
                             blob = await response.blob();
-                            filename = `image-${Date.now()}.${blob.type.split('/')[1] || 'png'}`;
+                            const ext = blob.type.split('/')[1] || 'png';
+                            filename = `${cardData.customName.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'image'}-${Date.now()}.${ext}`;
                             break;
                         case 'youtube':
                             blob = new Blob([cardData.content], { type: 'text/plain' });
@@ -1135,7 +1305,7 @@
             // ===== EVENT LISTENERS =====
             window.addEventListener('keydown', (e) => {
                 const activeElement = document.activeElement;
-                if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') return;
+                if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable) return;
                 
                 if (e.key.toLowerCase() === 'n') {
                     e.preventDefault();
@@ -1144,7 +1314,7 @@
             });
 
             window.addEventListener('paste', (e) => {
-                if (document.activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') return;
+                if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.isContentEditable) return;
                 
                 const items = e.clipboardData.items;
                 for (let i = 0; i < items.length; i++) {
@@ -1228,9 +1398,24 @@
             });
 
             helpModal.addEventListener('click', (e) => {
-                if (e.target === helpModal) {
-                    helpModal.style.display = 'none';
+                if (e.target === helpModal) helpModal.style.display = 'none';
+            });
+
+            confirmYes.addEventListener('click', () => {
+                if (pendingDeletePageId) {
+                    deletePage(pendingDeletePageId);
+                    pendingDeletePageId = null;
                 }
+                confirmModal.style.display = 'none';
+            });
+
+            confirmNo.addEventListener('click', () => {
+                pendingDeletePageId = null;
+                confirmModal.style.display = 'none';
+            });
+
+            confirmModal.addEventListener('click', (e) => {
+                if (e.target === confirmModal) confirmModal.style.display = 'none';
             });
 
             // ===== INITIALIZATION =====
