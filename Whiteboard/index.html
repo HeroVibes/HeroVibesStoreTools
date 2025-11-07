@@ -20,6 +20,7 @@
             --card-link: #2e4e79;
             --card-youtube: #9c06bb;
             --card-code: #272822;
+            --bottom-glow: rgba(135,169,255,0.3);
         }
 
         /* ===== GLOBAL STYLES ===== */
@@ -43,7 +44,7 @@
             display: flex;
             flex-direction: column;
             width: 100%;
-            min-height: 600px;
+            min-height: 800px;
             background: var(--primary-bg);
         }
 
@@ -57,12 +58,27 @@
             border-bottom: 1px solid var(--outline-color);
             flex-shrink: 0;
             flex-wrap: wrap;
+            justify-content: space-between;
         }
 
-        .control-group {
+        .control-left {
             display: flex;
-            gap: 10px;
             align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-separator {
+            width: 1px;
+            height: 32px;
+            background: var(--outline-color);
+            margin: 0 8px;
         }
 
         /* ===== BUTTONS ===== */
@@ -114,7 +130,7 @@
             padding: 10px 16px;
             border-radius: var(--radius);
             background: var(--primary-bg);
-            color:ателя var(--primary-text);
+            color: var(--primary-text);
             border: 1px solid var(--outline-color);
             font-size: 14px;
             font-family: inherit;
@@ -140,9 +156,35 @@
                 linear-gradient(90deg, rgba(135,169,255,0.03) 1px, transparent 1px);
             background-size: 20px 20px;
             width: 100%;
-            min-height: 600px;
-            padding-bottom: 50px;
+            min-height: 800px;
+            padding-bottom: 80px;
             overflow: auto;
+            position: relative;
+        }
+
+        #canvas::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(transparent, var(--bottom-glow));
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #canvas::before {
+            content: '';
+            position: absolute;
+            bottom: 59px;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: var(--outline-color);
+            box-shadow: 0 0 8px var(--accent-color);
+            pointer-events: none;
+            z-index: 2;
         }
 
         /* ===== PAGE CONTROLS ===== */
@@ -467,12 +509,12 @@
             background: #ff4940;
         }
 
-        .copy-btn.confirmed {
+        .copy-btn.confirmed, .download-btn.confirmed {
             background: #28c840;
             border-color: #22a034;
         }
 
-        .copy-btn.confirmed svg {
+        .copy-btn.confirmed svg, .download-btn.confirmed svg {
             opacity: 1;
         }
 
@@ -538,6 +580,10 @@
                 gap: 8px;
             }
 
+            .control-left, .control-right {
+                gap: 8px;
+            }
+
             button, .btn {
                 padding: 8px 12px;
                 font-size: 13px;
@@ -570,6 +616,10 @@
                 width: 32px;
                 height: 32px;
                 font-size: 18px;
+            }
+
+            .control-separator {
+                display: none;
             }
         }
 
@@ -607,15 +657,18 @@
     <div id="scratchpad-container">
         <!-- CONTROLS BAR -->
         <div id="controls">
-            <button id="add-note-btn" title="Add a new note (N)">Add Note</button>
-            <div class="control-group">
+            <div class="control-left">
+                <button id="add-note-btn" title="Add a new note (N)">Add Note</button>
                 <input type="text" id="link-input" placeholder="Paste link or code...">
+                <button id="upload-btn" title="Upload an image">Upload</button>
             </div>
-            <button id="upload-btn" title="Upload an image">Upload</button>
-            <button id="export-btn" title="Export layout">Export</button>
-            <button id="import-btn" title="Import layout">Import</button>
-            <button id="reset-btn" title="Clear all">Reset</button>
-            <button id="help-btn" title="Help & Tips">?</button>
+            <div class="control-right">
+                <div class="control-separator"></div>
+                <button id="export-btn" title="Export layout">Export</button>
+                <button id="import-btn" title="Import layout">Import</button>
+                <button id="reset-btn" title="Clear all">Reset</button>
+                <button id="help-btn" title="Help & Tips">?</button>
+            </div>
         </div>
 
         <!-- CANVAS AREA -->
@@ -641,8 +694,9 @@
                 <li>Double-click a page name in the list to rename it.</li>
                 <li>Export or import your layout as JSON using the buttons.</li>
                 <li>Use the reset button to clear everything (confirmation required).</li>
+                <li>Download individual card content using the arrow button.</li>
             </ul>
-            <p class="version">Version 1.1</p>
+            <p class="version">Version 1.2</p>
             <button id="close-help" class="btn">Close</button>
         </div>
     </div>
@@ -682,7 +736,8 @@
                 tick: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
                 x: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
                 link: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>',
-                play: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>'
+                play: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
+                download: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>'
             };
 
             // ===== HELPER FUNCTIONS =====
@@ -879,6 +934,7 @@
                     <div class="card-body">${contentHtml}</div>
                     <div class="card-footer">
                         ${footerHtml}
+                        <button type="button" class="card-btn download-btn" title="Download">${icons.download}</button>
                         <button type="button" class="card-btn copy-btn" title="Copy">${icons.clipboard}</button>
                         <button type="button" class="card-btn delete-btn" title="Delete">${icons.x}</button>
                     </div>
@@ -889,6 +945,7 @@
                 card.querySelector('.card-header').addEventListener('mousedown', (e) => startDrag(e, cardData, card));
                 card.querySelector('.delete-btn').addEventListener('click', () => deleteCard(cardData.id));
                 card.querySelector('.copy-btn').addEventListener('click', (e) => copyCardContent(e.currentTarget, cardData));
+                card.querySelector('.download-btn').addEventListener('click', (e) => downloadCardContent(e.currentTarget, cardData));
                 
                 const cardBody = card.querySelector('.card-body');
 
@@ -1015,6 +1072,56 @@
                 }
             };
 
+            const downloadCardContent = async (downloadBtn, cardData) => {
+                if (downloadBtn.classList.contains('confirmed')) return;
+
+                let blob, filename, type;
+
+                try {
+                    switch (cardData.type) {
+                        case 'note':
+                            blob = new Blob([cardData.content], { type: 'text/plain' });
+                            filename = `note-${Date.now()}.txt`;
+                            break;
+                        case 'code':
+                            blob = new Blob([cardData.content], { type: 'text/plain' });
+                            filename = `code-${Date.now()}.js`;
+                            break;
+                        case 'link':
+                            blob = new Blob([cardData.content], { type: 'text/plain' });
+                            filename = `link-${Date.now()}.txt`;
+                            break;
+                        case 'image':
+                            const response = await fetch(cardData.content);
+                            blob = await response.blob();
+                            filename = `image-${Date.now()}.${blob.type.split('/')[1] || 'png'}`;
+                            break;
+                        case 'youtube':
+                            blob = new Blob([cardData.content], { type: 'text/plain' });
+                            filename = `youtube-${Date.now()}.txt`;
+                            break;
+                        default:
+                            return;
+                    }
+
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    a.click();
+                    URL.revokeObjectURL(url);
+
+                    downloadBtn.innerHTML = icons.tick;
+                    downloadBtn.classList.add('confirmed');
+                    setTimeout(() => {
+                        downloadBtn.innerHTML = icons.download;
+                        downloadBtn.classList.remove('confirmed');
+                    }, 1500);
+                } catch (err) {
+                    console.error('Download failed:', err);
+                }
+            };
+
             const handleFile = (file) => {
                 if (file?.type.startsWith('image/')) {
                     const reader = new FileReader();
@@ -1037,7 +1144,7 @@
             });
 
             window.addEventListener('paste', (e) => {
-                if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+                if (document.activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') return;
                 
                 const items = e.clipboardData.items;
                 for (let i = 0; i < items.length; i++) {
