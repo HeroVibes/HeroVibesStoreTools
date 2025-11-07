@@ -867,41 +867,44 @@
 
     initializeTimers();
 
-    // ===== FOURTHWALL SCROLLBAR FIX =====
+// ===== FOURTHWALL SCROLLBAR FIX =====
     let lastHeight = 0;
-    let heightCheckTimeout = null;
+    let resizeTimer;
 
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
     function sendHeight() {
-      if (heightCheckTimeout) {
-        clearTimeout(heightCheckTimeout);
-      }
-
-      const contentHeight = document.body.scrollHeight;
+      const height = document.body.scrollHeight;
       
-      if (Math.abs(contentHeight - lastHeight) > 5) {
-        lastHeight = contentHeight;
-        window.parent.postMessage({ frameHeight: contentHeight }, '*');
+      // Only send message if height has *actually* changed
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
     function scheduleHeightCheck() {
-      if (heightCheckTimeout) {
-        clearTimeout(heightCheckTimeout);
-      }
-      heightCheckTimeout = setTimeout(sendHeight, 150);
+        // Clear any pending checks
+        clearTimeout(resizeTimer);
+        // Schedule a new check
+        resizeTimer = setTimeout(sendHeight, 150);
     }
 
-    window.onload = sendHeight;
-    window.onresize = scheduleHeightCheck;
-
-    const observer = new MutationObserver(() => {
-      scheduleHeightCheck();
+    // Send height on initial load (with a slight delay)
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
     });
-    
-    observer.observe(rowsContainer, { 
-      childList: true, 
-      subtree: true,
-      attributes: false
+
+    // Send height on window resize (debounced)
+    window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
+        scheduleHeightCheck();
     });
   </script>
 </body>
