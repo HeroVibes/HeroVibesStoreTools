@@ -29,6 +29,10 @@
       font-family: sans-serif;
       background: var(--bg-primary);
       color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 24px 16px;
     }
 
@@ -36,7 +40,6 @@
     .tool-container {
       width: 100%;
       max-width: 600px;
-      margin: 0 auto;
       background: var(--bg-secondary);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
@@ -337,20 +340,9 @@
     let currentQuality = '';
     let debounceTimer;
 
-    // ===== FOURTHWALL SCROLLBAR FIX =====
-    let lastHeight = 0;
-    function sendHeight() {
-      const height = document.body.scrollHeight;
-      if (height !== lastHeight) {
-        lastHeight = height;
-        window.parent.postMessage({ frameHeight: height }, '*');
-      }
-    }
-
     // ===== AUTO-FOCUS INPUT ON LOAD =====
     window.addEventListener('load', () => {
       videoInput.focus();
-      sendHeight();
     });
 
     // ===== INPUT HANDLER WITH DEBOUNCE =====
@@ -469,11 +461,6 @@
       qualityBadge.textContent = quality;
       qualityInfo.textContent = `Quality: ${quality} • Click image to open full size`;
       thumbnailDisplay.classList.add('show');
-      
-      // Wait for image to load before updating height
-      thumbnailImage.onload = () => {
-        setTimeout(sendHeight, 100);
-      };
     }
 
     // ===== SHOW ERROR =====
@@ -481,7 +468,6 @@
       errorText.textContent = message;
       errorMessage.classList.add('show');
       thumbnailDisplay.classList.remove('show');
-      setTimeout(sendHeight, 100);
     }
 
     // ===== HIDE ALL MESSAGES =====
@@ -490,7 +476,6 @@
       thumbnailDisplay.classList.remove('show');
       currentThumbnailUrl = '';
       currentQuality = '';
-      setTimeout(sendHeight, 100);
     }
 
     // ===== THUMBNAIL CLICK TO OPEN =====
@@ -536,6 +521,15 @@
         downloadButton.click();
       }
     });
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    function sendHeight() {
+      var height = document.body.scrollHeight;
+      window.parent.postMessage({ frameHeight: height }, '*');
+    }
+
+    window.onload = sendHeight;
+    window.onresize = sendHeight;
   </script>
 </body>
 </html>
