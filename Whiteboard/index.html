@@ -25,14 +25,13 @@
         /* ===== GLOBAL STYLES ===== */
         * { box-sizing: border-box; }
         
-        body, html {
+        html, body {
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--primary-bg);
             color: var(--primary-text);
             width: 100%;
-            height: 100%;
         }
 
         body {
@@ -44,7 +43,7 @@
             display: flex;
             flex-direction: column;
             width: 100%;
-            height: 100%;
+            min-height: 600px;
             background: var(--primary-bg);
         }
 
@@ -115,7 +114,7 @@
             padding: 10px 16px;
             border-radius: var(--radius);
             background: var(--primary-bg);
-            color: var(--primary-text);
+            color:ателя var(--primary-text);
             border: 1px solid var(--outline-color);
             font-size: 14px;
             font-family: inherit;
@@ -141,7 +140,8 @@
                 linear-gradient(90deg, rgba(135,169,255,0.03) 1px, transparent 1px);
             background-size: 20px 20px;
             width: 100%;
-            flex-grow: 1;
+            min-height: 600px;
+            padding-bottom: 50px;
             overflow: auto;
         }
 
@@ -675,7 +675,6 @@
             let appState = {};
             let highestZ = 0;
             const gridSize = 20;
-            const maxCanvasHeight = 2000;
             
             // ===== ICONS =====
             const icons = {
@@ -960,7 +959,6 @@
                     
                     newX = Math.max(0, newX);
                     newY = Math.max(0, newY);
-                    newY = Math.min(newY, maxCanvasHeight - cardElement.offsetHeight);
                     
                     cardElement.style.left = `${newX}px`;
                     cardElement.style.top = `${newY}px`;
