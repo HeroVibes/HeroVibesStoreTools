@@ -597,14 +597,6 @@
     /* ========================================
        QR DISPLAY AREA
     ======================================== */
-    .qr-preview-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 16px;
-      text-align: center;
-    }
-
     .qr-preview-wrapper {
       background: var(--primary-bg);
       border: 1px solid var(--outline-color);
@@ -946,7 +938,7 @@
 <body>
   
   <!-- VERSION BADGE -->
-  <div class="version-badge" title="QR Code Generator Version">v1.0.0</div>
+  <div class="version-badge" title="QR Code Generator Version">v1.0.1</div>
 
   <div class="page-wrapper">
     
@@ -1126,7 +1118,6 @@
 
       <!-- RIGHT COLUMN - QR PREVIEW (STICKY ON DESKTOP) -->
       <div class="qr-preview-column" id="qrPreviewColumn">
-        <div class="qr-preview-title">QR Code Preview</div>
         
         <div class="qr-preview-wrapper" id="previewWrapper">
           <div class="qr-image-container">
@@ -1376,6 +1367,7 @@
     // ====================================
     let currentLogo = null;
     let currentQRData = null;
+    let currentTemplate = 'url';
 
     // ====================================
     // AUTO-ADD "+" TO AREA CODE
@@ -1400,6 +1392,20 @@
     formatAreaCode(vcardAreaCode);
     formatAreaCode(smsAreaCode);
     formatAreaCode(phoneAreaCode);
+
+    // ====================================
+    // TEMPLATE BUTTON ACTIVATION
+    // ====================================
+    function setActiveTemplate(template) {
+      currentTemplate = template;
+      templateBtns.forEach(btn => {
+        if (btn.dataset.template === template) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
 
     // ====================================
     // FLOATING QR BUTTON
@@ -1473,21 +1479,15 @@
 
     function closeModal(modalId) {
       document.getElementById(modalId).classList.remove('active');
-      resetToURLTemplate();
+      setActiveTemplate('url');
       scheduleHeightCheck();
-    }
-
-    function resetToURLTemplate() {
-      templateBtns.forEach(b => b.classList.remove('active'));
-      templateBtns[0].classList.add('active');
     }
 
     templateBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const template = btn.dataset.template;
         
-        templateBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        setActiveTemplate(template);
         
         if (template === 'url') {
           input.focus();
@@ -1509,7 +1509,7 @@
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
           modal.classList.remove('active');
-          resetToURLTemplate();
+          setActiveTemplate('url');
           scheduleHeightCheck();
         }
       });
@@ -1531,6 +1531,7 @@
       const wifiString = `WIFI:T:${security};S:${ssid};P:${password};;`;
       input.value = wifiString;
       closeModal('wifiModal');
+      setActiveTemplate('wifi');
       updateQRCode();
     }
 
@@ -1557,6 +1558,7 @@
       
       input.value = vcard;
       closeModal('vcardModal');
+      setActiveTemplate('vcard');
       updateQRCode();
     }
 
@@ -1578,6 +1580,7 @@
       
       input.value = mailto;
       closeModal('emailModal');
+      setActiveTemplate('email');
       updateQRCode();
     }
 
@@ -1596,6 +1599,7 @@
       
       input.value = sms;
       closeModal('smsModal');
+      setActiveTemplate('sms');
       updateQRCode();
     }
 
@@ -1610,6 +1614,7 @@
       
       input.value = `tel:${areaCode}${number}`;
       closeModal('phoneModal');
+      setActiveTemplate('phone');
       updateQRCode();
     }
 
@@ -1708,15 +1713,29 @@
       
       updatePreviewBackground(bgColor);
 
-      // For gradient, we need to generate with white background first
-      const tempBgColor = qrColor === 'gradient' ? '#FFFFFF' : bgColor;
+      // Determine colors for QR generation
+      let darkColor, lightColor;
+      
+      if (qrColor === 'gradient') {
+        // For gradient, generate with black QR on white background first
+        darkColor = '#000000';
+        lightColor = '#FFFFFF';
+      } else if (qrColor === '#ffffff' && bgColor === '#000000') {
+        // Special case: white QR on black background
+        darkColor = '#FFFFFF';
+        lightColor = '#000000';
+      } else {
+        // Standard case
+        darkColor = (qrColor === '#ffffff') ? '#FFFFFF' : '#000000';
+        lightColor = (bgColor === '#00000000') ? '#FFFFFF' : bgColor;
+      }
 
       QRCode.toCanvas(canvas, text, {
         width: 800,
         margin: 2,
         color: {
-          dark: '#000000',
-          light: tempBgColor
+          dark: darkColor,
+          light: lightColor
         },
         errorCorrectionLevel: 'H'
       }, (err) => {
@@ -1779,8 +1798,8 @@
         // Copy back to main canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(tempCanvas, 0, 0);
-      } else if (qrColor !== '#000000') {
-        // Apply solid custom color
+      } else if (qrColor !== '#000000' && qrColor !== '#ffffff') {
+        // Apply solid custom color (not black or white)
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
         
