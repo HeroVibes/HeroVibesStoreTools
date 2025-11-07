@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steganography Tool - HeroVibes</title>
+    <style>
+        /* Ensure no min-height: 100vh and no default margin */
+        body {
+            margin: 0;
+        }
+
+        /* ========== HEROVIBES DESIGN SYSTEM ========== */
+        .herovibes-stego-tool {
+            --primary-bg: #191919;
+            --secondary-bg: #1F1F1F;
+            --hover-color: #323232;
+            --outline-color: #323232;
+            --accent-color: #87A9FF;
+            --primary-text: #D4D4D4;
+            --secondary-text: #8C8C8C;
+            --success-color: #4CAF50;
+            --error-color: #EF4444;
+            --warning-color: #F59E0B;
+            font-family: sans-serif;
+            
+            color: var(--primary-text);
+            
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 0; 
+        }
+
+        .herovibes-stego-tool * {
+            box-sizing: border-box;
+        }
+
+        /* ========== MAIN CONTAINER ========== */
+        .herovibes-stego-tool .stego-container {
+            background: var(--secondary-bg);
+            
+            border: 1px solid var(--outline-color);
+            
+            border-radius: 12px;
+            padding: 24px 16px;
+            
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            margin: 0 auto;
+        }
+
+        /* ========== MODE TOGGLE ========== */
+        .herovibes-stego-tool .mode-toggle-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            background: var(--primary-bg); 
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid var(--outline-color); 
+        }
+
+        .herovibes-stego-tool .mode-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            color: var(--secondary-text); 
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px; 
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .herovibes-stego-tool .mode-btn.active {
+            background: var(--secondary-bg);
+            
+            color: var(--accent-color);
+            
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .herovibes-stego-tool .mode-btn:hover:not(.active) {
+            color: var(--primary-text);
+            
+            background: var(--hover-color);
+            
+        }
+
+        /* ========== PROGRESS TRACKER ========== */
+        .herovibes-stego-tool .progress-tracker {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            position: relative;
+            padding: 0 16px;
+        }
+
+        .herovibes-stego-tool .progress-line {
+            position: absolute;
+            top: 15px;
+            left: 16px;
+            right: 16px;
+            height: 2px;
+            background: var(--outline-color);
+            
+            z-index: 0;
+        }
+
+        .herovibes-stego-tool .progress-line-fill {
+            height: 100%;
+            background: var(--accent-color); 
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .herovibes-stego-tool .progress-step {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            flex: 1;
+        }
+
+        .herovibes-stego-tool .progress-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--secondary-bg); 
+            border: 2px solid var(--outline-color);
+            
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-size: 12px; 
+            font-weight: bold;
+            color: var(--secondary-text); 
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .herovibes-stego-tool .progress-circle::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--secondary-bg);
+            
+            z-index: -1;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .herovibes-stego-tool .progress-step.active .progress-circle {
+            border-color: var(--accent-color);
+            
+            color: var(--accent-color);
+            
+            background: rgba(135, 169, 255, 0.1);
+        }
+
+        .herovibes-stego-tool .progress-step.completed .progress-circle {
+            border-color: var(--success-color);
+            background: var(--success-color);
+            color: white;
+        }
+
+        .herovibes-stego-tool .progress-label {
+            font-size: 11px;
+            color: var(--secondary-text); 
+            display: none;
+        }
+
+        .herovibes-stego-tool .progress-step.active .progress-label,
+        .herovibes-stego-tool .progress-step.completed .progress-label {
+            color: var(--primary-text);
+            
+        }
+
+        /* ========== STEP CONTAINERS ========== */
+        .herovibes-stego-tool .step {
+            display: none;
+            animation: hvStegoFadeIn 0.4s ease;
+        }
+
+        .herovibes-stego-tool .step.active {
+            display: block;
+        }
+
+        @keyframes hvStegoFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .herovibes-stego-tool .step-header {
+            margin-bottom: 20px;
+        }
+
+        .herovibes-stego-tool .step-title {
+            font-size: 20px;
+            
+            font-weight: bold;
+            
+            color: var(--primary-text);
+            
+            margin-bottom: 6px;
+        }
+
+        .herovibes-stego-tool .step-description {
+            font-size: 12px;
+            
+            color: var(--secondary-text);
+            
+            line-height: 1.5;
+        }
+
+        /* ========== IMAGE UPLOAD SECTION ========== */
+        .herovibes-stego-tool .drop-zone {
+            border: 2px dashed var(--outline-color);
+            
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--primary-bg);
+            
+            margin-bottom: 16px;
+            width: 100%;
+            display: block;
+        }
+
+        .herovibes-stego-tool .drop-zone:hover {
+            border-color: var(--accent-color);
+            
+            background: rgba(135, 169, 255, 0.05);
+        }
+
+        .herovibes-stego-tool .drop-zone.drag-over {
+            border-color: var(--accent-color);
+            
+            background: rgba(135, 169, 255, 0.1);
+            border-style: solid;
+        }
+
+        .herovibes-stego-tool .drop-zone-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            color: var(--secondary-text); 
+        }
+
+        .herovibes-stego-tool .drop-zone-text {
+            font-size: 14px;
+            
+            color: var(--primary-text);
+            
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .herovibes-stego-tool .drop-zone-subtext {
+            font-size: 12px;
+            
+            color: var(--secondary-text);
+            
+            margin-top: 8px;
+            opacity: 0.7;
+            display: block;
+        }
+
+        .herovibes-stego-tool #imageUpload,
+        .herovibes-stego-tool #extractImageUpload {
+            display: none;
+        }
+
+        /* ========== IMAGE PREVIEW ========== */
+        .herovibes-stego-tool .image-preview-container {
+            display: none;
+            background: var(--primary-bg); 
+            border: 1px solid var(--outline-color);
+            
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            position: relative;
+        }
+
+        .herovibes-stego-tool .image-preview-container.show {
+            display: block;
+        }
+
+        .herovibes-stego-tool .image-preview {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 6px;
+            background: var(--secondary-bg); 
+        }
+
+        .herovibes-stego-tool .image-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--outline-color);
+            
+        }
+
+        .herovibes-stego-tool .image-name {
+            font-size: 12px;
+            
+            color: var(--primary-text);
+            
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 12px;
+        }
+
+        .herovibes-stego-tool .image-size {
+            font-size: 11px;
+            color: var(--secondary-text); 
+        }
+
+        .herovibes-stego-tool .remove-image {
+            background: none;
+            border: none;
+            color: var(--error-color);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 8px;
+            margin-left: 8px;
+        }
+
+        .herovibes-stego-tool .remove-image:hover {
+            opacity: 0.7;
+        }
+
+        /* ========== INPUT FIELDS ========== */
+        .herovibes-stego-tool .form-group {
+            margin-bottom: 20px;
+        }
+
+        .herovibes-stego-tool .form-label {
+            display: block;
+            font-size: 12px; 
+            color: var(--secondary-text);
+            
+            margin-bottom: 8px;
+        }
+
+        .herovibes-stego-tool .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--primary-bg); 
+            border: 1px solid var(--outline-color);
+            
+            border-radius: 8px;
+            color: var(--primary-text);
+            
+            font-size: 14px;
+            
+            transition: border-color 0.3s ease;
+        }
+
+        .herovibes-stego-tool .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color); 
+        }
+
+        .herovibes-stego-tool .form-input::placeholder {
+            color: var(--secondary-text);
+            
+            opacity: 0.6;
+        }
+
+        .herovibes-stego-tool .input-hint {
+            font-size: 11px;
+            color: var(--secondary-text); 
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .herovibes-stego-tool .input-hint a {
+            color: var(--accent-color);
+            
+            text-decoration: none;
+        }
+
+        .herovibes-stego-tool .input-hint a:hover {
+            text-decoration: underline;
+        }
+
+        /* ========== PASSWORD VISIBILITY TOGGLE ========== */
+        .herovibes-stego-tool .password-input-wrapper {
+            position: relative;
+        }
+
+        .herovibes-stego-tool .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--secondary-text);
+            
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 16px;
+        }
+
+        .herovibes-stego-tool .password-toggle:hover {
+            color: var(--primary-text);
+            
+        }
+
+        /* ========== PASSWORD STRENGTH ========== */
+        .herovibes-stego-tool .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: var(--outline-color); 
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .herovibes-stego-tool .password-strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .herovibes-stego-tool .password-strength-text {
+            font-size: 11px;
+            margin-top: 4px;
+            color: var(--secondary-text); 
+        }
+
+        /* ========== REVIEW SECTION ========== */
+        .herovibes-stego-tool .review-card {
+            background: var(--primary-bg);
+            
+            border: 1px solid var(--outline-color);
+            
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .herovibes-stego-tool .review-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--outline-color);
+            
+        }
+
+        .herovibes-stego-tool .review-row:last-child {
+            border-bottom: none;
+        }
+
+        .herovibes-stego-tool .review-label {
+            font-size: 12px;
+            
+            color: var(--secondary-text);
+            
+        }
+
+        .herovibes-stego-tool .review-value {
+            font-size: 12px;
+            
+            color: var(--primary-text);
+            
+            font-weight: 500;
+            text-align: right;
+            max-width: 60%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ========== EXTRACTION OUTPUT ========== */
+        .herovibes-stego-tool .extracted-output {
+            background: var(--primary-bg);
+            
+            border: 1px solid var(--success-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .herovibes-stego-tool .extracted-output.show {
+            display: block;
+            animation: hvStegoFadeIn 0.4s ease;
+        }
+
+        .herovibes-stego-tool .extracted-label {
+            font-size: 12px;
+            
+            color: var(--success-color);
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .herovibes-stego-tool .extracted-password {
+            font-size: 14px;
+            
+            color: var(--primary-text);
+            
+            word-break: break-all;
+            background: var(--secondary-bg);
+            
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--outline-color); 
+            font-family: monospace;
+        }
+
+        .herovibes-stego-tool .copy-button {
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        /* ========== BUTTONS (SHIMMER EFFECT) ========== */
+        /* Based on default button template */
+        .herovibes-stego-tool .btn {
+            position: relative;
+            width: 100%;
+            padding: 12px 16px; 
+            border-radius: 8px;
+            
+            background: var(--secondary-bg);
+            
+            color: var(--primary-text);
+            
+            border: 1px solid var(--outline-color);
+            
+            cursor: pointer;
+            
+            overflow: hidden;
+            
+            font-size: 14px;
+            
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .herovibes-stego-tool .btn::before {
+            content: '';
+            
+            position: absolute;
+            
+            top: 0;
+            
+            left: -100%;
+            
+            width: 75%;
+            
+            height: 100%;
+            
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            
+            transform: skewX(-25deg);
+            
+            transition: left .7s ease-in-out;
+            
+        }
+
+        .herovibes-stego-tool .btn:hover::before {
+            left: 125%;
+            
+        }
+
+        .herovibes-stego-tool .btn:focus-visible {
+            outline: none;
+            
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+            
+        }
+
+        .herovibes-stego-tool .btn-primary {
+            background: var(--accent-color);
+            
+            color: #191919;
+            
+            font-weight: bold;
+        }
+
+        .herovibes-stego-tool .btn-primary:hover {
+            background: #9BB8FF;
+        }
+
+        .herovibes-stego-tool .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .herovibes-stego-tool .btn:disabled::before {
+            display: none;
+        }
+
+        .herovibes-stego-tool .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .herovibes-stego-tool .button-group .btn {
+            flex: 1;
+        }
+
+        /* ========== STATUS MESSAGES ========== */
+        .herovibes-stego-tool .status-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 12px; 
+            margin-top: 16px;
+            display: none;
+        }
+
+        .herovibes-stego-tool .status-message.show {
+            display: block;
+            animation: hvStegoFadeIn 0.3s ease;
+        }
+
+        .herovibes-stego-tool .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        .herovibes-stego-tool .status-success {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .herovibes-stego-tool .status-info {
+            background: rgba(135, 169, 255, 0.1);
+            color: var(--accent-color); 
+            border: 1px solid var(--accent-color);
+            
+        }
+
+        /* ========== VERSION NUMBER ========== */
+        .herovibes-stego-tool .tool-version {
+            font-size: 10px;
+            color: var(--secondary-text); 
+            text-align: right;
+            margin-top: 16px;
+            opacity: 0.6;
+        }
+
+        /* ========== MOBILE OPTIMIZATION ========== */
+        
+        @media (max-width: 640px) {
+            .herovibes-stego-tool .stego-container {
+                padding: 16px 12px;
+            }
+
+            .herovibes-stego-tool .progress-label {
+                display: block;
+            }
+
+            .herovibes-stego-tool .progress-circle {
+                width: 28px;
+                height: 28px;
+                font-size: 11px;
+            }
+
+            .herovibes-stego-tool .drop-zone {
+                padding: 30px 16px;
+            }
+
+            .herovibes-stego-tool .button-group {
+                flex-direction: column;
+            }
+
+            .herovibes-stego-tool .button-group .btn {
+                width: 100%;
+            }
+
+            .herovibes-stego-tool .step-title {
+                font-size: 18px;
+            }
+
+            .herovibes-stego-tool .image-preview {
+                max-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="herovibes-stego-tool">
+        <div class="stego-container">
+            
+            <div class="mode-toggle-container">
+                <button class="mode-btn active" id="embedModeBtn" type="button">
+                    🔐 Embed Password/Message
+       
+                 </button>
+                <button class="mode-btn" id="extractModeBtn" type="button">
+                    🔓 Extract Password/Message
+                </button>
+            </div>
+
+            <div id="embedMode">
+         
+               <div class="progress-tracker">
+                    <div class="progress-line">
+                        <div class="progress-line-fill" id="embedProgressFill"></div>
+                    </div>
+                    <div class="progress-step active" data-step="1">
+  
+                       <div class="progress-circle">1</div>
+                        <div class="progress-label">Image</div>
+                    </div>
+                    <div class="progress-step" data-step="2">
+          
+               <div class="progress-circle">2</div>
+                        <div class="progress-label">Message</div>
+                    </div>
+                    <div class="progress-step" data-step="3">
+                  
+       <div class="progress-circle">3</div>
+                        <div class="progress-label">Security</div>
+                    </div>
+                    <div class="progress-step" data-step="4">
+                        <div class="progress-circle">4</div>
+ 
+                        <div class="progress-label">Review</div>
+                    </div>
+                </div>
+
+                <div class="step active" id="embedStep1">
+                    <div 
+ class="step-header">
+                        <div class="step-title">Select Your Image</div>
+                        <div class="step-description">Choose an image to hide your password or message inside.
+ Larger images can store more data.</div>
+                    </div>
+
+                    <label for="imageUpload" class="drop-zone" id="embedDropZone">
+                        <div>
+                            
+ <div class="drop-zone-icon">🖼️</div>
+                            <div class="drop-zone-text">Drag & drop your image here or click to browse</div>
+                            <div class="drop-zone-subtext">Supports PNG, JPG, GIF • Max 10 MB</div>
+                        </div>
+ 
+                    </label>
+                    <input type="file" id="imageUpload" accept="image/*">
+
+                    <div class="image-preview-container" id="embedImagePreview">
+                        <img class="image-preview" id="embedPreviewImg" alt="Preview">
+         
+                <div class="image-info">
+                            <span class="image-name" id="embedImageName">image.png</span>
+                            <span class="image-size" id="embedImageSize">0 KB</span>
+                       
+      <button class="remove-image" id="embedRemoveImage" type="button">×</button>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-primary" 
+ id="embedStep1Next" disabled>Continue to Message</button>
+                    </div>
+                </div>
+
+                <div class="step" id="embedStep2">
+                    <div class="step-header">
+                      
+   <div class="step-title">Enter Your Password/Message</div>
+                        <div class="step-description">This is the password or message you want to hide inside the image.</div>
+                    </div>
+
+                    <div class="form-group">
+                 
+        <label class="form-label">Password/Message to Hide *</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" class="form-input" id="passwordToEmbed" placeholder="Enter the password or message you want to hide" autocomplete="off">
+                       
+      <button class="password-toggle" id="togglePasswordToEmbed" type="button">👁️</button>
+                        </div>
+                        <div class="input-hint">Need a secure password?
+ <a href="https://herovibes.store/pages/password-generator" target="_blank" rel="noopener">Generate one here!</a></div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn" id="embedStep2Back">Back</button>
+                        <button class="btn btn-primary" id="embedStep2Next" 
+ disabled>Continue to Security</button>
+                    </div>
+                </div>
+
+                <div class="step" id="embedStep3">
+                    <div class="step-header">
+                       
+  <div class="step-title">Set Encryption Passphrase</div>
+                        <div class="step-description">This passphrase encrypts your hidden password/message.
+ You'll need it to extract it later.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Encryption Passphrase *</label>
+                        <div class="password-input-wrapper">
+ 
+                            <input type="password" class="form-input" id="encryptionPassphrase" placeholder="Create a strong passphrase" autocomplete="off">
+                            <button class="password-toggle" id="toggleEncryptionPassphrase" type="button">👁️</button>
+                        </div>
+          
+               <div class="password-strength">
+                            <div class="password-strength-fill" id="passphraseStrengthFill"></div>
+                        </div>
+                        <div class="password-strength-text" id="passphraseStrengthText">Enter a passphrase</div>
+   
+                      <div class="input-hint">⚠️ <strong>Remember this passphrase!</strong> Without it, you cannot extract your password/message.</div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn" id="embedStep3Back">Back</button>
+ 
+                        <button class="btn btn-primary" id="embedStep3Next" disabled>Review & Embed</button>
+                    </div>
+                </div>
+
+                <div class="step" id="embedStep4">
+                 
+    <div class="step-header">
+                        <div class="step-title">Review & Embed</div>
+                        <div class="step-description">Verify your settings before creating your steganographic image.</div>
+                    </div>
+
+                 
+    <div class="review-card">
+                        <div class="review-row">
+                            <span class="review-label">Image</span>
+                            <span class="review-value" id="reviewImageName">image.png</span>
+            
+             </div>
+                        <div class="review-row">
+                            <span class="review-label">Image Size</span>
+                            <span class="review-value" id="reviewImageSize">0 KB</span>
+  
+                       </div>
+                        <div class="review-row">
+                            <span class="review-label">Message Length</span>
+                       
+      <span class="review-value" id="reviewPasswordLength">0 characters</span>
+                        </div>
+                        <div class="review-row">
+                            <span class="review-label">Encryption</span>
+              
+               <span class="review-value">AES-256-GCM</span>
+                        </div>
+                        <div class="review-row">
+                            <span class="review-label">Integrity Check</span>
+      
+                       <span class="review-value">SHA-256</span>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+            
+             <button class="btn" id="embedStep4Back">Back</button>
+                        <button class="btn btn-primary" id="embedButton">Embed & Download</button>
+                    </div>
+                </div>
+
+                <div class="status-message" id="embedStatusMessage"></div>
+   
+          </div>
+
+            <div id="extractMode" style="display: none;">
+                <div class="step-header">
+                    <div class="step-title">Extract Hidden Password/Message</div>
+                    <div class="step-description">Upload an image containing a hidden password/message and enter the encryption passphrase to extract it.</div>
+ 
+                </div>
+
+                <label for="extractImageUpload" class="drop-zone" id="extractDropZone">
+                    <div>
+                        <div class="drop-zone-icon">🖼️</div>
+                     
+    <div class="drop-zone-text">Drag & drop your image here or click to browse</div>
+                        <div class="drop-zone-subtext">Upload the image with hidden password/message</div>
+                    </div>
+                </label>
+                <input type="file" id="extractImageUpload" accept="image/*">
+
+  
+               <div class="image-preview-container" id="extractImagePreview">
+                    <img class="image-preview" id="extractPreviewImg" alt="Preview">
+                    <div class="image-info">
+                        <span class="image-name" id="extractImageName">image.png</span>
+              
+           <span class="image-size" id="extractImageSize">0 KB</span>
+                        <button class="remove-image" id="extractRemoveImage" type="button">×</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+       
+              <label class="form-label">Encryption Passphrase *</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" class="form-input" id="extractionPassphrase" placeholder="Enter the encryption passphrase" autocomplete="off">
+                        <button class="password-toggle" id="toggleExtractionPassphrase" type="button">👁️</button>
+    
+                 </div>
+                    <div class="input-hint">This is the same passphrase used when embedding the password/message.</div>
+                </div>
+
+                <button class="btn btn-primary" id="extractButton" disabled>Extract Password/Message</button>
+
+                <div 
+ class="extracted-output" id="extractedOutput">
+                    <div class="extracted-label">✓ Extracted Password/Message:</div>
+                    <div class="extracted-password" id="extractedPassword"></div>
+                    <button class="btn copy-button" id="copyPasswordButton">📋 Copy to Clipboard</button>
+                </div>
+
+            
+     <div class="status-message" id="extractStatusMessage"></div>
+            </div>
+
+            <div class="tool-version">V1.0.0</div>
+        </div>
+    </div>
+
+    <script>
+        // ========== GLOBAL VARIABLES ==========
+        const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
+        const END_MARKER = '###END_STEGO###';
+        
+        let embedCurrentStep = 1;
+        let embedImage = null;
+        let extractImage = null;
+
+        // ========== CANVAS ELEMENTS ==========
+        const embedCanvas = document.createElement('canvas');
+        const embedCtx = embedCanvas.getContext('2d');
+        const extractCanvas = document.createElement('canvas');
+        const extractCtx = extractCanvas.getContext('2d');
+        // ========== MODE TOGGLE ==========
+        const embedModeBtn = document.getElementById('embedModeBtn');
+        const extractModeBtn = document.getElementById('extractModeBtn');
+        const embedMode = document.getElementById('embedMode');
+        const extractMode = document.getElementById('extractMode');
+
+        embedModeBtn.addEventListener('click', () => {
+            embedModeBtn.classList.add('active');
+            extractModeBtn.classList.remove('active');
+            embedMode.style.display = 'block';
+            extractMode.style.display = 'none';
+            hideAllStatus();
+            scheduleHeightCheck(); // Height change
+        });
+        extractModeBtn.addEventListener('click', () => {
+            extractModeBtn.classList.add('active');
+            embedModeBtn.classList.remove('active');
+            extractMode.style.display = 'block';
+            embedMode.style.display = 'none';
+            hideAllStatus();
+            scheduleHeightCheck(); // Height change
+        });
+        // ========== EMBED MODE - IMAGE UPLOAD ==========
+        const imageUpload = document.getElementById('imageUpload');
+        const embedDropZone = document.getElementById('embedDropZone');
+        const embedImagePreview = document.getElementById('embedImagePreview');
+        const embedPreviewImg = document.getElementById('embedPreviewImg');
+        const embedImageName = document.getElementById('embedImageName');
+        const embedImageSize = document.getElementById('embedImageSize');
+        const embedRemoveImage = document.getElementById('embedRemoveImage');
+        
+        embedDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            embedDropZone.classList.add('drag-over');
+        });
+        embedDropZone.addEventListener('dragleave', () => {
+            embedDropZone.classList.remove('drag-over');
+        });
+        embedDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            embedDropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length > 0) {
+                handleEmbedImageUpload(e.dataTransfer.files[0]);
+            }
+        });
+        imageUpload.addEventListener('change', () => {
+            if (imageUpload.files.length > 0) {
+                handleEmbedImageUpload(imageUpload.files[0]);
+            }
+        });
+        embedRemoveImage.addEventListener('click', (e) => {
+            e.stopPropagation();
+            clearEmbedImage();
+        });
+        function handleEmbedImageUpload(file) {
+            if (!file.type.startsWith('image/')) {
+                showStatus('Please select a valid image file.', 'error', 'embed');
+                return;
+            }
+
+            if (file.size > MAX_IMAGE_SIZE) {
+                showStatus('Image size must be less than 10 MB.', 'error', 'embed');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    embedImage = img;
+                    embedCanvas.width = img.width;
+                    embedCanvas.height = img.height;
+                    embedCtx.drawImage(img, 0, 0);
+                    
+                    embedPreviewImg.src = e.target.result;
+                    embedImageName.textContent = file.name;
+                    embedImageSize.textContent = formatFileSize(file.size);
+                    embedImagePreview.classList.add('show');
+                    scheduleHeightCheck(); // Height change
+                    document.getElementById('embedStep1Next').disabled = false;
+                    showStatus('Image loaded successfully!', 'success', 'embed');
+                };
+                img.onerror = () => {
+                    showStatus('Failed to load image. Please try another.', 'error', 'embed');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearEmbedImage() {
+            embedImage = null;
+            embedImagePreview.classList.remove('show');
+            imageUpload.value = '';
+            document.getElementById('embedStep1Next').disabled = true;
+            scheduleHeightCheck(); // Height change
+        }
+
+        // ========== EMBED MODE - PASSWORD INPUT ==========
+        const passwordToEmbed = document.getElementById('passwordToEmbed');
+        const togglePasswordToEmbed = document.getElementById('togglePasswordToEmbed');
+
+        togglePasswordToEmbed.addEventListener('click', () => {
+            const type = passwordToEmbed.type === 'password' ? 'text' : 'password';
+            passwordToEmbed.type = type;
+            togglePasswordToEmbed.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+        passwordToEmbed.addEventListener('input', () => {
+            document.getElementById('embedStep2Next').disabled = passwordToEmbed.value.length === 0;
+        });
+        // ========== EMBED MODE - ENCRYPTION PASSPHRASE ==========
+        const encryptionPassphrase = document.getElementById('encryptionPassphrase');
+        const toggleEncryptionPassphrase = document.getElementById('toggleEncryptionPassphrase');
+        const passphraseStrengthFill = document.getElementById('passphraseStrengthFill');
+        const passphraseStrengthText = document.getElementById('passphraseStrengthText');
+        toggleEncryptionPassphrase.addEventListener('click', () => {
+            const type = encryptionPassphrase.type === 'password' ? 'text' : 'password';
+            encryptionPassphrase.type = type;
+            toggleEncryptionPassphrase.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+        encryptionPassphrase.addEventListener('input', () => {
+            const passphrase = encryptionPassphrase.value;
+            const strength = calculatePasswordStrength(passphrase);
+            
+            if (passphrase.length === 0) {
+                passphraseStrengthFill.style.width = '0%';
+                passphraseStrengthText.textContent = 'Enter a passphrase';
+ 
+                passphraseStrengthText.style.color = 'var(--secondary-text)';
+                document.getElementById('embedStep3Next').disabled = true;
+                return;
+            }
+
+            passphraseStrengthFill.style.width = strength.percent + '%';
+            passphraseStrengthFill.style.background = strength.color;
+       
+            passphraseStrengthText.textContent = strength.text;
+            passphraseStrengthText.style.color = strength.color;
+            
+            document.getElementById('embedStep3Next').disabled = false;
+        });
+        function calculatePasswordStrength(password) {
+            let score = 0;
+            if (password.length >= 8) score++;
+            if (password.length >= 12) score++;
+            if (password.length >= 16) score++;
+            
+            const hasLower = /[a-z]/.test(password);
+            const hasUpper = /[A-Z]/.test(password);
+            const hasNumber = /\d/.test(password);
+            const hasSpecial = /[^a-zA-Z\d]/.test(password);
+            
+            if (hasLower && hasUpper) score++;
+            if (hasNumber) score++;
+            if (hasSpecial) score++;
+            if (hasLower && hasUpper && hasNumber && hasSpecial) score++;
+            const strengths = [
+                { text: 'Very Weak', color: '#EF4444', percent: 15 },
+                { text: 'Weak', color: '#F59E0B', percent: 30 },
+                { text: 'Fair', color: '#F59E0B', percent: 45 },
+                { text: 'Fair', color: '#F59E0B', percent: 60 },
+    
+                { text: 'Good', color: '#4CAF50', percent: 75 },
+                { text: 'Strong', color: '#4CAF50', percent: 90 },
+                { text: 'Very Strong', color: '#4CAF50', percent: 100 }
+            ];
+            const finalScore = Math.min(score, strengths.length - 1);
+            return strengths[finalScore];
+        }
+
+        // ========== EMBED MODE - STEP NAVIGATION ==========
+        document.getElementById('embedStep1Next').addEventListener('click', () => goToEmbedStep(2));
+        document.getElementById('embedStep2Back').addEventListener('click', () => goToEmbedStep(1));
+        document.getElementById('embedStep2Next').addEventListener('click', () => goToEmbedStep(3));
+        document.getElementById('embedStep3Back').addEventListener('click', () => goToEmbedStep(2));
+        document.getElementById('embedStep3Next').addEventListener('click', () => {
+            updateReview();
+            goToEmbedStep(4);
+        });
+        document.getElementById('embedStep4Back').addEventListener('click', () => goToEmbedStep(3));
+
+        function goToEmbedStep(step) {
+            document.querySelectorAll('#embedMode .step').forEach(s => s.classList.remove('active'));
+            document.getElementById('embedStep' + step).classList.add('active');
+            updateEmbedProgressTracker(step);
+            embedCurrentStep = step;
+            hideStatus('embed');
+            scheduleHeightCheck(); // Height change
+        }
+
+        function updateEmbedProgressTracker(step) {
+            const steps = document.querySelectorAll('#embedMode .progress-step');
+            steps.forEach((s, index) => {
+                const stepNum = index + 1;
+                s.classList.remove('active', 'completed');
+                
+                if (stepNum < step) {
+                    s.classList.add('completed');
+   
+                    s.querySelector('.progress-circle').textContent = '✓';
+                } else if (stepNum === step) {
+                    s.classList.add('active');
+                    s.querySelector('.progress-circle').textContent = stepNum;
+                } 
+                else {
+                    s.querySelector('.progress-circle').textContent = stepNum;
+                }
+            });
+            const percent = ((step - 1) / 3) * 100;
+            document.getElementById('embedProgressFill').style.width = percent + '%';
+        }
+
+        // ========== REVIEW SECTION ==========
+        function updateReview() {
+            const fileName = embedImageName.textContent;
+            const fileSize = embedImageSize.textContent;
+            const messageLength = passwordToEmbed.value.length;
+            
+            document.getElementById('reviewImageName').textContent = fileName;
+            document.getElementById('reviewImageSize').textContent = fileSize;
+            document.getElementById('reviewPasswordLength').textContent = messageLength + ' characters';
+        }
+
+        // ========== EMBED FUNCTIONALITY ==========
+        document.getElementById('embedButton').addEventListener('click', embedPassword);
+        async function embedPassword() {
+            const message = passwordToEmbed.value;
+            const passphrase = encryptionPassphrase.value;
+
+            if (!embedImage || !message || !passphrase) {
+                showStatus('Please complete all required fields.', 'error', 'embed');
+                return;
+            }
+
+            try {
+                const embedButton = document.getElementById('embedButton');
+                embedButton.disabled = true;
+                embedButton.textContent = 'Processing...';
+                
+                showStatus('Encrypting message...', 'info', 'embed');
+
+                const key = await deriveKey(passphrase);
+                const messageBytes = textEncoder.encode(message);
+                const { iv, encryptedData } = await encryptData(messageBytes, key);
+
+                const ivAndEncryptedData = new Uint8Array([...iv, ...encryptedData]);
+                const hash = await generateHash(ivAndEncryptedData);
+                const fullDataToEmbedBytes = new Uint8Array([...hash, ...ivAndEncryptedData, ...textEncoder.encode(END_MARKER)]);
+                const dataToEmbedBits = bytesToBitString(fullDataToEmbedBytes);
+                const dataLengthBits = dataToEmbedBits.length;
+                const imageData = embedCtx.getImageData(0, 0, embedCanvas.width, embedCanvas.height);
+                const pixels = imageData.data;
+                const maxCapacityBits = (pixels.length / 4) * 3;
+                if (dataLengthBits > maxCapacityBits) {
+                    throw new Error('Password/Message is too long for this image!');
+                }
+
+                const startOffsetBits = getOffsetSeed(passphrase, maxCapacityBits);
+                if (startOffsetBits + dataLengthBits > maxCapacityBits) {
+                    throw new Error('Insufficient image capacity. Try a larger image or shorter password/message.');
+                }
+
+                showStatus('Embedding message into image...', 'info', 'embed');
+                let dataIndex = 0;
+                for (let i = startOffsetBits; i < startOffsetBits + dataLengthBits; i++) {
+                    const pixelArrayByteIndex = Math.floor(i / 3) * 4;
+                    const channelOffset = i % 3;
+
+                    if ((pixelArrayByteIndex + channelOffset) >= pixels.length) {
+                        throw new Error('Image capacity exceeded.');
+                    }
+
+                    pixels[pixelArrayByteIndex + channelOffset] = setLsb(
+                        pixels[pixelArrayByteIndex + channelOffset],
+                        parseInt(dataToEmbedBits[dataIndex++])
+                    );
+                }
+
+                embedCtx.putImageData(imageData, 0, 0);
+                showStatus('Generating download...', 'info', 'embed');
+                downloadCanvasAsPNG();
+                
+                showStatus('Success! Your steganographic image has been downloaded.', 'success', 'embed');
+                setTimeout(() => {
+                    resetEmbedForm();
+                }, 3000);
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error', 'embed');
+                console.error('Embedding error:', error);
+            } finally {
+                const embedButton = document.getElementById('embedButton');
+                embedButton.disabled = false;
+                embedButton.textContent = 'Embed & Download';
+            }
+        }
+
+        function downloadCanvasAsPNG() {
+            const dataURL = embedCanvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = dataURL;
+            // FIX 3: Updated filename
+            a.download = 'HV-Steganography-PassImg.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // ========== EXTRACT MODE - IMAGE UPLOAD ==========
+        const extractImageUpload = document.getElementById('extractImageUpload');
+        const extractDropZone = document.getElementById('extractDropZone');
+        const extractImagePreview = document.getElementById('extractImagePreview');
+        const extractPreviewImg = document.getElementById('extractPreviewImg');
+        const extractImageName = document.getElementById('extractImageName');
+        const extractImageSize = document.getElementById('extractImageSize');
+        const extractRemoveImage = document.getElementById('extractRemoveImage');
+        
+        extractDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            extractDropZone.classList.add('drag-over');
+        });
+        extractDropZone.addEventListener('dragleave', () => {
+            extractDropZone.classList.remove('drag-over');
+        });
+        extractDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            extractDropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length > 0) {
+                handleExtractImageUpload(e.dataTransfer.files[0]);
+            }
+        });
+        extractImageUpload.addEventListener('change', () => {
+            if (extractImageUpload.files.length > 0) {
+                handleExtractImageUpload(extractImageUpload.files[0]);
+            }
+        });
+        extractRemoveImage.addEventListener('click', (e) => {
+            e.stopPropagation();
+            clearExtractImage();
+        });
+        function handleExtractImageUpload(file) {
+            if (!file.type.startsWith('image/')) {
+                showStatus('Please select a valid image file.', 'error', 'extract');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    extractImage = img;
+                    extractCanvas.width = img.width;
+                    extractCanvas.height = img.height;
+                    extractCtx.drawImage(img, 0, 0);
+                    
+                    extractPreviewImg.src = e.target.result;
+                    extractImageName.textContent = file.name;
+                    extractImageSize.textContent = formatFileSize(file.size);
+                    extractImagePreview.classList.add('show');
+                    scheduleHeightCheck(); // Height change
+                    
+                    updateExtractButtonState();
+                    showStatus('Image loaded successfully!', 'success', 'extract');
+                };
+                img.onerror = () => {
+                    showStatus('Failed to load image. Please try another.', 'error', 'extract');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearExtractImage() {
+            extractImage = null;
+            extractImagePreview.classList.remove('show');
+            extractImageUpload.value = '';
+            updateExtractButtonState();
+            scheduleHeightCheck(); // Height change
+        }
+
+        // ========== EXTRACT MODE - PASSPHRASE ==========
+        const extractionPassphrase = document.getElementById('extractionPassphrase');
+        const toggleExtractionPassphrase = document.getElementById('toggleExtractionPassphrase');
+
+        toggleExtractionPassphrase.addEventListener('click', () => {
+            const type = extractionPassphrase.type === 'password' ? 'text' : 'password';
+            extractionPassphrase.type = type;
+            toggleExtractionPassphrase.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+        extractionPassphrase.addEventListener('input', updateExtractButtonState);
+
+        function updateExtractButtonState() {
+            const hasImage = extractImage !== null;
+            const hasPassphrase = extractionPassphrase.value.length > 0;
+            document.getElementById('extractButton').disabled = !(hasImage && hasPassphrase);
+        }
+
+        // ========== EXTRACT FUNCTIONALITY ==========
+        document.getElementById('extractButton').addEventListener('click', extractPassword);
+        async function extractPassword() {
+            const passphrase = extractionPassphrase.value;
+            if (!extractImage || !passphrase) {
+                showStatus('Please upload an image and enter the passphrase.', 'error', 'extract');
+                return;
+            }
+
+            try {
+                const extractButton = document.getElementById('extractButton');
+                extractButton.disabled = true;
+                extractButton.textContent = 'Extracting...';
+                
+                showStatus('Searching for hidden data...', 'info', 'extract');
+
+                const imageData = extractCtx.getImageData(0, 0, extractCanvas.width, extractCanvas.height);
+                const pixels = imageData.data;
+                const maxImageBits = (pixels.length / 4) * 3;
+                const endMarkerBinary = bytesToBitString(textEncoder.encode(END_MARKER));
+                const HASH_LENGTH_BITS = 32 * 8;
+                const IV_LENGTH_BITS = 16 * 8;
+
+                const startOffsetBits = getOffsetSeed(passphrase, maxImageBits);
+                let extractedBinary = '';
+                let foundEndMarker = false;
+
+                for (let i = startOffsetBits; i < maxImageBits; i++) {
+                    const pixelArrayByteIndex = Math.floor(i / 3) * 4;
+                    const channelOffset = i % 3;
+
+                    if ((pixelArrayByteIndex + channelOffset) >= pixels.length) {
+                        break;
+                    }
+
+                    extractedBinary += getLsb(pixels[pixelArrayByteIndex + channelOffset]).toString();
+                    if (extractedBinary.endsWith(endMarkerBinary)) {
+                        foundEndMarker = true;
+                        break;
+                    }
+                }
+
+                if (!foundEndMarker) {
+                    throw new Error('No hidden data found. Check your passphrase or image.');
+                }
+
+                extractedBinary = extractedBinary.substring(0, extractedBinary.length - endMarkerBinary.length);
+                if (extractedBinary.length < HASH_LENGTH_BITS + IV_LENGTH_BITS) {
+                    throw new Error('Insufficient data. Image may be corrupted.');
+                }
+
+                showStatus('Decrypting message...', 'info', 'extract');
+                const extractedBytes = bitStringToBytes(extractedBinary);
+
+                const extractedHash = extractedBytes.slice(0, 32);
+                const ivAndEncryptedData = extractedBytes.slice(32);
+
+                const calculatedHash = await generateHash(ivAndEncryptedData);
+                const isHashValid = calculatedHash.every((val, idx) => val === extractedHash[idx]);
+
+                if (!isHashValid) {
+                    throw new Error('Data integrity check failed! Wrong passphrase or corrupted data.');
+                }
+
+                const key = await deriveKey(passphrase);
+                const decryptedBytes = await decryptData(ivAndEncryptedData, key);
+                const extractedText = textDecoder.decode(decryptedBytes);
+
+                document.getElementById('extractedPassword').textContent = extractedText;
+                document.getElementById('extractedOutput').classList.add('show');
+                scheduleHeightCheck(); // Height change
+                showStatus('Success! Password/Message extracted and decrypted.', 'success', 'extract');
+
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error', 'extract');
+                console.error('Extraction error:', error);
+                document.getElementById('extractedOutput').classList.remove('show');
+                scheduleHeightCheck(); // Height change
+            } finally {
+                const extractButton = document.getElementById('extractButton');
+                extractButton.disabled = false;
+                extractButton.textContent = 'Extract Password/Message';
+                updateExtractButtonState();
+            }
+        }
+
+        // ========== COPY TO CLIPBOARD ==========
+        document.getElementById('copyPasswordButton').addEventListener('click', () => {
+            const message = document.getElementById('extractedPassword').textContent;
+            navigator.clipboard.writeText(message).then(() => {
+                const copyBtn = document.getElementById('copyPasswordButton');
+            
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+   
+                showStatus('Failed to copy to clipboard.', 'error', 'extract');
+            });
+        });
+        // ========== CRYPTOGRAPHY UTILITIES ==========
+        const textEncoder = new TextEncoder();
+        const textDecoder = new TextDecoder();
+        const STATIC_SALT = new Uint8Array([
+            0x4d, 0x61, 0x63, 0x68, 0x69, 0x6e, 0x65, 0x5f,
+            0x4c, 0x65, 0x61, 0x72, 0x6e, 0x69, 0x6e, 0x67
+        ]);
+        async function deriveKey(passphrase) {
+            const keyMaterial = await crypto.subtle.importKey(
+                "raw",
+                textEncoder.encode(passphrase),
+                { name: "PBKDF2" },
+                false,
+              
+                ["deriveBits", "deriveKey"]
+            );
+            return await crypto.subtle.deriveKey(
+                {
+                    name: "PBKDF2",
+                    salt: STATIC_SALT,
+                    iterations: 200000,
+                   
+                    hash: "SHA-256",
+                },
+                keyMaterial,
+                { name: "AES-GCM", length: 256 },
+                true,
+                ["encrypt", "decrypt"]
+            
+            );
+        }
+
+        async function encryptData(data, key) {
+            const iv = crypto.getRandomValues(new Uint8Array(16));
+            const encrypted = await crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: iv },
+                key,
+                data
+            );
+            return { iv: iv, encryptedData: new Uint8Array(encrypted) };
+        }
+
+        async function decryptData(encryptedDataWithIv, key) {
+            if (encryptedDataWithIv.length < 16) {
+                throw new Error("Invalid encrypted data.");
+            }
+            const iv = encryptedDataWithIv.slice(0, 16);
+            const cipherText = encryptedDataWithIv.slice(16);
+
+            const decrypted = await crypto.subtle.decrypt(
+                { name: "AES-GCM", iv: iv },
+                key,
+                cipherText
+            );
+            return new Uint8Array(decrypted);
+        }
+
+        async function generateHash(data) {
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return new Uint8Array(hashBuffer);
+        }
+
+        // ========== STEGANOGRAPHY UTILITIES ==========
+        function bytesToBitString(bytes) {
+            return Array.from(bytes).map(byte => byte.toString(2).padStart(8, '0')).join('');
+        }
+
+        function bitStringToBytes(bitString) {
+            const bytes = new Uint8Array(Math.floor(bitString.length / 8));
+            for (let i = 0; i < bitString.length; i += 8) {
+                bytes[i / 8] = parseInt(bitString.substring(i, i + 8), 2);
+            }
+            return bytes;
+        }
+
+        function setLsb(byte, bit) {
+            return (byte & 0xFE) |
+            bit;
+        }
+
+        function getLsb(byte) {
+            return byte & 0x01;
+        }
+
+        function getOffsetSeed(passphrase, totalImageBits) {
+            let hash = 0;
+            for (let i = 0; i < passphrase.length; i++) {
+                const char = passphrase.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash |= 0;
+            }
+            return Math.abs(hash) % Math.max(1, totalImageBits);
+        }
+
+        // ========== UTILITY FUNCTIONS ==========
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function showStatus(message, type, mode) {
+            const statusDiv = document.getElementById(mode + 'StatusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status-message status-' + type + ' show';
+            scheduleHeightCheck(); // Height change
+        }
+
+        function hideStatus(mode) {
+            const statusDiv = document.getElementById(mode + 'StatusMessage');
+            statusDiv.classList.remove('show');
+            scheduleHeightCheck(); // Height change
+        }
+
+        function hideAllStatus() {
+            hideStatus('embed');
+            hideStatus('extract');
+        }
+
+        function resetEmbedForm() {
+            clearEmbedImage();
+            passwordToEmbed.value = '';
+            encryptionPassphrase.value = '';
+            passwordToEmbed.type = 'password';
+            encryptionPassphrase.type = 'password';
+            togglePasswordToEmbed.textContent = '👁️';
+            toggleEncryptionPassphrase.textContent = '👁️';
+            passphraseStrengthFill.style.width = '0%';
+            passphraseStrengthText.textContent = 'Enter a passphrase';
+            goToEmbedStep(1);
+            // No need to call scheduleHeightCheck() here,
+            // clearEmbedImage() and goToEmbedStep() already do.
+        }
+
+        // ========== DEVELOPER CONSOLE LOG ==========
+        console.log('%c🔐 Steganography Tool - HeroVibes', 'color: #87A9FF; font-size: 16px; font-weight: bold;');
+        console.log('%cHide messages in plain sight', 'color: #8C8C8C; font-size: 12px;');
+
+        // ===== FOURTHWALL SCROLLBAR FIX =====
+        
+        let lastHeight = 0;
+        let resizeTimer;
+
+        /**
+         * Sends the current scrollHeight to the parent window if it has changed.
+         * This is the *only* function that should send a postMessage.
+         */
+        function sendHeight() {
+          const height = document.body.scrollHeight; 
+          // Only send message if height has *actually* changed
+          if (height !== lastHeight) { 
+            lastHeight = height;
+            window.parent.postMessage({ frameHeight: height }, '*'); 
+          }
+        }
+
+        /**
+         * A debounced version of sendHeight() to be called on content changes.
+         * This ensures we don't spam messages during rapid changes.
+         */
+        function scheduleHeightCheck() {
+            // Clear any pending checks
+            clearTimeout(resizeTimer);
+            // Schedule a new check
+            resizeTimer = setTimeout(sendHeight, 150); 
+        }
+
+        // Send height on initial load (with a slight delay)
+        // This fixes the "Content Cut-Off" race condition.
+        window.addEventListener('load', () => {
+            setTimeout(sendHeight, 100);
+        });
+        // Send height on window resize (debounced)
+        window.addEventListener('resize', () => {
+            // Use scheduleHeightCheck for built-in debounce
+            scheduleHeightCheck();
+        });
+        // ===== END OF SCROLLBAR FIX =====
+    </script>
+</body>
+</html>
