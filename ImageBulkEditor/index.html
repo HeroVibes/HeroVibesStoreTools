@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Image Editor - HeroVibes</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  
+  <style>
+    /* ============================================
+        DESIGN SYSTEM VARIABLES
+        ============================================ */
+    :root {
+      --primary-bg: #191919;
+      --secondary-bg: #1F1F1F;
+      --hover-color: #323232;
+      --outline-color: #323232;
+      --accent-color: #87A9FF;
+      --primary-text: #D4D4D4;
+      --secondary-text: #8C8C8C;
+      --success-color: #4CAF50;
+      --error-color: #FF4D4D;
+      --radius: 8px;
+    }
+
+    /* ============================================
+        GLOBAL STYLES
+        ============================================ */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--primary-bg);
+      color: var(--primary-text);
+      padding: 24px 16px;
+    }
+
+    /* ============================================
+        MAIN CONTAINER
+        ============================================ */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ============================================
+        HEADER SECTION (REMOVED)
+        ============================================ */
+    
+    /* ============================================
+        UPLOAD ZONE
+        ============================================ */
+    .upload-zone {
+      background: var(--secondary-bg);
+      border: 2px dashed var(--outline-color);
+      border-radius: var(--radius);
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--accent-color);
+      background: var(--hover-color);
+    }
+
+    .upload-zone.dragging {
+      border-color: var(--accent-color);
+      background: var(--hover-color);
+      transform: scale(1.02);
+    }
+
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.6;
+    }
+
+    .upload-zone h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-text);
+      margin-bottom: 8px;
+    }
+
+    .upload-zone p {
+      font-size: 12px;
+      color: var(--secondary-text);
+    }
+
+    .upload-zone input[type="file"] {
+      display: none;
+    }
+
+    /* ============================================
+        CONTROLS PANEL
+        ============================================ */
+    .controls-panel {
+      background: var(--secondary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 24px;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary-text);
+    }
+
+    /* Select Inputs */
+    select {
+      background: var(--primary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--primary-text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238C8C8C' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+
+    select:hover {
+      border-color: var(--accent-color);
+      background: var(--hover-color);
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+    
+    .global-filter-group {
+        display: flex;
+        gap: 8px;
+    }
+    .global-filter-group select {
+        flex: 1;
+    }
+
+    /* Text Inputs */
+    input[type="text"] {
+      background: var(--primary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--primary-text);
+      transition: all 0.2s ease;
+    }
+
+    input[type="text"]:hover {
+      border-color: var(--accent-color);
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--secondary-text);
+    }
+    
+    .image-filename-input {
+      background: var(--primary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--primary-text);
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    .image-filename-input:hover { border-color: var(--accent-color); }
+    .image-filename-input:focus { outline: none; border-color: var(--accent-color);
+    }
+
+    /* Range Slider */
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      height: 4px;
+      background: var(--outline-color);
+      border-radius: 2px;
+      outline: none;
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--accent-color);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: var(--accent-color);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+
+    .slider-value {
+      font-size: 12px;
+      color: var(--secondary-text);
+      min-width: 45px;
+      text-align: right;
+    }
+
+    /* ============================================
+        BUTTONS
+        ============================================ */
+    .btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--secondary-bg);
+      color: var(--primary-text);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .btn:hover::before {
+      left: 125%;
+    }
+
+    .btn:hover {
+      border-color: var(--accent-color);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--accent-color);
+      color: var(--primary-bg);
+      border-color: var(--accent-color);
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 11px;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn:disabled:hover {
+      border-color: rgba(255,255,255,0.06);
+    }
+    .btn:disabled::before {
+      left: -100%;
+    }
+
+    /* ============================================
+        IMAGE GRID
+        ============================================ */
+    .images-container {
+      margin-bottom: 24px;
+    }
+
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .image-card {
+      background: var(--secondary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Image Preview Area */
+    .image-preview {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      background: var(--primary-bg);
+      overflow: hidden;
+    }
+
+    .image-preview img {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* Image Controls */
+    .image-controls {
+      padding: 12px;
+      border-top: 1px solid var(--outline-color);
+    }
+
+    .image-controls-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .image-controls-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .image-info {
+      font-size: 11px;
+      color: var(--secondary-text);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    
+    .image-filter-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
+    }
+    .slider-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .slider-group label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--secondary-text);
+        width: 10px;
+    }
+    .slider-group input[type="range"] {
+        flex: 1;
+        margin: 0;
+    }
+    .slider-group span {
+        font-size: 11px;
+        color: var(--secondary-text);
+        width: 35px;
+        text-align: right;
+    }
+
+    /* ============================================
+        ACTION BUTTONS
+        ============================================ */
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 24px 0;
+    }
+
+    /* ============================================
+        LOADING OVERLAY
+        ============================================ */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(25, 25, 25, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--outline-color);
+      border-top-color: var(--accent-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+      font-size: 14px;
+      color: var(--primary-text);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ============================================
+        NOTIFICATION
+        ============================================ */
+    .notification {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: var(--secondary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 12px;
+      color: var(--primary-text);
+      z-index: 10000;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      max-width: 300px;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.success {
+      border-left: 4px solid var(--success-color);
+    }
+
+    .notification.error {
+      border-left: 4px solid var(--error-color);
+    }
+
+    /* ============================================
+        CROPPER CUSTOMIZATION
+        ============================================ */
+    .cropper-view-box {
+      outline: 2px solid var(--accent-color);
+    }
+
+    .cropper-point {
+      background-color: var(--accent-color) !important;
+    }
+
+    .cropper-line {
+      background-color: var(--accent-color) !important;
+    }
+    
+    .cropper-canvas,
+    .cropper-view-box img {
+        transition: filter 0.1s ease;
+    }
+
+    /* ============================================
+        MOBILE OPTIMIZATIONS
+        ============================================ */
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 8px;
+      }
+
+      .upload-zone {
+        padding: 32px 16px;
+      }
+
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .images-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .image-preview {
+        height: 320px;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .action-buttons .btn {
+        width: 100%;
+      }
+
+      .notification {
+        top: 8px;
+        right: 8px;
+        left: 8px;
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .upload-icon {
+        font-size: 36px;
+      }
+
+      .image-controls-row {
+        flex-direction: column;
+      }
+
+      .image-controls-row .btn {
+        width: 100%;
+      }
+      
+      .global-filter-group {
+        flex-direction: column;
+      }
+    }
+
+    /* ============================================
+        EMPTY STATE
+        ============================================ */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      background: var(--secondary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      margin: 24px 0;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      opacity: 0.3;
+      margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+      font-size: 14px;
+      color: var(--primary-text);
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      font-size: 12px;
+      color: var(--secondary-text);
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="container">
+    
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-icon">📸</div>
+      <h3>Drag & Drop Images Here</h3>
+      <p>or click to browse • Supports JPG, PNG, WEBP</p>
+      <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp">
+    </div>
+
+    <div class="controls-panel">
+      <div class="controls-grid">
+        
+        <div class="control-group">
+         
+         <label for="aspectRatio">Aspect Ratio</label>
+          <select id="aspectRatio">
+            <option value="free">Free</option>
+            <option value="1:1">1:1 (Square)</option>
+            <option value="16:9">16:9 (Widescreen)</option>
+            <option value="9:16">9:16 (Vertical)</option>
+            <option value="4:3">4:3 (Standard)</option>
+            <option value="3:2">3:2 (Classic)</option>
+   
+         <option value="21:9">21:9 (Ultrawide)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="customResolution">Custom Resolution</label>
+          <input type="text" id="customResolution" placeholder="1920x1080">
+        </div>
+
+        <div class="control-group">
+            <label for="bulkRename">Bulk Rename</label>
+      
+           <input type="text" id="bulkRename" placeholder="e.g., My-Image">
+        </div>
+
+        <div class="control-group">
+          <label for="outputFormat">Output Format</label>
+          <select id="outputFormat">
+            <option value="image/jpeg">JPEG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/webp">WEBP</option>
+          </select>
+ 
+        </div>
+
+        <div class="control-group" id="qualityControlGroup">
+          <label for="quality">Quality (JPEG/WEBP)</label>
+          <div class="slider-container">
+            <input type="range" id="quality" min="10" max="100" value="85" step="5">
+            <span class="slider-value" id="qualityValue">85%</span>
+          </div>
+        </div>
+        
+  
+       <div class="control-group">
+            <label for="globalFilter">Global Filter</label>
+            <div class="global-filter-group">
+                <select id="globalFilter">
+                    <option value="none">None</option>
+                    <option value="grayscale(100%)">Grayscale (Simple)</option>
+      
+                   <option value="sepia(100%)">Sepia (Simple)</option>
+                    
+                    <option value="contrast(1.15) saturate(1.3) brightness(1.05)">HeroVibe</option>
+                    <option value="sepia(0.6) contrast(1.1) brightness(0.9) saturate(1.2) hue-rotate(-10deg)">Retro Film</option>
+               
+           <option value="contrast(1.1) brightness(1.1) saturate(0.7) sepia(0.3)">Arctic</option>
+                    <option value="grayscale(100%) contrast(1.4) brightness(0.9)">Noir</option>
+                    <option value="sepia(0.5) saturate(1.4) hue-rotate(-20deg) contrast(1.1)">Rose Gold</option>
+                    <option value="saturate(0.5) contrast(1.05) brightness(1.1)">Muted</option>
+                    
+ 
+                    <option value="invert(100%)">Invert (Simple)</option>
+                </select>
+            </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="images-container" id="imagesContainer" style="display: none;">
+      <div class="images-grid" id="imagesGrid"></div>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      
+     <div class="empty-state-icon">🖼️</div>
+      <h3>No Images Yet</h3>
+      <p>Upload images to start editing</p>
+    </div>
+
+    <div class="action-buttons" id="actionButtons" style="display: none;">
+      <button class="btn btn-primary" id="processAllBtn">Process All Images</button>
+      <button class="btn" id="downloadAllBtn" disabled>Download All</button>
+      <button class="btn" id="downloadZipBtn" disabled>Download as ZIP</button>
+    </div>
+
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Processing...</div>
+  </div>
+
+  <div class="notification" id="notification"></div>
+
+  <script>
+    /* ============================================
+       APP STATE
+        ============================================ */
+    let images = [];
+    let imageIdCounter = 0;
+    let currentGlobalFilter = 'none';
+    let lastHeight = 0;
+    let resizeTimer;
+
+    /* ============================================
+        DOM ELEMENTS
+        ============================================ */
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const imagesContainer = document.getElementById('imagesContainer');
+    const imagesGrid = document.getElementById('imagesGrid');
+    const emptyState = document.getElementById('emptyState');
+    const actionButtons = document.getElementById('actionButtons');
+    const aspectRatio = document.getElementById('aspectRatio');
+    const customResolution = document.getElementById('customResolution');
+    const bulkRename = document.getElementById('bulkRename');
+    const outputFormat = document.getElementById('outputFormat');
+    const quality = document.getElementById('quality');
+    const qualityValue = document.getElementById('qualityValue');
+    const qualityControlGroup = document.getElementById('qualityControlGroup');
+    const globalFilter = document.getElementById('globalFilter');
+    const processAllBtn = document.getElementById('processAllBtn');
+    const downloadAllBtn = document.getElementById('downloadAllBtn');
+    const downloadZipBtn = document.getElementById('downloadZipBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+    const notification = document.getElementById('notification');
+    
+
+    /* ============================================
+        UPLOAD ZONE - EVENT LISTENERS
+        ============================================ */
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragging');
+    });
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragging');
+    });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragging');
+      handleFiles(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+      e.target.value = null;
+    });
+    /* ============================================
+        CONTROLS - EVENT LISTENERS
+        ============================================ */
+    
+    [aspectRatio, customResolution, outputFormat, quality, bulkRename, globalFilter].forEach(element => {
+        element.addEventListener('change', () => {
+            updateURLFromSettings();
+        });
+    });
+    aspectRatio.addEventListener('change', () => {
+      customResolution.value = '';
+      updateAllCroppers();
+    });
+    customResolution.addEventListener('input', updateAllCroppers);
+    
+    outputFormat.addEventListener('change', updateQualitySliderState);
+
+    quality.addEventListener('input', (e) => {
+      qualityValue.textContent = `${e.target.value}%`;
+    });
+    bulkRename.addEventListener('input', handleBulkRename);
+
+    globalFilter.addEventListener('change', () => {
+        currentGlobalFilter = globalFilter.value;
+        applyGlobalFilter();
+    });
+    processAllBtn.addEventListener('click', processAllImages);
+    downloadAllBtn.addEventListener('click', downloadAll);
+    downloadZipBtn.addEventListener('click', downloadAsZip);
+
+    /* ============================================
+        FILE HANDLING
+        ============================================ */
+    function handleFiles(files) {
+      const fileArray = Array.from(files);
+      if (fileArray.length === 0) return;
+      showLoading('Loading images...');
+      fileArray.forEach(file => {
+        if (!file.type.startsWith('image/')) {
+          showNotification('Only image files are supported', 'error');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          addImage(e.target.result, file.name);
+        };
+     
+       reader.readAsDataURL(file);
+      });
+      setTimeout(() => hideLoading(), 500);
+    }
+    
+    /* ============================================
+        BULK RENAME HANDLER
+        ============================================ */
+    function handleBulkRename() {
+        const baseName = bulkRename.value.trim();
+        images.forEach((imageData) => {
+            const id = imageData.id;
+            let newName = '';
+            
+            if (baseName) {
+                newName = `${baseName}-${id}`;
+            } else {
+          
+             newName = `HV-EditedImage-${id}`;
+            }
+            
+            newName = newName.replace(/[\/\\?%*:|"<>]/g, '_');
+            imageData.editableFilename = newName;
+            
+            const inputField = document.getElementById(`filename-${id}`);
+            
+           if (inputField) {
+                inputField.value = newName;
+            }
+        });
+    }
+
+    /* ============================================
+        IMAGE MANAGEMENT
+        ============================================ */
+    function addImage(src, originalFilename) {
+      const id = ++imageIdCounter;
+      
+      const baseName = bulkRename.value.trim();
+  
+         let editableName = '';
+      if (baseName) {
+          editableName = `${baseName}-${id}`;
+      } else {
+          editableName = `HV-EditedImage-${id}`;
+     }
+      editableName = editableName.replace(/[\/\\?%*:|"<>]/g, '_');
+      
+      const imageData = {
+        id,
+        src,
+        originalFilename: originalFilename,
+        editableFilename: editableName,
+        cropper: null,
+        processed: false,
+        blob: null,
+        element: null,
+     
+       filters: {
+            brightness: 100,
+            contrast: 100,
+            saturate: 100
+        },
+      };
+
+      images.push(imageData);
+      createImageCard(imageData);
+      updateUI();
+    }
+
+    function createImageCard(imageData) {
+      const card = document.createElement('div');
+      
+      card.className = 'image-card';
+      card.dataset.id = imageData.id;
+
+      card.innerHTML = `
+        <div class="image-preview" id="preview-${imageData.id}">
+          <img src="${imageData.src}" id="img-${imageData.id}">
+        </div>
+        <div class="image-controls">
+        
+          <div class="control-group" style="margin-bottom: 8px;">
+              <label for="filename-${imageData.id}" style="font-size: 11px;
+               margin-bottom: 4px;">Filename</label>
+              <input type="text" class="image-filename-input" id="filename-${imageData.id}" value="${imageData.editableFilename}" data-id="${imageData.id}">
+          </div>
+          <div class="image-info" id="info-${imageData.id}">
+            Original: ${imageData.originalFilename}
+          </div>
+          
+          <div class="image-controls-row">
+            <button class="btn 
+           btn-small" onclick="flipImage(${imageData.id}, 'h')">⇆ Flip H</button>
+            <button class="btn btn-small" onclick="flipImage(${imageData.id}, 'v')">⇅ Flip V</button>
+          </div>
+          <div class="image-controls-row">
+            <button class="btn btn-small" onclick="resetCropper(${imageData.id})">Reset</button>
+            <button class="btn btn-small" style="color: var(--error-color);" onclick="removeImage(${imageData.id})">✕ Remove</button>
+          </div>
+          
+    
+           <div class="image-filter-controls">
+              <div class="slider-group">
+                  <label for="brightness-${imageData.id}">B</label>
+                  <input type="range" id="brightness-${imageData.id}" data-id="${imageData.id}" data-filter="brightness" min="0" max="200" value="100" class="filter-slider">
+                  <span id="brightness-val-${imageData.id}">100%</span>
+              
+             </div>
+              <div class="slider-group">
+                  <label for="contrast-${imageData.id}">C</label>
+                  <input type="range" id="contrast-${imageData.id}" data-id="${imageData.id}" data-filter="contrast" min="0" max="200" value="100" class="filter-slider">
+                  <span id="contrast-val-${imageData.id}">100%</span>
+              </div>
+       
+             <div class="slider-group">
+                  <label for="saturate-${imageData.id}">S</label>
+                  <input type="range" id="saturate-${imageData.id}" data-id="${imageData.id}" data-filter="saturate" min="0" max="200" value="100" class="filter-slider">
+                  <span id="saturate-val-${imageData.id}">100%</span>
+              </div>
+          </div>
+    
+             
+        </div>
+      `;
+      imagesGrid.appendChild(card);
+      imageData.element = card;
+      
+      document.getElementById(`filename-${imageData.id}`).addEventListener('input', (e) => {
+          imageData.editableFilename = e.target.value.replace(/[\/\\?%*:|"<>]/g, '_');
+          updateImageInfo(imageData);
+      });
+      
+      card.querySelectorAll('.filter-slider').forEach(slider => {
+          slider.addEventListener('input', (e) => {
+              const id = parseInt(e.target.dataset.id, 10);
+              const filter = e.target.dataset.filter;
+ 
+              const value = e.target.value;
+              
+              const imgData = images.find(img => img.id === id);
+              if (!imgData) return;
+
+              imgData.filters[filter] = value;
+              updateImagePreviewFilters(imgData);
+ 
+              
+              document.getElementById(`${filter}-val-${id}`).textContent = `${value}%`;
+
+              imgData.processed = false;
+              imgData.blob = null;
+              updateImageInfo(imgData);
+          });
+      });
+
+      setTimeout(() => {
+ 
+         const img = document.getElementById(`img-${imageData.id}`);
+        const ratio = getAspectRatio();
+        imageData.cropper = new Cropper(img, {
+          aspectRatio: ratio,
+          viewMode: 1,
+          autoCropArea: 1,
+          responsive: true,
+          background: false,
+          zoomOnWheel: true,
+          zoomOnTouch: true,
+          toggleDragModeOnDblclick: false,
+        
+           minContainerHeight: 280,
+          ready: function() {
+              updateImagePreviewFilters(imageData);
+          }
+        });
+      }, 100);
+    }
+
+    function removeImage(id) {
+      const index = images.findIndex(img => img.id === id);
+      if (index === -1) return;
+
+      const imageData = images[index];
+      if (imageData.cropper) {
+        imageData.cropper.destroy();
+      }
+      if (imageData.element) {
+        imageData.element.remove();
+      }
+
+      images.splice(index, 1);
+      updateUI();
+      showNotification('Image removed', 'success');
+    }
+    
+    function updateImageInfo(imageData) {
+        const info = document.getElementById(`info-${imageData.id}`);
+        if (!info) return;
+
+        if (imageData.processed && imageData.blob) {
+            const sizeMB = (imageData.blob.size / 1024 / 1024).toFixed(2);
+            info.innerHTML = `Original: ${imageData.originalFilename}<br><small style="color: var(--success-color);">✓ Processed (${sizeMB} MB)</small>`;
+        } else {
+            info.innerHTML = `Original: ${imageData.originalFilename}`;
+        }
+    }
+
+    /* ============================================
+        IMAGE TRANSFORMATIONS
+        ============================================ */
+    // rotateImage function removed as requested
+
+    function flipImage(id, direction) {
+      const imageData = images.find(img => img.id === id);
+      if (!imageData || !imageData.cropper) return;
+
+      const data = imageData.cropper.getImageData();
+        
+      if (direction === 'h') {
+        const currentScaleX = data.scaleX ||
+        1;
+        imageData.cropper.scaleX(currentScaleX * -1);
+      } else {
+        const currentScaleY = data.scaleY || 1;
+        imageData.cropper.scaleY(currentScaleY * -1);
+      }
+        
+      imageData.processed = false;
+      imageData.blob = null;
+      updateImageInfo(imageData);
+    }
+
+    function resetCropper(id) {
+      const imageData = images.find(img => img.id === id);
+      if (!imageData || !imageData.cropper) return;
+      imageData.cropper.reset();
+      
+      imageData.filters = { brightness: 100, contrast: 100, saturate: 100 };
+      updateImagePreviewFilters(imageData);
+      
+      document.getElementById(`brightness-${id}`).value = 100;
+      document.getElementById(`contrast-${id}`).value = 100;
+      document.getElementById(`saturate-${id}`).value = 100;
+      document.getElementById(`brightness-val-${id}`).textContent = '100%';
+      document.getElementById(`contrast-val-${id}`).textContent = '100%';
+      document.getElementById(`saturate-val-${id}`).textContent = '100%';
+      
+      imageData.processed = false;
+      imageData.blob = null;
+      updateImageInfo(imageData);
+    }
+
+    /* ============================================
+        FILTER HANDLING
+        ============================================ */
+    function updateImagePreviewFilters(imageData) {
+        if (!imageData.element) return;
+        const cropperCanvas = imageData.element.querySelector('.cropper-canvas');
+        const cropperViewBoxImage = imageData.element.querySelector('.cropper-view-box img');
+
+        const filters = imageData.filters;
+        const perImageFilters = `
+            brightness(${filters.brightness}%) 
+            contrast(${filters.contrast}%) 
+            saturate(${filters.saturate}%)
+        `;
+        let combinedFilter;
+        if (currentGlobalFilter === 'none' || !currentGlobalFilter) {
+            combinedFilter = perImageFilters;
+        } else {
+            combinedFilter = `${currentGlobalFilter} ${perImageFilters}`;
+        }
+
+        if (cropperCanvas) {
+            cropperCanvas.style.filter = combinedFilter;
+        }
+        if (cropperViewBoxImage) {
+            cropperViewBoxImage.style.filter = combinedFilter;
+        }
+    }
+    
+    function applyGlobalFilter() {
+        images.forEach(imgData => {
+            updateImagePreviewFilters(imgData);
+            imgData.processed = false;
+            imgData.blob = null;
+            updateImageInfo(imgData);
+        });
+    }
+
+    /* ============================================
+        ASPECT RATIO HANDLING
+        ============================================ */
+    function getAspectRatio() {
+      const custom = customResolution.value.trim();
+      if (custom) {
+        const parts = custom.split(/[x:×]/).map(Number);
+        if (parts.length === 2 && parts.every(p => !isNaN(p) && p > 0)) {
+          return parts[0] / parts[1];
+        }
+      }
+
+      const selected = aspectRatio.value;
+      if (selected === 'free') return NaN;
+      
+      const [w, h] = selected.split(':').map(Number);
+      return w / h;
+    }
+
+    function getOutputDimensions() {
+      const custom = customResolution.value.trim();
+      if (custom) {
+        const parts = custom.split(/[x:×]/).map(Number);
+        if (parts.length === 2 && parts.every(p => !isNaN(p) && p > 0)) {
+          return { width: parts[0], height: parts[1] };
+        }
+      }
+      return null;
+    }
+
+    function updateAllCroppers() {
+      const ratio = getAspectRatio();
+      images.forEach(imageData => {
+        if (imageData.cropper) {
+          imageData.cropper.setAspectRatio(ratio);
+          imageData.processed = false;
+          imageData.blob = null;
+          updateImageInfo(imageData);
+        }
+      });
+    }
+    
+    function updateQualitySliderState() {
+        const format = outputFormat.value;
+        if (format === 'image/png') {
+            qualityControlGroup.style.opacity = '0.5';
+            quality.disabled = true;
+        } else {
+            qualityControlGroup.style.opacity = '1';
+            quality.disabled = false;
+        }
+    }
+
+    /* ============================================
+        IMAGE PROCESSING
+        ============================================ */
+    async function processAllImages() {
+      if (images.length === 0) return;
+      showLoading('Processing images...');
+      
+      const format = outputFormat.value;
+      const qualityValue = parseFloat(quality.value) / 100;
+      const dimensions = getOutputDimensions();
+
+      let processed = 0;
+      for (const imageData of images) {
+        if (!imageData.cropper) continue;
+        try {
+          const options = {};
+          if (dimensions) {
+            options.width = dimensions.width;
+            options.height = dimensions.height;
+          }
+
+          const croppedCanvas = imageData.cropper.getCroppedCanvas(options);
+          
+          const filterCanvas = document.createElement('canvas');
+          filterCanvas.width = croppedCanvas.width;
+          filterCanvas.height = croppedCanvas.height;
+          const ctx = filterCanvas.getContext('2d');
+          
+          const f = imageData.filters;
+          const perImageFilters = `
+              brightness(${f.brightness}%) 
+              contrast(${f.contrast}%) 
+              saturate(${f.saturate}%)
+          `;
+          if (currentGlobalFilter === 'none' || !currentGlobalFilter) {
+            ctx.filter = perImageFilters;
+          } else {
+            ctx.filter = `${currentGlobalFilter} ${perImageFilters}`;
+          }
+          
+          ctx.drawImage(croppedCanvas, 0, 0);
+          imageData.blob = await new Promise((resolve) => {
+              filterCanvas.toBlob(
+                (blob) => resolve(blob),
+                format,
+                (format === 'image/png') ? undefined : qualityValue
+              );
+          
+          });
+
+          imageData.processed = true;
+          processed++;
+          updateImageInfo(imageData);
+
+        } catch (error) {
+          console.error('Error processing image:', error);
+          showNotification(`Error processing ${imageData.originalFilename}`, 'error');
+        }
+      }
+
+      hideLoading();
+      if (processed > 0) {
+        downloadAllBtn.disabled = false;
+        downloadZipBtn.disabled = false;
+        showNotification(`${processed} image(s) processed successfully!`, 'success');
+      }
+    }
+
+    /* ============================================
+        DOWNLOAD FUNCTIONS
+        ============================================ */
+    async function downloadAll() {
+      const processedImages = images.filter(img => img.processed && img.blob);
+      if (processedImages.length === 0) {
+        showNotification('Please process images first', 'error');
+        return;
+      }
+
+      showLoading('Downloading images...');
+
+      for (const imageData of processedImages) {
+        const ext = outputFormat.value.split('/')[1] === 'jpeg' ?
+        'jpg' : outputFormat.value.split('/')[1];
+        const filename = `${imageData.editableFilename}.${ext}`;
+        saveAs(imageData.blob, filename);
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      hideLoading();
+      showNotification(`Downloaded ${processedImages.length} image(s)`, 'success');
+    }
+
+    async function downloadAsZip() {
+      const processedImages = images.filter(img => img.processed && img.blob);
+      if (processedImages.length === 0) {
+        showNotification('Please process images first', 'error');
+        return;
+      }
+
+      showLoading('Creating ZIP file...');
+
+      try {
+        const zip = new JSZip();
+        const ext = outputFormat.value.split('/')[1] === 'jpeg' ? 'jpg' : outputFormat.value.split('/')[1];
+        processedImages.forEach((imageData) => {
+          const filename = `${imageData.editableFilename}.${ext}`;
+          zip.file(filename, imageData.blob);
+        });
+        const content = await zip.generateAsync({ type: 'blob' });
+        saveAs(content, 'HeroVibes_Images.zip');
+        
+        hideLoading();
+        showNotification('ZIP file downloaded successfully!', 'success');
+      } catch (error) {
+        console.error('Error creating ZIP:', error);
+        hideLoading();
+        showNotification('Error creating ZIP file', 'error');
+      }
+    }
+
+    /* ============================================
+        UI UPDATES
+        ============================================ */
+    function updateUI() {
+      if (images.length === 0) {
+        imagesContainer.style.display = 'none';
+        emptyState.style.display = 'block';
+        actionButtons.style.display = 'none';
+      } else {
+        imagesContainer.style.display = 'block';
+        emptyState.style.display = 'none';
+        actionButtons.style.display = 'flex';
+      }
+      downloadAllBtn.disabled = true;
+      downloadZipBtn.disabled = true;
+      
+      scheduleHeightCheck();
+    }
+
+    /* ============================================
+        LOADING OVERLAY
+        ============================================ */
+    function showLoading(text = 'Processing...') {
+      loadingText.textContent = text;
+      loadingOverlay.classList.add('active');
+    }
+
+    function hideLoading() {
+      loadingOverlay.classList.remove('active');
+    }
+
+    /* ============================================
+        NOTIFICATIONS
+        ============================================ */
+    function showNotification(message, type = 'success') {
+      notification.textContent = message;
+      notification.className = `notification ${type}`;
+      notification.classList.add('show');
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    /* ============================================
+        GLOBAL FUNCTIONS (for inline onclick)
+        ============================================ */
+    window.flipImage = flipImage;
+    window.resetCropper = resetCropper;
+    window.removeImage = removeImage;
+
+    /* ============================================
+        KEYBOARD & PASTE SUPPORT
+        ============================================ */
+    function handlePastedImage(blob) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            addImage(e.target.result, `pasted-image-${Date.now()}.png`);
+            showNotification('Image pasted from clipboard', 'success');
+        };
+        reader.readAsDataURL(blob);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        if (document.activeElement.tagName === 'INPUT' && document.activeElement.type === 'text') {
+            return;
+        }
+        navigator.clipboard.read().then(items => {
+          for (const item of items) {
+          
+           for (const type of item.types) {
+              if (type.startsWith('image/')) {
+                item.getType(type).then(handlePastedImage);
+              }
+            }
+          }
+        }).catch(() => {});
+      }
+    });
+    document.addEventListener('paste', (e) => {
+        if (document.activeElement.tagName === 'INPUT' && document.activeElement.type === 'text') {
+            return;
+        }
+        const items = e.clipboardData.items;
+        for (const item of items) {
+            if (item.type.startsWith('image/')) {
+                const blob = item.getAsFile();
+   
+                 handlePastedImage(blob);
+            }
+        }
+    });
+    /* ============================================
+        PREVENT ACCIDENTAL PAGE UNLOAD
+        ============================================ */
+    window.addEventListener('beforeunload', (e) => {
+      if (images.length > 0) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+    /* ============================================
+        TOUCH DEVICE OPTIMIZATION
+        ============================================ */
+    const isTouchDevice = 'ontouchstart' in window ||
+    navigator.maxTouchPoints > 0;
+    if (isTouchDevice) {
+      document.body.addEventListener('touchstart', function(e) {
+        if (e.target.classList.contains('btn')) {
+            e.target.style.transform = 'scale(0.97)';
+        }
+      });
+      document.body.addEventListener('touchend', function(e) {
+        if (e.target.classList.contains('btn')) {
+            e.target.style.transform = '';
+        }
+      });
+    }
+
+    /* ============================================
+        ERROR HANDLING & DEBUGGING
+        ============================================ */
+    window.addEventListener('error', (e) => {
+      console.error('Global error:', e.error);
+      showNotification('An unexpected error occurred', 'error');
+    });
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('debug') === 'true') {
+      console.log('Debug mode enabled');
+      window.debugImages = () => {
+        console.log('Current images:', images);
+      };
+      console.log('Use debugImages() to inspect current state');
+    }
+
+    /* ============================================
+        BROWSER COMPATIBILITY CHECK
+        ============================================ */
+    function checkCompatibility() {
+      const required = {
+        'FileReader': typeof FileReader !== 'undefined',
+        'Blob': typeof Blob !== 'undefined',
+        'Canvas': document.createElement('canvas').getContext,
+        'JSZip': typeof JSZip !== 'undefined',
+        'Cropper': typeof 
+       Cropper !== 'undefined'
+      };
+      const missing = Object.entries(required)
+        .filter(([name, available]) => !available)
+        .map(([name]) => name);
+      if (missing.length > 0) {
+        showNotification(`Missing features: ${missing.join(', ')}. Please update your browser.`, 'error');
+        return false;
+      }
+      return true;
+    }
+
+    /* ============================================
+        SETTINGS & URL PRESET MANAGEMENT
+        ============================================ */
+    
+    function loadSettingsFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        let settingsChanged = false;
+        
+        if (params.has('aspect')) {
+            aspectRatio.value = params.get('aspect');
+            settingsChanged = true;
+        }
+        if (params.has('res')) {
+            customResolution.value = params.get('res');
+            settingsChanged = true;
+        }
+        if (params.has('format')) {
+            outputFormat.value = params.get('format');
+            settingsChanged = true;
+        }
+        if (params.has('quality')) {
+            quality.value = params.get('quality');
+            qualityValue.textContent = `${params.get('quality')}%`;
+            settingsChanged = true;
+        }
+        if (params.has('name')) {
+            bulkRename.value = params.get('name');
+            settingsChanged = true;
+        }
+        if (params.has('filter')) {
+            globalFilter.value = params.get('filter');
+            currentGlobalFilter = globalFilter.value;
+            settingsChanged = true;
+        }
+        
+        if (settingsChanged) {
+            showNotification('Settings loaded from URL preset', 'success');
+        }
+    }
+    
+    function updateURLFromSettings() {
+        const params = new URLSearchParams();
+        params.set('aspect', aspectRatio.value);
+        params.set('res', customResolution.value);
+        params.set('format', outputFormat.value);
+        if (!quality.disabled) {
+            params.set('quality', quality.value);
+        }
+        params.set('name', bulkRename.value);
+        params.set('filter', globalFilter.value);
+
+        if (!customResolution.value) params.delete('res');
+        if (!bulkRename.value) params.delete('name');
+        if (globalFilter.value === 'none') params.delete('filter');
+        
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.pushState({path: newUrl}, '', newUrl);
+    }
+
+    /* ============================================
+        INITIAL SETUP
+        ============================================ */
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!checkCompatibility()) {
+          console.error('Browser compatibility check failed');
+        }
+        
+        loadSettingsFromURL(); 
+        
+        updateUI();
+      
+         updateQualitySliderState();
+    });
+
+    
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      // Only send message if height has *actually* changed
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
+    function scheduleHeightCheck() {
+        // Clear any pending checks
+        clearTimeout(resizeTimer);
+        // Schedule a new check
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    // Send height on initial load (with a slight delay)
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    // Send height on window resize (debounced)
+    window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
+        scheduleHeightCheck();
+    });
+    // ===== END OF SCROLLBAR FIX =====
+
+  </script>
+</body>
+</html>
