@@ -32,12 +32,14 @@
       color: var(--primary-text);
       padding: 24px 16px;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     /* ===== MAIN CONTAINER ===== */
     .container {
       max-width: 1400px;
       margin: 0 auto;
+      padding-bottom: 200px; /* Extra space for popup */
     }
 
     /* ===== TIMER ROWS ===== */
@@ -65,6 +67,7 @@
       flex-direction: column;
       align-items: center;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
     }
 
     .timer:hover {
@@ -272,9 +275,9 @@
       transform: scale(0.98);
     }
 
-    /* ===== POPUP EDITOR (Desktop Only) ===== */
+    /* ===== POPUP EDITOR ===== */
     .popup {
-      position: absolute;
+      position: fixed;
       background: var(--secondary-bg);
       border: 1px solid var(--accent-color);
       border-radius: var(--radius);
@@ -282,10 +285,15 @@
       z-index: 1000;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
       min-width: 220px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
     }
 
     .popup.hidden {
       display: none;
+      pointer-events: none;
     }
 
     .popup-fields {
@@ -380,6 +388,10 @@
         padding: 16px 12px;
       }
 
+      .container {
+        padding-bottom: 100px;
+      }
+
       .timer-row {
         gap: 12px;
       }
@@ -418,11 +430,6 @@
         width: 100%;
         max-width: 300px;
       }
-
-      .popup {
-        left: 50% !important;
-        transform: translateX(-50%);
-      }
     }
 
     /* ===== ACCESSIBILITY ===== */
@@ -446,7 +453,7 @@
   <!-- ===== ALARM AUDIO ===== -->
   <audio id="alarm-sound" src="https://contactherovibes.wordpress.com/wp-content/uploads/2025/06/new-notification-09-352705.mp3" preload="auto"></audio>
 
-  <!-- ===== POPUP EDITOR (Desktop) ===== -->
+  <!-- ===== POPUP EDITOR ===== -->
   <div id="popup" class="popup hidden">
     <div class="popup-fields">
       <input type="number" id="popup-hours" min="0" max="23" placeholder="HH" />
@@ -461,9 +468,9 @@
 
   <script>
     // ===== CONFIGURATION =====
-    const defaultTimes = [5, 10, 30, 60, 120]; // Default timer durations in minutes
-    const maxPerRow = 6; // Maximum timers per row
-    let timers = []; // Array to store all timer objects
+    const defaultTimes = [5, 10, 30, 60, 120];
+    const maxPerRow = 6;
+    let timers = [];
 
     // ===== DOM ELEMENTS =====
     const rowsContainer = document.getElementById('rows-container');
@@ -507,21 +514,18 @@
     // ===== COLOR CALCULATION BASED ON PERCENTAGE =====
     function getRingColor(percentage) {
       if (percentage > 0.5) {
-        // Blue to Yellow gradient (100% to 50%)
-        const factor = (percentage - 0.5) * 2; // 0 to 1
+        const factor = (percentage - 0.5) * 2;
         const r = Math.round(135 + (255 - 135) * (1 - factor));
         const g = Math.round(169 + (215 - 169) * (1 - factor));
         const b = Math.round(255 * factor);
         return `rgb(${r}, ${g}, ${b})`;
       } else if (percentage > 0.2) {
-        // Yellow to Red gradient (50% to 20%)
-        const factor = (percentage - 0.2) / 0.3; // 0 to 1
+        const factor = (percentage - 0.2) / 0.3;
         const r = 255;
         const g = Math.round(215 * factor);
         const b = 0;
         return `rgb(${r}, ${g}, ${b})`;
       } else {
-        // Red (below 20%)
         return '#FF4444';
       }
     }
@@ -538,11 +542,9 @@
         hasStarted: false
       };
 
-      // Create timer wrapper element
       const wrapper = document.createElement('div');
       wrapper.className = 'timer';
 
-      // Build timer HTML structure
       wrapper.innerHTML = `
         <div class="title" contenteditable="true">${label}</div>
         <div class="circle-container">
@@ -560,7 +562,6 @@
         <input type="time" class="native-time-input" step="1" />
       `;
 
-      // Get ring element and set up progress circle
       const ring = wrapper.querySelector('.ring');
       const radius = 54;
       const circumference = 2 * Math.PI * radius;
@@ -589,8 +590,6 @@
         const progress = timer.remainingSeconds / timer.originalSeconds;
         const offset = circumference - (progress * circumference);
         ring.style.strokeDashoffset = offset;
-        
-        // Update ring color based on percentage
         ring.style.stroke = getRingColor(progress);
       }
 
@@ -602,37 +601,30 @@
         updateRing();
       }
 
-      // ===== TICK FUNCTION (runs every second) =====
+      // ===== TICK FUNCTION =====
       function tick() {
         if (timer.remainingSeconds > 0) {
           timer.remainingSeconds--;
           updateDisplay();
           updateRing();
         } else {
-          // Timer finished - STOP, don't loop
           clearInterval(timer.interval);
           timer.interval = null;
           timer.isRunning = false;
           
-          // Play alarm sound
           const alarm = document.getElementById('alarm-sound');
           alarm.play().catch(e => console.log('Audio play failed:', e));
-          
-          // Do NOT reset automatically - let user manually reset
         }
       }
 
-      // ===== CIRCLE CLICK (Start/Pause) =====
+      // ===== CIRCLE CLICK =====
       wrapper.querySelector('.circle-container').addEventListener('click', () => {
         if (timer.interval) {
-          // Pause timer
           clearInterval(timer.interval);
           timer.interval = null;
           timer.isRunning = false;
         } else {
-          // Start timer
           if (!timer.hasStarted) {
-            // First time starting - add pulse animation
             ring.classList.add('pulse');
             setTimeout(() => ring.classList.remove('pulse'), 600);
             timer.hasStarted = true;
@@ -646,39 +638,32 @@
       // ===== EDIT BUTTON =====
       wrapper.querySelector('.edit').addEventListener('click', (e) => {
         if (isMobile()) {
-          // Use native time picker on mobile
           const hrs = Math.floor(timer.originalSeconds / 3600);
           const min = Math.floor((timer.originalSeconds % 3600) / 60);
           const sec = timer.originalSeconds % 60;
           
-          // Set current value
           nativeInput.value = `${hrs.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
           
-          // Trigger native picker
           nativeInput.click();
           nativeInput.focus();
         } else {
-          // Use custom popup on desktop
           currentEditing = timer;
           const total = timer.originalSeconds;
           hInput.value = Math.floor(total / 3600);
           mInput.value = Math.floor((total % 3600) / 60);
           sInput.value = total % 60;
 
-          // Position popup near the edit button
-          const rect = e.target.getBoundingClientRect();
-          popup.style.top = `${rect.bottom + window.scrollY + 8}px`;
-          popup.style.left = `${rect.left + window.scrollX}px`;
           popup.classList.remove('hidden');
-          
-          // Focus first input
           setTimeout(() => hInput.focus(), 100);
+          
+          // Trigger height recalculation after popup opens
+          requestAnimationFrame(sendHeight);
         }
       });
 
-      // ===== NATIVE TIME INPUT HANDLER (Mobile) =====
+      // ===== NATIVE TIME INPUT HANDLER =====
       nativeInput.addEventListener('change', (e) => {
-        const timeValue = e.target.value; // Format: HH:MM:SS or HH:MM
+        const timeValue = e.target.value;
         if (timeValue) {
           const parts = timeValue.split(':');
           const hrs = parseInt(parts[0] || 0);
@@ -726,7 +711,6 @@
         updateURL();
       });
 
-      // Prevent newlines in title
       title.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -734,7 +718,6 @@
         }
       });
 
-      // Initialize display
       updateDisplay();
       updateRing();
 
@@ -754,7 +737,6 @@
         rowDiv.className = 'timer-row';
         row.forEach(timer => rowDiv.appendChild(timer.element));
 
-        // Add "+" button if row isn't full
         if (row.length < maxPerRow) {
           const addBtn = document.createElement('button');
           addBtn.className = 'add-btn';
@@ -770,7 +752,6 @@
         rowsContainer.appendChild(rowDiv);
       });
 
-      // Add new row with "+" button if last row is full
       if (timers.length % maxPerRow === 0 && timers.length < 24) {
         const newRow = document.createElement('div');
         newRow.className = 'timer-row';
@@ -796,7 +777,7 @@
       return result;
     }
 
-    // ===== POPUP SAVE BUTTON (Desktop) =====
+    // ===== POPUP SAVE BUTTON =====
     popupSave.addEventListener('click', () => {
       const h = parseInt(hInput.value || 0);
       const m = parseInt(mInput.value || 0);
@@ -808,12 +789,10 @@
         currentEditing.remainingSeconds = totalSec;
         currentEditing.hasStarted = false;
 
-        // Stop timer if running
         clearInterval(currentEditing.interval);
         currentEditing.interval = null;
         currentEditing.isRunning = false;
 
-        // Update display and ring
         const display = currentEditing.element.querySelector('.time-display');
         const ring = currentEditing.element.querySelector('.ring');
         const radius = 54;
@@ -831,7 +810,6 @@
           display.textContent = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
         }
 
-        // Reset color to blue
         ring.style.stroke = getRingColor(1);
         
         updateURL();
@@ -839,12 +817,18 @@
 
       popup.classList.add('hidden');
       currentEditing = null;
+      
+      // Trigger height recalculation after popup closes
+      requestAnimationFrame(sendHeight);
     });
 
     // ===== POPUP CANCEL BUTTON =====
     popupCancel.addEventListener('click', () => {
       popup.classList.add('hidden');
       currentEditing = null;
+      
+      // Trigger height recalculation after popup closes
+      requestAnimationFrame(sendHeight);
     });
 
     // ===== CLOSE POPUP ON ESCAPE =====
@@ -852,6 +836,7 @@
       if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
         popup.classList.add('hidden');
         currentEditing = null;
+        requestAnimationFrame(sendHeight);
       }
     });
 
@@ -860,32 +845,58 @@
       const urlTimers = parseURLTimers();
       
       if (urlTimers && urlTimers.length > 0) {
-        // Load from URL
         urlTimers.forEach(timerData => {
           createTimer(timerData.seconds / 60, timerData.label);
         });
       } else {
-        // Load defaults
         defaultTimes.forEach(min => createTimer(min, `${min}m Timer`));
         updateURL();
       }
     }
 
-    // ===== START APPLICATION =====
     initializeTimers();
 
     // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let heightCheckTimeout = null;
+
     function sendHeight() {
-      var height = document.body.scrollHeight;
-      window.parent.postMessage({ frameHeight: height }, '*');
+      // Clear any pending height checks
+      if (heightCheckTimeout) {
+        clearTimeout(heightCheckTimeout);
+      }
+
+      // Calculate actual content height
+      const contentHeight = document.body.scrollHeight;
+      
+      // Only send if height actually changed (prevents infinite loop)
+      if (Math.abs(contentHeight - lastHeight) > 5) {
+        lastHeight = contentHeight;
+        window.parent.postMessage({ frameHeight: contentHeight }, '*');
+      }
+    }
+
+    // Debounced height check
+    function scheduleHeightCheck() {
+      if (heightCheckTimeout) {
+        clearTimeout(heightCheckTimeout);
+      }
+      heightCheckTimeout = setTimeout(sendHeight, 150);
     }
 
     window.onload = sendHeight;
-    window.onresize = sendHeight;
+    window.onresize = scheduleHeightCheck;
 
-    // Also send height when timers are added/removed
-    const observer = new MutationObserver(sendHeight);
-    observer.observe(rowsContainer, { childList: true, subtree: true });
+    // Use debounced observer to prevent infinite loops
+    const observer = new MutationObserver(() => {
+      scheduleHeightCheck();
+    });
+    
+    observer.observe(rowsContainer, { 
+      childList: true, 
+      subtree: true,
+      attributes: false // Don't watch attribute changes
+    });
   </script>
 </body>
 </html>
