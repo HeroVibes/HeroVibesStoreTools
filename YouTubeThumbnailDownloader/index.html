@@ -150,8 +150,8 @@
     }
 
     .thumbnail-overlay {
-      /* FIXED: Changed from absolute to fixed positioning to prevent phantom overlays */
-      position: fixed;
+      /* FIXED: Reverted to absolute positioning */
+      position: absolute;
       top: 12px;
       right: 12px;
       background: rgba(25, 25, 25, 0.9);
@@ -160,13 +160,13 @@
       border-radius: 4px;
       font-size: 12px;
       color: var(--accent);
-      pointer-events: auto;
+      /* FIXED: Clicks now pass through to the image */
+      pointer-events: none;
       z-index: 10;
     }
 
     .thumbnail-overlay.hidden {
       display: none;
-      pointer-events: none;
     }
 
     /* ===== QUALITY INFO ===== */
@@ -289,10 +289,8 @@
   </style>
 </head>
 <body>
-  <!-- ===== TOOL CONTAINER ===== -->
   <div class="tool-container">
     
-    <!-- ===== INPUT SECTION ===== -->
     <div class="input-section">
       <label class="input-label" for="videoInput">Paste YouTube URL</label>
       <input 
@@ -304,8 +302,7 @@
       />
     </div>
 
-    <!-- ===== ERROR DISPLAY ===== -->
-    <div class="error-message" id="errorMessage">
+    <div classd="error-message" id="errorMessage">
       <strong>⚠️ Unable to Load Thumbnail</strong>
       <p id="errorText"></p>
       <ul>
@@ -316,7 +313,6 @@
       </ul>
     </div>
 
-    <!-- ===== THUMBNAIL DISPLAY AREA ===== -->
     <div class="thumbnail-display" id="thumbnailDisplay">
       <div class="thumbnail-wrapper">
         <img 
@@ -334,13 +330,11 @@
         Download Thumbnail
       </button>
 
-      <!-- ===== VERSION NUMBER ===== -->
       <div class="version-number">V1.0.1</div>
     </div>
 
   </div>
 
-  <!-- ===== JAVASCRIPT FUNCTIONALITY ===== -->
   <script>
     // ===== DOM ELEMENTS =====
     const videoInput = document.getElementById('videoInput');
