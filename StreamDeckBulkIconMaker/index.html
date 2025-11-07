@@ -86,6 +86,34 @@
             font-size: 18px;
         }
 
+        .section-header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .help-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .help-btn:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
         .toggle-icon {
             color: var(--text-secondary);
             transition: transform 0.3s ease;
@@ -97,7 +125,7 @@
 
         .section-content {
             padding: 0 24px 24px 24px;
-            max-height: 2000px;
+            max-height: 5000px;
             opacity: 1;
             transition: all 0.3s ease;
             overflow: hidden;
@@ -107,6 +135,141 @@
             max-height: 0;
             opacity: 0;
             padding: 0 24px;
+        }
+
+        /* ===== HELP MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(135, 169, 255, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--outline);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .help-section {
+            margin-bottom: 20px;
+        }
+
+        .help-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .help-section h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .help-section p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .help-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .help-section li {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 6px;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .help-section li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 700;
         }
 
         /* ===== PREVIEW SECTION ===== */
@@ -496,21 +659,25 @@
         }
 
         /* Custom Scrollbar */
-        .content-grid::-webkit-scrollbar {
+        .content-grid::-webkit-scrollbar,
+        .modal-content::-webkit-scrollbar {
             width: 8px;
         }
 
-        .content-grid::-webkit-scrollbar-track {
+        .content-grid::-webkit-scrollbar-track,
+        .modal-content::-webkit-scrollbar-track {
             background: var(--bg-primary);
             border-radius: 4px;
         }
 
-        .content-grid::-webkit-scrollbar-thumb {
+        .content-grid::-webkit-scrollbar-thumb,
+        .modal-content::-webkit-scrollbar-thumb {
             background: var(--outline);
             border-radius: 4px;
         }
 
-        .content-grid::-webkit-scrollbar-thumb:hover {
+        .content-grid::-webkit-scrollbar-thumb:hover,
+        .modal-content::-webkit-scrollbar-thumb:hover {
             background: var(--accent);
         }
 
@@ -739,7 +906,12 @@
                     <i class="fas fa-sliders-h"></i>
                     <span>Settings</span>
                 </div>
-                <i class="fas fa-chevron-down toggle-icon"></i>
+                <div class="section-header-right">
+                    <button class="help-btn" onclick="openHelpModal(event)" title="Help">
+                        <i class="fas fa-question"></i>
+                    </button>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
             </div>
             <div class="section-content">
                 <div class="input-group">
@@ -807,7 +979,97 @@
         </div>
     </div>
 
+    <!-- HELP MODAL -->
+    <div class="modal-overlay" id="helpModal" onclick="closeHelpModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-circle-info"></i>
+                    <span>Tool Guide</span>
+                </div>
+                <button class="modal-close" onclick="closeHelpModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="help-section">
+                    <h3>Resolution (Click to Change)</h3>
+                    <p>Click the Resolution stat card to cycle through available sizes: 72px, 96px, 144px (recommended), 288px, and 500px. This determines the size of your downloaded icon.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>Icon Name</h3>
+                    <p>The base name for your exported files. If downloading multiple icons, each will be appended with the icon's name.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>Multi-Size & ZIP</h3>
+                    <p>When enabled, generates icons in all 5 sizes (72px, 96px, 144px, 288px, 500px) and packages them into a ZIP file organized by resolution folders.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>Edge On/Off</h3>
+                    <p>Toggles the corner bracket decorations that appear on your icon. These are the L-shaped lines in each corner.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>Edge Glow</h3>
+                    <p>Adds a glow effect to the corner brackets using your selected Glow color. Only visible when Edge On/Off is enabled.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>Logo Glow</h3>
+                    <p>Adds a glow effect around your icon/logo using your selected Glow color for extra visual impact.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>Color Pickers</h3>
+                    <ul>
+                        <li><strong>Icon:</strong> Controls the color of your selected icon/logo</li>
+                        <li><strong>Background:</strong> Sets a solid background color (disabled when using gradients)</li>
+                        <li><strong>Glow:</strong> Determines the color of glow effects for both edges and logos</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>Content Tabs</h3>
+                    <ul>
+                        <li><strong>Icons:</strong> Select or upload custom icons/logos for your Stream Deck</li>
+                        <li><strong>Textures:</strong> Add overlay patterns to give your icon depth and style</li>
+                        <li><strong>Gradients:</strong> Apply gradient backgrounds instead of solid colors</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>Multi-Selection</h3>
+                    <p>You can select multiple icons to batch-generate Stream Deck buttons with the same styling. Perfect for creating a consistent set!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // ===== HELP MODAL =====
+        function openHelpModal(event) {
+            event.stopPropagation();
+            document.getElementById('helpModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeHelpModal(event) {
+            if (!event || event.target.classList.contains('modal-overlay') || event.target.closest('.modal-close')) {
+                document.getElementById('helpModal').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeHelpModal();
+            }
+        });
+
         // ===== COLLAPSIBLE SECTIONS =====
         function toggleSection(header) {
             const content = header.nextElementSibling;
@@ -815,13 +1077,16 @@
             
             content.classList.toggle('collapsed');
             icon.classList.toggle('collapsed');
+            
+            // Send height update after animation completes
+            setTimeout(sendHeight, 350);
         }
 
         // ===== SIZE CYCLER =====
         const sizeCard = document.getElementById('sizeCard');
         const currentSizeEl = document.getElementById('currentSize');
         const sizes = [72, 96, 144, 288, 500];
-        let currentSizeIndex = 2; // Start at 144px
+        let currentSizeIndex = 2;
         let selectedSize = sizes[currentSizeIndex];
 
         sizeCard.addEventListener('click', () => {
@@ -991,7 +1256,6 @@
             }
         }
 
-        // Add listener to background color inputs
         backgroundColorInput.addEventListener('click', checkGradientWarning);
         backgroundColorHexInput.addEventListener('focus', checkGradientWarning);
 
@@ -1547,8 +1811,7 @@
 
             if (backgroundData && backgroundData.id === 'off') {
                 targetCtx.fillStyle = bgColor;
-                targetCtx.fillRect(0, 0, targetSize, targetSize);
-            } else if (backgroundData) {
+                targetCtx.fillRect(0, 0, targetSize, targetSize);} else if (backgroundData) {
                 if (backgroundData.type === 'color') {
                     targetCtx.fillStyle = backgroundData.value;
                     targetCtx.fillRect(0, 0, targetSize, targetSize);
@@ -2054,20 +2317,37 @@
         });
 
         // ===== FOURTHWALL SCROLLBAR FIX =====
+        let lastHeight = 0;
+        let heightCheckInterval;
+
         function sendHeight() {
-            var height = document.body.scrollHeight;
-            window.parent.postMessage({ frameHeight: height }, '*');
+            const height = document.body.scrollHeight;
+            // Only send if height actually changed to prevent feedback loop
+            if (height !== lastHeight) {
+                lastHeight = height;
+                window.parent.postMessage({ frameHeight: height }, '*');
+            }
         }
 
-        window.onload = sendHeight;
-        window.onresize = sendHeight;
+        // Initial height send
+        window.addEventListener('load', () => {
+            setTimeout(sendHeight, 100);
+            
+            // Set up periodic height check (less aggressive than resize)
+            heightCheckInterval = setInterval(sendHeight, 500);
+            
+            // Stop checking after 10 seconds (by then everything should be loaded)
+            setTimeout(() => {
+                clearInterval(heightCheckInterval);
+            }, 10000);
+        });
 
-        // Also send height when sections are collapsed/expanded
-        const originalToggleSection = window.toggleSection;
-        window.toggleSection = function(header) {
-            originalToggleSection(header);
-            setTimeout(sendHeight, 350);
-        };
+        // Send height on window resize (debounced)
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(sendHeight, 250);
+        });
     </script>
 </body>
 </html>
