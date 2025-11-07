@@ -938,7 +938,7 @@
 <body>
   
   <!-- VERSION BADGE -->
-  <div class="version-badge" title="QR Code Generator Version">v1.0.6</div>
+  <div class="version-badge" title="QR Code Generator Version">v1.0.5</div>
 
   <div class="page-wrapper">
     
@@ -1652,12 +1652,12 @@
       });
     });
 
-    // HELPER FUNCTION FOR GRADIENT COLOR COMPUTATION
+    // HELPER FUNCTIONS FOR COLORS
     function hexToRgb(hex) {
       hex = hex.replace('#', '');
-      const r = parseInt(hex.substr(0, 2), 16);
-      const g = parseInt(hex.substr(2, 2), 16);
-      const b = parseInt(hex.substr(4, 2), 16);
+      const r = parseInt(hex.length === 3 ? hex[0] + hex[0] : hex.substr(0, 2), 16) || 0;
+      const g = parseInt(hex.length === 3 ? hex[1] + hex[1] : hex.substr(2, 2), 16) || 0;
+      const b = parseInt(hex.length === 3 ? hex[2] + hex[2] : hex.substr(4, 2), 16) || 0;
       return { r, g, b };
     }
 
@@ -1670,7 +1670,7 @@
       return { r, g, b };
     }
 
-    // QR CODE GENERATION - USING SIMPLE WORKING APPROACH
+    // QR CODE GENERATION - SYNCHRONOUS WITH toCanvas
     function updateQRCode() {
       const text = input.value.trim();
       
@@ -1681,151 +1681,102 @@
       }
 
       const qrColor = getSelectedColor();
+      const isGradient = qrColor === 'gradient';
+      const solidColor = !isGradient ? qrColor : null;
       const bgColor = getBackgroundColor();
       
       updatePreviewBackground(bgColor);
 
-      // Use simple toDataURL approach that works from old version
-      if (qrColor === 'gradient') {
-        // For gradient, generate with transparent background, then apply gradient to modules
-        QRCode.toDataURL(text, {
-          width: 800,
-          margin: 2,
-          color: {
-            dark: '#000000',
-            light: '#00000000'
-          },
-          errorCorrectionLevel: 'H'
-        }, (err, url) => {
-          if (err) {
-            console.error('QR Code generation error:', err);
-            return;
-          }
-          
-          // Apply gradient to the generated QR
-          applyGradientToQR(url, bgColor, text);
-        });
-      } else {
-        // For solid colors, use direct generation
-        QRCode.toDataURL(text, {
-          width: 800,
-          margin: 2,
-          color: {
-            dark: qrColor,
-            light: bgColor
-          },
-          errorCorrectionLevel: 'H'
-        }, (err, url) => {
-          if (err) {
-            console.error('QR Code generation error:', err);
-            return;
-          }
-          
-          // If there's a logo, add it
-          if (currentLogo) {
-            addLogoToQR(url, text);
-          } else {
-            img.src = url;
-            img.classList.remove('empty');
-            downloadBtn.disabled = false;
-            currentQRData = { text, dataUrl: url, timestamp: Date.now() };
-          }
-        });
-      }
-    }
+      const size = 800;
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = size;
+      tempCanvas.height = size;
+      const ctx = tempCanvas.getContext('2d');
 
-    function applyGradientToQR(dataUrl, bgColor, text) {
-      const tempImg = new Image();
-      tempImg.onload = () => {
-        canvas.width = 800;
-        canvas.height = 800;
-        const ctx = canvas.getContext('2d');
-        
-        // Fill background if not transparent
-        if (bgColor !== '#00000000') {
-          ctx.fillStyle = bgColor;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-        
-        // Create temporary canvas to detect module positions (where alpha > 0)
-        const moduleCanvas = document.createElement('canvas');
-        moduleCanvas.width = canvas.width;
-        moduleCanvas.height = canvas.height;
-        const moduleCtx = moduleCanvas.getContext('2d');
-        moduleCtx.drawImage(tempImg, 0, 0);
-        const moduleImageData = moduleCtx.getImageData(0, 0, canvas.width, canvas.height);
-        const moduleData = moduleImageData.data;
-        
-        // Get final image data after background fill
-        const finalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const finalData = finalImageData.data;
-        
-        // Prepare colors for vertical gradient (top to bottom)
-        let color1 = gradientColor1.value.trim();
+      // Generate base QR with black modules on transparent background
+      QRCode.toCanvas(tempCanvas, text, {
+        width: size,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#00000000'
+        },
+        errorCorrectionLevel: 'H'
+      });
+
+      // Get the original image data for module detection
+      const originalImageData = ctx.getImageData(0, 0, size, size);
+      const originalData = originalImageData.data;
+
+      // Prepare colors
+      const rgbBg = bgColor === '#00000000' ? null : hexToRgb(bgColor);
+      let color1 = '', color2 = '';
+      if (isGradient) {
+        color1 = gradientColor1.value.trim();
         if (!color1.startsWith('#')) color1 = '#' + color1;
-        let color2 = gradientColor2.value.trim();
+        color2 = gradientColor2.value.trim();
         if (!color2.startsWith('#')) color2 = '#' + color2;
-        
-        // Apply gradient to module pixels efficiently
-        for (let y = 0; y < canvas.height; y++) {
-          for (let x = 0; x < canvas.width; x++) {
-            const i = (y * canvas.width + x) * 4;
-            // Check if this pixel is part of a module (alpha > 0 in module detection)
-            if (moduleData[i + 3] > 0) {
-              const t = y / canvas.height;  // Vertical gradient parameter
-              const col = getGradientColor(t, color1, color2);
-              finalData[i] = col.r;
-              finalData[i + 1] = col.g;
-              finalData[i + 2] = col.b;
-              finalData[i + 3] = 255;
+      }
+
+      // Create output image data
+      const outputImageData = ctx.createImageData(size, size);
+      const outputData = outputImageData.data;
+
+      // Process each pixel
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const i = (y * size + x) * 4;
+          const isModule = originalData[i + 3] > 128;
+
+          if (isModule) {
+            // Module pixel - apply QR color
+            let col;
+            if (isGradient) {
+              const t = y / (size - 1);
+              col = getGradientColor(t, color1, color2);
+            } else {
+              col = hexToRgb(solidColor);
+            }
+            outputData[i] = col.r;
+            outputData[i + 1] = col.g;
+            outputData[i + 2] = col.b;
+            outputData[i + 3] = 255;
+          } else {
+            // Light pixel - apply background
+            if (rgbBg) {
+              outputData[i] = rgbBg.r;
+              outputData[i + 1] = rgbBg.g;
+              outputData[i + 2] = rgbBg.b;
+              outputData[i + 3] = 255;
+            } else {
+              // Transparent
+              outputData[i] = 0;
+              outputData[i + 1] = 0;
+              outputData[i + 2] = 0;
+              outputData[i + 3] = 0;
             }
           }
         }
-        
-        // Put the modified image data back
-        ctx.putImageData(finalImageData, 0, 0);
-        
-        const finalUrl = canvas.toDataURL('image/png');
-        
-        if (currentLogo) {
-          addLogoToQR(finalUrl, text);
-        } else {
-          img.src = finalUrl;
-          img.classList.remove('empty');
-          downloadBtn.disabled = false;
-          currentQRData = { text, dataUrl: finalUrl, timestamp: Date.now() };
-        }
-      };
-      tempImg.src = dataUrl;
-    }
+      }
 
-    function addLogoToQR(dataUrl, text) {
-      const tempImg = new Image();
-      tempImg.onload = () => {
-        canvas.width = 800;
-        canvas.height = 800;
-        const ctx = canvas.getContext('2d');
-        
-        // Draw the QR code
-        ctx.drawImage(tempImg, 0, 0);
-        
-        // Add logo with white background
-        const logoSize = canvas.width * 0.2;
-        const logoX = (canvas.width - logoSize) / 2;
-        const logoY = (canvas.height - logoSize) / 2;
-        
+      // Put the modified data back
+      ctx.putImageData(outputImageData, 0, 0);
+
+      // Add logo if present
+      if (currentLogo) {
+        const logoSize = size * 0.2;
+        const logoX = (size - logoSize) / 2;
+        const logoY = (size - logoSize) / 2;
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(logoX - 10, logoY - 10, logoSize + 20, logoSize + 20);
-        
         ctx.drawImage(currentLogo, logoX, logoY, logoSize, logoSize);
-        
-        const finalUrl = canvas.toDataURL('image/png');
-        img.src = finalUrl;
-        img.classList.remove('empty');
-        downloadBtn.disabled = false;
-        currentQRData = { text, dataUrl: finalUrl, timestamp: Date.now() };
-      };
-      tempImg.src = dataUrl;
+      }
+
+      const finalUrl = tempCanvas.toDataURL('image/png');
+      img.src = finalUrl;
+      img.classList.remove('empty');
+      downloadBtn.disabled = false;
+      currentQRData = { text, dataUrl: finalUrl, timestamp: Date.now() };
     }
 
     // DOWNLOAD FUNCTION
