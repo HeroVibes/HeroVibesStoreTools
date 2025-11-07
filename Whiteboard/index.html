@@ -36,6 +36,8 @@
 
         body {
             overflow-x: hidden;
+            [cite_start]/* Fix for "Failure to Shrink" bug [cite: 60] */
+            /* min-height: 100vh; */
         }
 
         /* ===== MAIN CONTAINER ===== */
@@ -44,6 +46,7 @@
             flex-direction: column;
             width: 100%;
             background: var(--primary-bg);
+            min-height: 100vh; /* Use on container, not body */
         }
 
         /* ===== CONTROLS BAR ===== */
@@ -63,15 +66,20 @@
             gap: 10px;
             align-items: center;
         }
+        
+        /* Help button separated to the right */
+        .help-group {
+            margin-left: auto;
+        }
 
         /* ===== BUTTONS ===== */
         button, .btn {
             position: relative;
             padding: 10px 16px;
             border-radius: var(--radius);
-            background: var(--secondary-bg);
-            color: var(--primary-text);
-            border: 1px solid rgba(255,255,255,0.06);
+            background: var(--secondary-bg); [cite_start]/* [cite: 27] */
+            color: var(--primary-text); [cite_start]/* [cite: 26] */
+            border: 1px solid rgba(255,255,255,0.06); [cite_start]/* [cite: 28] */
             cursor: pointer;
             overflow: hidden;
             font-size: 14px;
@@ -81,18 +89,18 @@
 
         button::before, .btn::before {
             content: '';
-            position: absolute;
+            position: absolute; [cite_start]/* [cite: 29] */
             top: 0;
             left: -100%;
             width: 75%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); [cite_start]/* [cite: 29] */
             transform: skewX(-25deg);
             transition: left 0.7s ease-in-out;
         }
 
         button:hover::before, .btn:hover::before {
-            left: 125%;
+            left: 125%; [cite_start]/* [cite: 30] */
         }
 
         button:hover, .btn:hover {
@@ -101,11 +109,32 @@
 
         button:focus-visible, .btn:focus-visible {
             outline: none;
-            box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.12); [cite_start]/* [cite: 31] */
         }
 
         button:active {
             transform: scale(0.98);
+        }
+        
+        /* Icon-only button style for help */
+        .icon-btn {
+            padding: 0;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .icon-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--secondary-text);
+            transition: stroke 0.2s;
+        }
+        
+        .icon-btn:hover svg {
+            stroke: var(--primary-text);
         }
 
         /* ===== INPUT FIELD ===== */
@@ -140,7 +169,15 @@
             background-size: 20px 20px;
             width: 100%;
             min-height: 600px;
-            padding-bottom: 50px;
+            flex-grow: 1; /* Allows canvas to fill space */
+        }
+
+        /* ===== TOOL FOOTER ===== */
+        #tool-footer {
+            height: 20px;
+            background: var(--secondary-bg);
+            border-top: 1px solid var(--outline-color);
+            flex-shrink: 0; /* Prevents shrinking */
         }
 
         /* ===== PAGE CONTROLS ===== */
@@ -380,6 +417,9 @@
             font-size: 13px;
             padding: 16px;
             line-height: 1.5;
+            width: 100%;
+            height: 100%;
+            min-height: 120px;
         }
 
         .card-code-content::-webkit-scrollbar {
@@ -464,6 +504,15 @@
         .delete-btn:hover {
             background: #ff4940;
         }
+        
+        .download-btn {
+            background: var(--secondary-bg);
+            border-color: var(--outline-color);
+        }
+
+        .download-btn:hover {
+            background: var(--primary-bg);
+        }
 
         .copy-btn.confirmed {
             background: #28c840;
@@ -482,6 +531,109 @@
         .toggle-view-btn:hover {
             background: #6a8edb;
         }
+        
+        /* ===== HELP MODAL ===== */
+        #help-modal-overlay {
+            [cite_start]/* Use fixed position for iframe compatibility [cite: 46] */
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none; [cite_start]/* [cite: 49] */
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        #help-modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto; [cite_start]/* [cite: 48] */
+        }
+
+        #help-modal {
+            background: var(--secondary-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--outline-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.95);
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        #help-modal-overlay.visible #help-modal {
+            transform: scale(1);
+        }
+
+        #help-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--outline-color);
+            flex-shrink: 0;
+        }
+        
+        #help-modal-header h3 {
+            margin: 0;
+            font-size: 20px;
+            color: var(--primary-text);
+        }
+        
+        #help-modal-close-btn {
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #help-modal-body {
+            padding: 24px 16px;
+            overflow-y: auto;
+            color: var(--primary-text);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        #help-modal-body p {
+            margin: 0 0 16px;
+        }
+        
+        #help-modal-body ul {
+            margin: 0 0 16px;
+            padding-left: 20px;
+        }
+        
+        #help-modal-body li {
+            margin-bottom: 10px;
+        }
+        
+        #help-modal-body code {
+            background: var(--primary-bg);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 13px;
+        }
+        
+        #help-modal-footer {
+            padding: 16px;
+            border-top: 1px solid var(--outline-color);
+            text-align: right;
+            font-size: 12px;
+            color: var(--secondary-text);
+            flex-shrink: 0;
+        }
 
         /* ===== MOBILE RESPONSIVE ===== */
         @media (max-width: 768px) {
@@ -493,6 +645,11 @@
             button, .btn {
                 padding: 8px 12px;
                 font-size: 13px;
+            }
+            
+            .icon-btn {
+                width: 34px;
+                height: 34px;
             }
 
             #link-input {
@@ -529,15 +686,20 @@
             #controls {
                 gap: 6px;
             }
-
-            button, .btn {
-                padding: 6px 10px;
-                font-size: 12px;
+            
+            .control-group {
+                width: 100%;
+            }
+            
+            #link-input {
+                width: 100%;
+                min-width: 0;
+                flex-grow: 1;
             }
 
-            #link-input {
-                min-width: 120px;
-                font-size: 12px;
+            button, .btn {
+                padding: 8px 10px; /* Increased padding slightly for touch */
+                font-size: 13px;
             }
 
             .card {
@@ -555,33 +717,61 @@
     </style>
 </head>
 <body>
-    <!-- MAIN CONTAINER -->
     <div id="scratchpad-container">
-        <!-- CONTROLS BAR -->
         <div id="controls">
             <button id="add-note-btn" title="Add a new note (N)">Add Note</button>
             <div class="control-group">
-                <input type="text" id="link-input" placeholder="Paste link or code...">
+                <input type="text" id="link-input" placeholder="Paste link, code, or image URL...">
             </div>
             <button id="upload-btn" title="Upload an image">Upload</button>
             <button id="export-btn" title="Export layout">Export</button>
             <button id="import-btn" title="Import layout">Import</button>
             <button id="reset-btn" title="Clear all">Reset</button>
+            <div class="help-group">
+                 <button id="help-btn" class="btn icon-btn" title="Help">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                 </button>
+            </div>
         </div>
 
-        <!-- CANVAS AREA -->
         <div id="canvas">
-            <!-- PAGE CONTROLS -->
             <div id="page-controls">
                 <ul id="page-list"></ul>
                 <button id="add-page-btn" title="Add a new page">+</button>
             </div>
         </div>
+        
+        <div id="tool-footer"></div>
     </div>
 
-    <!-- HIDDEN FILE INPUTS -->
     <input type="file" id="import-file-input" style="display: none;" accept=".json">
     <input type="file" id="upload-file-input" style="display: none;" accept="image/*">
+    
+    <div id="help-modal-overlay">
+        <div id="help-modal">
+            <div id="help-modal-header">
+                <h3>How to Use Scratchpad</h3>
+                <button id="help-modal-close-btn" class="btn icon-btn" title="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div id="help-modal-body">
+                <p>This is your personal whiteboard. Add notes, links, code snippets, and images and arrange them however you like.</p>
+                <ul>
+                    <li><strong>Add Note:</strong> Click 'Add Note' or press <code>N</code> to create a blank note card.</li>
+                    <li><strong>Paste Content:</strong> Paste a link, code, or image URL into the input bar and press <code>Enter</code>. You can also paste directly onto the canvas (<code>Ctrl+V</code>).</li>
+                    <li><strong>Upload:</strong> Click 'Upload' or drag-and-drop an image file onto the canvas.</li>
+                    <li><strong>Move:</strong> Click and drag any card's header to move it. Hold <code>Ctrl</code> while dragging to snap to the grid.</li>
+                    <li><strong>Pages:</strong> Use the controls on the right to add new pages or switch between them. Double-click a page name to rename it.</li>
+                    <li><strong>Code Editing:</strong> Double-click a code block to enter edit mode. Click outside the block to save.</li>
+                    <li><strong>Download/Copy:</strong> Use the buttons on each card to download or copy its content.</li>
+                </ul>
+            </div>
+            <div id="help-modal-footer">
+                Scratchpad v1.1.0
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -599,6 +789,11 @@
                 importFileInput: document.getElementById('import-file-input'),
                 uploadFileInput: document.getElementById('upload-file-input')
             };
+            const help = {
+                btn: document.getElementById('help-btn'),
+                overlay: document.getElementById('help-modal-overlay'),
+                closeBtn: document.getElementById('help-modal-close-btn')
+            };
 
             // ===== STATE MANAGEMENT =====
             let appState = {};
@@ -611,7 +806,8 @@
                 tick: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
                 x: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
                 link: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>',
-                play: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>'
+                play: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
+                download: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>'
             };
 
             // ===== HELPER FUNCTIONS =====
@@ -702,11 +898,11 @@
             const escapeHtml = (unsafe) => {
                 if (typeof unsafe !== 'string') return '';
                 return unsafe
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
+                     .replace(/&/g, "&amp;")
+                     .replace(/</g, "&lt;")
+                     .replace(/>/g, "&gt;")
+                     .replace(/"/g, "&quot;")
+                     .replace(/'/g, "&#039;");
             };
             
             const isCodeSnippet = (text) => {
@@ -773,6 +969,12 @@
 
                 let contentHtml = '';
                 let footerHtml = '';
+                let downloadBtnHtml = '';
+
+                // Add Download button for all types except YouTube
+                if (cardData.type !== 'youtube') {
+                    downloadBtnHtml = `<button type="button" class="card-btn download-btn" title="Download">${icons.download}</button>`;
+                }
 
                 if (cardData.ytData) {
                     const toggleIcon = cardData.type === 'youtube' ? icons.link : icons.play;
@@ -808,6 +1010,7 @@
                     <div class="card-body">${contentHtml}</div>
                     <div class="card-footer">
                         ${footerHtml}
+                        ${downloadBtnHtml}
                         <button type="button" class="card-btn copy-btn" title="Copy">${icons.clipboard}</button>
                         <button type="button" class="card-btn delete-btn" title="Delete">${icons.x}</button>
                     </div>
@@ -819,6 +1022,11 @@
                 card.querySelector('.delete-btn').addEventListener('click', () => deleteCard(cardData.id));
                 card.querySelector('.copy-btn').addEventListener('click', (e) => copyCardContent(e.currentTarget, cardData));
                 
+                const downloadBtn = card.querySelector('.download-btn');
+                if (downloadBtn) {
+                    downloadBtn.addEventListener('click', () => downloadCardContent(cardData));
+                }
+
                 const cardBody = card.querySelector('.card-body');
 
                 if (cardData.type === 'note') {
@@ -943,6 +1151,42 @@
                     }, 1500);
                 }
             };
+            
+            const downloadCardContent = (cardData) => {
+                const a = document.createElement('a');
+                
+                try {
+                    switch (cardData.type) {
+                        case 'note':
+                        case 'link':
+                            const textBlob = new Blob([cardData.content], { type: 'text/plain;charset=utf-8' });
+                            a.href = URL.createObjectURL(textBlob);
+                            a.download = `${cardData.type}-${Date.now()}.txt`;
+                            break;
+                        case 'code':
+                             const codeBlob = new Blob([cardData.content], { type: 'text/plain;charset=utf-8' });
+                            a.href = URL.createObjectURL(codeBlob);
+                            a.download = `code-${Date.now()}.js`; // Assume .js, .txt is also fine
+                            break;
+                        case 'image':
+                            a.href = cardData.content; // This is a data URL
+                            a.download = `image-${Date.now()}.png`;
+                            break;
+                        default:
+                            return; // Don't download for types like 'youtube'
+                    }
+                    
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    if (a.href.startsWith('blob:')) {
+                        URL.revokeObjectURL(a.href);
+                    }
+                    
+                } catch (err) {
+                    console.error('Download failed:', err);
+                }
+            };
 
             const handleFile = (file) => {
                 if (file?.type.startsWith('image/')) {
@@ -951,6 +1195,16 @@
                     reader.readAsDataURL(file);
                 } else {
                     alert('Only image files are supported.');
+                }
+            };
+            
+            const toggleHelpModal = (show) => {
+                if (show) {
+                    help.overlay.classList.add('visible');
+                    // Notify iframe parent of potential height change
+                    scheduleHeightCheck();
+                } else {
+                    help.overlay.classList.remove('visible');
                 }
             };
 
@@ -996,7 +1250,10 @@
 
             controls.uploadBtn.addEventListener('click', () => controls.uploadFileInput.click());
             controls.uploadFileInput.addEventListener('change', (e) => {
-                handleFile(e.target.files[0]);
+                if (e.target.files.length > 0) {
+                    handleFile(e.target.files[0]);
+                    e.target.value = null; // Reset for same-file upload
+                }
             });
 
             controls.resetBtn.addEventListener('click', () => {
@@ -1037,9 +1294,19 @@
                     };
                     reader.readAsText(file);
                 }
+                e.target.value = null; // Reset for same-file upload
             });
 
             addPageBtn.addEventListener('click', () => createPage());
+            
+            // Help Modal Listeners
+            help.btn.addEventListener('click', () => toggleHelpModal(true));
+            help.closeBtn.addEventListener('click', () => toggleHelpModal(false));
+            help.overlay.addEventListener('click', (e) => {
+                if (e.target === help.overlay) {
+                    toggleHelpModal(false);
+                }
+            });
 
             // ===== INITIALIZATION =====
             function init() {
@@ -1060,8 +1327,6 @@
                     appState = { pages: {}, currentPageId: null };
                     createPage('Page 1');
                 }
-                
-                setTimeout(scheduleHeightCheck, 200);
             }
 
             init();
@@ -1070,30 +1335,47 @@
 
     <script>
         // ===== FOURTHWALL SCROLLBAR FIX =====
+        [cite_start]// This is the "Definitive Iframe Scrollbar Script" from your docs. [cite: 32, 79]
         let lastHeight = 0;
         let resizeTimer;
 
+        /**
+         * Sends the current scrollHeight to the parent window if it has changed.
+         * [cite_start]This is the *only* function that should send a postMessage. [cite: 33, 81]
+         */
         function sendHeight() {
-            const height = document.body.scrollHeight;
-            
-            if (height !== lastHeight) {
-                lastHeight = height;
-                window.parent.postMessage({ frameHeight: height }, '*');
-            }
+          const height = document.body.scrollHeight; [cite_start]// [cite: 34, 82]
+          
+          [cite_start]// Only send message if height has *actually* changed [cite: 35, 83]
+          if (height !== lastHeight) {
+            lastHeight = height;
+            window.parent.postMessage({ frameHeight: height }, '*'); [cite_start]// [cite: 36, 84]
+          }
         }
 
+        /**
+         * [cite_start]A debounced version of sendHeight() to be called on content changes. [cite: 37, 85]
+         * This ensures we don't spam messages during rapid changes.
+         */
         function scheduleHeightCheck() {
+            [cite_start]// Clear any pending checks [cite: 38, 87]
             clearTimeout(resizeTimer);
+            [cite_start]// Schedule a new check [cite: 39, 88]
             resizeTimer = setTimeout(sendHeight, 150);
         }
 
+        [cite_start]// Send height on initial load (with a slight delay) [cite: 40, 89]
+        [cite_start]// This fixes the "Content Cut-Off" race condition. [cite: 71, 72]
         window.addEventListener('load', () => {
             setTimeout(sendHeight, 100);
         });
 
+        [cite_start]// Send height on window resize (debounced) [cite: 41, 90]
         window.addEventListener('resize', () => {
+            // Use scheduleHeightCheck for built-in debounce
             scheduleHeightCheck();
         });
+        
         // ===== END OF SCROLLBAR FIX =====
     </script>
 </body>
