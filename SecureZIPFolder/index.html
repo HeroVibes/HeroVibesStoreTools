@@ -7,77 +7,77 @@
     <style>
         /* ========== HEROVIBES DESIGN SYSTEM - SCOPED ========== */
         .herovibes-zip-tool {
-            [cite_start]--primary-bg: #191919; [cite: 26]
-            [cite_start]--secondary-bg: #1F1F1F; [cite: 94]
+            --primary-bg: #191919;
+            --secondary-bg: #1F1F1F;
             --hover-color: #323232;
             --outline-color: #323232;
             --accent-color: #87A9FF;
-            [cite_start]--primary-text: #D4D4D4; [cite: 26]
+            --primary-text: #D4D4D4;
             --secondary-text: #8C8C8C;
             --success-color: #4CAF50;
             --error-color: #EF4444;
             --warning-color: #F59E0B;
-            [cite_start]font-family: sans-serif; [cite: 27]
-            [cite_start]color: var(--primary-text); [cite: 95]
+            font-family: sans-serif;
+            color: var(--primary-text);
             width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            [cite_start]padding: 20px 0; [cite: 96]
+            padding: 20px 0;
         }
 
         .herovibes-zip-tool * {
-            [cite_start]box-sizing: border-box; [cite: 97]
+            box-sizing: border-box;
         }
 
         /* ========== MAIN CONTAINER ========== */
         .herovibes-zip-tool .zip-container {
-            [cite_start]background: var(--secondary-bg); [cite: 98]
-            [cite_start]border: 1px solid var(--outline-color); [cite: 98]
+            background: var(--secondary-bg);
+            border: 1px solid var(--outline-color);
             border-radius: 12px;
-            [cite_start]padding: 24px 16px; [cite: 99]
+            padding: 24px 16px;
             width: 100%;
-            [cite_start]max-width: 600px; [cite: 99]
-            [cite_start]box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); [cite: 99]
-            [cite_start]margin: 0 auto; [cite: 100]
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            margin: 0 auto;
         }
 
         /* ========== PROGRESS TRACKER ========== */
         .herovibes-zip-tool .progress-tracker {
-            [cite_start]display: flex; [cite: 101]
-            [cite_start]justify-content: space-between; [cite: 101]
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 32px;
             position: relative;
             padding: 0 16px;
         }
 
         .herovibes-zip-tool .progress-line {
-            [cite_start]position: absolute; [cite: 102]
-            [cite_start]top: 15px; [cite: 102]
+            position: absolute;
+            top: 15px;
             left: 16px;
             right: 16px;
             height: 2px;
             background: var(--outline-color);
-            [cite_start]z-index: 0; [cite: 103]
+            z-index: 0;
         }
 
         .herovibes-zip-tool .progress-line-fill {
-            [cite_start]height: 100%; [cite: 104]
-            [cite_start]background: var(--accent-color); [cite: 104]
+            height: 100%;
+            background: var(--accent-color);
             width: 0%;
             transition: width 0.4s ease;
         }
 
         .herovibes-zip-tool .progress-step {
-            [cite_start]position: relative; [cite: 105]
-            [cite_start]z-index: 1; [cite: 105]
+            position: relative;
+            z-index: 1;
             text-align: center;
             flex: 1;
         }
 
         .herovibes-zip-tool .progress-circle {
-            [cite_start]width: 32px; [cite: 106]
-            [cite_start]height: 32px; [cite: 106]
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: var(--secondary-bg);
             border: 2px solid var(--outline-color);
@@ -85,17 +85,17 @@
             align-items: center;
             justify-content: center;
             margin: 0 auto 8px;
-            [cite_start]font-size: 12px; [cite: 107]
+            font-size: 12px;
             font-weight: bold;
             color: var(--secondary-text);
             transition: all 0.3s ease;
             position: relative;
-            [cite_start]z-index: 2; [cite: 108]
+            z-index: 2;
         }
 
         .herovibes-zip-tool .progress-circle::before {
-            [cite_start]content: ''; [cite: 109]
-            [cite_start]position: absolute; [cite: 109]
+            content: '';
+            position: absolute;
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -103,78 +103,78 @@
             z-index: -1;
             left: 50%;
             top: 50%;
-            [cite_start]transform: translate(-50%, -50%); [cite: 110]
+            transform: translate(-50%, -50%);
         }
 
         .herovibes-zip-tool .progress-step.active .progress-circle {
-            [cite_start]border-color: var(--accent-color); [cite: 111]
-            [cite_start]color: var(--accent-color); [cite: 111]
+            border-color: var(--accent-color);
+            color: var(--accent-color);
             background: rgba(135, 169, 255, 0.1);
         }
 
         .herovibes-zip-tool .progress-step.completed .progress-circle {
-            [cite_start]border-color: var(--success-color); [cite: 112]
-            [cite_start]background: var(--success-color); [cite: 112]
+            border-color: var(--success-color);
+            background: var(--success-color);
             color: white;
         }
 
         .herovibes-zip-tool .progress-label {
-            [cite_start]font-size: 11px; [cite: 113]
-            [cite_start]color: var(--secondary-text); [cite: 113]
+            font-size: 11px;
+            color: var(--secondary-text);
             display: none;
         }
 
         .herovibes-zip-tool .progress-step.active .progress-label,
         .herovibes-zip-tool .progress-step.completed .progress-label {
-            [cite_start]color: var(--primary-text); [cite: 114]
+            color: var(--primary-text);
         }
 
         /* ========== STEP CONTAINERS ========== */
         .herovibes-zip-tool .step {
-            [cite_start]display: none; [cite: 115]
-            [cite_start]animation: fadeIn 0.4s ease; [cite: 115]
+            display: none;
+            animation: fadeIn 0.4s ease;
         }
 
         .herovibes-zip-tool .step.active {
-            [cite_start]display: block; [cite: 116]
+            display: block;
         }
 
         @keyframes hvZipFadeIn {
             from {
-                [cite_start]opacity: 0; [cite: 117]
-                [cite_start]transform: translateY(10px); [cite: 117]
+                opacity: 0;
+                transform: translateY(10px);
             }
             to {
-                [cite_start]opacity: 1; [cite: 118]
-                [cite_start]transform: translateY(0); [cite: 118]
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
         .herovibes-zip-tool .step {
-            [cite_start]animation: hvZipFadeIn 0.4s ease; [cite: 119]
+            animation: hvZipFadeIn 0.4s ease;
         }
 
         .herovibes-zip-tool .step-header {
-            [cite_start]margin-bottom: 20px; [cite: 120]
+            margin-bottom: 20px;
         }
 
         .herovibes-zip-tool .step-title {
-            [cite_start]font-size: 14px; [cite: 121]
-            [cite_start]font-weight: bold; [cite: 121]
+            font-size: 14px;
+            font-weight: bold;
             color: var(--primary-text);
             margin-bottom: 6px;
         }
 
         .herovibes-zip-tool .step-description {
-            [cite_start]font-size: 12px; [cite: 122]
-            [cite_start]color: var(--secondary-text); [cite: 122]
+            font-size: 12px;
+            color: var(--secondary-text);
             line-height: 1.5;
         }
 
         /* ========== FILE UPLOAD SECTION ========== */
         .herovibes-zip-tool .drop-zone {
-            [cite_start]border: 2px dashed var(--outline-color); [cite: 123]
-            [cite_start]border-radius: 8px; [cite: 123]
+            border: 2px dashed var(--outline-color);
+            border-radius: 8px;
             padding: 40px 20px;
             text-align: center;
             cursor: pointer;
@@ -182,352 +182,352 @@
             background: var(--primary-bg);
             margin-bottom: 16px;
             width: 100%;
-            [cite_start]display: block; [cite: 124]
+            display: block;
         }
 
         .herovibes-zip-tool .drop-zone:hover {
-            [cite_start]border-color: var(--accent-color); [cite: 125]
-            [cite_start]background: rgba(135, 169, 255, 0.05); [cite: 125]
+            border-color: var(--accent-color);
+            background: rgba(135, 169, 255, 0.05);
         }
 
         .herovibes-zip-tool .drop-zone.drag-over {
-            [cite_start]border-color: var(--accent-color); [cite: 126]
-            [cite_start]background: rgba(135, 169, 255, 0.1); [cite: 126]
+            border-color: var(--accent-color);
+            background: rgba(135, 169, 255, 0.1);
             border-style: solid;
         }
 
         .herovibes-zip-tool .drop-zone-icon {
-            [cite_start]font-size: 40px; [cite: 127]
-            [cite_start]margin-bottom: 12px; [cite: 127]
+            font-size: 40px;
+            margin-bottom: 12px;
             color: var(--secondary-text);
         }
 
         .herovibes-zip-tool .drop-zone-text {
-            [cite_start]font-size: 12px; [cite: 128]
-            [cite_start]color: var(--secondary-text); [cite: 128]
+            font-size: 12px;
+            color: var(--secondary-text);
             display: block;
         }
 
         .herovibes-zip-tool .drop-zone-subtext {
-            [cite_start]font-size: 11px; [cite: 129]
-            [cite_start]color: var(--secondary-text); [cite: 129]
+            font-size: 11px;
+            color: var(--secondary-text);
             margin-top: 8px;
             opacity: 0.7;
             display: block;
         }
 
         .herovibes-zip-tool #fileInput {
-            [cite_start]display: none; [cite: 130]
+            display: none;
         }
 
         /* ========== FILE LIST ========== */
         .herovibes-zip-tool .file-list {
-            [cite_start]margin-top: 16px; [cite: 131]
-            [cite_start]max-height: 200px; [cite: 131]
+            margin-top: 16px;
+            max-height: 200px;
             overflow-y: auto;
             padding: 12px;
             background: var(--primary-bg);
             border-radius: 8px;
-            [cite_start]border: 1px solid var(--outline-color); [cite: 132]
+            border: 1px solid var(--outline-color);
         }
 
         .herovibes-zip-tool .file-item {
-            [cite_start]display: flex; [cite: 133]
-            [cite_start]justify-content: space-between; [cite: 133]
+            display: flex;
+            justify-content: space-between;
             align-items: center;
             padding: 8px 12px;
             background: var(--secondary-bg);
             border-radius: 6px;
             margin-bottom: 8px;
-            [cite_start]border: 1px solid var(--outline-color); [cite: 134]
+            border: 1px solid var(--outline-color);
         }
 
         .herovibes-zip-tool .file-item:last-child {
-            [cite_start]margin-bottom: 0; [cite: 135]
+            margin-bottom: 0;
         }
 
         .herovibes-zip-tool .file-info {
-            [cite_start]flex: 1; [cite: 136]
-            [cite_start]overflow: hidden; [cite: 136]
+            flex: 1;
+            overflow: hidden;
         }
 
         .herovibes-zip-tool .file-name {
-            [cite_start]font-size: 12px; [cite: 137]
-            [cite_start]color: var(--primary-text); [cite: 137]
+            font-size: 12px;
+            color: var(--primary-text);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .herovibes-zip-tool .file-size {
-            [cite_start]font-size: 11px; [cite: 138]
-            [cite_start]color: var(--secondary-text); [cite: 138]
+            font-size: 11px;
+            color: var(--secondary-text);
             margin-top: 2px;
         }
 
         .herovibes-zip-tool .file-remove {
-            [cite_start]background: none; [cite: 139]
-            [cite_start]border: none; [cite: 139]
+            background: none;
+            border: none;
             color: var(--error-color);
             cursor: pointer;
             font-size: 18px;
             padding: 4px 8px;
-            [cite_start]margin-left: 8px; [cite: 140]
+            margin-left: 8px;
         }
 
         .herovibes-zip-tool .file-remove:hover {
-            [cite_start]opacity: 0.7; [cite: 141]
+            opacity: 0.7;
         }
 
         /* ========== INPUT FIELDS ========== */
         .herovibes-zip-tool .form-group {
-            [cite_start]margin-bottom: 20px; [cite: 142]
+            margin-bottom: 20px;
         }
 
         .herovibes-zip-tool .form-label {
-            [cite_start]display: block; [cite: 143]
-            [cite_start]font-size: 12px; [cite: 143]
+            display: block;
+            font-size: 12px;
             color: var(--secondary-text);
             margin-bottom: 8px;
         }
 
         .herovibes-zip-tool .form-input {
-            [cite_start]width: 100%; [cite: 144]
-            [cite_start]padding: 12px 16px; [cite: 144]
+            width: 100%;
+            padding: 12px 16px;
             background: var(--primary-bg);
             border: 1px solid var(--outline-color);
             border-radius: 8px;
             color: var(--primary-text);
             font-size: 14px;
-            [cite_start]transition: border-color 0.3s ease; [cite: 145]
+            transition: border-color 0.3s ease;
         }
 
         .herovibes-zip-tool .form-input:focus {
-            [cite_start]outline: none; [cite: 146]
-            [cite_start]border-color: var(--accent-color); [cite: 146]
+            outline: none;
+            border-color: var(--accent-color);
         }
 
         .herovibes-zip-tool .form-input::placeholder {
-            [cite_start]color: var(--secondary-text); [cite: 147]
-            [cite_start]opacity: 0.6; [cite: 147]
+            color: var(--secondary-text);
+            opacity: 0.6;
         }
 
         /* ========== PASSWORD STRENGTH ========== */
         .herovibes-zip-tool .password-strength {
-            [cite_start]margin-top: 8px; [cite: 148]
-            [cite_start]height: 4px; [cite: 148]
+            margin-top: 8px;
+            height: 4px;
             background: var(--outline-color);
             border-radius: 2px;
             overflow: hidden;
         }
 
         .herovibes-zip-tool .password-strength-fill {
-            [cite_start]height: 100%; [cite: 149]
-            [cite_start]width: 0%; [cite: 149]
+            height: 100%;
+            width: 0%;
             transition: all 0.3s ease;
             border-radius: 2px;
         }
 
         .herovibes-zip-tool .password-strength-text {
-            [cite_start]font-size: 11px; [cite: 150]
-            [cite_start]margin-top: 4px; [cite: 150]
+            font-size: 11px;
+            margin-top: 4px;
             color: var(--secondary-text);
         }
 
         /* ========== TOGGLE SWITCHES ========== */
         .herovibes-zip-tool .toggle-group {
-            [cite_start]display: flex; [cite: 151]
-            [cite_start]justify-content: space-between; [cite: 151]
+            display: flex;
+            justify-content: space-between;
             align-items: center;
             padding: 12px 16px;
             background: var(--primary-bg);
             border-radius: 8px;
             border: 1px solid var(--outline-color);
-            [cite_start]margin-bottom: 12px; [cite: 152]
+            margin-bottom: 12px;
         }
 
         .herovibes-zip-tool .toggle-info {
-            [cite_start]flex: 1; [cite: 153]
+            flex: 1;
         }
 
         .herovibes-zip-tool .toggle-title {
-            [cite_start]font-size: 12px; [cite: 154]
-            [cite_start]color: var(--primary-text); [cite: 154]
+            font-size: 12px;
+            color: var(--primary-text);
             font-weight: 500;
             margin-bottom: 4px;
         }
 
         .herovibes-zip-tool .toggle-description {
-            [cite_start]font-size: 11px; [cite: 155]
-            [cite_start]color: var(--secondary-text); [cite: 155]
+            font-size: 11px;
+            color: var(--secondary-text);
             line-height: 1.4;
         }
 
         .herovibes-zip-tool .toggle-switch {
-            [cite_start]position: relative; [cite: 156]
-            [cite_start]display: inline-block; [cite: 156]
+            position: relative;
+            display: inline-block;
             width: 44px;
             height: 24px;
             margin-left: 16px;
         }
 
         .herovibes-zip-tool .toggle-switch input {
-            [cite_start]opacity: 0; [cite: 157]
-            [cite_start]width: 0; [cite: 157]
+            opacity: 0;
+            width: 0;
             height: 0;
         }
 
         .herovibes-zip-tool .slider {
-            [cite_start]position: absolute; [cite: 158]
-            [cite_start]cursor: pointer; [cite: 158]
+            position: absolute;
+            cursor: pointer;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background-color: var(--outline-color);
             transition: .3s;
-            [cite_start]border-radius: 24px; [cite: 159]
+            border-radius: 24px;
         }
 
         .herovibes-zip-tool .slider:before {
-            [cite_start]position: absolute; [cite: 160]
-            [cite_start]content: ""; [cite: 160]
+            position: absolute;
+            content: "";
             height: 18px;
             width: 18px;
             left: 3px;
             bottom: 3px;
             background-color: white;
             transition: .3s;
-            [cite_start]border-radius: 50%; [cite: 161]
+            border-radius: 50%;
         }
 
         .herovibes-zip-tool input:checked + .slider {
-            [cite_start]background-color: var(--accent-color); [cite: 162]
+            background-color: var(--accent-color);
         }
 
         .herovibes-zip-tool input:checked + .slider:before {
-            [cite_start]transform: translateX(20px); [cite: 163]
+            transform: translateX(20px);
         }
 
         /* ========== SELECT DROPDOWN ========== */
         .herovibes-zip-tool .form-select {
-            [cite_start]width: 100%; [cite: 164]
-            [cite_start]padding: 12px 16px; [cite: 164]
+            width: 100%;
+            padding: 12px 16px;
             background: var(--primary-bg);
             border: 1px solid var(--outline-color);
             border-radius: 8px;
             color: var(--primary-text);
             font-size: 14px;
             cursor: pointer;
-            [cite_start]transition: border-color 0.3s ease; [cite: 165]
+            transition: border-color 0.3s ease;
         }
 
         .herovibes-zip-tool .form-select:focus {
-            [cite_start]outline: none; [cite: 166]
-            [cite_start]border-color: var(--accent-color); [cite: 166]
+            outline: none;
+            border-color: var(--accent-color);
         }
 
         /* ========== REVIEW SECTION ========== */
         .herovibes-zip-tool .review-card {
-            [cite_start]background: var(--primary-bg); [cite: 167]
-            [cite_start]border: 1px solid var(--outline-color); [cite: 167]
+            background: var(--primary-bg);
+            border: 1px solid var(--outline-color);
             border-radius: 8px;
             padding: 16px;
-            [cite_start]margin-bottom: 16px; [cite: 168]
+            margin-bottom: 16px;
         }
 
         .herovibes-zip-tool .review-row {
-            [cite_start]display: flex; [cite: 169]
-            [cite_start]justify-content: space-between; [cite: 169]
+            display: flex;
+            justify-content: space-between;
             align-items: center;
             padding: 8px 0;
-            [cite_start]border-bottom: 1px solid var(--outline-color); [cite: 170]
+            border-bottom: 1px solid var(--outline-color);
         }
 
         .herovibes-zip-tool .review-row:last-child {
-            [cite_start]border-bottom: none; [cite: 171]
+            border-bottom: none;
         }
 
         .herovibes-zip-tool .review-label {
-            [cite_start]font-size: 12px; [cite: 172]
-            [cite_start]color: var(--secondary-text); [cite: 172]
+            font-size: 12px;
+            color: var(--secondary-text);
         }
 
         .herovibes-zip-tool .review-value {
-            [cite_start]font-size: 12px; [cite: 173]
-            [cite_start]color: var(--primary-text); [cite: 173]
+            font-size: 12px;
+            color: var(--primary-text);
             font-weight: 500;
         }
 
         /* ========== BUTTONS (SHIMMER EFFECT) ========== */
         .herovibes-zip-tool .btn {
-            [cite_start]position: relative; [cite: 174]
-            [cite_start]width: 100%; [cite: 174]
+            position: relative;
+            width: 100%;
             padding: 12px 16px;
-            [cite_start]border-radius: 8px; [cite: 26]
-            [cite_start]background: var(--secondary-bg); [cite: 26]
-            [cite_start]color: var(--primary-text); [cite: 26]
-            [cite_start]border: 1px solid var(--outline-color); [cite: 28]
-            [cite_start]cursor: pointer; [cite: 28]
-            [cite_start]overflow: hidden; [cite: 28]
-            [cite_start]font-size: 14px; [cite: 175]
+            border-radius: 8px;
+            background: var(--secondary-bg);
+            color: var(--primary-text);
+            border: 1px solid var(--outline-color);
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px;
             font-weight: 500;
             transition: all 0.3s ease;
         }
 
         .herovibes-zip-tool .btn::before {
-            [cite_start]content: ''; [cite: 176]
-            [cite_start]position: absolute; [cite: 176]
+            content: '';
+            position: absolute;
             top: 0;
             left: -100%;
             width: 75%;
             height: 100%;
-            [cite_start]background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); [cite: 29]
-            [cite_start]transform: skewX(-25deg); [cite: 29]
-            [cite_start]transition: left .7s ease-in-out; [cite: 177]
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: skewX(-25deg);
+            transition: left .7s ease-in-out;
         }
 
         .herovibes-zip-tool .btn:hover::before {
-            [cite_start]left: 125%; [cite: 178]
+            left: 125%;
         }
 
         .herovibes-zip-tool .btn:focus-visible {
-            [cite_start]outline: none; [cite: 179]
-            [cite_start]box-shadow: 0 0 0 3px rgba(135,169,255,0.12); [cite: 179]
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
         }
 
         .herovibes-zip-tool .btn-primary {
-            [cite_start]background: var(--accent-color); [cite: 180]
-            [cite_start]color: #191919; [cite: 180]
+            background: var(--accent-color);
+            color: #191919;
             font-weight: bold;
         }
 
         .herovibes-zip-tool .btn-primary:hover {
-            [cite_start]background: #9BB8FF; [cite: 181]
+            background: #9BB8FF;
         }
 
         .herovibes-zip-tool .btn:disabled {
-            [cite_start]opacity: 0.5; [cite: 182]
-            [cite_start]cursor: not-allowed; [cite: 182]
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .herovibes-zip-tool .btn:disabled::before {
-            [cite_start]display: none; [cite: 183]
+            display: none;
         }
 
         .herovibes-zip-tool .button-group {
-            [cite_start]display: flex; [cite: 184]
-            [cite_start]gap: 12px; [cite: 184]
+            display: flex;
+            gap: 12px;
             margin-top: 20px;
         }
 
         .herovibes-zip-tool .button-group .btn {
-            [cite_start]flex: 1; [cite: 185]
+            flex: 1;
         }
 
         /* ========== STATUS MESSAGES ========== */
         .herovibes-zip-tool .status-message {
-            [cite_start]padding: 12px 16px; [cite: 186]
+            padding: 12px 16px;
             border-radius: 8px;
             font-size: 12px;
             margin-top: 16px;
@@ -535,25 +535,25 @@
         }
 
         .herovibes-zip-tool .status-message.show {
-            [cite_start]display: block; [cite: 187]
-            [cite_start]animation: hvZipFadeIn 0.3s ease; [cite: 187]
+            display: block;
+            animation: hvZipFadeIn 0.3s ease;
         }
 
         .herovibes-zip-tool .status-error {
-            [cite_start]background: rgba(239, 68, 68, 0.1); [cite: 188]
-            [cite_start]color: var(--error-color); [cite: 188]
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
             border: 1px solid var(--error-color);
         }
 
         .herovibes-zip-tool .status-success {
-            [cite_start]background: rgba(76, 175, 80, 0.1); [cite: 189]
-            [cite_start]color: var(--success-color); [cite: 189]
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--success-color);
             border: 1px solid var(--success-color);
         }
 
         .herovibes-zip-tool .status-info {
-            [cite_start]background: rgba(135, 169, 255, 0.1); [cite: 190]
-            [cite_start]color: var(--accent-color); [cite: 190]
+            background: rgba(135, 169, 255, 0.1);
+            color: var(--accent-color);
             border: 1px solid var(--accent-color);
         }
         
@@ -569,52 +569,52 @@
         /* ========== MOBILE OPTIMIZATION ========== */
         @media (max-width: 640px) {
             .herovibes-zip-tool .zip-container {
-                [cite_start]padding: 16px 12px; [cite: 191]
+                padding: 16px 12px;
             }
 
             .herovibes-zip-tool .progress-label {
-                [cite_start]display: block; [cite: 192]
+                display: block;
             }
 
             .herovibes-zip-tool .progress-circle {
-                [cite_start]width: 28px; [cite: 193]
-                [cite_start]height: 28px; [cite: 193]
+                width: 28px;
+                height: 28px;
                 font-size: 11px;
             }
 
             .herovibes-zip-tool .drop-zone {
-                [cite_start]padding: 30px 16px; [cite: 194]
+                padding: 30px 16px;
             }
 
             .herovibes-zip-tool .file-list {
-                [cite_start]max-height: 150px; [cite: 195]
+                max-height: 150px;
             }
 
             .herovibes-zip-tool .button-group {
-                [cite_start]flex-direction: column; [cite: 196]
+                flex-direction: column;
             }
 
             .herovibes-zip-tool .button-group .btn {
-                [cite_start]width: 100%; [cite: 197]
+                width: 100%;
             }
         }
 
         /* ========== SCROLLBAR STYLING ========== */
         .herovibes-zip-tool .file-list::-webkit-scrollbar {
-            [cite_start]width: 6px; [cite: 198]
+            width: 6px;
         }
 
         .herovibes-zip-tool .file-list::-webkit-scrollbar-track {
-            [cite_start]background: var(--secondary-bg); [cite: 199]
+            background: var(--secondary-bg);
         }
 
         .herovibes-zip-tool .file-list::-webkit-scrollbar-thumb {
-            [cite_start]background: var(--outline-color); [cite: 200]
+            background: var(--outline-color);
             border-radius: 3px;
         }
 
         .herovibes-zip-tool .file-list::-webkit-scrollbar-thumb:hover {
-            [cite_start]background: var(--hover-color); [cite: 201]
+            background: var(--hover-color);
         }
     </style>
 </head>
@@ -623,41 +623,41 @@
         <div class="zip-container">
             <div class="progress-tracker">
                 <div class="progress-line">
-                    [cite_start]<div class="progress-line-fill" id="progressFill"></div> [cite: 202]
+                    <div class="progress-line-fill" id="progressFill"></div>
                 </div>
                 <div class="progress-step active" data-step="1">
                     <div class="progress-circle">1</div>
                     <div class="progress-label">Files</div>
                 </div>
-                [cite_start]<div class="progress-step" data-step="2"> [cite: 203]
+                <div class="progress-step" data-step="2">
                     <div class="progress-circle">2</div>
                     <div class="progress-label">Security</div>
                 </div>
                 <div class="progress-step" data-step="3">
-                    [cite_start]<div class="progress-circle">3</div> [cite: 204]
+                    <div class="progress-circle">3</div>
                     <div class="progress-label">Options</div>
                 </div>
                 <div class="progress-step" data-step="4">
                     <div class="progress-circle">4</div>
-                    [cite_start]<div class="progress-label">Review</div> [cite: 205]
+                    <div class="progress-label">Review</div>
                 </div>
             </div>
 
             <div class="step active" id="step1">
                 <div class="step-header">
-                    [cite_start]<div class="step-title">Select Your Files</div> [cite: 206]
-                    [cite_start]<div class="step-description">Choose the files you want to secure. [cite: 207]
-                        [cite_start]Maximum 1 GB total.</div> [cite: 207]
+                    <div class="step-title">Select Your Files</div>
+                    <div class="step-description">Choose the files you want to secure.
+                        Maximum 1 GB total.</div>
                 </div>
 
                 <label for="fileInput" class="drop-zone" id="dropZone">
                     <div>
                         <div class="drop-zone-icon">📁</div>
-                        [cite_start]<div class="drop-zone-text">Drag & drop files here or click to browse</div> [cite: 208]
+                        <div class="drop-zone-text">Drag & drop files here or click to browse</div>
                         <div class="drop-zone-subtext">Supports all file types • Max 1 GB</div>
                     </div>
                 </label>
-                [cite_start]<input type="file" id="fileInput" multiple> [cite: 209]
+                <input type="file" id="fileInput" multiple>
 
                 <div class="file-list" id="fileList" style="display: none;"></div>
 
@@ -666,32 +666,31 @@
                 </div>
             </div>
 
-            [cite_start][cite: 210]
             <div class="step" id="step2">
                 <div class="step-header">
                     <div class="step-title">Set Security Options</div>
-                    [cite_start]<div class="step-description">Create a strong password to protect your files.</div> [cite: 211]
+                    <div class="step-description">Create a strong password to protect your files.</div>
                  </div>
 
                 <div class="form-group">
                     <label class="form-label">Password *</label>
                     <input type="password" class="form-input" id="passwordInput" placeholder="Enter a strong password">
                     <div class="password-strength">
-                        [cite_start]<div class="password-strength-fill" id="passwordStrengthFill"></div> [cite: 212]
+                        <div class="password-strength-fill" id="passwordStrengthFill"></div>
                     </div>
                     <div class="password-strength-text" id="passwordStrengthText">Enter a password</div>
                 </div>
 
                 <div class="toggle-group">
-                    [cite_start]<div class="toggle-info"> [cite: 213]
+                    <div class="toggle-info">
                         <div class="toggle-title">Show Password</div>
                         <div class="toggle-description">Toggle password visibility</div>
                     </div>
-                    [cite_start]<label class="toggle-switch"> [cite: 214]
+                    <label class="toggle-switch">
                         <input type="checkbox" id="showPasswordToggle">
                         <span class="slider"></span>
                     </label>
-                [cite_start]</div> [cite: 215]
+                </div>
 
                 <div class="button-group">
                     <button class="btn" id="step2Back">Back</button>
@@ -699,11 +698,10 @@
                 </div>
             </div>
 
-            [cite_start][cite: 216]
             <div class="step" id="step3">
                 <div class="step-header">
                     <div class="step-title">Advanced Options</div>
-                    [cite_start]<div class="step-description">Customize your ZIP file settings.</div> [cite: 217]
+                    <div class="step-description">Customize your ZIP file settings.</div>
                  </div>
 
                 <div class="form-group">
@@ -711,81 +709,81 @@
                     <input type="text" class="form-input" id="zipNameInput" placeholder="secure-archive" value="secure-archive">
                 </div>
 
-                [cite_start]<div class="form-group"> [cite: 218]
+                <div class="form-group">
                     <label class="form-label">Compression Level</label>
                     <select class="form-select" id="compressionLevel">
                         <option value="0">Store (No compression - Fastest)</option>
-                        [cite_start]<option value="6" selected>Balanced (Recommended)</option> [cite: 219]
+                        <option value="6" selected>Balanced (Recommended)</option>
                         <option value="9">Maximum (Smallest size - Slowest)</option>
                     </select>
                 </div>
 
                 <div class="toggle-group">
-                    [cite_start]<div class="toggle-info"> [cite: 220]
+                    <div class="toggle-info">
                         <div class="toggle-title">Anonymize Filenames</div>
                         <div class="toggle-description">Rename files to SecureFile1, SecureFile2, etc.</div>
                     </div>
-                    [cite_start]<label class="toggle-switch"> [cite: 221]
+                    <label class="toggle-switch">
                         <input type="checkbox" id="replaceFilesToggle">
                         <span class="slider"></span>
                     </label>
                 </div>
 
-                [cite_start]<div class="toggle-group"> [cite: 222]
+                <div class="toggle-group">
                     <div class="toggle-info">
                         <div class="toggle-title">Strip JPEG Metadata</div>
-                        [cite_start]<div class="toggle-description">Remove GPS and camera data from images</div> [cite: 223]
+                        <div class="toggle-description">Remove GPS and camera data from images</div>
                      </div>
                     <label class="toggle-switch">
                         <input type="checkbox" id="stripMetadataToggle">
                         <span class="slider"></span>
-                    [cite_start]</label> [cite: 224]
+                    </label>
                  </div>
 
                 <div class="button-group">
                     <button class="btn" id="step3Back">Back</button>
                     <button class="btn btn-primary" id="step3Next">Review & Generate</button>
-                [cite_start]</div> [cite: 225]
+                </div>
              </div>
 
             <div class="step" id="step4">
                 <div class="step-header">
                     <div class="step-title">Review Your Settings</div>
-                    [cite_start]<div class="step-description">Verify [cite: 226]
-                        [cite_start]everything before generating your secure ZIP.</div> [cite: 226]
+                    <div class="step-description">Verify
+                        everything before generating your secure ZIP.</div>
                 </div>
 
                 <div class="review-card">
                     <div class="review-row">
                         <span class="review-label">Total Files</span>
-                        [cite_start]<span class="review-value" id="reviewFileCount">0</span> [cite: 227]
+                        <span class="review-value" id="reviewFileCount">0</span>
                     </div>
                     <div class="review-row">
                         <span class="review-label">Total Size</span>
-                        [cite_start]<span class="review-value" id="reviewTotalSize">0 MB</span> [cite: 228]
+                        <span class="review-value" id="reviewTotalSize">0 MB</span>
                     </div>
                     <div class="review-row">
                         <span class="review-label">ZIP Name</span>
-                        [cite_start]<span class="review-value" id="reviewZipName">secure-archive.zip</span> [cite: 229]
+                        <span class="review-value" id="reviewZipName">secure-archive.zip</span>
                      </div>
                     <div class="review-row">
                         <span class="review-label">Compression</span>
-                        [cite_start]<span class="review-value" id="reviewCompression">Balanced</span> [cite: 230]
+                        <span class="review-value" id="reviewCompression">Balanced</span>
                      </div>
                     <div class="review-row">
                         <span class="review-label">Anonymized</span>
-                        [cite_start]<span class="review-value" id="reviewAnonymize">No</span> [cite: 231]
+                        <span class="review-value" id="reviewAnonymize">No</span>
                      </div>
                     <div class="review-row">
                         <span class="review-label">Metadata Stripped</span>
                         <span class="review-value" id="reviewMetadata">No</span>
-                    [cite_start]</div> [cite: 232]
+                    </div>
                  </div>
 
                 <div class="button-group">
                     <button class="btn" id="step4Back">Back</button>
                     <button class="btn btn-primary" id="generateButton">Generate Secure ZIP</button>
-                [cite_start]</div> [cite: 233]
+                </div>
              </div>
 
             <div class="status-message" id="statusMessage"></div>
@@ -799,10 +797,10 @@
 
     <script>
         // ========== GLOBAL VARIABLES ==========
-        [cite_start]const MAX_FILE_SIZE = 1 * 1024 * 1024 * 1024; [cite: 234]
+        const MAX_FILE_SIZE = 1 * 1024 * 1024 * 1024; // 1 GB
         let currentStep = 1;
-        [cite_start]let selectedFiles = []; [cite: 235]
-        [cite_start]let zipLib = null; [cite: 235]
+        let selectedFiles = [];
+        let zipLib = null;
 
         // Initialize zip.js when page loads
         window.addEventListener('DOMContentLoaded', () => {
@@ -810,131 +808,131 @@
                 zipLib = zip;
                 console.log('zip.js loaded successfully');
             } else {
-                [cite_start]console.error('zip.js failed to load'); [cite: 236]
+                console.error('zip.js failed to load');
             }
         });
-        [cite_start]// ========== DOM ELEMENTS ========== [cite: 237]
+        // ========== DOM ELEMENTS ==========
         const fileInput = document.getElementById('fileInput');
         const dropZone = document.getElementById('dropZone');
-        [cite_start]const fileList = document.getElementById('fileList'); [cite: 238]
+        const fileList = document.getElementById('fileList');
         const passwordInput = document.getElementById('passwordInput');
         const passwordStrengthFill = document.getElementById('passwordStrengthFill');
         const passwordStrengthText = document.getElementById('passwordStrengthText');
         const showPasswordToggle = document.getElementById('showPasswordToggle');
-        [cite_start]const zipNameInput = document.getElementById('zipNameInput'); [cite: 239]
+        const zipNameInput = document.getElementById('zipNameInput');
         const compressionLevel = document.getElementById('compressionLevel');
         const replaceFilesToggle = document.getElementById('replaceFilesToggle');
         const stripMetadataToggle = document.getElementById('stripMetadataToggle');
         const statusMessage = document.getElementById('statusMessage');
-        [cite_start]const progressFill = document.getElementById('progressFill'); [cite: 240]
+        const progressFill = document.getElementById('progressFill');
 
         // ========== FILE UPLOAD HANDLING ==========
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.classList.add('drag-over');
         });
-        [cite_start]dropZone.addEventListener('dragleave', () => { [cite: 241]
+        dropZone.addEventListener('dragleave', () => {
             dropZone.classList.remove('drag-over');
         });
-        [cite_start]dropZone.addEventListener('drop', (e) => { [cite: 242]
+        dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('drag-over');
             
             // Check for folders
             if (e.dataTransfer && e.dataTransfer.items) {
                 for (let i = 0; i < e.dataTransfer.items.length; i++) {
-                    [cite_start]const item = e.dataTransfer.items[i]; [cite: 243]
+                    const item = e.dataTransfer.items[i];
                     if (item.kind === 'file' && item.webkitGetAsEntry && item.webkitGetAsEntry().isDirectory) {
                         showStatus('Folders cannot be uploaded. Please ZIP them first.', 'error');
-                        [cite_start]return; [cite: 244]
+                        return;
                     }
                 }
             }
             
             const files = e.dataTransfer.files;
             if (files.length) {
-                [cite_start]handleFileSelection(files); [cite: 245]
+                handleFileSelection(files);
             }
         });
-        [cite_start]fileInput.addEventListener('change', () => { [cite: 246]
+        fileInput.addEventListener('change', () => {
             handleFileSelection(fileInput.files);
         });
-        [cite_start]function handleFileSelection(files) { [cite: 247]
-            [cite_start]if (files.length === 0) return; [cite: 248]
+        function handleFileSelection(files) {
+            if (files.length === 0) return;
             // Convert FileList to Array and add to selectedFiles
-            [cite_start]const newFiles = Array.from(files); [cite: 249]
+            const newFiles = Array.from(files);
             // Check total size
-            [cite_start]let totalSize = 0; [cite: 250]
+            let totalSize = 0;
             const allFiles = [...selectedFiles, ...newFiles];
             
             for (const file of allFiles) {
-                [cite_start]totalSize += file.size; [cite: 251]
+                totalSize += file.size;
             }
 
             if (totalSize > MAX_FILE_SIZE) {
-                [cite_start]showStatus('Total file size exceeds 1 GB limit', 'error'); [cite: 252]
+                showStatus('Total file size exceeds 1 GB limit', 'error');
                 return;
             }
 
             selectedFiles = allFiles;
             displayFileList();
-            [cite_start]document.getElementById('step1Next').disabled = false; [cite: 253]
+            document.getElementById('step1Next').disabled = false;
         }
 
         function displayFileList() {
             if (selectedFiles.length === 0) {
-                [cite_start]fileList.style.display = 'none'; [cite: 254]
+                fileList.style.display = 'none';
             } else {
                 fileList.style.display = 'block';
             }
 
-            [cite_start]fileList.innerHTML = ''; [cite: 255]
-            [cite_start]selectedFiles.forEach((file, index) => { [cite: 255]
+            fileList.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
                 fileItem.innerHTML = `
                     <div class="file-info">
-                        [cite_start]<div class="file-name">${file.name}</div> [cite: 256]
+                        <div class="file-name">${file.name}</div>
                         <div class="file-size">${formatFileSize(file.size)}</div>
                     </div>
                     <button class="file-remove" onclick="removeFile(${index})" type="button">×</button>
                 `;
-                [cite_start]fileList.appendChild(fileItem); [cite: 257]
+                fileList.appendChild(fileItem);
             });
-            scheduleHeightCheck(); [cite_start]// [cite: 92] Notify iframe of content change
+            scheduleHeightCheck(); // Notify iframe of content change
         }
 
         function removeFile(index) {
-            [cite_start]selectedFiles.splice(index, 1); [cite: 258]
-            [cite_start]displayFileList(); [cite: 259]
+            selectedFiles.splice(index, 1);
+            displayFileList();
             
             if (selectedFiles.length === 0) {
-                [cite_start]document.getElementById('step1Next').disabled = true; [cite: 260]
+                document.getElementById('step1Next').disabled = true;
             }
         }
 
         function formatFileSize(bytes) {
-            [cite_start]if (bytes === 0) return '0 Bytes'; [cite: 261]
-            [cite_start]const k = 1024; [cite: 261]
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
             const sizes = ['Bytes', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
-            [cite_start]return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]; [cite: 262]
-        [cite_start]} [cite: 263]
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+        }
 
         // ========== PASSWORD STRENGTH CHECKER ==========
-        [cite_start]passwordInput.addEventListener('input', () => { [cite: 263]
+        passwordInput.addEventListener('input', () => {
             const password = passwordInput.value;
             const strength = calculatePasswordStrength(password);
             
             if (password.length === 0) {
-                [cite_start]passwordStrengthFill.style.width = '0%'; [cite: 264]
+                passwordStrengthFill.style.width = '0%';
                 passwordStrengthText.textContent = 'Enter a password';
                 passwordStrengthText.style.color = 'var(--secondary-text)';
                 document.getElementById('step2Next').disabled = true;
                 return;
             }
 
-            [cite_start]passwordStrengthFill.style.width = strength.percent + '%'; [cite: 265]
+            passwordStrengthFill.style.width = strength.percent + '%';
             passwordStrengthFill.style.background = strength.color;
             passwordStrengthText.textContent = strength.text;
             passwordStrengthText.style.color = strength.color;
@@ -942,121 +940,121 @@
             // Allow any password length > 0
             document.getElementById('step2Next').disabled = false;
         });
-        [cite_start]function calculatePasswordStrength(password) { [cite: 266]
-            [cite_start]let score = 0; [cite: 267]
+        function calculatePasswordStrength(password) {
+            let score = 0;
             // Length requirements (stricter)
-            [cite_start]if (password.length >= 8) score++; [cite: 267]
-            [cite_start]if (password.length >= 12) score++; [cite: 268]
-            [cite_start]if (password.length >= 16) score++; [cite: 269]
+            if (password.length >= 8) score++;
+            if (password.length >= 12) score++;
+            if (password.length >= 16) score++;
             
             // Character variety (stricter)
-            [cite_start]const hasLower = /[a-z]/.test(password); [cite: 270]
-            [cite_start]const hasUpper = /[A-Z]/.test(password); [cite: 270]
+            const hasLower = /[a-z]/.test(password);
+            const hasUpper = /[A-Z]/.test(password);
             const hasNumber = /\d/.test(password);
             const hasSpecial = /[^a-zA-Z\d]/.test(password);
-            [cite_start]if (hasLower && hasUpper) score++; [cite: 271]
-            [cite_start]if (hasNumber) score++; [cite: 272]
-            [cite_start]if (hasSpecial) score++; [cite: 272]
+            if (hasLower && hasUpper) score++;
+            if (hasNumber) score++;
+            if (hasSpecial) score++;
             
             // Bonus for having all character types
-            [cite_start]if (hasLower && hasUpper && hasNumber && hasSpecial) score++; [cite: 273]
+            if (hasLower && hasUpper && hasNumber && hasSpecial) score++;
             const strengths = [
                 { text: 'Very Weak', color: '#EF4444', percent: 15 },
                 { text: 'Weak', color: '#F59E0B', percent: 30 },
                 { text: 'Fair', color: '#F59E0B', percent: 45 },
                 { text: 'Fair', color: '#F59E0B', percent: 60 },
-                [cite_start]{ text: 'Good', color: '#4CAF50', percent: 75 }, [cite: 274]
+                { text: 'Good', color: '#4CAF50', percent: 75 },
                 { text: 'Strong', color: '#4CAF50', percent: 90 },
                 { text: 'Very Strong', color: '#4CAF50', percent: 100 }
-            [cite_start]]; [cite: 275]
+            ];
             // Cap score at available strength levels
-            [cite_start]const finalScore = Math.min(score, strengths.length - 1); [cite: 275]
-            [cite_start]return { ...strengths[finalScore], score }; [cite: 276]
+            const finalScore = Math.min(score, strengths.length - 1);
+            return { ...strengths[finalScore], score };
         }
 
         // ========== SHOW PASSWORD TOGGLE ==========
-        [cite_start]showPasswordToggle.addEventListener('change', () => { [cite: 277]
+        showPasswordToggle.addEventListener('change', () => {
             passwordInput.type = showPasswordToggle.checked ? 'text' : 'password';
         });
-        [cite_start]// ========== STEP NAVIGATION ========== [cite: 277]
+        // ========== STEP NAVIGATION ==========
         document.getElementById('step1Next').addEventListener('click', () => goToStep(2));
         document.getElementById('step2Back').addEventListener('click', () => goToStep(1));
-        [cite_start]document.getElementById('step2Next').addEventListener('click', () => goToStep(3)); [cite: 278]
+        document.getElementById('step2Next').addEventListener('click', () => goToStep(3));
         document.getElementById('step3Back').addEventListener('click', () => goToStep(2));
         document.getElementById('step3Next').addEventListener('click', () => {
             updateReview();
             goToStep(4);
         });
-        [cite_start]document.getElementById('step4Back').addEventListener('click', () => goToStep(3)); [cite: 279]
+        document.getElementById('step4Back').addEventListener('click', () => goToStep(3));
 
         function goToStep(step) {
             // Hide all steps
-            [cite_start]document.querySelectorAll('.herovibes-zip-tool .step').forEach(s => s.classList.remove('active')); [cite: 279]
+            document.querySelectorAll('.herovibes-zip-tool .step').forEach(s => s.classList.remove('active'));
             // Show target step
-            [cite_start]document.getElementById('step' + step).classList.add('active'); [cite: 280]
+            document.getElementById('step' + step).classList.add('active');
             // Update progress tracker
-            [cite_start]updateProgressTracker(step); [cite: 281]
+            updateProgressTracker(step);
             
             currentStep = step;
             hideStatus();
-            scheduleHeightCheck(); [cite_start]// [cite: 92] Notify iframe of content change
-        [cite_start]} [cite: 282]
+            scheduleHeightCheck(); // Notify iframe of content change
+        }
 
         function updateProgressTracker(step) {
-            [cite_start]const steps = document.querySelectorAll('.herovibes-zip-tool .progress-step'); [cite: 283]
-            [cite_start]steps.forEach((s, index) => { [cite: 283]
+            const steps = document.querySelectorAll('.herovibes-zip-tool .progress-step');
+            steps.forEach((s, index) => {
                 const stepNum = index + 1;
                 s.classList.remove('active', 'completed');
                 
                 if (stepNum < step) {
                     s.classList.add('completed');
-                    [cite_start]s.querySelector('.progress-circle').textContent = '✓'; [cite: 284]
+                    s.querySelector('.progress-circle').textContent = '✓';
                 } else if (stepNum === step) {
                     s.classList.add('active');
                     s.querySelector('.progress-circle').textContent = stepNum;
-                [cite_start]} else { [cite: 285]
+                } else {
                     s.querySelector('.progress-circle').textContent = stepNum;
                 }
             });
-            [cite_start]// Update progress fill [cite: 286]
-            [cite_start]const percent = ((step - 1) / 3) * 100; [cite: 286]
-            [cite_start]progressFill.style.width = percent + '%'; [cite: 287]
+            // Update progress fill
+            const percent = ((step - 1) / 3) * 100;
+            progressFill.style.width = percent + '%';
         }
 
         // ========== REVIEW SECTION ==========
         function updateReview() {
             const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
-            [cite_start]document.getElementById('reviewFileCount').textContent = selectedFiles.length; [cite: 288]
+            document.getElementById('reviewFileCount').textContent = selectedFiles.length;
             document.getElementById('reviewTotalSize').textContent = formatFileSize(totalSize);
             
             const zipName = zipNameInput.value.trim() || 'secure-archive';
             document.getElementById('reviewZipName').textContent = zipName + '.zip';
-            [cite_start]const compressionText = { [cite: 289]
+            const compressionText = {
                 '0': 'Store (No compression)',
                 '6': 'Balanced',
                 '9': 'Maximum'
-            [cite_start]}; [cite: 289]
-            [cite_start]document.getElementById('reviewCompression').textContent = compressionText[compressionLevel.value]; [cite: 290]
+            };
+            document.getElementById('reviewCompression').textContent = compressionText[compressionLevel.value];
             
             document.getElementById('reviewAnonymize').textContent = replaceFilesToggle.checked ? 'Yes' : 'No';
-            document.getElementById('reviewMetadata').textContent = stripMetadataToggle.checked ? [cite_start]'Yes' : 'No'; [cite: 291]
+            document.getElementById('reviewMetadata').textContent = stripMetadataToggle.checked ? 'Yes' : 'No';
         }
 
         // ========== ZIP GENERATION ==========
-        [cite_start]document.getElementById('generateButton').addEventListener('click', async () => { [cite: 291]
+        document.getElementById('generateButton').addEventListener('click', async () => {
             if (!passwordInput.value) {
                 showStatus('Please enter a password', 'error');
                 return;
             }
 
-            [cite_start]// Check if zip.js is loaded [cite: 292]
-            [cite_start]if (!zipLib || typeof zipLib.ZipWriter === 'undefined') { [cite: 292]
+            // Check if zip.js is loaded
+            if (!zipLib || typeof zipLib.ZipWriter === 'undefined') {
                 showStatus('Error: ZIP library not loaded. Please refresh the page.', 'error');
                 console.error('zip.js not available:', zipLib);
                 return;
             }
 
-            [cite_start]const generateButton = document.getElementById('generateButton'); [cite: 293]
+            const generateButton = document.getElementById('generateButton');
             generateButton.disabled = true;
             generateButton.textContent = 'Generating...';
             
@@ -1064,89 +1062,89 @@
 
             try {
                 await createSecureZip();
-                [cite_start]showStatus('Success! Your download has started.', 'success'); [cite: 294]
+                showStatus('Success! Your download has started.', 'success');
                 
                 // Reset form after 3 seconds
                 setTimeout(() => {
-                    [cite_start]resetForm(); [cite: 295]
+                    resetForm();
                 }, 3000);
             } catch (error) {
-                [cite_start]showStatus('Error: ' + error.message, 'error'); [cite: 296]
-                [cite_start]console.error('ZIP generation error:', error); [cite: 296]
+                showStatus('Error: ' + error.message, 'error');
+                console.error('ZIP generation error:', error);
             } finally {
-                [cite_start]generateButton.disabled = false; [cite: 297]
-                [cite_start]generateButton.textContent = 'Generate Secure ZIP'; [cite: 297]
+                generateButton.disabled = false;
+                generateButton.textContent = 'Generate Secure ZIP';
             }
         });
-        [cite_start]// Detect user's operating system [cite: 298]
+        // Detect user's operating system
         function detectOS() {
-            [cite_start]const userAgent = window.navigator.userAgent; [cite: 298]
-            [cite_start]const platform = window.navigator.platform; [cite: 299]
+            const userAgent = window.navigator.userAgent;
+            const platform = window.navigator.platform;
             const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'];
-            [cite_start]const windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE']; [cite: 300]
-            [cite_start]if (macosPlatforms.indexOf(platform) !== -1) { [cite: 300]
-                [cite_start]return 'MacOS'; [cite: 301]
-            [cite_start]} else if (windowsPlatforms.indexOf(platform) !== -1) { [cite: 301]
-                [cite_start]return 'Windows'; [cite: 302]
-            [cite_start]} else if (/Linux/.test(platform)) { [cite: 302]
-                [cite_start]return 'Linux'; [cite: 303]
+            const windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
+            if (macosPlatforms.indexOf(platform) !== -1) {
+                return 'MacOS';
+            } else if (windowsPlatforms.indexOf(platform) !== -1) {
+                return 'Windows';
+            } else if (/Linux/.test(platform)) {
+                return 'Linux';
             }
-            [cite_start]return 'Unknown'; [cite: 304]
+            return 'Unknown';
         }
 
         async function createSecureZip() {
-            [cite_start]const password = passwordInput.value; [cite: 305]
-            [cite_start]const compression = parseInt(compressionLevel.value); [cite: 305]
+            const password = passwordInput.value;
+            const compression = parseInt(compressionLevel.value);
             const replaceFilenames = replaceFilesToggle.checked;
             const stripMetadata = stripMetadataToggle.checked;
-            [cite_start]const userOS = detectOS(); [cite: 306]
-            [cite_start]console.log('Creating ZIP for OS:', userOS); [cite: 306]
+            const userOS = detectOS();
+            console.log('Creating ZIP for OS:', userOS);
             
             // Use zip.js with proper initialization
             const zipWriter = new zipLib.ZipWriter(
                 new zipLib.BlobWriter("application/zip"),
                 { 
                     password, 
-                    [cite_start]encryptionStrength: 3, // AES-256 encryption (works on all OS) [cite: 307]
+                    encryptionStrength: 3, // AES-256 encryption (works on all OS)
                     zipCrypto: false, // Use AES instead of ZipCrypto for better security
                     useWebWorkers: false,
                     level: compression
-                [cite_start]} [cite: 308]
+                }
              );
-            [cite_start]for (let i = 0; i < selectedFiles.length; i++) { [cite: 309]
-                [cite_start]const file = selectedFiles[i]; [cite: 310]
-                [cite_start]let fileToAdd = file; [cite: 310]
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                let fileToAdd = file;
                 let fileName = file.name;
 
-                [cite_start]showStatus(`Processing ${i + 1} of ${selectedFiles.length}: ${file.name}`, 'info'); [cite: 311]
+                showStatus(`Processing ${i + 1} of ${selectedFiles.length}: ${file.name}`, 'info');
                 // Strip metadata from JPEG files
-                [cite_start]if (stripMetadata && file.type === 'image/jpeg') { [cite: 311]
+                if (stripMetadata && file.type === 'image/jpeg') {
                     try {
-                        [cite_start]const fileBuffer = await file.arrayBuffer(); [cite: 312]
-                        [cite_start]const strippedBuffer = ExifStripper.remove(fileBuffer); [cite: 312]
+                        const fileBuffer = await file.arrayBuffer();
+                        const strippedBuffer = ExifStripper.remove(fileBuffer);
                         fileToAdd = new Blob([strippedBuffer], { type: file.type });
-                    [cite_start]} catch (e) { [cite: 313]
-                        [cite_start]console.error("Could not strip metadata from", file.name, e); [cite: 314]
+                    } catch (e) {
+                        console.error("Could not strip metadata from", file.name, e);
                     }
                 }
                 
                 // Replace filenames if anonymization is enabled
                 if (replaceFilenames) {
                     const extension = file.name.slice(file.name.lastIndexOf('.'));
-                    [cite_start]fileName = `SecureFile${i + 1}${extension}`; [cite: 315]
+                    fileName = `SecureFile${i + 1}${extension}`;
                 }
 
                 // Normalize path separators for cross-platform compatibility
-                [cite_start]fileName = fileName.replace(/\\/g, '/'); [cite: 316]
-                [cite_start]await zipWriter.add(fileName, new zipLib.BlobReader(fileToAdd)); [cite: 316]
+                fileName = fileName.replace(/\\/g, '/');
+                await zipWriter.add(fileName, new zipLib.BlobReader(fileToAdd));
             }
 
-            [cite_start]showStatus('Finalizing ZIP file...', 'info'); [cite: 317]
-            [cite_start]const zipBlob = await zipWriter.close(); [cite: 317]
+            showStatus('Finalizing ZIP file...', 'info');
+            const zipBlob = await zipWriter.close();
             
             // Download the ZIP
             const zipName = (zipNameInput.value.trim() || 'secure-archive') + '.zip';
-            [cite_start]const downloadUrl = URL.createObjectURL(zipBlob); [cite: 318]
+            const downloadUrl = URL.createObjectURL(zipBlob);
             const a = document.createElement('a');
             a.href = downloadUrl;
             a.download = zipName;
@@ -1154,31 +1152,31 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(downloadUrl);
-            [cite_start]console.log('ZIP created successfully for', userOS); [cite: 319]
+            console.log('ZIP created successfully for', userOS);
         }
 
         // ========== STATUS MESSAGES ==========
         function showStatus(message, type) {
-            [cite_start]statusMessage.textContent = message; [cite: 320]
-            [cite_start]statusMessage.className = 'status-message status-' + type + ' show'; [cite: 320]
-            scheduleHeightCheck(); [cite_start]// [cite: 92] Notify iframe of content change
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message status-' + type + ' show';
+            scheduleHeightCheck(); // Notify iframe of content change
         }
 
         function hideStatus() {
-            [cite_start]statusMessage.classList.remove('show'); [cite: 321]
-            scheduleHeightCheck(); [cite_start]// [cite: 92] Notify iframe of content change
+            statusMessage.classList.remove('show');
+            scheduleHeightCheck(); // Notify iframe of content change
         }
 
         // ========== RESET FORM ==========
         function resetForm() {
-            [cite_start]selectedFiles = []; [cite: 322]
-            [cite_start]fileInput.value = ''; [cite: 322]
+            selectedFiles = [];
+            fileInput.value = '';
             passwordInput.value = '';
             zipNameInput.value = 'secure-archive';
             compressionLevel.value = '6';
             replaceFilesToggle.checked = false;
             stripMetadataToggle.checked = false;
-            [cite_start]showPasswordToggle.checked = false; [cite: 323]
+            showPasswordToggle.checked = false;
             passwordInput.type = 'password';
             
             displayFileList();
@@ -1186,52 +1184,52 @@
             
             document.getElementById('step1Next').disabled = true;
             passwordStrengthFill.style.width = '0%';
-            [cite_start]passwordStrengthText.textContent = 'Enter a password'; [cite: 324]
+            passwordStrengthText.textContent = 'Enter a password';
         }
 
         // ========== DEVELOPER CONSOLE LOG ==========
-        [cite_start]console.log('%c🎨 Secure ZIP Generator - HeroVibes', 'color: #87A9FF; font-size: 16px; font-weight: bold;'); [cite: 325]
-        [cite_start]console.log('%cBuilt with love for creators', 'color: #8C8C8C; font-size: 12px;'); [cite: 325]
+        console.log('%c🎨 Secure ZIP Generator - HeroVibes', 'color: #87A9FF; font-size: 16px; font-weight: bold;');
+        console.log('%cBuilt with love for creators', 'color: #8C8C8C; font-size: 12px;');
 
-        [cite_start]// ===== FOURTHWALL SCROLLBAR FIX ===== [cite: 79]
-        [cite_start]let lastHeight = 0; [cite: 79]
-        [cite_start]let resizeTimer; [cite: 79]
+        // ===== FOURTHWALL SCROLLBAR FIX =====
+        let lastHeight = 0;
+        let resizeTimer;
         /**
-         * [cite_start]Sends the current scrollHeight to the parent window if it has changed. [cite: 80]
-         * [cite_start]This is the *only* function that should send a postMessage. [cite: 81]
+         * Sends the current scrollHeight to the parent window if it has changed.
+         * This is the *only* function that should send a postMessage.
          */
         function sendHeight() {
           // Use scrollHeight for content height
-          [cite_start]const height = document.body.scrollHeight; [cite: 82]
-          [cite_start]// Only send message if height has *actually* changed [cite: 83]
+          const height = document.body.scrollHeight;
+          // Only send message if height has *actually* changed
           if (height !== lastHeight) {
-            [cite_start]lastHeight = height; [cite: 84]
-            [cite_start]window.parent.postMessage({ frameHeight: height }, '*'); [cite: 84]
+            lastHeight = height;
+            window.parent.postMessage({ frameHeight: height }, '*');
           }
         }
 
         /**
-         * [cite_start]A debounced version of sendHeight() to be called on content changes. [cite: 85]
-         * [cite_start]This ensures we don't spam messages during rapid changes. [cite: 86]
+         * A debounced version of sendHeight() to be called on content changes.
+         * This ensures we don't spam messages during rapid changes.
          */
         function scheduleHeightCheck() {
             // Clear any pending checks
-            [cite_start]clearTimeout(resizeTimer); [cite: 87]
-            [cite_start]// Schedule a new check after 150ms [cite: 88]
-            [cite_start]resizeTimer = setTimeout(sendHeight, 150); [cite: 88]
+            clearTimeout(resizeTimer);
+            // Schedule a new check after 150ms
+            resizeTimer = setTimeout(sendHeight, 150);
         }
 
-        [cite_start]// Send height on initial load (with a slight delay) [cite: 89]
-        [cite_start]// This fixes the "Content Cut-Off" race condition. [cite: 89]
-        [cite_start]window.addEventListener('load', () => { [cite: 90]
-            [cite_start]setTimeout(sendHeight, 100); [cite: 90]
+        // Send height on initial load (with a slight delay)
+        // This fixes the "Content Cut-Off" race condition.
+        window.addEventListener('load', () => {
+            setTimeout(sendHeight, 100);
         });
-        [cite_start]// Send height on window resize (debounced) [cite: 91]
-        [cite_start]window.addEventListener('resize', () => { [cite: 91]
+        // Send height on window resize (debounced)
+        window.addEventListener('resize', () => {
             // Use scheduleHeightCheck for built-in debounce
             scheduleHeightCheck();
         });
-        [cite_start]// ===== END OF SCROLLBAR FIX ===== [cite: 91]
+        // ===== END OF SCROLLBAR FIX =====
     </script>
 </body>
 </html>
