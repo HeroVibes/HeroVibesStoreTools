@@ -1745,4 +1745,373 @@
         }, 100);
 
         async function drawPreview() {
-            const currentBg = backgrounds
+            const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
+            const currentTx = texturesData.find(tx => tx.id === selectedTextureId);
+            const latestIcon = iconsData.find(icon => icon.id === latestSelectedIconId);
+
+            if (latestIcon) {
+                previewOverlayText.style.display = 'none';
+            } else {
+                previewOverlayText.style.display = 'block';
+            }
+
+            await renderIconToCanvas(
+                latestIcon,
+                currentBg,
+                currentTx,
+                iconColorInput.value,
+                backgroundColorInput.value,
+                glowColorInput.value,
+                edgeOnOffCheckbox.checked,
+                logoGlowOnOffCheckbox.checked,
+                edgeGlowOnOffCheckbox.checked,
+                iconPreview,
+                ctx,
+                300
+            );
+        }
+
+        function normalizeHex(hex) {
+            if (!hex) return '';
+            hex = hex.startsWith('#') ? hex : '#' + hex;
+            if (hex.length === 4 && /^#[0-9a-fA-F]{3}$/.test(hex)) {
+                return '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+            }
+            return hex.toUpperCase();
+        }
+
+        function isValidHex(hex) {
+            return /^#?([0-9a-fA-F]{3}){1,2}$/.test(hex);
+        }
+
+        function updateColorInputs(colorPickerElement, hexInputElement, newColor) {
+            const normalizedColor = normalizeHex(newColor);
+            colorPickerElement.value = normalizedColor;
+            hexInputElement.value = normalizedColor;
+        }
+
+        // ===== TAB SWITCHING =====
+        showIconsBtn.addEventListener('click', () => {
+            showIconsBtn.classList.add('active');
+            showTxBtn.classList.remove('active');
+            showBgBtn.classList.remove('active');
+            iconsContent.classList.add('active');
+            txContent.classList.remove('active');
+            bgContent.classList.remove('active');
+        });
+
+        showTxBtn.addEventListener('click', () => {
+            showTxBtn.classList.add('active');
+            showIconsBtn.classList.remove('active');
+            showBgBtn.classList.remove('active');
+            txContent.classList.add('active');
+            iconsContent.classList.remove('active');
+            bgContent.classList.remove('active');
+        });
+
+        showBgBtn.addEventListener('click', () => {
+            showBgBtn.classList.add('active');
+            showIconsBtn.classList.remove('active');
+            showTxBtn.classList.remove('active');
+            bgContent.classList.add('active');
+            iconsContent.classList.remove('active');
+            txContent.classList.remove('active');
+        });
+
+        // ===== COLOR SYNC WITH DEBOUNCE =====
+        function setupColorSync(colorPicker, hexInput) {
+            colorPicker.addEventListener('input', () => {
+                updateColorInputs(colorPicker, hexInput, colorPicker.value);
+                debouncedDrawPreview();
+            });
+
+            let hexInputTimeout;
+            hexInput.addEventListener('input', () => {
+                const value = hexInput.value;
+                
+                // Clear previous timeout
+                clearTimeout(hexInputTimeout);
+                
+                // Only update if we have a complete hex color (7 characters including #)
+                if (value.length === 7 && isValidHex(value)) {
+                    hexInputTimeout = setTimeout(() => {
+                        updateColorInputs(colorPicker, hexInput, value);
+                        debouncedDrawPreview();
+                    }, 300); // Wait 300ms after user stops typing
+                } else if (value.length === 4 && isValidHex(value)) {
+                    // Also handle short hex format like #FFF
+                    hexInputTimeout = setTimeout(() => {
+                        updateColorInputs(colorPicker, hexInput, value);
+                        debouncedDrawPreview();
+                    }, 300);
+                }
+            });
+        }
+
+        setupColorSync(iconColorInput, iconColorHexInput);
+        setupColorSync(backgroundColorInput, backgroundColorHexInput);
+        setupColorSync(glowColorInput, glowColorHexInput);
+
+        // ===== CHECKBOX & NAME LISTENERS =====
+        document.querySelectorAll('.checkbox-item input, #iconName').forEach(input => {
+            input.addEventListener('change', () => {
+                debouncedDrawPreview();
+            });
+        });
+
+        // ===== DOWNLOAD FUNCTIONALITY =====
+        downloadBtn.addEventListener('click', async () => {
+            if (selectedIcons.length === 0) {
+                alert('Please select at least one icon to download.');
+                return;
+            }
+
+            const baseFileName = iconNameInput.value.trim() || 'CustomIcon';
+            const saveAsZip = document.getElementById('saveAsZip').checked;
+            const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
+            const currentTx = texturesData.find(tx => tx.id === selectedTextureId);
+            const bgColor = backgroundColorInput.value;
+            const iconColor = iconColorInput.value;
+            const glowColor = glowColorInput.value;
+            const edgeOn = edgeOnOffCheckbox.checked;
+            const logoGlowOn = logoGlowOnOffCheckbox.checked;
+            const edgeGlowOn = edgeGlowOnOffCheckbox.checked;
+
+            let zip;
+            if (saveAsZip) {
+                zip = new JSZip();
+                const sizesToGenerate = [500, 288, 144, 96, 72];
+                const recommendedSize = 144;
+
+                downloadBtn.disabled = true;
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating ZIP...';
+
+                try {
+                    for (const iconId of selectedIcons) {
+                        const iconData = iconsData.find(i => i.id === iconId);
+                        if (!iconData) {
+                            console.warn(`Icon with ID ${iconId} not found. Skipping.`);
+                            continue;
+                        }
+
+                        const cleanIconName = iconData.name.replace(/[^a-z0-9]/gi, '_');
+
+                        for (const size of sizesToGenerate) {
+                            const exportCanvas = document.createElement('canvas');
+                            exportCanvas.width = size;
+                            exportCanvas.height = size;
+                            const exportCtx = exportCanvas.getContext('2d');
+
+                            await renderIconToCanvas(
+                                iconData,
+                                currentBg,
+                                currentTx,
+                                iconColor,
+                                bgColor,
+                                glowColor,
+                                edgeOn,
+                                logoGlowOn,
+                                edgeGlowOn,
+                                exportCanvas,
+                                exportCtx,
+                                size
+                            );
+
+                            const dataURL = exportCanvas.toDataURL('image/png');
+                            const base64Data = dataURL.split(',')[1];
+                            
+                            let folderName = `${size}px`;
+                            if (size === recommendedSize) {
+                                folderName = `${size}px (Recommended)`;
+                            }
+
+                            zip.file(`${folderName}/${baseFileName}_${cleanIconName}.png`, base64Data, { base64: true });
+                        }
+                    }
+
+                    const zipBlob = await zip.generateAsync({ type: 'blob' });
+                    const zipFileName = `${baseFileName}_Icons.zip`;
+                    const zipLink = document.createElement('a');
+                    zipLink.href = URL.createObjectURL(zipBlob);
+                    zipLink.download = zipFileName;
+                    document.body.appendChild(zipLink);
+                    zipLink.click();
+                    document.body.removeChild(zipLink);
+                    URL.revokeObjectURL(zipLink.href);
+
+                } catch (error) {
+                    console.error('Error during ZIP icon download:', error);
+                    alert('An error occurred during ZIP download. Please check the console for details.');
+                } finally {
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons';
+                }
+
+            } else {
+                downloadBtn.disabled = true;
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+                try {
+                    for (const iconId of selectedIcons) {
+                        const iconData = iconsData.find(i => i.id === iconId);
+                        if (!iconData) {
+                            console.warn(`Icon with ID ${iconId} not found. Skipping.`);
+                            continue;
+                        }
+
+                        const exportCanvas = document.createElement('canvas');
+                        exportCanvas.width = selectedSize;
+                        exportCanvas.height = selectedSize;
+                        const exportCtx = exportCanvas.getContext('2d');
+
+                        await renderIconToCanvas(
+                            iconData,
+                            currentBg,
+                            currentTx,
+                            iconColor,
+                            bgColor,
+                            glowColor,
+                            edgeOn,
+                            logoGlowOn,
+                            edgeGlowOn,
+                            exportCanvas,
+                            exportCtx,
+                            selectedSize
+                        );
+
+                        const cleanIconName = iconData.name.replace(/[^a-z0-9]/gi, '_');
+                        const fileName = `${baseFileName}_${cleanIconName}.png`;
+                        const dataURL = exportCanvas.toDataURL('image/png');
+
+                        const link = document.createElement('a');
+                        link.download = fileName;
+                        link.href = dataURL;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                } catch (error) {
+                    console.error('Error during single icon download:', error);
+                    alert('An error occurred during download. Please check the console for details.');
+                } finally {
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons';
+                }
+            }
+        });
+
+        // ===== UPLOAD HANDLERS =====
+        document.getElementById('uploadIcon').addEventListener('change', async (event) => {
+            if (event.target.files.length > 0) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    customIconCount++;
+                    const isSVG = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
+                    const newIconType = isSVG ? 'custom-svg' : 'custom-image';
+
+                    const newIcon = { 
+                        id: 'custom-icon-' + Date.now(), 
+                        name: `Custom ${customIconCount}`, 
+                        type: newIconType, 
+                        src: e.target.result 
+                    };
+                    iconsData.unshift(newIcon);
+                    await populateGrid(iconsContent, iconsData, 'icon');
+                    
+                    clearSelection(iconsContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                    const newIconElement = iconsContent.querySelector(`[data-id="${newIcon.id}"]`);
+                    if (newIconElement) newIconElement.classList.add('selected');
+                    selectedIcons = [newIcon.id];
+                    latestSelectedIconId = newIcon.id;
+                    updateSelectedCount();
+                    
+                    debouncedDrawPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('uploadTx').addEventListener('change', async (event) => {
+            if (event.target.files.length > 0) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    customTextureCount++;
+                    const newTx = { 
+                        id: 'custom-tx-' + Date.now(), 
+                        name: `Custom ${customTextureCount}`, 
+                        type: 'custom-image', 
+                        src: e.target.result, 
+                        textureOpacity: 0.8 
+                    };
+                    texturesData.unshift(newTx);
+                    await populateGrid(txContent, texturesData, 'texture');
+                    
+                    clearSelection(txContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                    const newTxElement = txContent.querySelector(`[data-id="${newTx.id}"]`);
+                    if (newTxElement) newTxElement.classList.add('selected');
+                    selectedTextureId = newTx.id;
+                    
+                    debouncedDrawPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('uploadBg').addEventListener('change', async (event) => {
+            if (event.target.files.length > 0) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    customBackgroundCount++;
+                    const newBg = { 
+                        id: 'custom-bg-' + Date.now(), 
+                        name: `Custom ${customBackgroundCount}`, 
+                        type: 'custom-image', 
+                        src: e.target.result 
+                    };
+                    backgroundsData.unshift(newBg);
+                    await populateGrid(bgContent, backgroundsData, 'background');
+                    
+                    clearSelection(bgContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                    const newBgElement = bgContent.querySelector(`[data-id="${newBg.id}"]`);
+                    if (newBgElement) newBgElement.classList.add('selected');
+                    selectedBackgroundId = newBg.id;
+                    
+                    debouncedDrawPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ===== INITIALIZATION =====
+        document.fonts.ready.then(async () => {
+            await populateGrid(iconsContent, iconsData, 'icon');
+            await populateGrid(txContent, texturesData, 'texture');
+            await populateGrid(bgContent, backgroundsData, 'background');
+            debouncedDrawPreview();
+            iconColorHexInput.value = normalizeHex(iconColorInput.value);
+            backgroundColorHexInput.value = normalizeHex(backgroundColorInput.value);
+            glowColorHexInput.value = normalizeHex(glowColorInput.value);
+            updateSelectedCount();
+            checkGradientWarning();
+        });
+
+        // ===== FOURTHWALL SCROLLBAR FIX =====
+        function sendHeight() {
+            var height = document.body.scrollHeight;
+            window.parent.postMessage({ frameHeight: height }, '*');
+        }
+
+        window.onload = sendHeight;
+        window.onresize = sendHeight;
+
+        // Also send height when sections are collapsed/expanded
+        const originalToggleSection = window.toggleSection;
+        window.toggleSection = function(header) {
+            originalToggleSection(header);
+            setTimeout(sendHeight, 350); // Wait for animation to complete
+        };
+    </script>
+</body>
+</html>
