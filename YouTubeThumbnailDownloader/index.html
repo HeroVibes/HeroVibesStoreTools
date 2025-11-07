@@ -1,584 +1,1179 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
   <title>YouTube Thumbnail Downloader - HeroVibes</title>
+
   <style>
+
     /* ===== DESIGN SYSTEM VARIABLES ===== */
+
     :root {
+
       --bg-primary: #191919;
+
       --bg-secondary: #1F1F1F;
+
       --bg-hover: #323232;
+
       --outline: #323232;
+
       --accent: #87A9FF;
+
       --text-primary: #D4D4D4;
+
       --text-secondary: #8C8C8C;
+
       --radius: 8px;
+
       --transition: 0.3s ease;
+
     }
+
+
 
     /* ===== GLOBAL RESET ===== */
+
     * {
+
       margin: 0;
+
       padding: 0;
+
       box-sizing: border-box;
+
     }
+
+
 
     body {
+
       font-family: sans-serif;
+
       background: var(--bg-primary);
+
       color: var(--text-primary);
+
       padding: 24px 16px;
+
       /* REMOVED min-height: 100vh; to fix "Failure to Shrink" bug */
+
     }
+
+
 
     /* ===== MAIN CONTAINER ===== */
+
     .tool-container {
+
       width: 100%;
+
       max-width: 600px;
+
       margin: 0 auto;
+
       background: var(--bg-secondary);
+
       border: 1px solid var(--outline);
+
       border-radius: var(--radius);
+
       padding: 40px 16px;
+
     }
+
+
 
     /* ===== INPUT SECTION ===== */
+
     .input-section {
+
       text-align: center;
+
       margin-bottom: 24px;
+
     }
+
+
 
     .input-label {
+
       font-size: 14px;
+
       font-weight: 600;
+
       color: var(--text-primary);
+
       margin-bottom: 12px;
+
       display: block;
+
     }
+
+
 
     #videoInput {
+
       width: 100%;
+
       padding: 14px 16px;
+
       font-size: 14px;
+
       font-family: sans-serif;
+
       background: var(--bg-primary);
+
       border: 1px solid var(--outline);
+
       border-radius: var(--radius);
+
       color: var(--text-primary);
+
       transition: var(--transition);
+
       outline: none;
+
       text-align: center;
+
     }
+
+
 
     #videoInput:focus {
+
       border-color: var(--accent);
+
       box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+
     }
+
+
 
     #videoInput::placeholder {
+
       color: var(--text-secondary);
+
     }
+
+
 
     /* ===== ERROR MESSAGE ===== */
+
     .error-message {
+
       background: rgba(255, 100, 100, 0.1);
+
       border: 1px solid rgba(255, 100, 100, 0.3);
+
       border-radius: var(--radius);
+
       padding: 16px;
+
       margin-bottom: 20px;
+
       display: none;
+
     }
+
+
 
     .error-message.show {
+
       display: block;
+
       animation: slideIn 0.3s ease;
+
     }
+
+
 
     .error-message strong {
+
       color: #ff6464;
+
       font-size: 14px;
+
       display: block;
+
       margin-bottom: 8px;
+
     }
+
+
 
     .error-message p {
+
       font-size: 12px;
+
       color: var(--text-secondary);
+
       line-height: 1.5;
+
       margin-bottom: 8px;
+
     }
+
+
 
     .error-message ul {
+
       font-size: 12px;
+
       color: var(--text-secondary);
+
       line-height: 1.6;
+
       padding-left: 20px;
+
     }
+
+
 
     /* ===== THUMBNAIL DISPLAY AREA ===== */
+
     .thumbnail-display {
+
       display: none;
+
       animation: fadeIn 0.4s ease;
+
     }
+
+
 
     .thumbnail-display.show {
+
       display: block;
+
     }
+
+
 
     .thumbnail-wrapper {
+
       position: relative;
+
       border-radius: var(--radius);
+
       overflow: hidden;
+
       margin-bottom: 16px;
+
       background: var(--bg-primary);
+
       border: 1px solid var(--outline);
+
     }
+
+
 
     #thumbnailImage {
+
       width: 100%;
+
       height: auto;
+
       display: block;
+
       cursor: pointer;
+
       transition: var(--transition);
+
     }
+
+
 
     #thumbnailImage:hover {
+
       opacity: 0.9;
+
       transform: scale(1.01);
+
     }
+
+
 
     .thumbnail-overlay {
-      position: absolute;
+
+      /* FIXED: Changed from absolute to fixed positioning to prevent phantom overlays */
+
+      position: fixed;
+
       top: 12px;
+
       right: 12px;
+
       background: rgba(25, 25, 25, 0.9);
+
       border: 1px solid var(--outline);
+
       padding: 6px 12px;
+
       border-radius: 4px;
+
       font-size: 12px;
+
       color: var(--accent);
-      pointer-events: none;
+
+      pointer-events: auto;
+
       z-index: 10;
+
     }
+
+
 
     .thumbnail-overlay.hidden {
+
       display: none;
+
+      pointer-events: none;
+
     }
+
+
 
     /* ===== QUALITY INFO ===== */
+
     .quality-info {
+
       font-size: 12px;
+
       color: var(--text-secondary);
+
       text-align: center;
+
       margin-bottom: 16px;
+
     }
+
+
 
     /* ===== DOWNLOAD BUTTON ===== */
+
     .btn-download {
+
       position: relative;
+
       width: 100%;
+
       padding: 12px 16px;
+
       border-radius: var(--radius);
+
       background: var(--bg-primary);
+
       color: var(--text-primary);
+
       border: 1px solid rgba(255, 255, 255, 0.06);
+
       cursor: pointer;
+
       overflow: hidden;
+
       font-size: 14px;
+
       font-weight: 600;
+
       font-family: sans-serif;
+
       transition: var(--transition);
+
     }
+
+
 
     /* Shimmer effect */
+
     .btn-download::before {
+
       content: '';
+
       position: absolute;
+
       top: 0;
+
       left: -100%;
+
       width: 75%;
+
       height: 100%;
+
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+
       transform: skewX(-25deg);
+
       transition: left 0.7s ease-in-out;
+
     }
+
+
 
     .btn-download:hover {
+
       background: var(--bg-hover);
+
       border-color: var(--accent);
+
     }
+
+
 
     .btn-download:hover::before {
+
       left: 125%;
+
     }
+
+
 
     .btn-download:focus-visible {
+
       outline: none;
+
       box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+
     }
+
+
 
     .btn-download:active {
+
       transform: scale(0.98);
+
     }
+
+
 
     /* ===== VERSION NUMBER ===== */
+
     .version-number {
+
       font-size: 12px;
+
       color: var(--text-secondary);
+
       text-align: center;
+
       margin-top: 16px;
+
       opacity: 0.6;
+
     }
+
+
 
     /* ===== ANIMATIONS ===== */
+
     @keyframes fadeIn {
+
       from {
+
         opacity: 0;
+
         transform: translateY(10px);
+
       }
+
       to {
+
         opacity: 1;
+
         transform: translateY(0);
+
       }
+
     }
+
+
 
     @keyframes slideIn {
+
       from {
+
         opacity: 0;
+
         transform: translateX(-10px);
+
       }
+
       to {
+
         opacity: 1;
+
         transform: translateX(0);
+
       }
+
     }
+
+
 
     /* ===== MOBILE OPTIMIZATION ===== */
+
     @media screen and (max-width: 768px) {
+
       body {
+
         padding: 16px;
+
       }
 
+
+
       .tool-container {
+
         padding: 32px 12px;
+
       }
+
+
 
       #videoInput {
+
         font-size: 16px; /* Prevents zoom on iOS */
+
       }
+
+
 
       .thumbnail-overlay {
+
         font-size: 11px;
+
         padding: 4px 8px;
+
       }
+
     }
+
+
 
     @media screen and (max-width: 480px) {
+
       .tool-container {
+
         padding: 24px 12px;
+
       }
+
+
 
       .input-label {
+
         font-size: 13px;
+
       }
+
     }
+
   </style>
+
 </head>
+
 <body>
+
+  <!-- ===== TOOL CONTAINER ===== -->
+
   <div class="tool-container">
+
     
+
+    <!-- ===== INPUT SECTION ===== -->
+
     <div class="input-section">
+
       <label class="input-label" for="videoInput">Paste YouTube URL</label>
+
       <input 
+
         type="text" 
+
         id="videoInput" 
+
         placeholder="https://youtube.com/watch?v=..." 
+
         autocomplete="off"
+
         spellcheck="false"
+
       />
+
     </div>
+
+
+
+    <!-- ===== ERROR DISPLAY ===== -->
 
     <div class="error-message" id="errorMessage">
+
       <strong>⚠️ Unable to Load Thumbnail</strong>
+
       <p id="errorText"></p>
+
       <ul>
+
         <li>Ensure the video is public or unlisted</li>
+
         <li>Check for typos in the URL or Video ID</li>
+
         <li>Video ID should be exactly 11 characters</li>
+
         <li>Try using the full YouTube URL</li>
+
       </ul>
+
     </div>
+
+
+
+    <!-- ===== THUMBNAIL DISPLAY AREA ===== -->
 
     <div class="thumbnail-display" id="thumbnailDisplay">
+
       <div class="thumbnail-wrapper">
+
         <img 
+
           id="thumbnailImage" 
+
           src="" 
+
           alt="YouTube Thumbnail"
+
           title="Click to open in new tab"
+
         />
+
         <div class="thumbnail-overlay" id="qualityBadge"></div>
+
       </div>
+
       
+
       <div class="quality-info" id="qualityInfo"></div>
+
       
+
       <button class="btn-download" id="downloadButton" type="button">
+
         Download Thumbnail
+
       </button>
 
-      <div class="version-number">V1.0.3</div>
+
+
+      <!-- ===== VERSION NUMBER ===== -->
+
+      <div class="version-number">V1.0.1</div>
+
     </div>
+
+
 
   </div>
 
+
+
+  <!-- ===== JAVASCRIPT FUNCTIONALITY ===== -->
+
   <script>
+
     // ===== DOM ELEMENTS =====
+
     const videoInput = document.getElementById('videoInput');
+
     const errorMessage = document.getElementById('errorMessage');
+
     const errorText = document.getElementById('errorText');
+
     const thumbnailDisplay = document.getElementById('thumbnailDisplay');
+
     const thumbnailImage = document.getElementById('thumbnailImage');
+
     const downloadButton = document.getElementById('downloadButton');
+
     const qualityBadge = document.getElementById('qualityBadge');
+
     const qualityInfo = document.getElementById('qualityInfo');
 
+
+
     // ===== STATE MANAGEMENT =====
+
     let currentThumbnailUrl = '';
+
     let currentQuality = '';
+
     let debounceTimer;
 
+
+
     // ===== INPUT HANDLER WITH DEBOUNCE =====
+
     videoInput.addEventListener('input', () => {
+
       clearTimeout(debounceTimer);
+
       const value = videoInput.value.trim();
+
       
+
       if (value.length >= 11) {
+
         debounceTimer = setTimeout(() => {
+
           processVideo(value);
+
         }, 500);
+
       } else {
+
         hideAllMessages();
+
       }
+
     });
 
+
+
     // ===== EXTRACT VIDEO ID FROM URL OR RAW ID =====
+
     function extractVideoId(input) {
+
       try {
+
         const url = new URL(input);
+
         const hostname = url.hostname;
 
+
+
         // Handle youtu.be short links
+
         if (hostname.includes('youtu.be')) {
+
           return url.pathname.split('/')[1]?.split('?')[0];
+
         }
+
+
 
         // Handle youtube.com links
+
         if (hostname.includes('youtube.com')) {
+
           // Handle /shorts/ format
+
           if (url.pathname.includes('/shorts/')) {
+
             return url.pathname.split('/shorts/')[1]?.split('?')[0];
+
           }
+
           // Handle standard watch?v= format
+
           return url.searchParams.get('v');
+
         }
+
       } catch (e) {
+
         // Not a valid URL, treat as raw video ID
+
         const cleaned = input.replace(/[^a-zA-Z0-9_-]/g, '');
+
         return cleaned.length === 11 ? cleaned : null;
+
       }
+
       return null;
+
     }
+
+
 
     // ===== CHECK IF IMAGE EXISTS =====
+
     function checkImageExists(url) {
+
       return new Promise((resolve) => {
+
         const img = new Image();
+
         img.onload = () => resolve(true);
+
         img.onerror = () => resolve(false);
+
         img.src = url;
+
       });
+
     }
 
+
+
     // ===== PROCESS VIDEO INPUT =====
+
     async function processVideo(input) {
+
       hideAllMessages();
+
       
+
       const videoId = extractVideoId(input);
+
       
+
       if (!videoId || videoId.length !== 11) {
+
         showError('Invalid YouTube URL or Video ID. Please check your input.');
+
         return;
+
       }
 
+
+
       // Try different quality levels
+
       const qualityLevels = [
+
         { name: 'maxresdefault', label: 'Max Resolution (1280x720)' },
+
         { name: 'sddefault', label: 'Standard Definition (640x480)' },
+
         { name: 'hqdefault', label: 'High Quality (480x360)' },
+
         { name: 'mqdefault', label: 'Medium Quality (320x180)' },
+
         { name: 'default', label: 'Default (120x90)' }
+
       ];
+
+
 
       let foundThumbnail = false;
 
+
+
       for (const quality of qualityLevels) {
+
         const url = `https://img.youtube.com/vi/${videoId}/${quality.name}.jpg`;
+
         const exists = await checkImageExists(url);
+
         
+
         if (exists) {
+
           currentThumbnailUrl = url;
+
           currentQuality = quality.label;
+
           showThumbnail(url, quality.label);
+
           foundThumbnail = true;
+
           break;
+
         }
+
       }
+
+
 
       // Fallback to oEmbed API
-      if (!foundThumbnail) {
-        try {
-          const oEmbedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
-          const response = await fetch(oEmbedUrl);
-          const data = await response.json();
-          
-          if (data.thumbnail_url) {
-            currentThumbnailUrl = data.thumbnail_url;
-            currentQuality = 'Auto-detected';
-            showThumbnail(data.thumbnail_url, 'Auto-detected');
-            foundThumbnail = true;
-          }
-        } catch (e) {
-          console.error('oEmbed fetch failed:', e);
-        }
-      }
 
       if (!foundThumbnail) {
-        showError('Thumbnail not found. The video may be private, deleted, or too new.');
+
+        try {
+
+          const oEmbedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+
+          const response = await fetch(oEmbedUrl);
+
+          const data = await response.json();
+
+          
+
+          if (data.thumbnail_url) {
+
+            currentThumbnailUrl = data.thumbnail_url;
+
+            currentQuality = 'Auto-detected';
+
+            showThumbnail(data.thumbnail_url, 'Auto-detected');
+
+            foundThumbnail = true;
+
+          }
+
+        } catch (e) {
+
+          console.error('oEmbed fetch failed:', e);
+
+        }
+
       }
+
+
+
+      if (!foundThumbnail) {
+
+        showError('Thumbnail not found. The video may be private, deleted, or too new.');
+
+      }
+
     }
+
+
 
     // ===== SHOW THUMBNAIL =====
+
     function showThumbnail(url, quality) {
+
       thumbnailImage.src = url;
+
       qualityBadge.textContent = quality;
+
       qualityBadge.classList.remove('hidden');
+
       qualityInfo.textContent = `Quality: ${quality} • Click image to open full size`;
+
       thumbnailDisplay.classList.add('show');
+
       
+
       // Wait for image to load before updating height
+
       thumbnailImage.onload = () => {
+
         scheduleHeightCheck();
+
       };
+
     }
+
+
 
     // ===== SHOW ERROR =====
+
     function showError(message) {
+
       errorText.textContent = message;
+
       errorMessage.classList.add('show');
+
       thumbnailDisplay.classList.remove('show');
+
       qualityBadge.classList.add('hidden');
+
       scheduleHeightCheck();
+
     }
+
+
 
     // ===== HIDE ALL MESSAGES =====
+
     function hideAllMessages() {
+
       errorMessage.classList.remove('show');
+
       thumbnailDisplay.classList.remove('show');
+
       qualityBadge.classList.add('hidden');
+
       currentThumbnailUrl = '';
+
       currentQuality = '';
+
       scheduleHeightCheck();
+
     }
+
+
 
     // ===== THUMBNAIL CLICK TO OPEN =====
+
     thumbnailImage.addEventListener('click', () => {
+
       if (currentThumbnailUrl) {
+
         window.open(currentThumbnailUrl, '_blank');
+
       }
+
     });
+
+
 
     // ===== DOWNLOAD BUTTON =====
+
     downloadButton.addEventListener('click', async () => {
+
       if (!currentThumbnailUrl) return;
 
+
+
       try {
+
         const response = await fetch(currentThumbnailUrl);
+
         const blob = await response.blob();
+
         const blobUrl = URL.createObjectURL(blob);
 
+
+
         const link = document.createElement('a');
+
         link.href = blobUrl;
+
         link.download = `youtube_thumbnail_${Date.now()}.jpg`;
+
         document.body.appendChild(link);
+
         link.click();
+
         document.body.removeChild(link);
+
         URL.revokeObjectURL(blobUrl);
+
       } catch (err) {
+
         showError('Download failed. Please try again or check your connection.');
+
         console.error('Download error:', err);
+
       }
+
     });
+
+
 
     // ===== KEYBOARD SHORTCUTS =====
+
     document.addEventListener('keydown', (e) => {
+
       // Ctrl/Cmd + K to focus input
+
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+
         e.preventDefault();
+
         videoInput.focus();
+
         videoInput.select();
+
       }
+
       
+
       // Enter to download if thumbnail is showing
+
       if (e.key === 'Enter' && thumbnailDisplay.classList.contains('show')) {
+
         downloadButton.click();
+
       }
+
     });
+
+
 
     // ===== FOURTHWALL SCROLLBAR FIX =====
+
     let lastHeight = 0;
+
     let resizeTimer;
 
-    /**
-     * Sends the current scrollHeight to the parent window if it has changed.
-     * This is the *only* function that should send a postMessage.
-     */
-    function sendHeight() {
-      const height = document.body.scrollHeight;
-      
-      // Only send message if height has *actually* changed
-      if (height !== lastHeight) {
-        lastHeight = height;
-        window.parent.postMessage({ frameHeight: height }, '*');
-      }
-    }
+
 
     /**
-     * A debounced version of 'sendHeight' to be called on content changes.
-     * This ensures we don't spam messages during rapid changes.
+
+     * Sends the current scrollHeight to the parent window if it has changed.
+
+     * This is the *only* function that should send a postMessage.
+
      */
-    function scheduleHeightCheck() {
-        // Clear any pending checks
-        clearTimeout(resizeTimer);
-        // Schedule a new check
-        resizeTimer = setTimeout(sendHeight, 150);
+
+    function sendHeight() {
+
+      const height = document.body.scrollHeight;
+
+      
+
+      // Only send message if height has *actually* changed
+
+      if (height !== lastHeight) {
+
+        lastHeight = height;
+
+        window.parent.postMessage({ frameHeight: height }, '*');
+
+      }
+
     }
+
+
+
+    /**
+
+     * A debounced version of sendHeight() to be called on content changes.
+
+     * This ensures we don't spam messages during rapid changes.
+
+     */
+
+    function scheduleHeightCheck() {
+
+        // Clear any pending checks
+
+        clearTimeout(resizeTimer);
+
+        // Schedule a new check
+
+        resizeTimer = setTimeout(sendHeight, 150);
+
+    }
+
+
 
     // Send height on initial load (with a slight delay)
+
     window.addEventListener('load', () => {
+
         setTimeout(sendHeight, 100);
-        // Also auto-focus the input on load
-        videoInput.focus();
+
     });
 
+
+
     // Send height on window resize (debounced)
+
     window.addEventListener('resize', () => {
+
         // Use scheduleHeightCheck for built-in debounce
+
         scheduleHeightCheck();
+
     });
+
     
+
     // ===== END OF SCROLLBAR FIX =====
+
   </script>
+
 </body>
+
 </html>
