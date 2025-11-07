@@ -30,6 +30,7 @@
       background: var(--bg-primary);
       color: var(--text-primary);
       padding: 24px 16px;
+      /* REMOVED min-height: 100vh; to fix "Failure to Shrink" bug */
     }
 
     /* ===== MAIN CONTAINER ===== */
@@ -149,7 +150,8 @@
     }
 
     .thumbnail-overlay {
-      position: absolute;
+      /* FIXED: Changed from absolute to fixed positioning to prevent phantom overlays */
+      position: fixed;
       top: 12px;
       right: 12px;
       background: rgba(25, 25, 25, 0.9);
@@ -158,6 +160,12 @@
       border-radius: 4px;
       font-size: 12px;
       color: var(--accent);
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    .thumbnail-overlay.hidden {
+      display: none;
       pointer-events: none;
     }
 
@@ -337,22 +345,6 @@
     let currentQuality = '';
     let debounceTimer;
 
-    // ===== FOURTHWALL SCROLLBAR FIX =====
-    let lastHeight = 0;
-    function sendHeight() {
-      const height = document.body.scrollHeight;
-      if (height !== lastHeight) {
-        lastHeight = height;
-        window.parent.postMessage({ frameHeight: height }, '*');
-      }
-    }
-
-    // ===== AUTO-FOCUS INPUT ON LOAD =====
-    window.addEventListener('load', () => {
-      videoInput.focus();
-      sendHeight();
-    });
-
     // ===== INPUT HANDLER WITH DEBOUNCE =====
     videoInput.addEventListener('input', () => {
       clearTimeout(debounceTimer);
@@ -467,12 +459,13 @@
     function showThumbnail(url, quality) {
       thumbnailImage.src = url;
       qualityBadge.textContent = quality;
+      qualityBadge.classList.remove('hidden');
       qualityInfo.textContent = `Quality: ${quality} • Click image to open full size`;
       thumbnailDisplay.classList.add('show');
       
       // Wait for image to load before updating height
       thumbnailImage.onload = () => {
-        setTimeout(sendHeight, 100);
+        scheduleHeightCheck();
       };
     }
 
@@ -481,16 +474,18 @@
       errorText.textContent = message;
       errorMessage.classList.add('show');
       thumbnailDisplay.classList.remove('show');
-      setTimeout(sendHeight, 100);
+      qualityBadge.classList.add('hidden');
+      scheduleHeightCheck();
     }
 
     // ===== HIDE ALL MESSAGES =====
     function hideAllMessages() {
       errorMessage.classList.remove('show');
       thumbnailDisplay.classList.remove('show');
+      qualityBadge.classList.add('hidden');
       currentThumbnailUrl = '';
       currentQuality = '';
-      setTimeout(sendHeight, 100);
+      scheduleHeightCheck();
     }
 
     // ===== THUMBNAIL CLICK TO OPEN =====
@@ -536,6 +531,48 @@
         downloadButton.click();
       }
     });
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      // Only send message if height has *actually* changed
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
+    function scheduleHeightCheck() {
+        // Clear any pending checks
+        clearTimeout(resizeTimer);
+        // Schedule a new check
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    // Send height on initial load (with a slight delay)
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    // Send height on window resize (debounced)
+    window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
+        scheduleHeightCheck();
+    });
+    
+    // ===== END OF SCROLLBAR FIX =====
   </script>
 </body>
 </html>
