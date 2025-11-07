@@ -150,7 +150,6 @@
     }
 
     .thumbnail-overlay {
-      /* FIXED: Reverted to absolute positioning */
       position: absolute;
       top: 12px;
       right: 12px;
@@ -160,7 +159,6 @@
       border-radius: 4px;
       font-size: 12px;
       color: var(--accent);
-      /* FIXED: Clicks now pass through to the image */
       pointer-events: none;
       z-index: 10;
     }
@@ -302,7 +300,7 @@
       />
     </div>
 
-    <div classd="error-message" id="errorMessage">
+    <div class="error-message" id="errorMessage">
       <strong>⚠️ Unable to Load Thumbnail</strong>
       <p id="errorText"></p>
       <ul>
@@ -330,7 +328,7 @@
         Download Thumbnail
       </button>
 
-      <div class="version-number">V1.0.2</div>
+      <div class="version-number">V1.0.3</div>
     </div>
 
   </div>
@@ -557,7 +555,7 @@
     }
 
     /**
-     * A debounced version of sendHeight() to be called on content changes.
+     * A debounced version of 'sendHeight' to be called on content changes.
      * This ensures we don't spam messages during rapid changes.
      */
     function scheduleHeightCheck() {
@@ -570,6 +568,8 @@
     // Send height on initial load (with a slight delay)
     window.addEventListener('load', () => {
         setTimeout(sendHeight, 100);
+        // Also auto-focus the input on load
+        videoInput.focus();
     });
 
     // Send height on window resize (debounced)
