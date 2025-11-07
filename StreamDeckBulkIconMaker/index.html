@@ -1084,15 +1084,15 @@
         // ===== HELP MODAL =====
         function openHelpModal(event) {
             event.stopPropagation();
-            const modal = document.getElementById('helpModal');
+            [cite_start]const modal = document.getElementById('helpModal'); [cite: 215]
             modal.classList.add('active');
             // Prevent body scroll
-            document.body.style.overflow = 'hidden';
+            [cite_start]document.body.style.overflow = 'hidden'; [cite: 215]
         }
 
         function closeHelpModal() {
-            const modal = document.getElementById('helpModal');
-            modal.classList.remove('active');
+            [cite_start]const modal = document.getElementById('helpModal'); [cite: 216]
+            [cite_start]modal.classList.remove('active'); [cite: 217]
             document.body.style.overflow = '';
         }
 
@@ -1102,917 +1102,925 @@
                 closeHelpModal();
             }
         });
-
         // Close modal with Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
+        [cite_start]document.addEventListener('keydown', (e) => { [cite: 218]
+            [cite_start]if (e.key === 'Escape') { [cite: 218]
                 closeHelpModal();
             }
         });
-
         // ===== COLLAPSIBLE SECTIONS =====
         function toggleSection(header) {
-            const content = header.nextElementSibling;
-            const icon = header.querySelector('.toggle-icon');
+            [cite_start]const content = header.nextElementSibling; [cite: 219]
+            [cite_start]const icon = header.querySelector('.toggle-icon'); [cite: 220]
             
             content.classList.toggle('collapsed');
             icon.classList.toggle('collapsed');
+
+            // Send new height after animation (300ms) + 50ms buffer
+            setTimeout(sendHeight, 350);
         }
 
         // ===== SIZE CYCLER =====
-        const sizeCard = document.getElementById('sizeCard');
-        const currentSizeEl = document.getElementById('currentSize');
-        const sizes = [72, 96, 144, 288, 500];
-        let currentSizeIndex = 2;
-        let selectedSize = sizes[currentSizeIndex];
-
-        sizeCard.addEventListener('click', () => {
-            currentSizeIndex = (currentSizeIndex + 1) % sizes.length;
-            selectedSize = sizes[currentSizeIndex];
-            currentSizeEl.textContent = selectedSize;
+        [cite_start]const sizeCard = document.getElementById('sizeCard'); [cite: 220]
+        [cite_start]const currentSizeEl = document.getElementById('currentSize'); [cite: 221]
+        [cite_start]const sizes = [72, 96, 144, 288, 500]; [cite: 221]
+        [cite_start]let currentSizeIndex = 2; [cite: 221]
+        [cite_start]let selectedSize = sizes[currentSizeIndex]; [cite: 221]
+        [cite_start]sizeCard.addEventListener('click', () => { [cite: 222]
+            [cite_start]currentSizeIndex = (currentSizeIndex + 1) % sizes.length; [cite: 222]
+            [cite_start]selectedSize = sizes[currentSizeIndex]; [cite: 222]
+            [cite_start]currentSizeEl.textContent = selectedSize; [cite: 222]
         });
-
         // ===== ELEMENTS =====
-        const iconPreview = document.getElementById('iconPreview');
-        const ctx = iconPreview.getContext('2d');
-        const showIconsBtn = document.getElementById('showIconsBtn');
-        const showTxBtn = document.getElementById('showTxBtn');
-        const showBgBtn = document.getElementById('showBgBtn');
-        const iconsContent = document.getElementById('iconsContent');
-        const txContent = document.getElementById('txContent');
-        const bgContent = document.getElementById('bgContent');
+        [cite_start]const iconPreview = document.getElementById('iconPreview'); [cite: 223]
+        [cite_start]const ctx = iconPreview.getContext('2d'); [cite: 223]
+        [cite_start]const showIconsBtn = document.getElementById('showIconsBtn'); [cite: 224]
+        [cite_start]const showTxBtn = document.getElementById('showTxBtn'); [cite: 224]
+        [cite_start]const showBgBtn = document.getElementById('showBgBtn'); [cite: 224]
+        [cite_start]const iconsContent = document.getElementById('iconsContent'); [cite: 224]
+        [cite_start]const txContent = document.getElementById('txContent'); [cite: 224]
+        [cite_start]const bgContent = document.getElementById('bgContent'); [cite: 225]
         
-        const iconColorInput = document.getElementById('iconColor');
-        const backgroundColorInput = document.getElementById('backgroundColor');
-        const glowColorInput = document.getElementById('glowColor');
+        [cite_start]const iconColorInput = document.getElementById('iconColor'); [cite: 225]
+        [cite_start]const backgroundColorInput = document.getElementById('backgroundColor'); [cite: 225]
+        [cite_start]const glowColorInput = document.getElementById('glowColor'); [cite: 225]
         
-        const iconColorHexInput = document.getElementById('iconColorHex');
-        const backgroundColorHexInput = document.getElementById('backgroundColorHex');
-        const glowColorHexInput = document.getElementById('glowColorHex');
+        [cite_start]const iconColorHexInput = document.getElementById('iconColorHex'); [cite: 225]
+        [cite_start]const backgroundColorHexInput = document.getElementById('backgroundColorHex'); [cite: 226]
+        [cite_start]const glowColorHexInput = document.getElementById('glowColorHex'); [cite: 226]
 
-        const edgeOnOffCheckbox = document.getElementById('edgeOnOff');
-        const edgeGlowOnOffCheckbox = document.getElementById('edgeGlowOnOff');
-        const logoGlowOnOffCheckbox = document.getElementById('logoGlowOnOff');
-        const previewOverlayText = document.querySelector('.preview-overlay-text');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const iconNameInput = document.getElementById('iconName');
-        const selectedCountEl = document.getElementById('selectedCount');
-        const gradientWarning = document.getElementById('gradientWarning');
-
-        let customIconCount = 0;
-        let customTextureCount = 0;
-        let customBackgroundCount = 0;
-
+        [cite_start]const edgeOnOffCheckbox = document.getElementById('edgeOnOff'); [cite: 226]
+        [cite_start]const edgeGlowOnOffCheckbox = document.getElementById('edgeGlowOnOff'); [cite: 226]
+        [cite_start]const logoGlowOnOffCheckbox = document.getElementById('logoGlowOnOff'); [cite: 226]
+        [cite_start]const previewOverlayText = document.querySelector('.preview-overlay-text'); [cite: 227]
+        [cite_start]const downloadBtn = document.getElementById('downloadBtn'); [cite: 227]
+        [cite_start]const iconNameInput = document.getElementById('iconName'); [cite: 227]
+        [cite_start]const selectedCountEl = document.getElementById('selectedCount'); [cite: 227]
+        [cite_start]const gradientWarning = document.getElementById('gradientWarning'); [cite: 227]
+        [cite_start]let customIconCount = 0; [cite: 228]
+        [cite_start]let customTextureCount = 0; [cite: 228]
+        [cite_start]let customBackgroundCount = 0; [cite: 228]
         // ===== DATA =====
         const iconsData = [
-            { id: 'elgato', name: 'Elgato', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/589c087f59e6f87cec82c8e0497b0bca894926fe/SD_Icon_Maker/Images/Elgato.svg' },
-            { id: 'youtube', name: 'YouTube', type: 'fa-icon', class: 'fa-brands fa-youtube', unicode: '\uf167' },
-            { id: 'x', name: 'X', type: 'fa-icon', class: 'fa-brands fa-x-twitter', unicode: '\ue61b' },
-            { id: 'instagram', name: 'Instagram', type: 'fa-icon', class: 'fa-brands fa-instagram', unicode: '\uf16d' },
-            { id: 'chrome', name: 'Chrome', type: 'fa-icon', class: 'fa-brands fa-chrome', unicode: '\uf268' },
-            { id: 'twitch', name: 'Twitch', type: 'fa-icon', class: 'fa-brands fa-twitch', unicode: '\uf1e8' },
-            { id: 'discord', name: 'Discord', type: 'fa-icon', class: 'fa-brands fa-discord', unicode: '\uf392' },
-            { id: 'spotify', name: 'Spotify', type: 'fa-icon', class: 'fa-brands fa-spotify', unicode: '\uf1bc' },
-            { id: 'reddit', name: 'Reddit', type: 'fa-icon', class: 'fa-brands fa-reddit', unicode: '\uf1a1' },
-            { id: 'github', name: 'GitHub', type: 'fa-icon', class: 'fa-brands fa-github', unicode: '\uf09b' },
-            { id: 'steam', name: 'Steam', type: 'fa-icon', class: 'fa-brands fa-steam', unicode: '\uf1b6' },
-            { id: 'vlc', name: 'VLC', type: 'fa-icon', class: 'fa-solid fa-play', unicode: '\uf04b' },
-            { id: 'vs_code', name: 'VS Code', type: 'fa-icon', class: 'fa-solid fa-code', unicode: '\uf121' },
-            { id: 'obs', name: 'OBS', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/OBSIcon.svg' },
-            { id: 'photoshop', name: 'Photoshop', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/PhotoshopIcon.svg' },
-            { id: 'illustrator', name: 'Illustrator', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/IllustratorIcon.svg' },
-            { id: 'premiere', name: 'Premiere', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/PremiereIcon.svg' },
-            { id: 'lightroom', name: 'Lightroom', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/LightroomIcon.svg' },
-            { id: 'firefox', name: 'Firefox', type: 'fa-icon', class: 'fa-brands fa-firefox', unicode: '\uf269' },
-            { id: 'safari', name: 'Safari', type: 'fa-icon', class: 'fa-brands fa-safari', unicode: '\uf267' },
-            { id: 'edge', name: 'Edge', type: 'fa-icon', class: 'fa-brands fa-edge', unicode: '\uf282' },
-            { id: 'slack', name: 'Slack', type: 'fa-icon', class: 'fa-brands fa-slack', unicode: '\uf198' },
-            { id: 'zoom', name: 'Zoom', type: 'fa-icon', class: 'fa-solid fa-video', unicode: '\uf03d' },
-            { id: 'google_meet', name: 'Google Meet', type: 'fa-icon', class: 'fa-solid fa-users', unicode: '\uf0c0' },
-            { id: 'word', name: 'Word', type: 'fa-icon', class: 'fa-solid fa-file-word', unicode: '\uf1c2' },
-            { id: 'excel', name: 'Excel', type: 'fa-icon', class: 'fa-solid fa-file-excel', unicode: '\uf1c3' },
-            { id: 'powerpoint', name: 'Powerpoint', type: 'fa-icon', class: 'fa-solid fa-file-powerpoint', unicode: '\uf1c4' },
-            { id: 'figma', name: 'Figma', type: 'fa-icon', class: 'fa-brands fa-figma', unicode: '\uf799' },
-            { id: 'notion', name: 'Notion', type: 'fa-icon', class: 'fa-solid fa-lightbulb', unicode: '\uf0eb' },
-            { id: 'trello', name: 'Trello', type: 'fa-icon', class: 'fa-brands fa-trello', unicode: '\uf181' },
-            { id: 'dropbox', name: 'Dropbox', type: 'fa-icon', class: 'fa-brands fa-dropbox', unicode: '\uf16b' },
-            { id: 'google_drive', name: 'Google Drive', type: 'fa-icon', class: 'fa-brands fa-google-drive', unicode: '\uf3aa' },
-            { id: 'outlook', name: 'Outlook', type: 'fa-icon', class: 'fa-solid fa-envelope', unicode: '\uf0e0' },
-            { id: 'onenote', name: 'OneNote', type: 'fa-icon', class: 'fa-solid fa-book', unicode: '\uf02d' },
-            { id: 'google_docs', name: 'Docs', type: 'fa-icon', class: 'fa-solid fa-file-alt', unicode: '\uf15c' },
-            { id: 'google_sheets', name: 'Sheets', type: 'fa-icon', class: 'fa-solid fa-table', unicode: '\uf0ce' },
+            [cite_start]{ id: 'elgato', name: 'Elgato', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/589c087f59e6f87cec82c8e0497b0bca894926fe/SD_Icon_Maker/Images/Elgato.svg' }, [cite: 229]
+            [cite_start]{ id: 'youtube', name: 'YouTube', type: 'fa-icon', class: 'fa-brands fa-youtube', unicode: '\uf167' }, [cite: 229]
+            [cite_start]{ id: 'x', name: 'X', type: 'fa-icon', class: 'fa-brands fa-x-twitter', unicode: '\ue61b' }, [cite: 229]
+            [cite_start]{ id: 'instagram', name: 'Instagram', [cite: 229]
+            [cite_start]type: 'fa-icon', class: 'fa-brands fa-instagram', unicode: '\uf16d' }, [cite: 230]
+            [cite_start]{ id: 'chrome', name: 'Chrome', type: 'fa-icon', class: 'fa-brands fa-chrome', unicode: '\uf268' }, [cite: 230]
+            [cite_start]{ id: 'twitch', name: 'Twitch', type: 'fa-icon', class: 'fa-brands fa-twitch', unicode: '\uf1e8' }, [cite: 230]
+            [cite_start]{ id: 'discord', name: 'Discord', type: 'fa-icon', class: 'fa-brands fa-discord', unicode: '\uf392' }, [cite: 230]
+            [cite_start]{ id: 'spotify', name: 'Spotify', type: 'fa-icon', class: 'fa-brands fa-spotify', unicode: '\uf1bc' }, [cite: 230, 231]
+            [cite_start]{ id: 'reddit', name: 'Reddit', type: 'fa-icon', class: 'fa-brands fa-reddit', unicode: '\uf1a1' }, [cite: 231]
+            [cite_start]{ id: 'github', name: 'GitHub', type: 'fa-icon', class: 'fa-brands fa-github', unicode: '\uf09b' }, [cite: 231]
+            [cite_start]{ id: 'steam', name: 'Steam', type: 'fa-icon', class: 'fa-brands fa-steam', unicode: '\uf1b6' }, [cite: 231]
+            [cite_start]{ id: 'vlc', name: 'VLC', type: 'fa-icon', class: 'fa-solid fa-play', unicode: '\uf04b' }, [cite: 231]
+ 
+            [cite_start]{ id: 'vs_code', name: 'VS Code', type: 'fa-icon', class: 'fa-solid fa-code', unicode: '\uf121' }, [cite: 232]
+            [cite_start]{ id: 'obs', name: 'OBS', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/OBSIcon.svg' }, [cite: 232]
+            [cite_start]{ id: 'photoshop', name: 'Photoshop', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/PhotoshopIcon.svg' }, [cite: 232]
+            [cite_start]{ id: 'illustrator', name: 'Illustrator', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/IllustratorIcon.svg' }, [cite: 232]
+            [cite_start]{ [cite: 232]
+            [cite_start]id: 'premiere', name: 'Premiere', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/PremiereIcon.svg' }, [cite: 233]
+            [cite_start]{ id: 'lightroom', name: 'Lightroom', type: 'custom-svg', src: 'https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/refs/heads/main/SD_Icon_Maker/Images/LightroomIcon.svg' }, [cite: 233]
+            [cite_start]{ id: 'firefox', name: 'Firefox', type: 'fa-icon', class: 'fa-brands fa-firefox', unicode: '\uf269' }, [cite: 233]
+            [cite_start]{ id: 'safari', name: 'Safari', type: 'fa-icon', class: 'fa-brands fa-safari', unicode: '\uf267' }, [cite: 233]
+            [cite_start]{ id: 'edge', name: 'Edge', type: 'fa-icon', class: 'fa-brands fa-edge', unicode: [cite: 233]
+            [cite_start]'\uf282' }, [cite: 234]
+            [cite_start]{ id: 'slack', name: 'Slack', type: 'fa-icon', class: 'fa-brands fa-slack', unicode: '\uf198' }, [cite: 234]
+            [cite_start]{ id: 'zoom', name: 'Zoom', type: 'fa-icon', class: 'fa-solid fa-video', unicode: '\uf03d' }, [cite: 234]
+            [cite_start]{ id: 'google_meet', name: 'Google Meet', type: 'fa-icon', class: 'fa-solid fa-users', unicode: '\uf0c0' }, [cite: 234]
+            [cite_start]{ id: 'word', name: 'Word', type: 'fa-icon', class: 'fa-solid fa-file-word', unicode: '\uf1c2' }, [cite: 234]
+  
+            [cite_start]{ id: 'excel', name: 'Excel', type: 'fa-icon', class: 'fa-solid fa-file-excel', unicode: '\uf1c3' }, [cite: 235]
+            [cite_start]{ id: 'powerpoint', name: 'Powerpoint', type: 'fa-icon', class: 'fa-solid fa-file-powerpoint', unicode: '\uf1c4' }, [cite: 235]
+            [cite_start]{ id: 'figma', name: 'Figma', type: 'fa-icon', class: 'fa-brands fa-figma', unicode: '\uf799' }, [cite: 235]
+            [cite_start]{ id: 'notion', name: 'Notion', type: 'fa-icon', class: 'fa-solid fa-lightbulb', unicode: '\uf0eb' }, [cite: 235]
+      
+            [cite_start]{ id: 'trello', name: 'Trello', type: 'fa-icon', class: 'fa-brands fa-trello', unicode: '\uf181' }, [cite: 236]
+            [cite_start]{ id: 'dropbox', name: 'Dropbox', type: 'fa-icon', class: 'fa-brands fa-dropbox', unicode: '\uf16b' }, [cite: 236]
+            [cite_start]{ id: 'google_drive', name: 'Google Drive', type: 'fa-icon', class: 'fa-brands fa-google-drive', unicode: '\uf3aa' }, [cite: 236]
+            [cite_start]{ id: 'outlook', name: 'Outlook', type: 'fa-icon', class: 'fa-solid fa-envelope', unicode: '\uf0e0' }, [cite: 236]
+         
+            [cite_start]{ id: 'onenote', name: 'OneNote', type: 'fa-icon', class: 'fa-solid fa-book', unicode: '\uf02d' }, [cite: 237]
+            [cite_start]{ id: 'google_docs', name: 'Docs', type: 'fa-icon', class: 'fa-solid fa-file-alt', unicode: '\uf15c' }, [cite: 237]
+            [cite_start]{ id: 'google_sheets', name: 'Sheets', type: 'fa-icon', class: 'fa-solid fa-table', unicode: '\uf0ce' }, [cite: 237]
         ];
-
-        const backgroundsData = [
-            { id: 'off', name: 'Off', type: 'color', value: '#333333' },
-            { id: 'gradient_blue', name: 'Blue Grad', type: 'gradient', colors: ['#007bff', '#66bbff'] },
-            { id: 'gradient_green', name: 'Green Grad', type: 'gradient', colors: ['#28a745', '#76e091'] },
-            { id: 'gradient_purple', name: 'Purple Grad', type: 'gradient', colors: ['#6f42c1', '#b388ff'] },
-            { id: 'gradient_red', name: 'Red Grad', type: 'gradient', colors: ['#dc3545', '#ff7f8c'] },
-            { id: 'gradient_orange', name: 'Orange Grad', type: 'gradient', colors: ['#fd7e14', '#ffc107'] },
-            { id: 'gradient_teal', name: 'Teal Grad', type: 'gradient', colors: ['#20c997', '#6eead7'] },
-            { id: 'gradient_grey', name: 'Grey Grad', type: 'gradient', colors: ['#6c757d', '#adb5bd'] },
-            { id: 'gradient_pink', name: 'Pink Grad', type: 'gradient', colors: ['#e83e8c', '#ff85d2'] },
-            { id: 'gradient_brown', name: 'Brown Grad', type: 'gradient', colors: ['#795548', '#a1887f'] },
-            { id: 'gradient_gold', name: 'Gold Grad', type: 'gradient', colors: ['#FFD700', '#FFA500'] },
-            { id: 'gradient_indigo', name: 'Indigo Grad', type: 'gradient', colors: ['#4b0082', '#8a2be2'] },
-            { id: 'gradient_emerald', name: 'Emerald Grad', type: 'gradient', colors: ['#50C878', '#3D9970'] },
-            { id: 'gradient_violet', name: 'Violet Grad', type: 'gradient', colors: ['#EE82EE', '#D8BFD8'] },
-            { id: 'gradient_sky', name: 'Sky Grad', type: 'gradient', colors: ['#87CEEB', '#ADD8E6'] },
-            { id: 'gradient_forest', name: 'Forest Grad', type: 'gradient', colors: ['#228B22', '#6B8E23'] },
-            { id: 'gradient_sunset', name: 'Sunset Grad', type: 'gradient', colors: ['#FF6B6B', '#FFE66B'] },
-            { id: 'gradient_ocean', name: 'Ocean Grad', type: 'gradient', colors: ['#1A2980', '#26D0CE'] },
-            { id: 'gradient_spring', name: 'Spring Grad', type: 'gradient', colors: ['#00FF87', '#60BF60'] },
-            { id: 'gradient_autumn', name: 'Autumn Grad', type: 'gradient', colors: ['#C79081', '#F29C6B'] },
-            { id: 'gradient_dawn', name: 'Dawn Grad', type: 'gradient', colors: ['#FFC371', '#FF5F6D'] },
-            { id: 'gradient_twilight', name: 'Twilight Grad', type: 'gradient', colors: ['#5F2C82', '#49A09D'] },
-            { id: 'gradient_royal', name: 'Royal Grad', type: 'gradient', colors: ['#4C4C4C', '#5C5C5C'] },
-            { id: 'gradient_electric', name: 'Electric Grad', type: 'gradient', colors: ['#6A057F', '#88B04B'] },
-            { id: 'gradient_softblue', name: 'Soft Blue Grad', type: 'gradient', colors: ['#D6E6F2', '#B9D7EA'] },
-            { id: 'gradient_warmgrey', name: 'Warm Grey Grad', type: 'gradient', colors: ['#D3CFCF', '#EAEAEA'] },
-            { id: 'gradient_coolgrey', name: 'Cool Grey Grad', type: 'gradient', colors: ['#ECEFF1', '#CFD8DC'] },
-            { id: 'gradient_deepblue', name: 'Deep Blue Grad', type: 'gradient', colors: ['#213A50', '#07244D'] },
-            { id: 'gradient_darkred', name: 'Dark Red Grad', type: 'gradient', colors: ['#8B0000', '#CD5C5C'] },
-            { id: 'gradient_lime', name: 'Lime Grad', type: 'gradient', colors: ['#8BC34A', '#CDDC39'] },
-            { id: 'gradient_peach', name: 'Peach Grad', type: 'gradient', colors: ['#FFCBA4', '#FFAB91'] },
-            { id: 'gradient_mint', name: 'Mint Grad', type: 'gradient', colors: ['#98FB98', '#66CDAA'] },
-            { id: 'gradient_lavender', name: 'Lavender Grad', type: 'gradient', colors: ['#E6E6FA', '#D8BFD8'] },
-            { id: 'gradient_chocolate', name: 'Choco Grad', type: 'gradient', colors: ['#5C3317', '#A0522D'] },
-            { id: 'gradient_charcoal', name: 'Charcoal Grad', type: 'gradient', colors: ['#36454F', '#525252'] }
+        [cite_start]const backgroundsData = [ [cite: 238]
+            [cite_start]{ id: 'off', name: 'Off', type: 'color', value: '#333333' }, [cite: 238]
+            [cite_start]{ id: 'gradient_blue', name: 'Blue Grad', type: 'gradient', colors: ['#007bff', '#66bbff'] }, [cite: 238]
+            [cite_start]{ id: 'gradient_green', name: 'Green Grad', type: 'gradient', colors: ['#28a745', '#76e091'] }, [cite: 238]
+            [cite_start]{ id: 'gradient_purple', name: 'Purple Grad', type: 'gradient', colors: ['#6f42c1', '#b388ff'] }, [cite: 238]
+       
+            [cite_start]{ id: 'gradient_red', name: 'Red Grad', type: 'gradient', colors: ['#dc3545', '#ff7f8c'] }, [cite: 239]
+            [cite_start]{ id: 'gradient_orange', name: 'Orange Grad', type: 'gradient', colors: ['#fd7e14', '#ffc107'] }, [cite: 239]
+            [cite_start]{ id: 'gradient_teal', name: 'Teal Grad', type: 'gradient', colors: ['#20c997', '#6eead7'] }, [cite: 239]
+            [cite_start]{ id: 'gradient_grey', name: 'Grey Grad', type: 'gradient', colors: ['#6c757d', '#adb5bd'] }, [cite: 239]
+            [cite_start]{ id: 'gradient_pink', [cite: 239]
+            [cite_start]name: 'Pink Grad', type: 'gradient', colors: ['#e83e8c', '#ff85d2'] }, [cite: 240]
+            [cite_start]{ id: 'gradient_brown', name: 'Brown Grad', type: 'gradient', colors: ['#795548', '#a1887f'] }, [cite: 240]
+            [cite_start]{ id: 'gradient_gold', name: 'Gold Grad', type: 'gradient', colors: ['#FFD700', '#FFA500'] }, [cite: 240]
+            [cite_start]{ id: 'gradient_indigo', name: 'Indigo Grad', type: 'gradient', colors: ['#4b0082', '#8a2be2'] }, [cite: 240]
+            [cite_start]{ id: 'gradient_emerald', name: 'Emerald Grad', type: 'gradient', colors: ['#50C878', '#3D9970'] [cite: 240]
+            [cite_start]}, [cite: 241]
+            [cite_start]{ id: 'gradient_violet', name: 'Violet Grad', type: 'gradient', colors: ['#EE82EE', '#D8BFD8'] }, [cite: 241]
+            [cite_start]{ id: 'gradient_sky', name: 'Sky Grad', type: 'gradient', colors: ['#87CEEB', '#ADD8E6'] }, [cite: 241]
+            [cite_start]{ id: 'gradient_forest', name: 'Forest Grad', type: 'gradient', colors: ['#228B22', '#6B8E23'] }, [cite: 241]
+            [cite_start]{ id: 'gradient_sunset', name: 'Sunset Grad', type: 'gradient', colors: ['#FF6B6B', '#FFE66B'] }, [cite: 241]
+        
+            [cite_start]{ id: 'gradient_ocean', name: 'Ocean Grad', type: 'gradient', colors: ['#1A2980', '#26D0CE'] }, [cite: 242]
+            [cite_start]{ id: 'gradient_spring', name: 'Spring Grad', type: 'gradient', colors: ['#00FF87', '#60BF60'] }, [cite: 242]
+            [cite_start]{ id: 'gradient_autumn', name: 'Autumn Grad', type: 'gradient', colors: ['#C79081', '#F29C6B'] }, [cite: 242]
+            [cite_start]{ id: 'gradient_dawn', name: 'Dawn Grad', type: 'gradient', colors: ['#FFC371', '#FF5F6D'] }, [cite: 242]
+            [cite_start]{ id: 'gradient_twilight', name: [cite: 242]
+            [cite_start]'Twilight Grad', type: 'gradient', colors: ['#5F2C82', '#49A09D'] }, [cite: 243]
+            [cite_start]{ id: 'gradient_royal', name: 'Royal Grad', type: 'gradient', colors: ['#4C4C4C', '#5C5C5C'] }, [cite: 243]
+            [cite_start]{ id: 'gradient_electric', name: 'Electric Grad', type: 'gradient', colors: ['#6A057F', '#88B04B'] }, [cite: 243]
+            [cite_start]{ id: 'gradient_softblue', name: 'Soft Blue Grad', type: 'gradient', colors: ['#D6E6F2', '#B9D7EA'] }, [cite: 243]
+            [cite_start]{ id: 'gradient_warmgrey', name: 'Warm Grey Grad', type: 'gradient', colors: ['#D3CFCF', [cite: 243]
+            [cite_start]'#EAEAEA'] }, [cite: 244]
+            [cite_start]{ id: 'gradient_coolgrey', name: 'Cool Grey Grad', type: 'gradient', colors: ['#ECEFF1', '#CFD8DC'] }, [cite: 244]
+            [cite_start]{ id: 'gradient_deepblue', name: 'Deep Blue Grad', type: 'gradient', colors: ['#213A50', '#07244D'] }, [cite: 244]
+            [cite_start]{ id: 'gradient_darkred', name: 'Dark Red Grad', type: 'gradient', colors: ['#8B0000', '#CD5C5C'] }, [cite: 244]
+            [cite_start]{ id: 'gradient_lime', name: 'Lime Grad', type: 'gradient', colors: ['#8BC34A', '#CDDC39'] }, [cite: 244]
+    
+            [cite_start]{ id: 'gradient_peach', name: 'Peach Grad', type: 'gradient', colors: ['#FFCBA4', '#FFAB91'] }, [cite: 245]
+            [cite_start]{ id: 'gradient_mint', name: 'Mint Grad', type: 'gradient', colors: ['#98FB98', '#66CDAA'] }, [cite: 245]
+            [cite_start]{ id: 'gradient_lavender', name: 'Lavender Grad', type: 'gradient', colors: ['#E6E6FA', '#D8BFD8'] }, [cite: 245]
+            [cite_start]{ id: 'gradient_chocolate', name: 'Choco Grad', type: 'gradient', colors: ['#5C3317', '#A0522D'] }, [cite: 245]
+            
+            [cite_start]{ id: 'gradient_charcoal', name: 'Charcoal Grad', type: 'gradient', colors: ['#36454F', '#525252'] } [cite: 246]
         ];
-
-        const texturesData = [
-            { id: 'off_texture', name: 'Off', type: 'texture', textureOpacity: 0 },
-            { id: 'texture_dots_light', name: 'Dots Light', type: 'texture', pattern: 'dots', textureOpacity: 0.08, dotSize: 1, dotGap: 15 },
-            { id: 'texture_dots_medium', name: 'Dots Med', type: 'texture', pattern: 'dots', textureOpacity: 0.15, dotSize: 2, dotGap: 10 },
-            { id: 'texture_dots_dense', name: 'Dots Dense', type: 'texture', pattern: 'dots', textureOpacity: 0.2, dotSize: 1.5, dotGap: 8 },
-            { id: 'texture_stripes_thin', name: 'Stripes Thin', type: 'texture', pattern: 'stripes', width: 3, gap: 10, textureOpacity: 0.1 },
-            { id: 'texture_stripes_thick', name: 'Stripes Thick', type: 'texture', pattern: 'stripes', width: 8, gap: 18, textureOpacity: 0.1 },
-            { id: 'texture_lines_horizontal', name: 'H Lines', type: 'texture', pattern: 'lines', thickness: 3, spacing: 15, textureOpacity: 0.1 },
-            { id: 'texture_lines_vertical', name: 'V Lines', type: 'texture', pattern: 'lines_v', thickness: 3, spacing: 15, textureOpacity: 0.1 },
-            { id: 'texture_crosshatch', name: 'Crosshatch', type: 'texture', pattern: 'crosshatch', textureOpacity: 0.1, lineThickness: 2, lineSpacing: 10 },
-            { id: 'texture_squares', name: 'Squares', type: 'texture', pattern: 'squares', textureOpacity: 0.08, squareSize: 10, squareGap: 20 },
-            { id: 'texture_grid', name: 'Grid', type: 'texture', pattern: 'grid', textureOpacity: 0.12, lineThickness: 2, lineSpacing: 15 },
-            { id: 'texture_diamond', name: 'Diamond', type: 'texture', pattern: 'diamond', textureOpacity: 0.1, diamondSize: 10, spacing: 20 },
-            { id: 'texture_noise', name: 'Noise', type: 'texture', pattern: 'noise', textureOpacity: 0.05 },
-            { id: 'texture_diagonal_stripes', name: 'Diag Stripes', type: 'texture', pattern: 'diagonal_stripes', width: 4, gap: 12, textureOpacity: 0.1 },
-            { id: 'texture_checkerboard', name: 'Checkerboard', type: 'texture', pattern: 'checkerboard', squareSize: 15, textureOpacity: 0.05 },
-            { id: 'texture_wave', name: 'Wave', type: 'texture', pattern: 'wave', textureOpacity: 0.07 },
-            { id: 'texture_honeycomb', name: 'Honeycomb', type: 'texture', pattern: 'honeycomb', textureOpacity: 0.09 },
-            { id: 'texture_circles', name: 'Circles', type: 'texture', pattern: 'circles', textureOpacity: 0.07, circleRadius: 5, circleGap: 20 },
-            { id: 'texture_hex_grid', name: 'Hex Grid', type: 'texture', pattern: 'hex_grid', textureOpacity: 0.08, hexSize: 10 },
-            { id: 'texture_pyramids', name: 'Pyramids', type: 'texture', pattern: 'pyramids', textureOpacity: 0.06 },
-            { id: 'texture_concentric', name: 'Concentric', type: 'texture', pattern: 'concentric', textureOpacity: 0.08, ringCount: 3, ringGap: 5 },
-            { id: 'texture_diagonal_cross', name: 'Diag Cross', type: 'texture', pattern: 'diagonal_cross', textureOpacity: 0.1, lineThickness: 3, lineSpacing: 15 },
-            { id: 'texture_woven', name: 'Woven', type: 'texture', pattern: 'woven', textureOpacity: 0.1, weaveSize: 8 },
-            { id: 'texture_brick', name: 'Brick', type: 'texture', pattern: 'brick', textureOpacity: 0.09, brickWidth: 25, brickHeight: 12 },
-            { id: 'texture_fish_scale', name: 'Fish Scale', type: 'texture', pattern: 'fish_scale', textureOpacity: 0.07, scaleRadius: 10 },
-            { id: 'texture_stars', name: 'Stars', type: 'texture', pattern: 'stars', textureOpacity: 0.06, starSize: 3, starCount: 15 },
-            { id: 'texture_doodle', name: 'Doodle', type: 'texture', pattern: 'doodle', textureOpacity: 0.05 },
-            { id: 'texture_bubble', name: 'Bubble', type: 'texture', pattern: 'bubble', textureOpacity: 0.08, bubbleSize: 6, bubbleCount: 10 },
-            { id: 'texture_cloud', name: 'Cloud', type: 'texture', pattern: 'cloud', textureOpacity: 0.04 },
-            { id: 'texture_mesh', name: 'Mesh', type: 'texture', pattern: 'mesh', textureOpacity: 0.1, meshDensity: 10 },
-            { id: 'texture_ripples', name: 'Ripples', type: 'texture', pattern: 'ripples', textureOpacity: 0.07, rippleStrength: 5 },
-            { id: 'texture_fractal', name: 'Fractal', type: 'texture', pattern: 'fractal', textureOpacity: 0.06 },
-            { id: 'texture_circuit', name: 'Circuit', type: 'texture', pattern: 'circuit', textureOpacity: 0.09 },
-            { id: 'texture_camo', name: 'Camo', type: 'texture', pattern: 'camo', textureOpacity: 0.12 }
+        [cite_start]const texturesData = [ [cite: 247]
+            [cite_start]{ id: 'off_texture', name: 'Off', type: 'texture', textureOpacity: 0 }, [cite: 247]
+            [cite_start]{ id: 'texture_dots_light', name: 'Dots Light', type: 'texture', pattern: 'dots', textureOpacity: 0.08, dotSize: 1, dotGap: 15 }, [cite: 247]
+            [cite_start]{ id: 'texture_dots_medium', name: 'Dots Med', type: 'texture', pattern: 'dots', textureOpacity: 0.15, dotSize: 2, dotGap: 10 }, [cite: 247]
+            [cite_start]{ id: 'texture_dots_dense', name: 'Dots Dense', type: 'texture', [cite: 247]
+            [cite_start]pattern: 'dots', textureOpacity: 0.2, dotSize: 1.5, dotGap: 8 }, [cite: 248]
+            [cite_start]{ id: 'texture_stripes_thin', name: 'Stripes Thin', type: 'texture', pattern: 'stripes', width: 3, gap: 10, textureOpacity: 0.1 }, [cite: 248]
+            [cite_start]{ id: 'texture_stripes_thick', name: 'Stripes Thick', type: 'texture', pattern: 'stripes', width: 8, gap: 18, textureOpacity: 0.1 }, [cite: 248]
+            [cite_start]{ id: 'texture_lines_horizontal', name: 'H Lines', type: 'texture', pattern: 'lines', thickness: 3, spacing: 15, textureOpacity: 0.1 }, [cite: 248]
+        
+            [cite_start]{ id: 'texture_lines_vertical', name: 'V Lines', type: 'texture', pattern: 'lines_v', thickness: 3, spacing: 15, textureOpacity: 0.1 }, [cite: 249]
+            [cite_start]{ id: 'texture_crosshatch', name: 'Crosshatch', type: 'texture', pattern: 'crosshatch', textureOpacity: 0.1, lineThickness: 2, lineSpacing: 10 }, [cite: 249]
+            [cite_start]{ id: 'texture_squares', name: 'Squares', type: 'texture', pattern: 'squares', textureOpacity: 0.08, squareSize: 10, squareGap: 20 }, [cite: 249]
+            [cite_start]{ id: 'texture_grid', name: 'Grid', type: 'texture', pattern: 'grid', textureOpacity: 0.12, lineThickness: 2, lineSpacing: [cite: 249]
+            [cite_start]15 }, [cite: 250]
+            [cite_start]{ id: 'texture_diamond', name: 'Diamond', type: 'texture', pattern: 'diamond', textureOpacity: 0.1, diamondSize: 10, spacing: 20 }, [cite: 250]
+            [cite_start]{ id: 'texture_noise', name: 'Noise', type: 'texture', pattern: 'noise', textureOpacity: 0.05 }, [cite: 250]
+            [cite_start]{ id: 'texture_diagonal_stripes', name: 'Diag Stripes', type: 'texture', pattern: 'diagonal_stripes', width: 4, gap: 12, textureOpacity: 0.1 }, [cite: 250]
+            [cite_start]{ id: 'texture_checkerboard', name: 'Checkerboard', type: 'texture', pattern: 'checkerboard', [cite: 250]
+            [cite_start]squareSize: 15, textureOpacity: 0.05 }, [cite: 251]
+            [cite_start]{ id: 'texture_wave', name: 'Wave', type: 'texture', pattern: 'wave', textureOpacity: 0.07 }, [cite: 251]
+            [cite_start]{ id: 'texture_honeycomb', name: 'Honeycomb', type: 'texture', pattern: 'honeycomb', textureOpacity: 0.09 }, [cite: 251]
+            [cite_start]{ id: 'texture_circles', name: 'Circles', type: 'texture', pattern: 'circles', textureOpacity: 0.07, circleRadius: 5, circleGap: 20 }, [cite: 251]
+            [cite_start]{ id: 'texture_hex_grid', name: 'Hex Grid', type: 'texture', pattern: 'hex_grid', textureOpacity: [cite: 251]
+            [cite_start]0.08, hexSize: 10 }, [cite: 252]
+            [cite_start]{ id: 'texture_pyramids', name: 'Pyramids', type: 'texture', pattern: 'pyramids', textureOpacity: 0.06 }, [cite: 252]
+            [cite_start]{ id: 'texture_concentric', name: 'Concentric', type: 'texture', pattern: 'concentric', textureOpacity: 0.08, ringCount: 3, ringGap: 5 }, [cite: 252]
+            [cite_start]{ id: 'texture_diagonal_cross', name: 'Diag Cross', type: 'texture', pattern: 'diagonal_cross', textureOpacity: 0.1, lineThickness: 3, lineSpacing: 15 }, [cite: 252]
+            [cite_start]{ id: 'texture_woven', name: 'Woven', type: 'texture', [cite: 252]
+            [cite_start]pattern: 'woven', textureOpacity: 0.1, weaveSize: 8 }, [cite: 253]
+            [cite_start]{ id: 'texture_brick', name: 'Brick', type: 'texture', pattern: 'brick', textureOpacity: 0.09, brickWidth: 25, brickHeight: 12 }, [cite: 253]
+            [cite_start]{ id: 'texture_fish_scale', name: 'Fish Scale', type: 'texture', pattern: 'fish_scale', textureOpacity: 0.07, scaleRadius: 10 }, [cite: 253]
+            [cite_start]{ id: 'texture_stars', name: 'Stars', type: 'texture', pattern: 'stars', textureOpacity: 0.06, starSize: 3, starCount: 15 }, [cite: 253]
+            [cite_start]{ id: [cite: 253]
+            [cite_start]'texture_doodle', name: 'Doodle', type: 'texture', pattern: 'doodle', textureOpacity: 0.05 }, [cite: 254]
+            [cite_start]{ id: 'texture_bubble', name: 'Bubble', type: 'texture', pattern: 'bubble', textureOpacity: 0.08, bubbleSize: 6, bubbleCount: 10 }, [cite: 254]
+            [cite_start]{ id: 'texture_cloud', name: 'Cloud', type: 'texture', pattern: 'cloud', textureOpacity: 0.04 }, [cite: 254]
+            [cite_start]{ id: 'texture_mesh', name: 'Mesh', type: 'texture', pattern: 'mesh', textureOpacity: 0.1, meshDensity: 10 }, [cite: 254]
+            [cite_start]{ id: 'texture_ripples', name: [cite: 254]
+            [cite_start]'Ripples', type: 'texture', pattern: 'ripples', textureOpacity: 0.07, rippleStrength: 5 }, [cite: 255]
+            [cite_start]{ id: 'texture_fractal', name: 'Fractal', type: 'texture', pattern: 'fractal', textureOpacity: 0.06 }, [cite: 255]
+            [cite_start]{ id: 'texture_circuit', name: 'Circuit', type: 'texture', pattern: 'circuit', textureOpacity: 0.09 }, [cite: 255]
+            [cite_start]{ id: 'texture_camo', name: 'Camo', type: 'texture', pattern: 'camo', textureOpacity: 0.12 } [cite: 255]
         ];
-
-        let selectedIcons = [];
-        let latestSelectedIconId = null;
-        let selectedTextureId = 'off_texture';
-        let selectedBackgroundId = 'off';
-
+        [cite_start]let selectedIcons = []; [cite: 256]
+        [cite_start]let latestSelectedIconId = null; [cite: 256]
+        [cite_start]let selectedTextureId = 'off_texture'; [cite: 256]
+        [cite_start]let selectedBackgroundId = 'off'; [cite: 256]
         // ===== GRADIENT WARNING CHECK =====
         function checkGradientWarning() {
-            const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
-            if (currentBg && currentBg.type === 'gradient') {
-                gradientWarning.classList.add('active');
+            [cite_start]const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId); [cite: 257]
+            [cite_start]if (currentBg && currentBg.type === 'gradient') { [cite: 258]
+                [cite_start]gradientWarning.classList.add('active'); [cite: 258]
             } else {
-                gradientWarning.classList.remove('active');
+                [cite_start]gradientWarning.classList.remove('active'); [cite: 259]
             }
         }
 
-        backgroundColorInput.addEventListener('click', checkGradientWarning);
-        backgroundColorHexInput.addEventListener('focus', checkGradientWarning);
-
+        [cite_start]backgroundColorInput.addEventListener('click', checkGradientWarning); [cite: 260]
+        [cite_start]backgroundColorHexInput.addEventListener('focus', checkGradientWarning); [cite: 260]
         // ===== HELPER FUNCTIONS =====
         function clearSelection(elements) {
-            elements.forEach(el => el.classList.remove('selected'));
+            [cite_start]elements.forEach(el => el.classList.remove('selected')); [cite: 261]
         }
 
         function loadImage(src) {
             return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => resolve(img);
-                img.onerror = (e) => reject(new Error(`Failed to load image: ${src}`));
-                img.src = src;
+                [cite_start]const img = new Image(); [cite: 262]
+                [cite_start]img.onload = () => resolve(img); [cite: 262]
+                [cite_start]img.onerror = (e) => reject(new Error(`Failed to load image: ${src}`)); [cite: 262]
+        
+                [cite_start]img.src = src; [cite: 263]
             });
         }
 
-        const svgCache = {};
-
+        [cite_start]const svgCache = {}; [cite: 264]
         async function getSvgText(svgUrl) {
-            if (svgCache[svgUrl]) {
-                return svgCache[svgUrl];
+            [cite_start]if (svgCache[svgUrl]) { [cite: 265]
+                [cite_start]return svgCache[svgUrl]; [cite: 265]
             }
             try {
-                const response = await fetch(svgUrl);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch SVG: ${response.statusText}`);
+                [cite_start]const response = await fetch(svgUrl); [cite: 266]
+                [cite_start]if (!response.ok) { [cite: 267]
+                    [cite_start]throw new Error(`Failed to fetch SVG: ${response.statusText}`); [cite: 267]
                 }
-                const svgText = await response.text();
-                svgCache[svgUrl] = svgText;
+                [cite_start]const svgText = await response.text(); [cite: 268]
+                [cite_start]svgCache[svgUrl] = svgText; [cite: 269]
                 return svgText;
             } catch (error) {
-                console.error(`Error fetching SVG from ${svgUrl}:`, error);
-                throw error;
+                [cite_start]console.error(`Error fetching SVG from ${svgUrl}:`, error); [cite: 269]
+                [cite_start]throw error; [cite: 270]
             }
         }
 
         async function renderSvgIcon(svgUrl, targetColor) {
             try {
-                let originalSvgText = await getSvgText(svgUrl);
-                const parser = new DOMParser();
-                const svgDoc = parser.parseFromString(originalSvgText, 'image/svg+xml');
+                [cite_start]let originalSvgText = await getSvgText(svgUrl); [cite: 270]
+                [cite_start]const parser = new DOMParser(); [cite: 271]
+                [cite_start]const svgDoc = parser.parseFromString(originalSvgText, 'image/svg+xml'); [cite: 271]
                 const svgElement = svgDoc.documentElement;
 
-                const referenceSizeForImage = 300;
-                svgElement.setAttribute('width', `${referenceSizeForImage}px`);
-                svgElement.setAttribute('height', `${referenceSizeForImage}px`);
-                svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                [cite_start]const referenceSizeForImage = 300; [cite: 271]
+                [cite_start]svgElement.setAttribute('width', `${referenceSizeForImage}px`); [cite: 271]
+                [cite_start]svgElement.setAttribute('height', `${referenceSizeForImage}px`); [cite: 272]
+                [cite_start]svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet'); [cite: 272]
 
                 svgElement.querySelectorAll('style').forEach(styleTag => {
-                    styleTag.remove();
+                    [cite_start]styleTag.remove(); [cite: 272]
                 });
-
-                svgElement.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, text, g').forEach(shape => {
-                    const currentFill = shape.getAttribute('fill');
-                    const currentStroke = shape.getAttribute('stroke');
+                [cite_start]svgElement.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, text, g').forEach(shape => { [cite: 273]
+                    [cite_start]const currentFill = shape.getAttribute('fill'); [cite: 273]
+                    [cite_start]const currentStroke = shape.getAttribute('stroke'); [cite: 273]
                     
-                    shape.removeAttribute('fill');
-                    shape.removeAttribute('stroke');
-                    shape.removeAttribute('style');
+                    [cite_start]shape.removeAttribute('fill'); [cite: 273]
+     
+                    [cite_start]shape.removeAttribute('stroke'); [cite: 274]
+                    [cite_start]shape.removeAttribute('style'); [cite: 274]
 
                     if (currentFill === 'none') {
-                        shape.setAttribute('fill', 'none');
-                    } else {
+                        [cite_start]shape.setAttribute('fill', 'none'); [cite: 274]
+                
+                    [cite_start]} else { [cite: 275]
                         if (shape.tagName !== 'g' || shape.hasAttribute('fill')) {
-                           shape.setAttribute('fill', targetColor);
+                           [cite_start]shape.setAttribute('fill', targetColor); [cite: 275]
                         }
-                    }
+            
+                    [cite_start]} [cite: 276]
                     
                     if (currentStroke === 'none') {
-                        shape.setAttribute('stroke', 'none');
-                    } else if (currentStroke) {
-                        shape.setAttribute('stroke', targetColor);
+                        [cite_start]shape.setAttribute('stroke', 'none'); [cite: 276]
+                    [cite_start]} else if [cite: 276]
+                    (currentStroke) [cite_start]{ [cite: 277]
+                        [cite_start]shape.setAttribute('stroke', targetColor); [cite: 277]
                     }
                 });
-
-                if (svgElement.getAttribute('fill') !== 'none') {
-                     svgElement.setAttribute('fill', targetColor);
-                } else if (!svgElement.hasAttribute('fill')) {
-                    svgElement.setAttribute('fill', targetColor);
+                [cite_start]if (svgElement.getAttribute('fill') !== 'none') { [cite: 279]
+                     [cite_start]svgElement.setAttribute('fill', targetColor); [cite: 279]
+                [cite_start]} else if (!svgElement.hasAttribute('fill')) { [cite: 280]
+                    [cite_start]svgElement.setAttribute('fill', targetColor); [cite: 280]
                 }
 
-                const modifiedSvgText = new XMLSerializer().serializeToString(svgDoc);
-                const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(modifiedSvgText)}`;
+                [cite_start]const modifiedSvgText = new XMLSerializer().serializeToString(svgDoc); [cite: 281]
+                [cite_start]const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(modifiedSvgText)}`; [cite: 282]
 
                 return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.onload = () => resolve(img);
+                    [cite_start]const img = new Image(); [cite: 282]
+                    [cite_start]img.onload = () => resolve(img); [cite: 282]
                     img.onerror = (e) => {
-                        console.error(`Failed to load modified SVG as image for ${svgUrl}`);
-                        reject(new Error(`Could not load SVG as image for ${svgUrl}.`));
+                   
+                        [cite_start]console.error(`Failed to load modified SVG as image for ${svgUrl}`); [cite: 283]
+                        [cite_start]reject(new Error(`Could not load SVG as image for ${svgUrl}.`)); [cite: 283]
                     }
                     img.src = svgDataUrl;
-                });
+             
+                [cite_start]}); [cite: 284]
 
             } catch (error) {
-                console.error(`Error in renderSvgIcon for ${svgUrl}:`, error);
-                return Promise.reject(error);
+                [cite_start]console.error(`Error in renderSvgIcon for ${svgUrl}:`, error); [cite: 284]
+                [cite_start]return Promise.reject(error); [cite: 285]
             }
         }
         
         const patternDrawers = {
             dots: (ctx, item, scaleFactor) => {
-                ctx.beginPath();
-                ctx.arc((item.dotGap || 5) * scaleFactor, (item.dotGap || 5) * scaleFactor, (item.dotSize || 1) * scaleFactor, 0, Math.PI * 2);
-                ctx.arc(((item.dotGap * 4) || 20) * scaleFactor, ((item.dotGap * 3) || 15) * scaleFactor, (item.dotSize || 1) * scaleFactor, 0, Math.PI * 2);
-                ctx.arc(((item.dotGap * 2) || 10) * scaleFactor, ((item.dotGap * 5) || 25) * scaleFactor, (item.dotSize || 1) * scaleFactor, 0, Math.PI * 2);
-                ctx.fill();
+                [cite_start]ctx.beginPath(); [cite: 285]
+                [cite_start]ctx.arc((item.dotGap || 5) * scaleFactor, (item.dotGap || 5) * scaleFactor, (item.dotSize || 1) * scaleFactor, 0, Math.PI * 2); [cite: 286]
+                [cite_start]ctx.arc(((item.dotGap * 4) || 20) * scaleFactor, ((item.dotGap * 3) || 15) * scaleFactor, (item.dotSize || 1) * scaleFactor, 0, Math.PI * 2); [cite: 287]
+                [cite_start]ctx.arc(((item.dotGap * 2) || 10) * scaleFactor, ((item.dotGap * 5) || 25) * scaleFactor, (item.dotSize || 1) * scaleFactor, 0, Math.PI * 2); [cite: 288]
+                [cite_start]ctx.fill(); [cite: 289]
             },
             stripes: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.fillRect(0, 0, (item.width || 5) * scaleFactor, canvasHeight);
-                ctx.fillRect((item.gap || 15) * scaleFactor, 0, (item.width || 5) * scaleFactor, canvasHeight);
+                [cite_start]ctx.fillRect(0, 0, (item.width || 5) * scaleFactor, canvasHeight); [cite: 289]
+                [cite_start]ctx.fillRect((item.gap || 15) * scaleFactor, 0, (item.width || 5) * scaleFactor, canvasHeight); [cite: 290]
             },
             lines: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.fillRect(0, 0, canvasWidth, (item.thickness || 5) * scaleFactor);
-                ctx.fillRect(0, (item.spacing || 15) * scaleFactor, canvasWidth, (item.thickness || 5) * scaleFactor);
+                [cite_start]ctx.fillRect(0, 0, canvasWidth, (item.thickness || 5) * scaleFactor); [cite: 291]
+                [cite_start]ctx.fillRect(0, (item.spacing || 15) * scaleFactor, canvasWidth, (item.thickness || 5) * scaleFactor); [cite: 292]
             },
             lines_v: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.fillRect(0, 0, (item.thickness || 5) * scaleFactor, canvasHeight);
-                ctx.fillRect((item.spacing || 15) * scaleFactor, 0, (item.thickness || 5) * scaleFactor, canvasHeight);
+                [cite_start]ctx.fillRect(0, 0, (item.thickness || 5) * scaleFactor, canvasHeight); [cite: 293]
+                [cite_start]ctx.fillRect((item.spacing || 15) * scaleFactor, 0, (item.thickness || 5) * scaleFactor, canvasHeight); [cite: 294]
             },
             crosshatch: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.fillRect(0, 0, canvasWidth, (item.lineThickness || 2) * scaleFactor);
-                ctx.fillRect(0, (item.lineSpacing || 10) * scaleFactor, canvasWidth, (item.lineThickness || 2) * scaleFactor);
-                ctx.fillRect(0, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
-                ctx.fillRect((item.lineSpacing || 10) * scaleFactor, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
+                [cite_start]ctx.fillRect(0, 0, canvasWidth, (item.lineThickness || 2) * scaleFactor); [cite: 295]
+                [cite_start]ctx.fillRect(0, (item.lineSpacing || 10) * scaleFactor, canvasWidth, (item.lineThickness || 2) * scaleFactor); [cite: 296]
+                [cite_start]ctx.fillRect(0, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight); [cite: 296]
+                [cite_start]ctx.fillRect((item.lineSpacing || 10) * scaleFactor, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight); [cite: 297]
             },
             squares: (ctx, item, scaleFactor) => {
-                ctx.fillRect(0, 0, (item.squareSize || 10) * scaleFactor, (item.squareSize || 10) * scaleFactor);
-                ctx.fillRect((item.squareGap || 20) * scaleFactor, (item.squareGap || 20) * scaleFactor, (item.squareSize || 10) * scaleFactor, (item.squareSize || 10) * scaleFactor);
+                [cite_start]ctx.fillRect(0, 0, (item.squareSize || 10) * scaleFactor, (item.squareSize || 10) * scaleFactor); [cite: 298]
+                [cite_start]ctx.fillRect((item.squareGap || 20) * scaleFactor, (item.squareGap || 20) * scaleFactor, (item.squareSize || 10) * scaleFactor, (item.squareSize || 10) * scaleFactor); [cite: 299]
             },
             grid: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.fillRect(0, 0, canvasWidth, (item.lineThickness || 2) * scaleFactor);
-                ctx.fillRect(0, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
-                ctx.fillRect(canvasWidth - ((item.lineThickness || 2) * scaleFactor), 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
-                ctx.fillRect(0, canvasHeight - ((item.lineThickness || 2) * scaleFactor), canvasWidth, (item.lineThickness || 2) * scaleFactor);
-                ctx.fillRect(canvasWidth/2 - ((item.lineThickness || 2) * scaleFactor)/2, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
-                ctx.fillRect(0, canvasHeight/2 - ((item.lineThickness || 2) * scaleFactor)/2, canvasWidth, (item.lineThickness || 2) * scaleFactor);
+                [cite_start]ctx.fillRect(0, 0, canvasWidth, (item.lineThickness || 2) * scaleFactor); [cite: 300]
+                [cite_start]ctx.fillRect(0, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight); [cite: 301]
+                [cite_start]ctx.fillRect(canvasWidth - ((item.lineThickness || 2) * scaleFactor), 0, (item.lineThickness || 2) * scaleFactor, canvasHeight); [cite: 301]
+                [cite_start]ctx.fillRect(0, canvasHeight - ((item.lineThickness || 2) * scaleFactor), canvasWidth, (item.lineThickness || 2) * scaleFactor); [cite: 302]
+                [cite_start]ctx.fillRect(canvasWidth/2 - ((item.lineThickness || 2) * scaleFactor)/2, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight); [cite: 303]
+                [cite_start]ctx.fillRect(0, canvasHeight/2 - ((item.lineThickness || 2) * scaleFactor)/2, canvasWidth, (item.lineThickness || 2) * scaleFactor); [cite: 304]
             },
             diamond: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.save();
-                ctx.translate(canvasWidth / 2, canvasHeight / 2);
-                ctx.rotate(Math.PI / 4);
-                ctx.fillRect(-(item.diamondSize || 5) * scaleFactor, -(item.diamondSize || 5) * scaleFactor, (item.diamondSize || 10) * scaleFactor, (item.diamondSize || 10) * scaleFactor);
-                ctx.restore();
+                [cite_start]ctx.save(); [cite: 305]
+                [cite_start]ctx.translate(canvasWidth / 2, canvasHeight / 2); [cite: 306]
+                [cite_start]ctx.rotate(Math.PI / 4); [cite: 306]
+                [cite_start]ctx.fillRect(-(item.diamondSize || 5) * scaleFactor, -(item.diamondSize || 5) * scaleFactor, (item.diamondSize || 10) * scaleFactor, (item.diamondSize || 10) * scaleFactor); [cite: 306]
+                [cite_start]ctx.restore(); [cite: 307]
             },
             noise: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
                 for (let i = 0; i < canvasWidth * canvasHeight / 5; i++) {
-                    const x = Math.random() * canvasWidth;
-                    const y = Math.random() * canvasHeight;
-                    const size = Math.random() * 1.5 * scaleFactor;
-                    ctx.fillRect(x, y, size, size);
+                    [cite_start]const x = Math.random() * canvasWidth; [cite: 307]
+                    [cite_start]const y = Math.random() * canvasHeight; [cite: 308]
+                    [cite_start]const size = Math.random() * 1.5 * scaleFactor; [cite: 308]
+                    [cite_start]ctx.fillRect(x, y, size, size); [cite: 308]
                 }
             },
             diagonal_stripes: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.save();
-                ctx.rotate(45 * Math.PI / 180);
-                ctx.fillRect(0, -canvasHeight, (item.width || 4) * scaleFactor, canvasHeight * 2);
-                ctx.fillRect((item.gap || 12) * scaleFactor, -canvasHeight, (item.width || 4) * scaleFactor, canvasHeight * 2);
-                ctx.restore();
+                [cite_start]ctx.save(); [cite: 309]
+                [cite_start]ctx.rotate(45 * Math.PI / 180); [cite: 310]
+                [cite_start]ctx.fillRect(0, -canvasHeight, (item.width || 4) * scaleFactor, canvasHeight * 2); [cite: 310]
+                [cite_start]ctx.fillRect((item.gap || 12) * scaleFactor, -canvasHeight, (item.width || 4) * scaleFactor, canvasHeight * 2); [cite: 311]
+                [cite_start]ctx.restore(); [cite: 311]
             },
             checkerboard: (ctx, item, scaleFactor) => {
-                const squareSize = (item.squareSize || 15) * scaleFactor;
-                ctx.fillRect(0, 0, squareSize, squareSize);
-                ctx.fillRect(squareSize, squareSize, squareSize, squareSize);
+                [cite_start]const squareSize = (item.squareSize || 15) * scaleFactor; [cite: 312]
+                [cite_start]ctx.fillRect(0, 0, squareSize, squareSize); [cite: 313]
+                [cite_start]ctx.fillRect(squareSize, squareSize, squareSize, squareSize); [cite: 313]
             },
             wave: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.beginPath();
-                ctx.moveTo(0, canvasHeight / 2);
-                ctx.bezierCurveTo(canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, 3 * canvasHeight / 4, canvasWidth, canvasHeight / 2);
-                ctx.lineWidth = 2 * scaleFactor;
-                ctx.stroke();
+                [cite_start]ctx.beginPath(); [cite: 313]
+                [cite_start]ctx.moveTo(0, canvasHeight / 2); [cite: 314]
+                [cite_start]ctx.bezierCurveTo(canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, 3 * canvasHeight / 4, canvasWidth, canvasHeight / 2); [cite: 314]
+                [cite_start]ctx.lineWidth = 2 * scaleFactor; [cite: 315]
+                [cite_start]ctx.stroke(); [cite: 315]
             },
             honeycomb: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                const hexSize = (item.hexSize || 8) * scaleFactor;
-                const hexWidth = hexSize * Math.sqrt(3);
-                const hexHeight = hexSize * 2;
+                [cite_start]const hexSize = (item.hexSize || 8) * scaleFactor; [cite: 315]
+                [cite_start]const hexWidth = hexSize * Math.sqrt(3); [cite: 316]
+                [cite_start]const hexHeight = hexSize * 2; [cite: 316]
                 function drawHex(cx, cy) {
-                    ctx.beginPath();
-                    for (let i = 0; i < 6; i++) {
-                        ctx.lineTo(cx + hexSize * Math.cos(i * Math.PI / 3), cy + hexSize * Math.sin(i * Math.PI / 3));
+                    [cite_start]ctx.beginPath(); [cite: 317]
+                    [cite_start]for (let i = 0; i < 6; i++) { [cite: 318]
+                        [cite_start]ctx.lineTo(cx + hexSize * Math.cos(i * Math.PI / 3), cy + hexSize * Math.sin(i * Math.PI / 3)); [cite: 318]
                     }
-                    ctx.closePath();
-                    ctx.fill();
+                    [cite_start]ctx.closePath(); [cite: 319]
+                    [cite_start]ctx.fill(); [cite: 320]
                 }
-                ctx.fillStyle = `rgba(255,255,255,${item.textureOpacity || 0.09})`;
-                drawHex(hexWidth / 2, hexHeight / 2);
-                drawHex(hexWidth / 2, hexHeight / 2 + hexHeight * 3 / 2);
-                drawHex(hexWidth / 2 + hexWidth * 3 / 2, hexHeight / 2 + hexHeight * 3 / 4);
+                [cite_start]ctx.fillStyle = `rgba(255,255,255,${item.textureOpacity || 0.09})`; [cite: 320]
+                [cite_start]drawHex(hexWidth / 2, hexHeight / 2); [cite: 321]
+                [cite_start]drawHex(hexWidth / 2, hexHeight / 2 + hexHeight * 3 / 2); [cite: 321]
+                [cite_start]drawHex(hexWidth / 2 + hexWidth * 3 / 2, hexHeight / 2 + hexHeight * 3 / 4); [cite: 322]
             },
             circles: (ctx, item, scaleFactor) => {
-                ctx.beginPath();
-                ctx.arc((item.circleGap || 10) * scaleFactor, (item.circleGap || 10) * scaleFactor, (item.circleRadius || 5) * scaleFactor, 0, Math.PI * 2);
-                ctx.arc(((item.circleGap * 2) || 20) * scaleFactor, (item.circleGap || 10) * scaleFactor, (item.circleRadius || 5) * scaleFactor, 0, Math.PI * 2);
-                ctx.fill();
+                [cite_start]ctx.beginPath(); [cite: 323]
+                [cite_start]ctx.arc((item.circleGap || 10) * scaleFactor, (item.circleGap || 10) * scaleFactor, (item.circleRadius || 5) * scaleFactor, 0, Math.PI * 2); [cite: 324]
+                [cite_start]ctx.arc(((item.circleGap * 2) || 20) * scaleFactor, (item.circleGap || 10) * scaleFactor, (item.circleRadius || 5) * scaleFactor, 0, Math.PI * 2); [cite: 325]
+                [cite_start]ctx.fill(); [cite: 326]
             },
             hex_grid: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                const hexSize = (item.hexSize || 10) * scaleFactor;
-                const hexWidth = hexSize * Math.sqrt(3);
-                const hexHeight = hexSize * 2;
+                [cite_start]const hexSize = (item.hexSize || 10) * scaleFactor; [cite: 326]
+                [cite_start]const hexWidth = hexSize * Math.sqrt(3); [cite: 327]
+                [cite_start]const hexHeight = hexSize * 2; [cite: 327]
                 function drawHexOutline(cx, cy) {
-                    ctx.beginPath();
-                    for (let i = 0; i < 6; i++) {
-                        ctx.lineTo(cx + hexSize * Math.cos(i * Math.PI / 3), cy + hexSize * Math.sin(i * Math.PI / 3));
+                    [cite_start]ctx.beginPath(); [cite: 328]
+                    [cite_start]for (let i = 0; i < 6; i++) { [cite: 329]
+                        [cite_start]ctx.lineTo(cx + hexSize * Math.cos(i * Math.PI / 3), cy + hexSize * Math.sin(i * Math.PI / 3)); [cite: 329]
                     }
-                    ctx.closePath();
-                    ctx.stroke();
+                    [cite_start]ctx.closePath(); [cite: 330]
+                    [cite_start]ctx.stroke(); [cite: 331]
                 }
-                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.08})`;
-                drawHexOutline(hexWidth / 2, hexHeight / 2);
-                drawHexOutline(hexWidth / 2, hexHeight / 2 + hexHeight * 3 / 2);
+                [cite_start]ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.08})`; [cite: 331]
+                [cite_start]drawHexOutline(hexWidth / 2, hexHeight / 2); [cite: 332]
+                [cite_start]drawHexOutline(hexWidth / 2, hexHeight / 2 + hexHeight * 3 / 2); [cite: 332]
             },
             pyramids: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.save();
-                ctx.translate(canvasWidth / 2, canvasHeight / 2);
-                ctx.beginPath();
-                ctx.moveTo(-10 * scaleFactor, 10 * scaleFactor);
-                ctx.lineTo(0, -10 * scaleFactor);
-                ctx.lineTo(10 * scaleFactor, 10 * scaleFactor);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
+                [cite_start]ctx.save(); [cite: 333]
+                [cite_start]ctx.translate(canvasWidth / 2, canvasHeight / 2); [cite: 334]
+                [cite_start]ctx.beginPath(); [cite: 334]
+                [cite_start]ctx.moveTo(-10 * scaleFactor, 10 * scaleFactor); [cite: 334]
+                [cite_start]ctx.lineTo(0, -10 * scaleFactor); [cite: 334]
+                [cite_start]ctx.lineTo(10 * scaleFactor, 10 * scaleFactor); [cite: 335]
+                [cite_start]ctx.closePath(); [cite: 335]
+                [cite_start]ctx.fill(); [cite: 335]
+                [cite_start]ctx.restore(); [cite: 335]
             },
             concentric: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.beginPath();
-                for (let i = 0; i < (item.ringCount || 3); i++) {
-                    ctx.arc(canvasWidth / 2, canvasHeight / 2, (i + 1) * (item.ringGap || 5) * scaleFactor, 0, Math.PI * 2);
+                [cite_start]ctx.beginPath(); [cite: 335]
+                [cite_start]for (let i = 0; i < (item.ringCount || 3); i++) { [cite: 336]
+                    [cite_start]ctx.arc(canvasWidth / 2, canvasHeight / 2, (i + 1) * (item.ringGap || 5) * scaleFactor, 0, Math.PI * 2); [cite: 336]
                 }
-                ctx.stroke();
+                [cite_start]ctx.stroke(); [cite: 337]
             },
             diagonal_cross: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.fillRect(0, 0, (item.lineThickness || 3) * scaleFactor, canvasHeight);
-                ctx.fillRect((item.lineSpacing || 15) * scaleFactor, 0, (item.lineThickness || 3) * scaleFactor, canvasHeight);
-                ctx.save();
-                ctx.rotate(90 * Math.PI / 180);
-                ctx.fillRect(0, -(item.lineSpacing || 15) * scaleFactor, (item.lineThickness || 3) * scaleFactor, canvasHeight);
-                ctx.fillRect(0, 0, (item.lineThickness || 3) * scaleFactor, canvasHeight);
-                ctx.restore();
+                [cite_start]ctx.fillRect(0, 0, (item.lineThickness || 3) * scaleFactor, canvasHeight); [cite: 338]
+                [cite_start]ctx.fillRect((item.lineSpacing || 15) * scaleFactor, 0, (item.lineThickness || 3) * scaleFactor, canvasHeight); [cite: 339]
+                [cite_start]ctx.save(); [cite: 339]
+                [cite_start]ctx.rotate(90 * Math.PI / 180); [cite: 339]
+                [cite_start]ctx.fillRect(0, -(item.lineSpacing || 15) * scaleFactor, (item.lineThickness || 3) * scaleFactor, canvasHeight); [cite: 340]
+                [cite_start]ctx.fillRect(0, 0, (item.lineThickness || 3) * scaleFactor, canvasHeight); [cite: 340]
+                [cite_start]ctx.restore(); [cite: 341]
             },
             woven: (ctx, item, scaleFactor) => {
-                ctx.fillRect(0, 0, (item.weaveSize || 8) * scaleFactor, (item.weaveSize * 2 || 16) * scaleFactor);
-                ctx.fillRect((item.weaveSize * 2 || 16) * scaleFactor, (item.weaveSize || 8) * scaleFactor, (item.weaveSize || 8) * scaleFactor, (item.weaveSize * 2 || 16) * scaleFactor);
+                [cite_start]ctx.fillRect(0, 0, (item.weaveSize || 8) * scaleFactor, (item.weaveSize * 2 || 16) * scaleFactor); [cite: 341]
+                [cite_start]ctx.fillRect((item.weaveSize * 2 || 16) * scaleFactor, (item.weaveSize || 8) * scaleFactor, (item.weaveSize || 8) * scaleFactor, (item.weaveSize * 2 || 16) * scaleFactor); [cite: 342]
             },
             brick: (ctx, item, scaleFactor) => {
-                ctx.fillRect(0, 0, (item.brickWidth || 25) * scaleFactor, (item.brickHeight || 12) * scaleFactor);
-                ctx.fillRect(item.brickWidth / 2 * scaleFactor, (item.brickHeight || 12) * scaleFactor, (item.brickWidth || 25) * scaleFactor, (item.brickHeight || 12) * scaleFactor);
+                [cite_start]ctx.fillRect(0, 0, (item.brickWidth || 25) * scaleFactor, (item.brickHeight || 12) * scaleFactor); [cite: 343]
+                [cite_start]ctx.fillRect(item.brickWidth / 2 * scaleFactor, (item.brickHeight || 12) * scaleFactor, (item.brickWidth || 25) * scaleFactor, (item.brickHeight || 12) * scaleFactor); [cite: 344]
             },
             fish_scale: (ctx, item, scaleFactor) => {
-                ctx.beginPath();
-                ctx.arc((item.scaleRadius || 10) * scaleFactor, 0, (item.scaleRadius || 10) * scaleFactor, 0, Math.PI, true);
-                ctx.arc((item.scaleRadius * 3 || 30) * scaleFactor, 0, (item.scaleRadius || 10) * scaleFactor, 0, Math.PI, true);
-                ctx.fill();
+                [cite_start]ctx.beginPath(); [cite: 345]
+                [cite_start]ctx.arc((item.scaleRadius || 10) * scaleFactor, 0, (item.scaleRadius || 10) * scaleFactor, 0, Math.PI, true); [cite: 346]
+                [cite_start]ctx.arc((item.scaleRadius * 3 || 30) * scaleFactor, 0, (item.scaleRadius || 10) * scaleFactor, 0, Math.PI, true); [cite: 347]
+                [cite_start]ctx.fill(); [cite: 347]
             },
             stars: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
                 for (let i = 0; i < (item.starCount || 5); i++) {
-                    const x = Math.random() * canvasWidth;
-                    const y = Math.random() * canvasHeight;
-                    const size = (item.starSize || 3) * scaleFactor;
-                    ctx.beginPath();
-                    ctx.moveTo(x, y + size);
-                    for (let j = 0; j < 5; j++) {
-                        ctx.lineTo(x + size * Math.sin(j * Math.PI * 2 / 5), y + size * Math.cos(j * Math.PI * 2 / 5));
-                        ctx.lineTo(x + size / 2 * Math.sin((j + 0.5) * Math.PI * 2 / 5), y + size / 2 * Math.cos((j + 0.5) * Math.PI * 2 / 5));
+                    [cite_start]const x = Math.random() * canvasWidth; [cite: 348]
+                    [cite_start]const y = Math.random() * canvasHeight; [cite: 349]
+                    [cite_start]const size = (item.starSize || 3) * scaleFactor; [cite: 349]
+                    [cite_start]ctx.beginPath(); [cite: 349]
+                    [cite_start]ctx.moveTo(x, y + size); [cite: 349]
+                    [cite_start]for (let j = 0; j < 5; j++) { [cite: 350]
+                        [cite_start]ctx.lineTo(x + size * Math.sin(j * Math.PI * 2 / 5), y + size * Math.cos(j * Math.PI * 2 / 5)); [cite: 350]
+                        [cite_start]ctx.lineTo(x + size / 2 * Math.sin((j + 0.5) * Math.PI * 2 / 5), y + size / 2 * Math.cos((j + 0.5) * Math.PI * 2 / 5)); [cite: 351]
                     }
-                    ctx.closePath();
-                    ctx.fill();
+                    [cite_start]ctx.closePath(); [cite: 352]
+                    [cite_start]ctx.fill(); [cite: 353]
                 }
             },
             doodle: (ctx, item, scaleFactor) => {
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.bezierCurveTo(10 * scaleFactor, 20 * scaleFactor, 20 * scaleFactor, 0, 30 * scaleFactor, 20 * scaleFactor);
-                ctx.bezierCurveTo(10 * scaleFactor, 0, 0, 20 * scaleFactor, 0, 0);
-                ctx.stroke();
+                [cite_start]ctx.beginPath(); [cite: 353]
+                [cite_start]ctx.moveTo(0, 0); [cite: 354]
+                [cite_start]ctx.bezierCurveTo(10 * scaleFactor, 20 * scaleFactor, 20 * scaleFactor, 0, 30 * scaleFactor, 20 * scaleFactor); [cite: 354]
+                [cite_start]ctx.bezierCurveTo(10 * scaleFactor, 0, 0, 20 * scaleFactor, 0, 0); [cite: 355]
+                [cite_start]ctx.stroke(); [cite: 355]
             },
             bubble: (ctx, item, scaleFactor) => {
-                ctx.beginPath();
-                ctx.arc((item.bubbleSize || 6) * scaleFactor, (item.bubbleSize || 6) * scaleFactor, (item.bubbleSize || 6) * scaleFactor, 0, Math.PI * 2);
-                ctx.arc(((item.bubbleSize * 3) || 18) * scaleFactor, ((item.bubbleSize * 2) || 12) * scaleFactor, (item.bubbleSize || 6) * scaleFactor, 0, Math.PI * 2);
-                ctx.fill();
+                [cite_start]ctx.beginPath(); [cite: 356]
+                [cite_start]ctx.arc((item.bubbleSize || 6) * scaleFactor, (item.bubbleSize || 6) * scaleFactor, (item.bubbleSize || 6) * scaleFactor, 0, Math.PI * 2); [cite: 357]
+                [cite_start]ctx.arc(((item.bubbleSize * 3) || 18) * scaleFactor, ((item.bubbleSize * 2) || 12) * scaleFactor, (item.bubbleSize || 6) * scaleFactor, 0, Math.PI * 2); [cite: 358]
+                [cite_start]ctx.fill(); [cite: 359]
             },
             cloud: (ctx, item, scaleFactor) => {
-                ctx.beginPath();
-                ctx.arc(5 * scaleFactor, 10 * scaleFactor, 5 * scaleFactor, 0, Math.PI * 2);
-                ctx.arc(15 * scaleFactor, 8 * scaleFactor, 7 * scaleFactor, 0, Math.PI * 2);
-                ctx.arc(25 * scaleFactor, 10 * scaleFactor, 5 * scaleFactor, 0, Math.PI * 2);
-                ctx.fill();
+                [cite_start]ctx.beginPath(); [cite: 359]
+                [cite_start]ctx.arc(5 * scaleFactor, 10 * scaleFactor, 5 * scaleFactor, 0, Math.PI * 2); [cite: 360]
+                [cite_start]ctx.arc(15 * scaleFactor, 8 * scaleFactor, 7 * scaleFactor, 0, Math.PI * 2); [cite: 361]
+                [cite_start]ctx.arc(25 * scaleFactor, 10 * scaleFactor, 5 * scaleFactor, 0, Math.PI * 2); [cite: 362]
+                [cite_start]ctx.fill(); [cite: 362]
             },
             mesh: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.1})`;
-                ctx.lineWidth = 1 * scaleFactor;
+                [cite_start]ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.1})`; [cite: 363]
+                [cite_start]ctx.lineWidth = 1 * scaleFactor; [cite: 364]
                 for (let i = 0; i < canvasWidth; i += (item.meshDensity || 10) * scaleFactor) {
-                    ctx.beginPath();
-                    ctx.moveTo(i, 0);
-                    ctx.lineTo(i, canvasHeight);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.moveTo(0, i);
-                    ctx.lineTo(canvasWidth, i);
-                    ctx.stroke();
+                    [cite_start]ctx.beginPath(); [cite: 364]
+                    [cite_start]ctx.moveTo(i, 0); [cite: 365]
+                    [cite_start]ctx.lineTo(i, canvasHeight); [cite: 365]
+                    [cite_start]ctx.stroke(); [cite: 365]
+                    [cite_start]ctx.beginPath(); [cite: 365]
+                    [cite_start]ctx.moveTo(0, i); [cite: 365]
+                    [cite_start]ctx.lineTo(canvasWidth, i); [cite: 365]
+                    [cite_start]ctx.stroke(); [cite: 365]
                 }
             },
             ripples: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.07})`;
-                ctx.lineWidth = 1.5 * scaleFactor;
-                ctx.beginPath();
-                ctx.arc(canvasWidth / 2, canvasHeight / 2, (item.rippleStrength || 5) * scaleFactor, 0, Math.PI * 2);
-                ctx.arc(canvasWidth / 2, canvasWidth / 2, (item.rippleStrength || 5) * 2 * scaleFactor, 0, Math.PI * 2);
-                ctx.stroke();
+                [cite_start]ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.07})`; [cite: 366]
+                [cite_start]ctx.lineWidth = 1.5 * scaleFactor; [cite: 367]
+                [cite_start]ctx.beginPath(); [cite: 367]
+                [cite_start]ctx.arc(canvasWidth / 2, canvasHeight / 2, (item.rippleStrength || 5) * scaleFactor, 0, Math.PI * 2); [cite: 367]
+                [cite_start]ctx.arc(canvasWidth / 2, canvasWidth / 2, (item.rippleStrength || 5) * 2 * scaleFactor, 0, Math.PI * 2); [cite: 368]
+                [cite_start]ctx.stroke(); [cite: 368]
             },
             fractal: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.06})`;
-                ctx.lineWidth = 1 * scaleFactor;
+                [cite_start]ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.06})`; [cite: 369]
+                [cite_start]ctx.lineWidth = 1 * scaleFactor; [cite: 370]
                 function drawLine(x1, y1, x2, y2, depth) {
-                    if (depth > 3) return;
-                    const dx = x2 - x1;
-                    const dy = y2 - y1;
-                    const len = Math.sqrt(dx * dx + dy * dy);
-                    if (len < 5 * scaleFactor) return;
+                    [cite_start]if (depth > 3) return; [cite: 370]
+                    [cite_start]const dx = x2 - x1; [cite: 371]
+                    [cite_start]const dy = y2 - y1; [cite: 371]
+                    [cite_start]const len = Math.sqrt(dx * dx + dy * dy); [cite: 372]
+                    [cite_start]if (len < 5 * scaleFactor) return; [cite: 372]
+                    [cite_start]const midX = (x1 + x2) / 2; [cite: 373]
+                    [cite_start]const midY = (y1 + y2) / 2; [cite: 373]
+                    [cite_start]const perpX = midX + dy * 0.1 * Math.random() * scaleFactor; [cite: 374]
+                    [cite_start]const perpY = midY - dx * 0.1 * Math.random() * scaleFactor; [cite: 375]
 
-                    const midX = (x1 + x2) / 2;
-                    const midY = (y1 + y2) / 2;
-
-                    const perpX = midX + dy * 0.1 * Math.random() * scaleFactor;
-                    const perpY = midY - dx * 0.1 * Math.random() * scaleFactor;
-
-                    ctx.beginPath();
-                    ctx.moveTo(x1, y1);
-                    ctx.lineTo(perpX, perpY);
-                    ctx.lineTo(x2, y2);
-                    ctx.stroke();
-
-                    drawLine(x1, y1, perpX, perpY, depth + 1);
-                    drawLine(perpX, perpY, x2, y2, depth + 1);
+                    [cite_start]ctx.beginPath(); [cite: 375]
+                    [cite_start]ctx.moveTo(x1, y1); [cite: 375]
+                    [cite_start]ctx.lineTo(perpX, perpY); [cite: 375]
+                    [cite_start]ctx.lineTo(x2, y2); [cite: 375]
+                    [cite_start]ctx.stroke(); [cite: 375]
+                    [cite_start]drawLine(x1, y1, perpX, perpY, depth + 1); [cite: 376]
+                    [cite_start]drawLine(perpX, perpY, x2, y2, depth + 1); [cite: 376]
                 }
-                drawLine(0, 0, canvasWidth, canvasHeight, 0);
-                drawLine(canvasWidth, 0, 0, canvasHeight, 0);
+                [cite_start]drawLine(0, 0, canvasWidth, canvasHeight, 0); [cite: 377]
+                [cite_start]drawLine(canvasWidth, 0, 0, canvasHeight, 0); [cite: 378]
             },
             circuit: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
-                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.09})`;
-                ctx.lineWidth = 1 * scaleFactor;
+                [cite_start]ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.09})`; [cite: 378]
+                [cite_start]ctx.lineWidth = 1 * scaleFactor; [cite: 379]
                 for (let i = 0; i < canvasWidth; i += 5 * scaleFactor) {
-                    ctx.beginPath();
-                    ctx.moveTo(i, 0);
-                    ctx.lineTo(i, Math.random() * canvasHeight);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(i, Math.random() * canvasHeight, 2 * scaleFactor, 0, Math.PI * 2);
-                    ctx.fill();
+                    [cite_start]ctx.beginPath(); [cite: 379]
+                    [cite_start]ctx.moveTo(i, 0); [cite: 380]
+                    [cite_start]ctx.lineTo(i, Math.random() * canvasHeight); [cite: 380]
+                    [cite_start]ctx.stroke(); [cite: 380]
+                    [cite_start]ctx.beginPath(); [cite: 380]
+                    [cite_start]ctx.arc(i, Math.random() * canvasHeight, 2 * scaleFactor, 0, Math.PI * 2); [cite: 380]
+                    [cite_start]ctx.fill(); [cite: 380]
                 }
             },
             camo: (ctx, item, scaleFactor) => {
-                ctx.fillStyle = `rgba(0,0,0,${item.textureOpacity || 0.12})`;
-                ctx.beginPath();
-                ctx.arc(5 * scaleFactor, 5 * scaleFactor, 10 * scaleFactor, 0, Math.PI * 2);
-                ctx.arc(20 * scaleFactor, 10 * scaleFactor, 8 * scaleFactor, 0, Math.PI * 2);
-                ctx.arc(10 * scaleFactor, 20 * scaleFactor, 12 * scaleFactor, 0, Math.PI * 2);
-                ctx.fill();
+                [cite_start]ctx.fillStyle = `rgba(0,0,0,${item.textureOpacity || 0.12})`; [cite: 381]
+                [cite_start]ctx.beginPath(); [cite: 382]
+                [cite_start]ctx.arc(5 * scaleFactor, 5 * scaleFactor, 10 * scaleFactor, 0, Math.PI * 2); [cite: 382]
+                [cite_start]ctx.arc(20 * scaleFactor, 10 * scaleFactor, 8 * scaleFactor, 0, Math.PI * 2); [cite: 383]
+                [cite_start]ctx.arc(10 * scaleFactor, 20 * scaleFactor, 12 * scaleFactor, 0, Math.PI * 2); [cite: 384]
+                [cite_start]ctx.fill(); [cite: 384]
             }
         };
 
         function drawPattern(ctx, itemData, scaleFactor, canvasWidth, canvasHeight, isTexturePreview = false) {
-            if (!itemData || itemData.textureOpacity === 0) return;
-
-            const tempPatternCanvas = document.createElement('canvas');
-            const tempPatternCtx = tempPatternCanvas.getContext('2d');
-            tempPatternCanvas.width = 30 * scaleFactor;
-            tempPatternCanvas.height = 30 * scaleFactor;
-
+            [cite_start]if (!itemData || itemData.textureOpacity === 0) return; [cite: 385]
+            [cite_start]const tempPatternCanvas = document.createElement('canvas'); [cite: 386]
+            [cite_start]const tempPatternCtx = tempPatternCanvas.getContext('2d'); [cite: 386]
+            [cite_start]tempPatternCanvas.width = 30 * scaleFactor; [cite: 386]
+            [cite_start]tempPatternCanvas.height = 30 * scaleFactor; [cite: 386]
             if (isTexturePreview) {
-                tempPatternCtx.fillStyle = `rgba(0,0,0,${itemData.textureOpacity || 0.1})`;
-                tempPatternCtx.strokeStyle = `rgba(0,0,0,${itemData.textureOpacity || 0.1})`;
+                [cite_start]tempPatternCtx.fillStyle = `rgba(0,0,0,${itemData.textureOpacity || 0.1})`; [cite: 387]
+                [cite_start]tempPatternCtx.strokeStyle = `rgba(0,0,0,${itemData.textureOpacity || 0.1})`; [cite: 388]
             } else {
-                tempPatternCtx.fillStyle = `rgba(255,255,255,${itemData.textureOpacity || 0.1})`;
-                tempPatternCtx.strokeStyle = `rgba(255,255,255,${itemData.textureOpacity || 0.1})`;
+                [cite_start]tempPatternCtx.fillStyle = `rgba(255,255,255,${itemData.textureOpacity || 0.1})`; [cite: 388]
+                [cite_start]tempPatternCtx.strokeStyle = `rgba(255,255,255,${itemData.textureOpacity || 0.1})`; [cite: 389]
             }
-            tempPatternCtx.lineWidth = 1 * scaleFactor;
-
-            const drawer = patternDrawers[itemData.pattern];
+            [cite_start]tempPatternCtx.lineWidth = 1 * scaleFactor; [cite: 389]
+            [cite_start]const drawer = patternDrawers[itemData.pattern]; [cite: 390]
             if (drawer) {
-                tempPatternCtx.save();
-                drawer(tempPatternCtx, itemData, scaleFactor, tempPatternCanvas.width, tempPatternCanvas.height);
-                tempPatternCtx.restore();
+                [cite_start]tempPatternCtx.save(); [cite: 390]
+                [cite_start]drawer(tempPatternCtx, itemData, scaleFactor, tempPatternCanvas.width, tempPatternCanvas.height); [cite: 391]
+                [cite_start]tempPatternCtx.restore(); [cite: 391]
             }
 
-            const pattern = ctx.createPattern(tempPatternCanvas, 'repeat');
-            ctx.fillStyle = pattern;
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            [cite_start]const pattern = ctx.createPattern(tempPatternCanvas, 'repeat'); [cite: 391]
+            [cite_start]ctx.fillStyle = pattern; [cite: 392]
+            [cite_start]ctx.fillRect(0, 0, canvasWidth, canvasHeight); [cite: 392]
         }
 
         function renderPatternToMiniCanvas(itemData, targetCanvas, targetCtx, size, type) {
-            targetCtx.clearRect(0, 0, size, size);
-
-            let baseColor = '#333333';
+            [cite_start]targetCtx.clearRect(0, 0, size, size); [cite: 392]
+            [cite_start]let baseColor = '#333333'; [cite: 393]
             if (type === 'texture') {
-                baseColor = '#888888';
+                [cite_start]baseColor = '#888888'; [cite: 393]
             }
 
-            targetCtx.fillStyle = baseColor;
-            targetCtx.fillRect(0, 0, size, size);
-
+            [cite_start]targetCtx.fillStyle = baseColor; [cite: 394]
+            [cite_start]targetCtx.fillRect(0, 0, size, size); [cite: 394]
             if (itemData.type === 'color') {
-                targetCtx.fillStyle = itemData.value || baseColor;
-                targetCtx.fillRect(0, 0, size, size);
+                [cite_start]targetCtx.fillStyle = itemData.value || [cite: 395]
+                [cite_start]baseColor; [cite: 396]
+                [cite_start]targetCtx.fillRect(0, 0, size, size); [cite: 396]
             } else if (itemData.type === 'gradient') {
-                const gradient = targetCtx.createLinearGradient(0, 0, size, size);
-                gradient.addColorStop(0, itemData.colors[0]);
-                gradient.addColorStop(1, itemData.colors[1]);
-                targetCtx.fillStyle = gradient;
-                targetCtx.fillRect(0, 0, size, size);
+                [cite_start]const gradient = targetCtx.createLinearGradient(0, 0, size, size); [cite: 396]
+                [cite_start]gradient.addColorStop(0, itemData.colors[0]); [cite: 397]
+                [cite_start]gradient.addColorStop(1, itemData.colors[1]); [cite: 397]
+                [cite_start]targetCtx.fillStyle = gradient; [cite: 397]
+                [cite_start]targetCtx.fillRect(0, 0, size, size); [cite: 397]
             } else if (itemData.type === 'texture') {
-                drawPattern(targetCtx, itemData, size / 30, size, size, true);
+                [cite_start]drawPattern(targetCtx, itemData, size / 30, size, size, true); [cite: 398]
             } else if (itemData.type === 'custom-image') {
-                loadImage(itemData.src).then(img => {
-                    targetCtx.drawImage(img, 0, 0, size, size);
-                }).catch(e => console.error("Error loading custom image for preview:", e));
+                [cite_start]loadImage(itemData.src).then(img => { [cite: 399]
+                    [cite_start]targetCtx.drawImage(img, 0, 0, size, size); [cite: 399]
+                [cite_start]}).catch(e => console.error("Error loading custom image for preview:", e)); [cite: 399]
             }
         }
 
         async function populateGrid(container, data, type) {
-            const uploadArea = container.querySelector('.upload-area');
-            while (container.firstChild) {
-                container.removeChild(container.firstChild);
+            [cite_start]const uploadArea = container.querySelector('.upload-area'); [cite: 400]
+            [cite_start]while (container.firstChild) { [cite: 401]
+                [cite_start]container.removeChild(container.firstChild); [cite: 401]
             }
 
-            const fragment = document.createDocumentFragment();
-            if (uploadArea) {
-                fragment.appendChild(uploadArea);
+            [cite_start]const fragment = document.createDocumentFragment(); [cite: 402]
+            [cite_start]if (uploadArea) { [cite: 403]
+                [cite_start]fragment.appendChild(uploadArea); [cite: 403]
             }
 
             for (const item of data) {
-                const div = document.createElement('div');
-                div.classList.add('grid-item');
-                div.dataset.id = item.id;
-                div.dataset.type = type;
+                [cite_start]const div = document.createElement('div'); [cite: 404]
+                [cite_start]div.classList.add('grid-item'); [cite: 405]
+                [cite_start]div.dataset.id = item.id; [cite: 405]
+                [cite_start]div.dataset.type = type; [cite: 405]
 
                 if (item.type === 'fa-icon') {
-                    div.innerHTML = `<i class="${item.class}"></i><span class="icon-name">${item.name}</span>`;
+                    [cite_start]div.innerHTML = `<i class="${item.class}"></i><span class="icon-name">${item.name}</span>`; [cite: 405]
                 } else if (item.type === 'custom-image') {
-                    const img = document.createElement('img');
-                    img.src = item.src;
-                    img.alt = item.name;
-                    div.appendChild(img);
-                    const nameSpan = document.createElement('span');
-                    nameSpan.classList.add('icon-name');
-                    nameSpan.textContent = item.name;
-                    div.appendChild(nameSpan);
+                    [cite_start]const img = document.createElement('img'); [cite: 406]
+                    [cite_start]img.src = item.src; [cite: 407]
+                    [cite_start]img.alt = item.name; [cite: 407]
+                    [cite_start]div.appendChild(img); [cite: 407]
+                    [cite_start]const nameSpan = document.createElement('span'); [cite: 407]
+                    [cite_start]nameSpan.classList.add('icon-name'); [cite: 407]
+                    [cite_start]nameSpan.textContent = item.name; [cite: 407]
+                    [cite_start]div.appendChild(nameSpan); [cite: 407]
                 } else if (item.type === 'custom-svg') {
-                    const img = document.createElement('img');
-                    img.alt = item.name;
+                    [cite_start]const img = document.createElement('img'); [cite: 408]
+                    [cite_start]img.alt = item.name; [cite: 409]
                     try {
-                        const whiteSvgImage = await renderSvgIcon(item.src, '#FFFFFF');
-                        img.src = whiteSvgImage.src;
+                        [cite_start]const whiteSvgImage = await renderSvgIcon(item.src, '#FFFFFF'); [cite: 409]
+                        [cite_start]img.src = whiteSvgImage.src; [cite: 410]
                     } catch (e) {
-                        console.error(`Error loading white SVG for grid preview (${item.name}):`, e);
-                        img.src = item.src;
+                        [cite_start]console.error(`Error loading white SVG for grid preview (${item.name}):`, e); [cite: 410]
+                        [cite_start]img.src = item.src; [cite: 411]
                     }
-                    div.appendChild(img);
-                    const nameSpan = document.createElement('span');
-                    nameSpan.classList.add('icon-name');
-                    nameSpan.textContent = item.name;
-                    div.appendChild(nameSpan);
+                    [cite_start]div.appendChild(img); [cite: 411]
+                    [cite_start]const nameSpan = document.createElement('span'); [cite: 412]
+                    [cite_start]nameSpan.classList.add('icon-name'); [cite: 412]
+                    [cite_start]nameSpan.textContent = item.name; [cite: 412]
+                    [cite_start]div.appendChild(nameSpan); [cite: 412]
                 } else if (type === 'background' || type === 'texture') {
-                    const miniCanvas = document.createElement('canvas');
-                    miniCanvas.width = 60;
-                    miniCanvas.height = 60;
-                    const miniCtx = miniCanvas.getContext('2d');
-                    renderPatternToMiniCanvas(item, miniCanvas, miniCtx, 60, type);
+                    [cite_start]const miniCanvas = document.createElement('canvas'); [cite: 412]
+                    [cite_start]miniCanvas.width = 60; [cite: 413]
+                    [cite_start]miniCanvas.height = 60; [cite: 413]
+                    [cite_start]const miniCtx = miniCanvas.getContext('2d'); [cite: 413]
+                    [cite_start]renderPatternToMiniCanvas(item, miniCanvas, miniCtx, 60, type); [cite: 413]
 
-                    div.style.backgroundImage = `url(${miniCanvas.toDataURL()})`;
-                    div.style.backgroundSize = 'cover';
-                    div.style.backgroundPosition = 'center';
-                    div.style.position = 'relative';
+                    [cite_start]div.style.backgroundImage = `url(${miniCanvas.toDataURL()})`; [cite: 413]
+                    [cite_start]div.style.backgroundSize = 'cover'; [cite: 414]
+                    [cite_start]div.style.backgroundPosition = 'center'; [cite: 414]
+                    [cite_start]div.style.position = 'relative'; [cite: 414]
 
                     if (item.type === 'custom-image') {
                         try {
-                            const img = await loadImage(item.src);
-                            miniCtx.clearRect(0, 0, 60, 60);
-                            miniCtx.drawImage(img, 0, 0, 60, 60);
-                            div.style.backgroundImage = `url(${miniCanvas.toDataURL()})`;
+                            [cite_start]const img = await loadImage(item.src); [cite: 414]
+                            [cite_start]miniCtx.clearRect(0, 0, 60, 60); [cite: 415]
+                            [cite_start]miniCtx.drawImage(img, 0, 0, 60, 60); [cite: 415]
+                            [cite_start]div.style.backgroundImage = `url(${miniCanvas.toDataURL()})`; [cite: 415]
                         } catch (e) {
-                            console.error(`Error loading custom ${type} preview for grid:`, e);
-                            div.style.backgroundColor = '#ccc';
+                            [cite_start]console.error(`Error loading custom ${type} preview for grid:`, e); [cite: 416]
+                            [cite_start]div.style.backgroundColor = '#ccc'; [cite: 417]
                         }
                     }
-                    const nameOverlay = document.createElement('span');
-                    nameOverlay.classList.add('background-name-overlay');
-                    nameOverlay.textContent = item.name;
-                    div.appendChild(nameOverlay);
+                    [cite_start]const nameOverlay = document.createElement('span'); [cite: 417]
+                    [cite_start]nameOverlay.classList.add('background-name-overlay'); [cite: 418]
+                    [cite_start]nameOverlay.textContent = item.name; [cite: 418]
+                    [cite_start]div.appendChild(nameOverlay); [cite: 418]
                 }
 
                 if (type === 'icon' && selectedIcons.includes(item.id)) {
-                    div.classList.add('selected');
-                } else if (type === 'background' && selectedBackgroundId === item.id) {
-                    div.classList.add('selected');
-                } else if (type === 'texture' && selectedTextureId === item.id) {
-                    div.classList.add('selected');
+                    [cite_start]div.classList.add('selected'); [cite: 418]
+                [cite_start]} else if (type === 'background' && selectedBackgroundId === item.id) { [cite: 419]
+                    [cite_start]div.classList.add('selected'); [cite: 419]
+                [cite_start]} else if (type === 'texture' && selectedTextureId === item.id) { [cite: 420]
+                    [cite_start]div.classList.add('selected'); [cite: 420]
                 }
 
-                div.addEventListener('click', () => handleGridItemClick(item, div, type));
-                fragment.appendChild(div);
+                [cite_start]div.addEventListener('click', () => handleGridItemClick(item, div, type)); [cite: 421]
+                [cite_start]fragment.appendChild(div); [cite: 422]
             }
 
-            container.appendChild(fragment);
+            [cite_start]container.appendChild(fragment); [cite: 423]
         }
 
         function handleGridItemClick(item, element, type) {
             if (type === 'icon') {
                 if (element.classList.contains('selected')) {
-                    element.classList.remove('selected');
-                    selectedIcons = selectedIcons.filter(id => id !== item.id);
+                    [cite_start]element.classList.remove('selected'); [cite: 423]
+                    [cite_start]selectedIcons = selectedIcons.filter(id => id !== item.id); [cite: 424]
                     if (latestSelectedIconId === item.id) {
-                        latestSelectedIconId = selectedIcons.length > 0 ? selectedIcons[selectedIcons.length - 1] : null;
+                        [cite_start]latestSelectedIconId = selectedIcons.length > 0 ? [cite: 424]
+                        [cite_start]selectedIcons[selectedIcons.length - 1] : null; [cite: 425]
                     }
                 } else {
-                    element.classList.add('selected');
-                    selectedIcons.push(item.id);
-                    latestSelectedIconId = item.id;
+                    [cite_start]element.classList.add('selected'); [cite: 425]
+                    [cite_start]selectedIcons.push(item.id); [cite: 426]
+                    [cite_start]latestSelectedIconId = item.id; [cite: 426]
                 }
-                updateSelectedCount();
+                [cite_start]updateSelectedCount(); [cite: 426]
             } else if (type === 'background') {
-                clearSelection(bgContent.querySelectorAll('.grid-item:not(.upload-area)'));
-                element.classList.add('selected');
-                selectedBackgroundId = item.id;
-                checkGradientWarning();
+                [cite_start]clearSelection(bgContent.querySelectorAll('.grid-item:not(.upload-area)')); [cite: 427]
+                [cite_start]element.classList.add('selected'); [cite: 428]
+                [cite_start]selectedBackgroundId = item.id; [cite: 428]
+                [cite_start]checkGradientWarning(); [cite: 428]
             } else if (type === 'texture') {
-                clearSelection(txContent.querySelectorAll('.grid-item:not(.upload-area)'));
-                element.classList.add('selected');
-                selectedTextureId = item.id;
+                [cite_start]clearSelection(txContent.querySelectorAll('.grid-item:not(.upload-area)')); [cite: 428]
+                [cite_start]element.classList.add('selected'); [cite: 429]
+                [cite_start]selectedTextureId = item.id; [cite: 429]
             }
-            debouncedDrawPreview();
+            [cite_start]debouncedDrawPreview(); [cite: 429]
         }
 
         function updateSelectedCount() {
-            selectedCountEl.textContent = selectedIcons.length;
+            [cite_start]selectedCountEl.textContent = selectedIcons.length; [cite: 430]
         }
 
-        async functionrenderIconToCanvas(iconData, backgroundData, textureData, iconColor, bgColor, glowColor, edgeOn, logoGlowOn, edgeGlowOn, targetCanvas, targetCtx, targetSize) {
-            targetCtx.shadowBlur = 0;
-            targetCtx.shadowColor = 'transparent';
-            targetCtx.shadowOffsetX = 0;
-            targetCtx.shadowOffsetY = 0;
-            targetCtx.clearRect(0, 0, targetSize, targetSize);
+        async function renderIconToCanvas(iconData, backgroundData, textureData, iconColor, bgColor, glowColor, edgeOn, logoGlowOn, edgeGlowOn, targetCanvas, targetCtx, targetSize) {
+            [cite_start]targetCtx.shadowBlur = 0; [cite: 431]
+            [cite_start]targetCtx.shadowColor = 'transparent'; [cite: 432]
+            [cite_start]targetCtx.shadowOffsetX = 0; [cite: 432]
+            [cite_start]targetCtx.shadowOffsetY = 0; [cite: 432]
+            [cite_start]targetCtx.clearRect(0, 0, targetSize, targetSize); [cite: 432]
 
-            const baseIconFontSize = 150;
-            const iconRenderSizeRatio = 0.7;
-            const baseEdgeLineWidth = 6;
-            const baseEdgeOffset = 20;
-            const baseEdgeLineLength = 55;
-
-            let iconFontSize = baseIconFontSize * (targetSize / 300);
-            let iconImageDrawSize = targetSize * iconRenderSizeRatio;
-
+            [cite_start]const baseIconFontSize = 150; [cite: 432]
+            [cite_start]const iconRenderSizeRatio = 0.7; [cite: 433]
+            [cite_start]const baseEdgeLineWidth = 6; [cite: 433]
+            [cite_start]const baseEdgeOffset = 20; [cite: 433]
+            [cite_start]const baseEdgeLineLength = 55; [cite: 433]
+            [cite_start]let iconFontSize = baseIconFontSize * (targetSize / 300); [cite: 434]
+            [cite_start]let iconImageDrawSize = targetSize * iconRenderSizeRatio; [cite: 434]
             if (backgroundData && backgroundData.id === 'off') {
-                targetCtx.fillStyle = bgColor;
-                targetCtx.fillRect(0, 0, targetSize, targetSize);
+                [cite_start]targetCtx.fillStyle = bgColor; [cite: 435]
+                [cite_start]targetCtx.fillRect(0, 0, targetSize, targetSize); [cite: 436]
             } else if (backgroundData) {
                 if (backgroundData.type === 'color') {
-                    targetCtx.fillStyle = backgroundData.value;
-                    targetCtx.fillRect(0, 0, targetSize, targetSize);
+                    [cite_start]targetCtx.fillStyle = backgroundData.value; [cite: 436]
+                    [cite_start]targetCtx.fillRect(0, 0, targetSize, targetSize); [cite: 437]
                 } else if (backgroundData.type === 'gradient') {
-                    const gradient = targetCtx.createLinearGradient(0, 0, targetSize, targetSize);
-                    gradient.addColorStop(0, backgroundData.colors[0]);
-                    gradient.addColorStop(1, backgroundData.colors[1]);
-                    targetCtx.fillStyle = gradient;
-                    targetCtx.fillRect(0, 0, targetSize, targetSize);
+                    [cite_start]const gradient = targetCtx.createLinearGradient(0, 0, targetSize, targetSize); [cite: 437]
+                    [cite_start]gradient.addColorStop(0, backgroundData.colors[0]); [cite: 438]
+                    [cite_start]gradient.addColorStop(1, backgroundData.colors[1]); [cite: 438]
+                    [cite_start]targetCtx.fillStyle = gradient; [cite: 438]
+                    [cite_start]targetCtx.fillRect(0, 0, targetSize, targetSize); [cite: 438]
                 } else if (backgroundData.type === 'custom-image') {
                     try {
-                        const img = await loadImage(backgroundData.src);
-                        targetCtx.drawImage(img, 0, 0, targetSize, targetSize);
+                        [cite_start]const img = await loadImage(backgroundData.src); [cite: 439]
+                        [cite_start]targetCtx.drawImage(img, 0, 0, targetSize, targetSize); [cite: 440]
                     } catch (error) {
-                        console.error('Error drawing custom background image:', error);
-                        targetCtx.fillStyle = bgColor;
-                        targetCtx.fillRect(0, 0, targetSize, targetSize);
+                        [cite_start]console.error('Error drawing custom background image:', error); [cite: 440]
+                        [cite_start]targetCtx.fillStyle = bgColor; [cite: 441]
+                        [cite_start]targetCtx.fillRect(0, 0, targetSize, targetSize); [cite: 441]
                     }
                 }
             } else {
-                targetCtx.fillStyle = bgColor;
-                targetCtx.fillRect(0, 0, targetSize, targetSize);
+                [cite_start]targetCtx.fillStyle = bgColor; [cite: 441]
+                [cite_start]targetCtx.fillRect(0, 0, targetSize, targetSize); [cite: 442]
             }
 
             if (textureData && textureData.textureOpacity > 0) {
-                drawPattern(targetCtx, textureData, targetSize / 300, targetSize, targetSize, false);
+                [cite_start]drawPattern(targetCtx, textureData, targetSize / 300, targetSize, targetSize, false); [cite: 442]
             } else if (textureData && textureData.type === 'custom-image') {
                 try {
-                    const img = await loadImage(textureData.src);
-                    targetCtx.globalAlpha = textureData.textureOpacity || 1;
-                    targetCtx.drawImage(img, 0, 0, targetSize, targetSize);
-                    targetCtx.globalAlpha = 1;
+                    [cite_start]const img = await loadImage(textureData.src); [cite: 443]
+                    targetCtx.globalAlpha = textureData.textureOpacity || [cite_start]1; [cite: 444]
+                    [cite_start]targetCtx.drawImage(img, 0, 0, targetSize, targetSize); [cite: 444]
+                    [cite_start]targetCtx.globalAlpha = 1; [cite: 444]
                 } catch (error) {
-                    console.error('Error drawing custom texture image:', error);
+                    [cite_start]console.error('Error drawing custom texture image:', error); [cite: 445]
                 }
             }
 
             if (iconData) {
                 if (logoGlowOn) {
-                    targetCtx.shadowColor = glowColor;
-                    targetCtx.shadowBlur = 15 * (targetSize / 300);
-                    targetCtx.shadowOffsetX = 0;
-                    targetCtx.shadowOffsetY = 0;
+                    [cite_start]targetCtx.shadowColor = glowColor; [cite: 446]
+                    [cite_start]targetCtx.shadowBlur = 15 * (targetSize / 300); [cite: 447]
+                    [cite_start]targetCtx.shadowOffsetX = 0; [cite: 447]
+                    [cite_start]targetCtx.shadowOffsetY = 0; [cite: 447]
                 }
 
                 if (iconData.type === 'fa-icon') {
-                    targetCtx.fillStyle = iconColor;
-                    const fontFamily = iconData.class.includes('fa-brands') ? '"Font Awesome 6 Brands"' : '"Font Awesome 6 Free"';
-                    targetCtx.font = `900 ${iconFontSize}px ${fontFamily}`;
-                    targetCtx.textAlign = 'center';
-                    targetCtx.textBaseline = 'middle';
-                    targetCtx.fillText(iconData.unicode, targetSize / 2, targetSize / 2);
+                    [cite_start]targetCtx.fillStyle = iconColor; [cite: 448]
+                    const fontFamily = iconData.class.includes('fa-brands') ? [cite_start]'"Font Awesome 6 Brands"' : '"Font Awesome 6 Free"'; [cite: 449]
+                    [cite_start]targetCtx.font = `900 ${iconFontSize}px ${fontFamily}`; [cite: 449]
+                    [cite_start]targetCtx.textAlign = 'center'; [cite: 450]
+                    [cite_start]targetCtx.textBaseline = 'middle'; [cite: 450]
+                    [cite_start]targetCtx.fillText(iconData.unicode, targetSize / 2, targetSize / 2); [cite: 450]
                 } else if (iconData.type === 'custom-image') {
                     try {
-                        const img = await loadImage(iconData.src);
-                        const imgAspectRatio = img.width / img.height;
-                        let drawWidth = iconImageDrawSize;
-                        let drawHeight = iconImageDrawSize;
-                        if (imgAspectRatio > 1) { 
-                            drawHeight = drawWidth / imgAspectRatio;
-                        } else { 
-                            drawWidth = drawHeight * imgAspectRatio;
+                        [cite_start]const img = await loadImage(iconData.src); [cite: 451]
+                        [cite_start]const imgAspectRatio = img.width / img.height; [cite: 452]
+                        [cite_start]let drawWidth = iconImageDrawSize; [cite: 452]
+                        [cite_start]let drawHeight = iconImageDrawSize; [cite: 452]
+                        [cite_start]if (imgAspectRatio > 1) { [cite: 453]
+                            [cite_start]drawHeight = drawWidth / imgAspectRatio; [cite: 453]
+                        [cite_start]} else { [cite: 454]
+                            [cite_start]drawWidth = drawHeight * imgAspectRatio; [cite: 454]
                         }
-                        const drawX = (targetSize - drawWidth) / 2;
-                        const drawY = (targetSize - drawHeight) / 2;
-                        targetCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                        [cite_start]const drawX = (targetSize - drawWidth) / 2; [cite: 455]
+                        [cite_start]const drawY = (targetSize - drawHeight) / 2; [cite: 456]
+                        [cite_start]targetCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight); [cite: 456]
                     } catch (error) {
-                        console.error('Error drawing custom icon image:', error);
-                        targetCtx.fillStyle = iconColor;
-                        targetCtx.font = `bold ${50 * (targetSize / 300)}px Arial`;
-                        targetCtx.textAlign = 'center';
-                        targetCtx.textBaseline = 'middle';
-                        targetCtx.fillText('?', targetSize / 2, targetSize / 2);
+                        [cite_start]console.error('Error drawing custom icon image:', error); [cite: 457]
+                        [cite_start]targetCtx.fillStyle = iconColor; [cite: 458]
+                        [cite_start]targetCtx.font = `bold ${50 * (targetSize / 300)}px Arial`; [cite: 458]
+                        [cite_start]targetCtx.textAlign = 'center'; [cite: 458]
+                        [cite_start]targetCtx.textBaseline = 'middle'; [cite: 458]
+                        [cite_start]targetCtx.fillText('?', targetSize / 2, targetSize / 2); [cite: 459]
                     }
                 } else if (iconData.type === 'custom-svg') {
                     try {
-                        const img = await renderSvgIcon(iconData.src, iconColor); 
-                        const imgAspectRatio = img.width / img.height; 
-                        let drawWidth = iconImageDrawSize;
-                        let drawHeight = iconImageDrawSize;
-                        if (imgAspectRatio > 1) { 
-                            drawHeight = drawWidth / imgAspectRatio;
-                        } else { 
-                            drawWidth = drawHeight * imgAspectRatio;
+                        [cite_start]const img = await renderSvgIcon(iconData.src, iconColor); [cite: 459]
+                        [cite_start]const imgAspectRatio = img.width / img.height; [cite: 460]
+                        [cite_start]let drawWidth = iconImageDrawSize; [cite: 460]
+                        [cite_start]let drawHeight = iconImageDrawSize; [cite: 460]
+                        [cite_start]if (imgAspectRatio > 1) { [cite: 461]
+                            [cite_start]drawHeight = drawWidth / imgAspectRatio; [cite: 461]
+                        [cite_start]} else { [cite: 462]
+                            [cite_start]drawWidth = drawHeight * imgAspectRatio; [cite: 462]
                         }
-                        const drawX = (targetSize - drawWidth) / 2;
-                        const drawY = (targetSize - drawHeight) / 2;
-                        targetCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                        [cite_start]const drawX = (targetSize - drawWidth) / 2; [cite: 463]
+                        [cite_start]const drawY = (targetSize - drawHeight) / 2; [cite: 464]
+                        [cite_start]targetCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight); [cite: 464]
                     } catch (error) {
-                        console.error('Error drawing custom SVG icon:', error);
-                        targetCtx.fillStyle = iconColor;
-                        targetCtx.font = `bold ${50 * (targetSize / 300)}px Arial`;
-                        targetCtx.textAlign = 'center';
-                        targetCtx.textBaseline = 'middle';
-                        targetCtx.fillText('SVG?', targetSize / 2, targetSize / 2);
+                        [cite_start]console.error('Error drawing custom SVG icon:', error); [cite: 465]
+                        [cite_start]targetCtx.fillStyle = iconColor; [cite: 466]
+                        [cite_start]targetCtx.font = `bold ${50 * (targetSize / 300)}px Arial`; [cite: 466]
+                        [cite_start]targetCtx.textAlign = 'center'; [cite: 466]
+                        [cite_start]targetCtx.textBaseline = 'middle'; [cite: 466]
+                        [cite_start]targetCtx.fillText('SVG?', targetSize / 2, targetSize / 2); [cite: 467]
                     }
                 }
-                targetCtx.shadowBlur = 0;
-                targetCtx.shadowColor = 'transparent';
-                targetCtx.shadowOffsetX = 0;
-                targetCtx.shadowOffsetY = 0;
+                [cite_start]targetCtx.shadowBlur = 0; [cite: 467]
+                [cite_start]targetCtx.shadowColor = 'transparent'; [cite: 468]
+                [cite_start]targetCtx.shadowOffsetX = 0; [cite: 468]
+                [cite_start]targetCtx.shadowOffsetY = 0; [cite: 468]
             }
 
             if (edgeOn) {
                 if (edgeGlowOn) {
-                    targetCtx.shadowColor = glowColor;
-                    targetCtx.shadowBlur = 15 * (targetSize / 300);
-                    targetCtx.shadowOffsetX = 0;
-                    targetCtx.shadowOffsetY = 0;
+                    [cite_start]targetCtx.shadowColor = glowColor; [cite: 468]
+                    [cite_start]targetCtx.shadowBlur = 15 * (targetSize / 300); [cite: 469]
+                    [cite_start]targetCtx.shadowOffsetX = 0; [cite: 469]
+                    [cite_start]targetCtx.shadowOffsetY = 0; [cite: 469]
                 }
 
-                targetCtx.strokeStyle = glowColor;
-                targetCtx.lineWidth = baseEdgeLineWidth * (targetSize / 300);
-                targetCtx.lineCap = 'round';
-                targetCtx.lineJoin = 'round';
+                [cite_start]targetCtx.strokeStyle = glowColor; [cite: 470]
+                [cite_start]targetCtx.lineWidth = baseEdgeLineWidth * (targetSize / 300); [cite: 471]
+                [cite_start]targetCtx.lineCap = 'round'; [cite: 471]
+                [cite_start]targetCtx.lineJoin = 'round'; [cite: 471]
+                [cite_start]const offset = baseEdgeOffset * (targetSize / 300); [cite: 472]
+                [cite_start]const lineLength = baseEdgeLineLength * (targetSize / 300); [cite: 472]
 
-                const offset = baseEdgeOffset * (targetSize / 300);
-                const lineLength = baseEdgeLineLength * (targetSize / 300);
+                [cite_start]targetCtx.beginPath(); [cite: 472]
+                [cite_start]targetCtx.moveTo(offset, offset + lineLength); [cite: 473]
+                [cite_start]targetCtx.lineTo(offset, offset); [cite: 473]
+                [cite_start]targetCtx.lineTo(offset + lineLength, offset); [cite: 473]
+                [cite_start]targetCtx.moveTo(targetSize - offset - lineLength, offset); [cite: 473]
+                [cite_start]targetCtx.lineTo(targetSize - offset, offset); [cite: 473]
+                [cite_start]targetCtx.lineTo(targetSize - offset, offset + lineLength); [cite: 474]
+                [cite_start]targetCtx.moveTo(targetSize - offset, targetSize - offset - lineLength); [cite: 474]
+                [cite_start]targetCtx.lineTo(targetSize - offset, targetSize - offset); [cite: 474]
+                [cite_start]targetCtx.lineTo(targetSize - offset - lineLength, targetSize - offset); [cite: 475]
+                [cite_start]targetCtx.moveTo(offset + lineLength, targetSize - offset); [cite: 475]
+                [cite_start]targetCtx.lineTo(offset, targetSize - offset); [cite: 475]
+                [cite_start]targetCtx.lineTo(offset, targetSize - offset - lineLength); [cite: 476]
+                [cite_start]targetCtx.stroke(); [cite: 476]
 
-                targetCtx.beginPath();
-                targetCtx.moveTo(offset, offset + lineLength);
-                targetCtx.lineTo(offset, offset);
-                targetCtx.lineTo(offset + lineLength, offset);
-                targetCtx.moveTo(targetSize - offset - lineLength, offset);
-                targetCtx.lineTo(targetSize - offset, offset);
-                targetCtx.lineTo(targetSize - offset, offset + lineLength);
-                targetCtx.moveTo(targetSize - offset, targetSize - offset - lineLength);
-                targetCtx.lineTo(targetSize - offset, targetSize - offset);
-                targetCtx.lineTo(targetSize - offset - lineLength, targetSize - offset);
-                targetCtx.moveTo(offset + lineLength, targetSize - offset);
-                targetCtx.lineTo(offset, targetSize - offset);
-                targetCtx.lineTo(offset, targetSize - offset - lineLength); 
-                targetCtx.stroke();
-
-                targetCtx.shadowBlur = 0;
-                targetCtx.shadowColor = 'transparent';
-                targetCtx.shadowOffsetX = 0;
-                targetCtx.shadowOffsetY = 0;
+                [cite_start]targetCtx.shadowBlur = 0; [cite: 476]
+                [cite_start]targetCtx.shadowColor = 'transparent'; [cite: 476]
+                [cite_start]targetCtx.shadowOffsetX = 0; [cite: 476]
+                [cite_start]targetCtx.shadowOffsetY = 0; [cite: 476]
             }
         }
 
         function debounce(func, delay) {
-            let timeout;
-            return function(...args) {
-                const context = this;
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(context, args), delay);
+            [cite_start]let timeout; [cite: 477]
+            [cite_start]return function(...args) { [cite: 478]
+                [cite_start]const context = this; [cite: 478]
+                [cite_start]clearTimeout(timeout); [cite: 479]
+                [cite_start]timeout = setTimeout(() => func.apply(context, args), delay); [cite: 479]
             };
         }
 
         const debouncedDrawPreview = debounce(() => {
-            document.fonts.ready.then(drawPreview);
+            [cite_start]document.fonts.ready.then(drawPreview); [cite: 479]
         }, 100);
-
         async function drawPreview() {
-            const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
-            const currentTx = texturesData.find(tx => tx.id === selectedTextureId);
-            const latestIcon = iconsData.find(icon => icon.id === latestSelectedIconId);
-
-            if (latestIcon) {
-                previewOverlayText.style.display = 'none';
+            [cite_start]const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId); [cite: 480]
+            [cite_start]const currentTx = texturesData.find(tx => tx.id === selectedTextureId); [cite: 481]
+            [cite_start]const latestIcon = iconsData.find(icon => icon.id === latestSelectedIconId); [cite: 481]
+            [cite_start]if (latestIcon) { [cite: 482]
+                [cite_start]previewOverlayText.style.display = 'none'; [cite: 482]
             } else {
-                previewOverlayText.style.display = 'block';
+                [cite_start]previewOverlayText.style.display = 'block'; [cite: 483]
             }
 
             await renderIconToCanvas(
@@ -2021,33 +2029,35 @@
                 currentTx,
                 iconColorInput.value,
                 backgroundColorInput.value,
-                glowColorInput.value,
+       
+                [cite_start]glowColorInput.value, [cite: 485]
                 edgeOnOffCheckbox.checked,
                 logoGlowOnOffCheckbox.checked,
                 edgeGlowOnOffCheckbox.checked,
                 iconPreview,
                 ctx,
-                300
+           
+                [cite_start]300 [cite: 486]
             );
         }
 
         function normalizeHex(hex) {
-            if (!hex) return '';
-            hex = hex.startsWith('#') ? hex : '#' + hex;
+            [cite_start]if (!hex) return ''; [cite: 487]
+            [cite_start]hex = hex.startsWith('#') ? hex : '#' + hex; [cite: 488]
             if (hex.length === 4 && /^#[0-9a-fA-F]{3}$/.test(hex)) {
-                return '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+                [cite_start]return '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3]; [cite: 488]
             }
-            return hex.toUpperCase();
+            [cite_start]return hex.toUpperCase(); [cite: 489]
         }
 
         function isValidHex(hex) {
-            return /^#?([0-9a-fA-F]{3}){1,2}$/.test(hex);
+            [cite_start]return /^#?([0-9a-fA-F]{3}){1,2}$/.test(hex); [cite: 490]
         }
 
         function updateColorInputs(colorPickerElement, hexInputElement, newColor) {
-            const normalizedColor = normalizeHex(newColor);
-            colorPickerElement.value = normalizedColor;
-            hexInputElement.value = normalizedColor;
+            [cite_start]const normalizedColor = normalizeHex(newColor); [cite: 491]
+            [cite_start]colorPickerElement.value = normalizedColor; [cite: 492]
+            [cite_start]hexInputElement.value = normalizedColor; [cite: 492]
         }
 
         // ===== TAB SWITCHING =====
@@ -2057,311 +2067,326 @@
             showBgBtn.classList.remove('active');
             iconsContent.classList.add('active');
             txContent.classList.remove('active');
-            bgContent.classList.remove('active');
+           
+            [cite_start]bgContent.classList.remove('active'); [cite: 493]
         });
-
-        showTxBtn.addEventListener('click', () => {
-            showTxBtn.classList.add('active');
-            showIconsBtn.classList.remove('active');
-            showBgBtn.classList.remove('active');
-            txContent.classList.add('active');
-            iconsContent.classList.remove('active');
-            bgContent.classList.remove('active');
+        [cite_start]showTxBtn.addEventListener('click', () => { [cite: 494]
+            [cite_start]showTxBtn.classList.add('active'); [cite: 494]
+            [cite_start]showIconsBtn.classList.remove('active'); [cite: 494]
+            [cite_start]showBgBtn.classList.remove('active'); [cite: 494]
+            [cite_start]txContent.classList.add('active'); [cite: 494]
+            [cite_start]iconsContent.classList.remove('active'); [cite: 494]
+            [cite_start]bgContent.classList.remove('active'); [cite: 494]
         });
-
-        showBgBtn.addEventListener('click', () => {
-            showBgBtn.classList.add('active');
-            showIconsBtn.classList.remove('active');
-            showTxBtn.classList.remove('active');
-            bgContent.classList.add('active');
-            iconsContent.classList.remove('active');
-            txContent.classList.remove('active');
+        [cite_start]showBgBtn.addEventListener('click', () => { [cite: 495]
+            [cite_start]showBgBtn.classList.add('active'); [cite: 495]
+            [cite_start]showIconsBtn.classList.remove('active'); [cite: 495]
+            [cite_start]showTxBtn.classList.remove('active'); [cite: 495]
+            [cite_start]bgContent.classList.add('active'); [cite: 495]
+            [cite_start]iconsContent.classList.remove('active'); [cite: 495]
+            [cite_start]txContent.classList.remove('active'); [cite: 495]
         });
-
         // ===== COLOR SYNC WITH DEBOUNCE =====
         function setupColorSync(colorPicker, hexInput) {
             colorPicker.addEventListener('input', () => {
                 updateColorInputs(colorPicker, hexInput, colorPicker.value);
                 debouncedDrawPreview();
-            });
-
-            let hexInputTimeout;
-            hexInput.addEventListener('input', () => {
-                const value = hexInput.value;
+            [cite_start]}); [cite: 496]
+            [cite_start]let hexInputTimeout; [cite: 497]
+            [cite_start]hexInput.addEventListener('input', () => { [cite: 497]
+                [cite_start]const value = hexInput.value; [cite: 497]
                 
-                clearTimeout(hexInputTimeout);
+                [cite_start]clearTimeout(hexInputTimeout); [cite: 497]
                 
                 if (value.length === 7 && isValidHex(value)) {
-                    hexInputTimeout = setTimeout(() => {
-                        updateColorInputs(colorPicker, hexInput, value);
-                        debouncedDrawPreview();
+      
+                    [cite_start]hexInputTimeout = setTimeout(() => { [cite: 498]
+                        [cite_start]updateColorInputs(colorPicker, hexInput, value); [cite: 498]
+                        [cite_start]debouncedDrawPreview(); [cite: 498]
                     }, 300);
-                } else if (value.length === 4 && isValidHex(value)) {
-                    hexInputTimeout = setTimeout(() => {
-                        updateColorInputs(colorPicker, hexInput, value);
-                        debouncedDrawPreview();
-                    }, 300);
+           
+                [cite_start]} else if (value.length === 4 && isValidHex(value)) { [cite: 499]
+                    [cite_start]hexInputTimeout = setTimeout(() => { [cite: 499]
+                        [cite_start]updateColorInputs(colorPicker, hexInput, value); [cite: 499]
+                        [cite_start]debouncedDrawPreview(); [cite: 499]
+             
+                    [cite_start]}, 300); [cite: 500]
                 }
             });
         }
 
-        setupColorSync(iconColorInput, iconColorHexInput);
-        setupColorSync(backgroundColorInput, backgroundColorHexInput);
-        setupColorSync(glowColorInput, glowColorHexInput);
-
+        [cite_start]setupColorSync(iconColorInput, iconColorHexInput); [cite: 501]
+        [cite_start]setupColorSync(backgroundColorInput, backgroundColorHexInput); [cite: 501]
+        [cite_start]setupColorSync(glowColorInput, glowColorHexInput); [cite: 501]
         // ===== CHECKBOX & NAME LISTENERS =====
-        document.querySelectorAll('.checkbox-item input, #iconName').forEach(input => {
-            input.addEventListener('change', () => {
-                debouncedDrawPreview();
+        [cite_start]document.querySelectorAll('.checkbox-item input, #iconName').forEach(input => { [cite: 502]
+            [cite_start]input.addEventListener('change', () => { [cite: 502]
+                [cite_start]debouncedDrawPreview(); [cite: 502]
             });
         });
-
         // ===== DOWNLOAD FUNCTIONALITY =====
-        downloadBtn.addEventListener('click', async () => {
-            if (selectedIcons.length === 0) {
+        [cite_start]downloadBtn.addEventListener('click', async () => { [cite: 503]
+            [cite_start]if (selectedIcons.length === 0) { [cite: 503]
                 alert('Please select at least one icon to download.');
                 return;
             }
 
-            const baseFileName = iconNameInput.value.trim() || 'CustomIcon';
-            const saveAsZip = document.getElementById('saveAsZip').checked;
-            const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
-            const currentTx = texturesData.find(tx => tx.id === selectedTextureId);
-            const bgColor = backgroundColorInput.value;
-            const iconColor = iconColorInput.value;
-            const glowColor = glowColorInput.value;
-            const edgeOn = edgeOnOffCheckbox.checked;
-            const logoGlowOn = logoGlowOnOffCheckbox.checked;
-            const edgeGlowOn = edgeGlowOnOffCheckbox.checked;
+            [cite_start]const baseFileName = iconNameInput.value.trim() || [cite: 503]
+            [cite_start]'CustomIcon'; [cite: 504]
+            [cite_start]const saveAsZip = document.getElementById('saveAsZip').checked; [cite: 504]
+            [cite_start]const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId); [cite: 504]
+            [cite_start]const currentTx = texturesData.find(tx => tx.id === selectedTextureId); [cite: 504]
+            [cite_start]const bgColor = backgroundColorInput.value; [cite: 504]
+            [cite_start]const iconColor = iconColorInput.value; [cite: 504]
+            [cite_start]const glowColor = glowColorInput.value; [cite: 504]
+  
+            [cite_start]const edgeOn = edgeOnOffCheckbox.checked; [cite: 505]
+            [cite_start]const logoGlowOn = logoGlowOnOffCheckbox.checked; [cite: 505]
+            [cite_start]const edgeGlowOn = edgeGlowOnOffCheckbox.checked; [cite: 505]
 
             let zip;
             if (saveAsZip) {
-                zip = new JSZip();
-                const sizesToGenerate = [500, 288, 144, 96, 72];
-                const recommendedSize = 144;
+                [cite_start]zip = new JSZip(); [cite: 505]
+                [cite_start]const sizesToGenerate = [500, 288, 144, 96, 72]; [cite: 506]
+                [cite_start]const recommendedSize = 144; [cite: 506]
 
-                downloadBtn.disabled = true;
-                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating ZIP...';
+                [cite_start]downloadBtn.disabled = true; [cite: 506]
+                [cite_start]downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating ZIP...'; [cite: 507]
 
                 try {
                     for (const iconId of selectedIcons) {
-                        const iconData = iconsData.find(i => i.id === iconId);
-                        if (!iconData) {
-                            console.warn(`Icon with ID ${iconId} not found. Skipping.`);
-                            continue;
+                        [cite_start]const iconData = iconsData.find(i => i.id === iconId); [cite: 507]
+                        [cite_start]if (!iconData) { [cite: 508]
+                            [cite_start]console.warn(`Icon with ID ${iconId} not found. Skipping.`); [cite: 508]
+                            [cite_start]continue; [cite: 509]
                         }
 
-                        const cleanIconName = iconData.name.replace(/[^a-z0-9]/gi, '_');
-
-                        for (const size of sizesToGenerate) {
-                            const exportCanvas = document.createElement('canvas');
-                            exportCanvas.width = size;
-                            exportCanvas.height = size;
-                            const exportCtx = exportCanvas.getContext('2d');
-
-                            await renderIconToCanvas(
+                        [cite_start]const cleanIconName = iconData.name.replace(/[^a-z0-9]/gi, '_'); [cite: 509]
+                        [cite_start]for (const size of sizesToGenerate) { [cite: 510]
+                            [cite_start]const exportCanvas = document.createElement('canvas'); [cite: 510]
+                            [cite_start]exportCanvas.width = size; [cite: 511]
+                            [cite_start]exportCanvas.height = size; [cite: 511]
+                            [cite_start]const exportCtx = exportCanvas.getContext('2d'); [cite: 511]
+                            [cite_start]await renderIconToCanvas( [cite: 512]
                                 iconData,
                                 currentBg,
                                 currentTx,
-                                iconColor,
+   
+                                [cite_start]iconColor, [cite: 513]
                                 bgColor,
                                 glowColor,
-                                edgeOn,
+       
+                                [cite_start]edgeOn, [cite: 514]
                                 logoGlowOn,
                                 edgeGlowOn,
-                                exportCanvas,
+           
+                                [cite_start]exportCanvas, [cite: 515]
                                 exportCtx,
                                 size
-                            );
+               
+                            [cite_start]); [cite: 516]
 
-                            const dataURL = exportCanvas.toDataURL('image/png');
-                            const base64Data = dataURL.split(',')[1];
+                            [cite_start]const dataURL = exportCanvas.toDataURL('image/png'); [cite: 516]
+                            [cite_start]const base64Data = dataURL.split(',')[1]; [cite: 517]
                             
-                            let folderName = `${size}px`;
+                            [cite_start]let folderName = `${size}px`; [cite: 517]
                             if (size === recommendedSize) {
-                                folderName = `${size}px (Recommended)`;
+                                [cite_start]folderName = `${size}px (Recommended)`; [cite: 517]
                             }
 
-                            zip.file(`${folderName}/${baseFileName}_${cleanIconName}.png`, base64Data, { base64: true });
+                            [cite_start]zip.file(`${folderName}/${baseFileName}_${cleanIconName}.png`, base64Data, { base64: true }); [cite: 518]
                         }
                     }
 
-                    const zipBlob = await zip.generateAsync({ type: 'blob' });
-                    const zipFileName = `${baseFileName}_Icons.zip`;
-                    const zipLink = document.createElement('a');
-                    zipLink.href = URL.createObjectURL(zipBlob);
-                    zipLink.download = zipFileName;
-                    document.body.appendChild(zipLink);
-                    zipLink.click();
-                    document.body.removeChild(zipLink);
-                    URL.revokeObjectURL(zipLink.href);
-
+                    [cite_start]const zipBlob = await zip.generateAsync({ type: 'blob' }); [cite: 519]
+                    [cite_start]const zipFileName = `${baseFileName}_Icons.zip`; [cite: 520]
+                    [cite_start]const zipLink = document.createElement('a'); [cite: 520]
+                    [cite_start]zipLink.href = URL.createObjectURL(zipBlob); [cite: 520]
+                    [cite_start]zipLink.download = zipFileName; [cite: 520]
+                    [cite_start]document.body.appendChild(zipLink); [cite: 520]
+                    [cite_start]zipLink.click(); [cite: 520]
+                    [cite_start]document.body.removeChild(zipLink); [cite: 520]
+                    [cite_start]URL.revokeObjectURL(zipLink.href); [cite: 520]
                 } catch (error) {
-                    console.error('Error during ZIP icon download:', error);
-                    alert('An error occurred during ZIP download. Please check the console for details.');
+                    [cite_start]console.error('Error during ZIP icon download:', error); [cite: 521]
+                    [cite_start]alert('An error occurred during ZIP download. Please check the console for details.'); [cite: 522]
                 } finally {
-                    downloadBtn.disabled = false;
-                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons';
+                    [cite_start]downloadBtn.disabled = false; [cite: 523]
+                    [cite_start]downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons'; [cite: 524]
                 }
 
             } else {
-                downloadBtn.disabled = true;
-                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+                [cite_start]downloadBtn.disabled = true; [cite: 524]
+                [cite_start]downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...'; [cite: 525]
                 try {
                     for (const iconId of selectedIcons) {
-                        const iconData = iconsData.find(i => i.id === iconId);
-                        if (!iconData) {
-                            console.warn(`Icon with ID ${iconId} not found. Skipping.`);
-                            continue;
+                        [cite_start]const iconData = iconsData.find(i => i.id === iconId); [cite: 525]
+                        [cite_start]if (!iconData) { [cite: 526]
+                            [cite_start]console.warn(`Icon with ID ${iconId} not found. Skipping.`); [cite: 526]
+                            [cite_start]continue; [cite: 527]
                         }
 
-                        const exportCanvas = document.createElement('canvas');
-                        exportCanvas.width = selectedSize;
-                        exportCanvas.height = selectedSize;
-                        const exportCtx = exportCanvas.getContext('2d');
-
-                        await renderIconToCanvas(
+                        [cite_start]const exportCanvas = document.createElement('canvas'); [cite: 527]
+                        [cite_start]exportCanvas.width = selectedSize; [cite: 528]
+                        [cite_start]exportCanvas.height = selectedSize; [cite: 528]
+                        [cite_start]const exportCtx = exportCanvas.getContext('2d'); [cite: 528]
+                        [cite_start]await renderIconToCanvas( [cite: 529]
                             iconData,
                             currentBg,
                             currentTx,
-                            iconColor,
+               
+                            [cite_start]iconColor, [cite: 530]
                             bgColor,
                             glowColor,
                             edgeOn,
-                            logoGlowOn,
+   
+                            [cite_start]logoGlowOn, [cite: 531]
                             edgeGlowOn,
                             exportCanvas,
-                            exportCtx,
+                   
+                            [cite_start]exportCtx, [cite: 532]
                             selectedSize
                         );
+                        [cite_start]const cleanIconName = iconData.name.replace(/[^a-z0-9]/gi, '_'); [cite: 533]
+                        [cite_start]const fileName = `${baseFileName}_${cleanIconName}.png`; [cite: 533]
+                        [cite_start]const dataURL = exportCanvas.toDataURL('image/png'); [cite: 533]
 
-                        const cleanIconName = iconData.name.replace(/[^a-z0-9]/gi, '_');
-                        const fileName = `${baseFileName}_${cleanIconName}.png`;
-                        const dataURL = exportCanvas.toDataURL('image/png');
-
-                        const link = document.createElement('a');
-                        link.download = fileName;
-                        link.href = dataURL;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                        [cite_start]const link = document.createElement('a'); [cite: 533]
+                        [cite_start]link.download = fileName; [cite: 533]
+                        [cite_start]link.href = dataURL; [cite: 534]
+                        [cite_start]document.body.appendChild(link); [cite: 534]
+                        [cite_start]link.click(); [cite: 534]
+                        [cite_start]document.body.removeChild(link); [cite: 534]
                     }
                 } catch (error) {
-                    console.error('Error during single icon download:', error);
-                    alert('An error occurred during download. Please check the console for details.');
+                    [cite_start]console.error('Error during single icon download:', error); [cite: 534]
+                    [cite_start]alert('An error occurred during download. Please check the console for details.'); [cite: 535]
                 } finally {
-                    downloadBtn.disabled = false;
-                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons';
+                    [cite_start]downloadBtn.disabled = false; [cite: 536]
+                    [cite_start]downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons'; [cite: 537]
                 }
             }
         });
-
         // ===== UPLOAD HANDLERS =====
-        document.getElementById('uploadIcon').addEventListener('change', async (event) => {
+        [cite_start]document.getElementById('uploadIcon').addEventListener('change', async (event) => { [cite: 538]
             if (event.target.files.length > 0) {
                 const file = event.target.files[0];
                 const reader = new FileReader();
                 reader.onload = async (e) => {
-                    customIconCount++;
-                    const isSVG = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
-                    const newIconType = isSVG ? 'custom-svg' : 'custom-image';
+        
+                    [cite_start]customIconCount++; [cite: 539]
+                    [cite_start]const isSVG = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg'); [cite: 539]
+                    const newIconType = isSVG ? [cite_start]'custom-svg' : 'custom-image'; [cite: 539]
 
-                    const newIcon = { 
-                        id: 'custom-icon-' + Date.now(), 
-                        name: `Custom ${customIconCount}`, 
-                        type: newIconType, 
-                        src: e.target.result 
-                    };
-                    iconsData.unshift(newIcon);
-                    await populateGrid(iconsContent, iconsData, 'icon');
+                    [cite_start]const newIcon = { [cite: 539]
+          
+                        [cite_start]id: 'custom-icon-' + Date.now(), [cite: 540]
+                        [cite_start]name: `Custom ${customIconCount}`, [cite: 540]
+                        [cite_start]type: newIconType, [cite: 540]
+                        [cite_start]src: e.target.result [cite: 540]
+   
+                    [cite_start]}; [cite: 541]
+                    [cite_start]iconsData.unshift(newIcon); [cite: 541]
+                    [cite_start]await populateGrid(iconsContent, iconsData, 'icon'); [cite: 541]
                     
-                    clearSelection(iconsContent.querySelectorAll('.grid-item:not(.upload-area)'));
-                    const newIconElement = iconsContent.querySelector(`[data-id="${newIcon.id}"]`);
-                    if (newIconElement) newIconElement.classList.add('selected');
-                    selectedIcons = [newIcon.id];
-                    latestSelectedIconId = newIcon.id;
-                    updateSelectedCount();
+                    
+                    [cite_start]clearSelection(iconsContent.querySelectorAll('.grid-item:not(.upload-area)')); [cite: 542]
+                    [cite_start]const newIconElement = iconsContent.querySelector(`[data-id="${newIcon.id}"]`); [cite: 542]
+                    [cite_start]if (newIconElement) newIconElement.classList.add('selected'); [cite: 542]
+                    [cite_start]selectedIcons = [newIcon.id]; [cite: 542]
+                    [cite_start]latestSelectedIconId = newIcon.id; [cite: 542]
+                    [cite_start]updateSelectedCount(); [cite: 542]
                     
                     debouncedDrawPreview();
+                    sendHeight(); // <-- ADDED
                 };
-                reader.readAsDataURL(file);
+                [cite_start]reader.readAsDataURL(file); [cite: 542]
             }
         });
 
-        document.getElementById('uploadTx').addEventListener('change', async (event) => {
+        [cite_start]document.getElementById('uploadTx').addEventListener('change', async (event) => { [cite: 543]
             if (event.target.files.length > 0) {
                 const file = event.target.files[0];
                 const reader = new FileReader();
                 reader.onload = async (e) => {
-                    customTextureCount++;
-                    const newTx = { 
-                        id: 'custom-tx-' + Date.now(), 
-                        name: `Custom ${customTextureCount}`, 
-                        type: 'custom-image', 
-                        src: e.target.result, 
-                        textureOpacity: 0.8 
+           
+                    [cite_start]customTextureCount++; [cite: 544]
+                    [cite_start]const newTx = { [cite: 544]
+                        [cite_start]id: 'custom-tx-' + Date.now(), [cite: 544]
+                        [cite_start]name: `Custom ${customTextureCount}`, [cite: 544]
+            
+                        [cite_start]type: 'custom-image', [cite: 545]
+                        [cite_start]src: e.target.result, [cite: 545]
+                        [cite_start]textureOpacity: 0.8 [cite: 545]
                     };
-                    texturesData.unshift(newTx);
-                    await populateGrid(txContent, texturesData, 'texture');
+              
+                    [cite_start]texturesData.unshift(newTx); [cite: 546]
+                    [cite_start]await populateGrid(txContent, texturesData, 'texture'); [cite: 546]
                     
-                    clearSelection(txContent.querySelectorAll('.grid-item:not(.upload-area)'));
-                    const newTxElement = txContent.querySelector(`[data-id="${newTx.id}"]`);
-                    if (newTxElement) newTxElement.classList.add('selected');
-                    selectedTextureId = newTx.id;
+                    [cite_start]clearSelection(txContent.querySelectorAll('.grid-item:not(.upload-area)')); [cite: 546]
+                    [cite_start]const newTxElement = txContent.querySelector(`[data-id="${newTx.id}"]`); [cite: 546]
+        
+                    [cite_start]if (newTxElement) newTxElement.classList.add('selected'); [cite: 547]
+                    [cite_start]selectedTextureId = newTx.id; [cite: 547]
                     
                     debouncedDrawPreview();
+                    sendHeight(); // <-- ADDED
                 };
-                reader.readAsDataURL(file);
+                [cite_start]reader.readAsDataURL(file); [cite: 548]
             }
         });
-
-        document.getElementById('uploadBg').addEventListener('change', async (event) => {
+        [cite_start]document.getElementById('uploadBg').addEventListener('change', async (event) => { [cite: 549]
             if (event.target.files.length > 0) {
                 const file = event.target.files[0];
                 const reader = new FileReader();
                 reader.onload = async (e) => {
-                    customBackgroundCount++;
-                    const newBg = { 
-                        id: 'custom-bg-' + Date.now(), 
-                        name: `Custom ${customBackgroundCount}`, 
-                        type: 'custom-image', 
-                        src: e.target.result 
-                    };
-                    backgroundsData.unshift(newBg);
-                    await populateGrid(bgContent, backgroundsData, 'background');
                     
-                    clearSelection(bgContent.querySelectorAll('.grid-item:not(.upload-area)'));
-                    const newBgElement = bgContent.querySelector(`[data-id="${newBg.id}"]`);
-                    if (newBgElement) newBgElement.classList.add('selected');
-                    selectedBackgroundId = newBg.id;
+                    [cite_start]customBackgroundCount++; [cite: 550]
+                    [cite_start]const newBg = { [cite: 550]
+                        [cite_start]id: 'custom-bg-' + Date.now(), [cite: 550]
+                        [cite_start]name: `Custom ${customBackgroundCount}`, [cite: 550]
+                     
+                        [cite_start]type: 'custom-image', [cite: 551]
+                        [cite_start]src: e.target.result [cite: 551]
+                    };
+                    [cite_start]backgroundsData.unshift(newBg); [cite: 551]
+                    [cite_start]await populateGrid(bgContent, backgroundsData, 'background'); [cite: 551]
+      
+                    
+                    [cite_start]clearSelection(bgContent.querySelectorAll('.grid-item:not(.upload-area)')); [cite: 552]
+                    [cite_start]const newBgElement = bgContent.querySelector(`[data-id="${newBg.id}"]`); [cite: 552]
+                    [cite_start]if (newBgElement) newBgElement.classList.add('selected'); [cite: 552]
+                    [cite_start]selectedBackgroundId = newBg.id; [cite: 553]
                     
                     debouncedDrawPreview();
+                    sendHeight(); // <-- ADDED
                 };
-                reader.readAsDataURL(file);
+                [cite_start]reader.readAsDataURL(file); [cite: 553]
             }
         });
-
         // ===== INITIALIZATION =====
-        document.fonts.ready.then(async () => {
-            await populateGrid(iconsContent, iconsData, 'icon');
-            await populateGrid(txContent, texturesData, 'texture');
-            await populateGrid(bgContent, backgroundsData, 'background');
-            debouncedDrawPreview();
-            iconColorHexInput.value = normalizeHex(iconColorInput.value);
-            backgroundColorHexInput.value = normalizeHex(backgroundColorInput.value);
-            glowColorHexInput.value = normalizeHex(glowColorInput.value);
-            updateSelectedCount();
-            checkGradientWarning();
+        [cite_start]document.fonts.ready.then(async () => { [cite: 554]
+            [cite_start]await populateGrid(iconsContent, iconsData, 'icon'); [cite: 554]
+            [cite_start]await populateGrid(txContent, texturesData, 'texture'); [cite: 554]
+            [cite_start]await populateGrid(bgContent, backgroundsData, 'background'); [cite: 554]
+            [cite_start]debouncedDrawPreview(); [cite: 554]
+            [cite_start]iconColorHexInput.value = normalizeHex(iconColorInput.value); [cite: 554]
+            [cite_start]backgroundColorHexInput.value = normalizeHex(backgroundColorInput.value); [cite: 554]
+ 
+            [cite_start]glowColorHexInput.value = normalizeHex(glowColorInput.value); [cite: 555]
+            [cite_start]updateSelectedCount(); [cite: 555]
+            [cite_start]checkGradientWarning(); [cite: 555]
+            sendHeight(); // <-- ADDED
         });
-
         // ===== FOURTHWALL SCROLLBAR FIX =====
         function sendHeight() {
-            const height = document.body.scrollHeight;
-            window.parent.postMessage({ frameHeight: height }, '*');
+            // Use documentElement.scrollHeight for a more reliable height
+            const height = document.documentElement.scrollHeight;
+            [cite_start]window.parent.postMessage({ frameHeight: height }, '*'); [cite: 557]
         }
 
-        window.addEventListener('load', sendHeight);
-        window.addEventListener('resize', sendHeight);
+        [cite_start]window.addEventListener('load', sendHeight); [cite: 557]
+        [cite_start]window.addEventListener('resize', sendHeight); [cite: 557]
     </script>
 </body>
 </html>
