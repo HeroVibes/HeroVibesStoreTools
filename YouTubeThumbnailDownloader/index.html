@@ -25,12 +25,17 @@
       box-sizing: border-box;
     }
 
+    html, body {
+      height: auto;
+      overflow-x: hidden;
+    }
+
     body {
       font-family: sans-serif;
       background: var(--bg-primary);
       color: var(--text-primary);
       padding: 24px 16px;
-      overflow-x: hidden;
+      position: relative;
     }
 
     /* ===== MAIN CONTAINER ===== */
@@ -41,7 +46,143 @@
       background: var(--bg-secondary);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
-      padding: 40px 16px 40px 16px;
+      padding: 40px 16px;
+      position: relative;
+    }
+
+    /* ===== HELP BUTTON ===== */
+    .help-button {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      border: 1px solid var(--outline);
+      color: var(--accent);
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      z-index: 100;
+    }
+
+    .help-button:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+      transform: scale(1.05);
+    }
+
+    .help-button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+    }
+
+    /* ===== HELP MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      animation: slideUp 0.3s ease;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      border: 1px solid var(--outline);
+      color: var(--text-secondary);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .modal-header {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      padding-right: 30px;
+    }
+
+    .modal-section {
+      margin-bottom: 16px;
+    }
+
+    .modal-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .modal-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .modal-list {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      padding-left: 20px;
+      margin-bottom: 8px;
+    }
+
+    .modal-list li {
+      margin-bottom: 4px;
+    }
+
+    .modal-version {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+      padding-top: 16px;
+      border-top: 1px solid var(--outline);
+      margin-top: 16px;
     }
 
     /* ===== INPUT SECTION ===== */
@@ -146,7 +287,6 @@
 
     #thumbnailImage:hover {
       opacity: 0.9;
-      transform: scale(1.01);
     }
 
     .thumbnail-overlay {
@@ -174,7 +314,7 @@
     .btn-download {
       position: relative;
       width: 100%;
-      padding: 12px 16px;
+      padding: 14px 16px;
       border-radius: var(--radius);
       background: var(--bg-primary);
       color: var(--text-primary);
@@ -185,8 +325,8 @@
       font-weight: 600;
       font-family: sans-serif;
       transition: var(--transition);
-      z-index: 10;
-      pointer-events: auto;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* Shimmer effect */
@@ -201,6 +341,7 @@
       transform: skewX(-25deg);
       transition: left 0.7s ease-in-out;
       pointer-events: none;
+      z-index: 1;
     }
 
     .btn-download:hover {
@@ -225,11 +366,9 @@
     @keyframes fadeIn {
       from {
         opacity: 0;
-        transform: translateY(10px);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
       }
     }
 
@@ -241,6 +380,17 @@
       to {
         opacity: 1;
         transform: translateX(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
     }
 
@@ -262,6 +412,11 @@
         font-size: 11px;
         padding: 4px 8px;
       }
+
+      .modal-content {
+        padding: 20px;
+        max-height: 90vh;
+      }
     }
 
     @media screen and (max-width: 480px) {
@@ -272,13 +427,71 @@
       .input-label {
         font-size: 13px;
       }
+
+      .help-button {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- ===== HELP MODAL ===== -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeModal" type="button">×</button>
+      <div class="modal-header">Help & Guidelines</div>
+      
+      <div class="modal-section">
+        <div class="modal-section-title">⚠️ Important Copyright Notice</div>
+        <p class="modal-text">Only download thumbnails that you have the legal right to use. This includes:</p>
+        <ul class="modal-list">
+          <li>Thumbnails from your own YouTube videos</li>
+          <li>Thumbnails you have permission to use from the creator</li>
+          <li>Thumbnails for educational analysis or critique (fair use)</li>
+        </ul>
+        <p class="modal-text">Do not use downloaded thumbnails for commercial purposes without proper authorization.</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">📝 How to Use</div>
+        <ul class="modal-list">
+          <li>Paste any YouTube video URL or Video ID</li>
+          <li>Supports standard links, youtu.be links, and Shorts</li>
+          <li>Tool automatically finds the highest quality available</li>
+          <li>Click the thumbnail to view full size</li>
+          <li>Press Enter or click Download to save</li>
+        </ul>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">⌨️ Keyboard Shortcuts</div>
+        <ul class="modal-list">
+          <li><strong>Ctrl/Cmd + K</strong> - Focus input field</li>
+          <li><strong>Enter</strong> - Download thumbnail</li>
+        </ul>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">💡 Tips</div>
+        <ul class="modal-list">
+          <li>Quality varies by video - newer videos usually have better thumbnails</li>
+          <li>Private or deleted videos won't show thumbnails</li>
+          <li>Very new videos may not have high-res thumbnails yet</li>
+        </ul>
+      </div>
+
+      <div class="modal-version">Version 1.0.1</div>
+    </div>
+  </div>
+
   <!-- ===== TOOL CONTAINER ===== -->
   <div class="tool-container">
     
+    <!-- ===== HELP BUTTON ===== -->
+    <button class="help-button" id="helpButton" type="button" title="Help & Guidelines">?</button>
+
     <!-- ===== INPUT SECTION ===== -->
     <div class="input-section">
       <label class="input-label" for="videoInput">Paste YouTube URL</label>
@@ -335,11 +548,36 @@
     const downloadButton = document.getElementById('downloadButton');
     const qualityBadge = document.getElementById('qualityBadge');
     const qualityInfo = document.getElementById('qualityInfo');
+    const helpButton = document.getElementById('helpButton');
+    const helpModal = document.getElementById('helpModal');
+    const closeModal = document.getElementById('closeModal');
 
     // ===== STATE MANAGEMENT =====
     let currentThumbnailUrl = '';
     let currentQuality = '';
     let debounceTimer;
+
+    // ===== HELP MODAL HANDLERS =====
+    helpButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      helpModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    });
+
+    closeModal.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      helpModal.classList.remove('show');
+      document.body.style.overflow = '';
+    });
+
+    helpModal.addEventListener('click', (e) => {
+      if (e.target === helpModal) {
+        helpModal.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+    });
 
     // ===== AUTO-FOCUS INPUT ON LOAD =====
     window.addEventListener('load', () => {
@@ -462,7 +700,7 @@
       qualityBadge.textContent = quality;
       qualityInfo.textContent = `Quality: ${quality} • Click image to open full size`;
       thumbnailDisplay.classList.add('show');
-      setTimeout(sendHeight, 100);
+      setTimeout(sendHeight, 150);
     }
 
     // ===== SHOW ERROR =====
@@ -470,7 +708,7 @@
       errorText.textContent = message;
       errorMessage.classList.add('show');
       thumbnailDisplay.classList.remove('show');
-      setTimeout(sendHeight, 100);
+      setTimeout(sendHeight, 150);
     }
 
     // ===== HIDE ALL MESSAGES =====
@@ -479,7 +717,7 @@
       thumbnailDisplay.classList.remove('show');
       currentThumbnailUrl = '';
       currentQuality = '';
-      setTimeout(sendHeight, 100);
+      setTimeout(sendHeight, 150);
     }
 
     // ===== THUMBNAIL CLICK TO OPEN =====
@@ -490,7 +728,10 @@
     });
 
     // ===== DOWNLOAD BUTTON =====
-    downloadButton.addEventListener('click', async () => {
+    downloadButton.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
       if (!currentThumbnailUrl) return;
 
       try {
@@ -522,7 +763,14 @@
       
       // Enter to download if thumbnail is showing
       if (e.key === 'Enter' && thumbnailDisplay.classList.contains('show')) {
+        e.preventDefault();
         downloadButton.click();
+      }
+
+      // Escape to close modal
+      if (e.key === 'Escape' && helpModal.classList.contains('show')) {
+        helpModal.classList.remove('show');
+        document.body.style.overflow = '';
       }
     });
 
