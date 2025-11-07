@@ -31,9 +31,11 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--primary-bg);
             color: var(--primary-text);
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            width: 100%;
+        }
+
+        body {
+            overflow-x: hidden;
         }
 
         /* ===== MAIN CONTAINER ===== */
@@ -41,7 +43,6 @@
             display: flex;
             flex-direction: column;
             width: 100%;
-            height: 100vh;
             background: var(--primary-bg);
         }
 
@@ -131,15 +132,15 @@
 
         /* ===== CANVAS AREA ===== */
         #canvas {
-            flex-grow: 1;
             position: relative;
             background: var(--primary-bg);
             background-image: 
                 linear-gradient(rgba(135,169,255,0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(135,169,255,0.03) 1px, transparent 1px);
             background-size: 20px 20px;
-            overflow: auto;
             width: 100%;
+            min-height: 600px;
+            padding-bottom: 50px;
         }
 
         /* ===== PAGE CONTROLS ===== */
@@ -291,6 +292,7 @@
             position: relative;
             overflow: hidden;
             background: var(--secondary-bg);
+            min-height: 120px;
         }
 
         .card-note .card-body,
@@ -332,7 +334,6 @@
             width: 100%;
             height: auto;
             display: block;
-            border-radius: 0 0 var(--radius) var(--radius);
         }
 
         .card-link-content {
@@ -551,11 +552,6 @@
                 font-size: 10px;
             }
         }
-
-        /* ===== UTILITY CLASSES ===== */
-        .hidden {
-            display: none !important;
-        }
     </style>
 </head>
 <body>
@@ -638,7 +634,7 @@
                     appState.currentPageId = pageId;
                     render();
                     if (!isNew) saveState();
-                    scheduleHeightCheck();
+                    setTimeout(scheduleHeightCheck, 100);
                 }
             };
 
@@ -700,7 +696,7 @@
                     createCardElement(cardData);
                 });
                 
-                scheduleHeightCheck();
+                setTimeout(scheduleHeightCheck, 100);
             };
 
             const escapeHtml = (unsafe) => {
@@ -764,7 +760,7 @@
                 cardData.z = highestZ;
                 createCardElement(cardData);
                 saveState();
-                scheduleHeightCheck();
+                setTimeout(scheduleHeightCheck, 100);
             };
 
             const createCardElement = (cardData) => {
@@ -890,9 +886,8 @@
                         newY = Math.round(newY / gridSize) * gridSize;
                     }
                     
-                    const canvasRect = canvas.getBoundingClientRect();
-                    newX = Math.max(0, Math.min(newX, canvasRect.width - cardElement.offsetWidth));
-                    newY = Math.max(0, Math.min(newY, canvasRect.height - cardElement.offsetHeight));
+                    newX = Math.max(0, newX);
+                    newY = Math.max(0, newY);
                     
                     cardElement.style.left = `${newX}px`;
                     cardElement.style.top = `${newY}px`;
@@ -905,6 +900,7 @@
                     cardData.x = cardElement.style.left;
                     cardData.y = cardElement.style.top;
                     saveState();
+                    setTimeout(scheduleHeightCheck, 100);
                 };
                 
                 document.addEventListener('mousemove', onMove);
@@ -917,7 +913,7 @@
                 page.cards = page.cards.filter(c => c.id !== cardId);
                 renderCanvas();
                 saveState();
-                scheduleHeightCheck();
+                setTimeout(scheduleHeightCheck, 100);
             };
 
             const copyCardContent = async (copyBtn, cardData) => {
@@ -1064,6 +1060,8 @@
                     appState = { pages: {}, currentPageId: null };
                     createPage('Page 1');
                 }
+                
+                setTimeout(scheduleHeightCheck, 200);
             }
 
             init();
