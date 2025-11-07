@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" />
+    <style>
+        /* ===== AI INSTRUCTIONS - DESIGN GUIDE APPLIED ===== */
+        :root {
+            --bg: #191919;
+            --btn-bg: #1F1F1F;
+            --hover: #323232;
+            --outline: #323232;
+            --accent: #87A9FF;
+            --text: #D4D4D4;
+            --text-secondary: #8C8C8C;
+            --radius: 8px;
+
+            /* Card-specific accents */
+            --card-note: #e6b628;
+            --card-image: #31a414;
+            --card-link: var(--accent);
+            --card-youtube: #FF0000;
+            --card-code: #f0f0f0;
+        }
+
+        /* ===== GENERAL STYLING ===== */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            /* min-height: 100vh; removed to fix "Failure to Shrink" bug */
+            overflow-x: hidden; /* Prevent horizontal scroll on body */
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        #SCRATCHPAD_CONTAINER {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            min-height: 100vh; /* Use min-height on the container, not body */
+        }
+
+        /* ===== CONTROLS BAR ===== */
+        #SCRATCHPAD_CONTROLS {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            padding: 16px; /* */
+            background-color: var(--btn-bg);
+            border-bottom: 1px solid var(--outline);
+            flex-shrink: 0;
+            z-index: 1000;
+        }
+
+        .control-group {
+            flex-grow: 1;
+        }
+
+        #LINK_INPUT {
+            background: var(--bg);
+            border: 1px solid var(--outline);
+            color: var(--text);
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            width: 100%;
+            min-width: 200px;
+        }
+        #LINK_INPUT::placeholder {
+            color: var(--text-secondary);
+            opacity: 1;
+        }
+        #LINK_INPUT:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.12); /* */
+        }
+
+        /* ===== DEFAULT BUTTON TEMPLATE ===== */
+        .btn {
+            position: relative;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            background: var(--btn-bg);
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .btn:hover {
+            background-color: var(--hover);
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-25deg);
+            transition: left .7s ease-in-out;
+        }
+        .btn:hover::before {
+            left: 125%;
+        }
+        .btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+        }
+
+        /* ===== CANVAS AREA ===== */
+        #SCRATCHPAD_CANVAS {
+            flex-grow: 1;
+            position: relative;
+            background-color: var(--bg);
+            background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow: auto; /* Changed from hidden to allow canvas panning */
+            width: 100%;
+            min-height: 60vh;
+        }
+
+        /* ===== PAGE CONTROLS ===== */
+        #PAGE_CONTROLS {
+            position: absolute;
+            top: 24px;
+            right: 16px;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        #PAGE_LIST {
+            list-style: none;
+            margin: 0;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: rgba(31, 31, 31, 0.8); /* var(--btn-bg) with transparency */
+            border-radius: var(--radius);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            max-width: 150px;
+            border: 1px solid var(--outline);
+        }
+
+        .page-item {
+            padding: 8px 12px 8px 22px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            transition: background-color 0.2s, color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: right;
+            position: relative;
+        }
+        .page-item:hover {
+            background-color: var(--hover);
+        }
+        .page-item.active {
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .page-item.active::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+        }
+
+        .page-rename-input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            border: none;
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: right;
+            outline: none;
+            border-radius: 2px;
+        }
+
+        #ADD_PAGE_BTN {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--outline);
+            background-color: var(--btn-bg);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 20px;
+            line-height: 1;
+            padding: 0;
+            color: var(--text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        #ADD_PAGE_BTN:hover {
+            background-color: var(--hover);
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            position: absolute;
+            width: 280px;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--outline);
+            background-color: var(--btn-bg);
+            transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+            background-clip: padding-box;
+            border-top-width: 3px;
+        }
+        /* Card accents */
+        .card-note { border-top-color: var(--card-note); }
+        .card-image { border-top-color: var(--card-image); }
+        .card-link { border-top-color: var(--card-link); }
+        .card-youtube { border-top-color: var(--card-youtube); }
+        .card-code { border-top-color: var(--card-code); }
+
+        .card.dragging {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            transform: scale(1.02);
+            z-index: 9999 !important;
+        }
+
+        .card-header {
+            height: 20px;
+            cursor: grab;
+            flex-shrink: 0;
+            /* The color is now handled by the .card border-top */
+        }
+        .card:active .card-header {
+            cursor: grabbing;
+        }
+
+        .card-body {
+            flex-grow: 1;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Card content styling */
+        .card-body .card-text-content {
+            background: transparent;
+            border: none;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+            color: var(--text);
+            padding: 12px;
+        }
+        .card-text-content::placeholder {
+            color: var(--text-secondary);
+            opacity: 1;
+        }
+
+        .card-body .card-image-content {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 0 0 7px 7px; /* Match radius bottom */
+        }
+
+        .card-body .card-link-content {
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--accent);
+            font-weight: 500;
+            text-decoration: none;
+            overflow-wrap: break-word;
+            word-break: break-all;
+            padding: 15px;
+        }
+        .card-body .card-link-content:hover {
+            text-decoration: underline;
+        }
+
+        /* Prism.js overrides */
+        .card-code .card-body {
+            padding: 0;
+            background: #272822; /* Okaidia theme bg */
+            border-radius: 0 0 7px 7px;
+        }
+        .card-code-content {
+            width: 100%;
+            margin: 0 !important;
+            max-height: 400px;
+            overflow: auto !important;
+            padding: 1em;
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: #5f5f5f #272822;
+        }
+        .card-code-content > code[class*="language-"] {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 14px;
+            color: #f8f8f2;
+            text-shadow: none !important;
+            white-space: pre-wrap !important;
+            word-break: break-all !important;
+        }
+        .code-editor {
+            flex-grow: 1;
+            background: #272822;
+            color: #f8f8f2;
+            border: none;
+            resize: none;
+            outline: none;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 14px;
+            padding: 1em;
+            width: 100%;
+            min-height: 150px;
+        }
+        .card-code-content::-webkit-scrollbar { width: 8px; height: 8px; }
+        .card-code-content::-webkit-scrollbar-track { background: #272822; }
+        .card-code-content::-webkit-scrollbar-thumb { background-color: #5f5f5f; border-radius: 4px; border: 2px solid #272822; }
+        .card-code-content::-webkit-scrollbar-thumb:hover { background-color: #7a7a7a; }
+
+        .card-body iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 150px;
+            border: none;
+            border-radius: 0 0 7px 7px;
+        }
+
+        /* Card footer */
+        .card-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            border-top: 1px solid var(--outline);
+            background: var(--bg); /* Contrast footer */
+            flex-shrink: 0;
+            border-radius: 0 0 7px 7px;
+        }
+
+        .card-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 5px;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease-in-out, color 0.2s;
+            color: var(--text-secondary);
+        }
+        .card-btn:hover {
+            background-color: var(--hover);
+            color: var(--text);
+        }
+        .card-btn.confirmed {
+            color: #28c840;
+        }
+        .card-btn.delete-btn:hover {
+            color: #ff5f57;
+        }
+        .card-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke-width: 2.5;
+        }
+
+        /* Hidden file inputs */
+        .hidden-input {
+            display: none;
+        }
+
+
+        /* ===== MOBILE OPTIMISATION (RULE 3) ===== */
+        @media (max-width: 768px) {
+            #SCRATCHPAD_CONTROLS {
+                padding: 12px;
+            }
+            /* Make the link input take full width on its own line */
+            .control-group {
+                width: 100%;
+                order: -1; /* Move link input to the top */
+            }
+            #LINK_INPUT {
+                min-width: unset;
+            }
+            .btn {
+                flex-grow: 1; /* Allow buttons to grow and fill space */
+                min-width: 100px;
+            }
+            
+            #PAGE_CONTROLS {
+                /* Move to bottom right, out of the way */
+                top: auto;
+                bottom: 16px;
+                right: 16px;
+            }
+            
+            .card {
+                width: 260px; /* Slightly smaller to fit more on screen */
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="SCRATCHPAD_CONTAINER">
+        <div id="SCRATCHPAD_CONTROLS">
+            <button id="ADD_NOTE_BTN" class="btn" title="Add a new note (N)">Add Note</button>
+            <div class="control-group">
+                <input type="text" id="LINK_INPUT" placeholder="Paste link, text, or code snippet...">
+            </div>
+            <button id="UPLOAD_BTN" class="btn" title="Upload an image">Upload</button>
+            <button id="EXPORT_BTN" class="btn" title="Save layout to a file">Export</button>
+            <button id="IMPORT_BTN" class="btn" title="Load layout from a file">Import</button>
+            <button id="RESET_BTN" class="btn" title="Clear the entire scratchpad">Reset</button>
+        </div>
+
+        <div id="SCRATCHPAD_CANVAS">
+            <div id="PAGE_CONTROLS">
+                <ul id="PAGE_LIST"></ul>
+                <button id="ADD_PAGE_BTN" title="Add a new page">+</button>
+            </div>
+            </div>
+    </div>
+
+    <input type="file" id="IMPORT_FILE_INPUT" class="hidden-input" accept=".json">
+    <input type="file" id="UPLOAD_FILE_INPUT" class="hidden-input" accept="image/*">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ===== DOM ELEMENTS =====
+            const canvas = document.getElementById('SCRATCHPAD_CANVAS');
+            const pageList = document.getElementById('PAGE_LIST');
+            const addPageBtn = document.getElementById('ADD_PAGE_BTN');
+            const controls = {
+                addNoteBtn: document.getElementById('ADD_NOTE_BTN'),
+                linkInput: document.getElementById('LINK_INPUT'),
+                uploadBtn: document.getElementById('UPLOAD_BTN'),
+                exportBtn: document.getElementById('EXPORT_BTN'),
+                importBtn: document.getElementById('IMPORT_BTN'),
+                resetBtn: document.getElementById('RESET_BTN'),
+                importFileInput: document.getElementById('IMPORT_FILE_INPUT'),
+                uploadFileInput: document.getElementById('UPLOAD_FILE_INPUT')
+            };
+
+            // ===== STATE & CONFIG =====
+            let appState = {};
+            let highestZ = 0;
+            const gridSize = 20;
+
+            // Updated SVG icons
+            const icons = {
+                clipboard: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>',
+                tick: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+                x: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+                link: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>',
+                play: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>'
+            };
+
+            // ===== STATE MANAGEMENT =====
+            const saveState = () => {
+                try {
+                    localStorage.setItem('scratchpadState', JSON.stringify(appState));
+                } catch (e) {
+                    console.error("Failed to save state:", e);
+                }
+            };
+
+            const createPage = (name) => {
+                const newPageId = `page-${Date.now()}`;
+                appState.pages[newPageId] = { id: newPageId, name: name || `Page ${Object.keys(appState.pages).length + 1}`, cards: [] };
+                switchPage(newPageId, true);
+            };
+
+            const switchPage = (pageId, isNew = false) => {
+                if (appState.pages[pageId]) {
+                    appState.currentPageId = pageId;
+                    render();
+                    if (!isNew) saveState();
+                }
+            };
+
+            const renamePage = (pageId, newName) => {
+                if (appState.pages[pageId] && newName.trim()) {
+                    appState.pages[pageId].name = newName.trim();
+                }
+                renderPageList();
+                saveState();
+            };
+
+            const getCurrentPage = () => appState.pages[appState.currentPageId];
+
+            // ===== RENDER FUNCTIONS =====
+            const render = () => {
+                renderPageList();
+                renderCanvas();
+            };
+
+            const renderPageList = () => {
+                pageList.innerHTML = '';
+                if (!appState.pages) return;
+                
+                Object.values(appState.pages).forEach(page => {
+                    const li = document.createElement('li');
+                    li.className = 'page-item';
+                    li.textContent = page.name;
+                    if (page.id === appState.currentPageId) li.classList.add('active');
+                    
+                    li.addEventListener('click', () => switchPage(page.id));
+                    
+                    li.addEventListener('dblclick', () => {
+                        li.innerHTML = `<input type="text" class="page-rename-input" value="${page.name}" />`;
+                        const input = li.querySelector('input');
+                        input.focus();
+                        input.select();
+                        
+                        const finishRename = () => {
+                            renamePage(page.id, input.value);
+                            // scheduleHeightCheck() not needed, renamePage calls renderPageList
+                        };
+                        
+                        input.addEventListener('blur', finishRename);
+                        input.addEventListener('keydown', e => {
+                            if (e.key === 'Enter') finishRename();
+                            else if (e.key === 'Escape') renderPageList();
+                        });
+                    });
+                    pageList.appendChild(li);
+                });
+                scheduleHeightCheck(); // Page list height might change
+            };
+
+            const renderCanvas = () => {
+                canvas.querySelectorAll('.card').forEach(card => card.remove());
+                highestZ = 0;
+                const currentPage = getCurrentPage();
+                if (!currentPage) return;
+
+                currentPage.cards.forEach(cardData => {
+                    highestZ = Math.max(highestZ, cardData.z || 0);
+                    createCardElement(cardData);
+                });
+                scheduleHeightCheck(); // Canvas content has definitely changed
+            };
+
+            const escapeHtml = (unsafe) => {
+                if (typeof unsafe !== 'string') return '';
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            };
+            
+            const isCodeSnippet = (text) => {
+                const codeChars = ['{', '}', ';', '/>', '</', '=>', 'import ', 'def ', 'function', 'const ', 'let '];
+                const lineCount = (text.match(/\n/g) || []).length;
+                if (lineCount > 1 && text.length > 20) return true;
+                return codeChars.some(char => text.includes(char));
+            };
+            
+            const fetchYouTubeData = async (url) => {
+                const endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+                // Using a CORS proxy
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(endpoint)}`;
+                try {
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) return null;
+                    const data = await response.json();
+                    return (data.thumbnail_url && data.html) ? data : null;
+                } catch (error) {
+                    console.error("YouTube oEmbed fetch failed:", error);
+                    return null;
+                }
+            };
+
+            // ===== CARD FUNCTIONS =====
+            
+            const createCardData = (data) => {
+                const currentPage = getCurrentPage();
+                if (!currentPage) return;
+                
+                const cardData = {
+                    id: `card-${Date.now()}`,
+                    type: data.type,
+                    content: data.content || '',
+                    x: `${(currentPage.cards.length % 10) * 30 + 20}px`,
+                    y: `${(currentPage.cards.length % 10) * 30 + 20}px`,
+                    z: 0,
+                    ytData: data.ytData || null
+                };
+                
+                currentPage.cards.push(cardData);
+                highestZ++;
+                cardData.z = highestZ;
+                
+                createCardElement(cardData);
+                saveState();
+                scheduleHeightCheck(); // New card added
+            };
+
+            const createCardElement = (cardData) => {
+                const card = document.createElement('div');
+                card.id = cardData.id;
+                card.className = `card card-${cardData.type}`;
+                card.style.left = cardData.x;
+                card.style.top = cardData.y;
+                card.style.zIndex = cardData.z;
+
+                let contentHtml = '', footerHtml = '';
+
+                if (cardData.ytData) {
+                    const toggleIcon = cardData.type === 'youtube' ? icons.link : icons.play;
+                    footerHtml += `<button type="button" class="card-btn toggle-view-btn" title="Toggle view">${toggleIcon}</button>`;
+                }
+                
+                switch (cardData.type) {
+                    case 'note':
+                        contentHtml = `<textarea class="card-text-content" placeholder="Enter your note...">${cardData.content}</textarea>`;
+                        break;
+                    case 'image':
+                        contentHtml = `<img src="${cardData.content}" class="card-image-content" alt="User image" loading="lazy">`;
+                        break;
+                    case 'link':
+                        contentHtml = `<a href="${cardData.content}" target="_blank" rel="noopener noreferrer" class="card-link-content" title="${cardData.content}">${cardData.content}</a>`;
+                        break;
+                    case 'youtube':
+                        if (cardData.ytData && cardData.ytData.html) {
+                            contentHtml = cardData.ytData.html
+                                .replace(/width="\d+"/g, 'width="100%"')
+                                .replace(/height="\d+"/g, 'height="100%"');
+                        }
+                        break;
+                    case 'code':
+                        contentHtml = `<pre class="card-code-content"><code class="language-markup">${escapeHtml(cardData.content)}</code></pre>`;
+                        break;
+                }
+                
+                card.innerHTML = `
+                    <div class="card-header"></div>
+                    <div class="card-body">${contentHtml}</div>
+                    <div class="card-footer">
+                        ${footerHtml}
+                        <button type="button" class="card-btn copy-btn" title="Copy">${icons.clipboard}</button>
+                        <button type="button" class="card-btn delete-btn" title="Delete">${icons.x}</button>
+                    </div>`;
+                
+                canvas.appendChild(card);
+                
+                if (cardData.type === 'code' && window.Prism) {
+                    Prism.highlightElement(card.querySelector('code'));
+                }
+                
+                // Add event listeners
+                card.querySelector('.card-header').addEventListener('mousedown', (e) => startDrag(e, cardData, card));
+                card.querySelector('.delete-btn').addEventListener('click', () => deleteCard(cardData.id));
+                card.querySelector('.copy-btn').addEventListener('click', (e) => copyCardContent(e.currentTarget, cardData));
+                
+                const cardBody = card.querySelector('.card-body');
+
+                if (cardData.type === 'note') {
+                    cardBody.querySelector('.card-text-content').addEventListener('input', (e) => {
+                        cardData.content = e.target.value;
+                        saveState();
+                    });
+                } else if (cardData.type === 'code') {
+                    cardBody.addEventListener('dblclick', () => {
+                        cardBody.innerHTML = `<textarea class="code-editor">${cardData.content}</textarea>`;
+                        const editor = cardBody.querySelector('.code-editor');
+                        editor.focus();
+                        editor.addEventListener('blur', () => {
+                            cardData.content = editor.value;
+                            renderCanvas(); // Re-renders the card
+                            saveState();
+                        });
+                    });
+                }
+
+                card.querySelector('.toggle-view-btn')?.addEventListener('click', () => {
+                    cardData.type = cardData.type === 'youtube' ? 'link' : 'youtube';
+                    renderCanvas(); // Re-renders the card
+                    saveState();
+                });
+            };
+
+            const handleLinkInput = async (url) => {
+                if (!url.trim()) return;
+                const ytData = await fetchYouTubeData(url);
+                
+                if (ytData) {
+                    createCardData({ type: 'youtube', content: url, ytData: ytData });
+                } else if (isCodeSnippet(url)) {
+                    createCardData({ type: 'code', content: url });
+                } else {
+                    createCardData({ type: 'link', content: url });
+                }
+                controls.linkInput.value = '';
+            };
+
+            const startDrag = (e, cardData, cardElement) => {
+                e.preventDefault();
+                highestZ++;
+                cardElement.style.zIndex = cardData.z = highestZ;
+                cardElement.classList.add('dragging');
+                
+                const iX = e.clientX, iY = e.clientY;
+                const iL = cardElement.offsetLeft, iT = cardElement.offsetTop;
+
+                const onMove = (mE) => {
+                    const dX = mE.clientX - iX, dY = mE.clientY - iY;
+                    let nX = iL + dX, nY = iT + dY;
+                    
+                    if (mE.ctrlKey || mE.metaKey) { // Snap to grid
+                        nX = Math.round(nX / gridSize) * gridSize;
+                        nY = Math.round(nY / gridSize) * gridSize;
+                    }
+                    
+                    const cR = canvas.getBoundingClientRect();
+                    nX = Math.max(0, Math.min(nX, canvas.scrollWidth - cardElement.offsetWidth));
+                    nY = Math.max(0, Math.min(nY, canvas.scrollHeight - cardElement.offsetHeight));
+                    
+                    cardElement.style.left = `${nX}px`;
+                    cardElement.style.top = `${nY}px`;
+                };
+
+                const onUp = () => {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                    cardElement.classList.remove('dragging');
+                    cardData.x = cardElement.style.left;
+                    cardData.y = cardElement.style.top;
+                    saveState();
+                };
+
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            };
+
+            const deleteCard = (cardId) => {
+                const page = getCurrentPage();
+                if (!page) return;
+                page.cards = page.cards.filter(c => c.id !== cardId);
+                renderCanvas(); // Re-renders canvas, which calls scheduleHeightCheck
+                saveState();
+            };
+
+            const copyCardContent = async (copyButton, cardData) => {
+                if (copyButton.classList.contains('confirmed')) return;
+                
+                let success = false;
+                try {
+                    if (['note', 'link', 'youtube', 'code'].includes(cardData.type)) {
+                        await navigator.clipboard.writeText(cardData.content);
+                        success = true;
+                    } else if (cardData.type === 'image') {
+                        const response = await fetch(cardData.content);
+                        const blob = await response.blob();
+                        await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                        success = true;
+                    }
+                } catch (err) {
+                    console.error('Copy failed:', err);
+                }
+
+                if (success) {
+                    copyButton.innerHTML = icons.tick;
+                    copyButton.classList.add('confirmed');
+                    setTimeout(() => {
+                        copyButton.innerHTML = icons.clipboard;
+                        copyButton.classList.remove('confirmed');
+                    }, 1500);
+                }
+            };
+
+            const handleFile = (file) => {
+                if (file?.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => createCardData({ type: 'image', content: e.target.result });
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Only image files are supported for upload.');
+                }
+            };
+
+            // ===== GLOBAL EVENT LISTENERS =====
+            
+            // Add note shortcut
+            window.addEventListener('keydown', (e) => {
+                const activeEl = document.activeElement;
+                if (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA') return;
+                if (e.key.toLowerCase() === 'n') {
+                    e.preventDefault();
+                    createCardData({ type: 'note' });
+                }
+            });
+
+            // Paste handling
+            window.addEventListener('paste', (e) => {
+                const activeEl = document.activeElement;
+                if (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA') return;
+                
+                const items = e.clipboardData.items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.includes('image')) {
+                        handleFile(items[i].getAsFile());
+                        return;
+                    }
+                }
+                const text = e.clipboardData.getData('text/plain');
+                if (text) handleLinkInput(text);
+            });
+
+            // Drag/drop file handling
+            canvas.addEventListener('dragover', (e) => e.preventDefault());
+            canvas.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+            });
+
+            // ===== CONTROL BUTTON LISTENERS =====
+            
+            controls.addNoteBtn.addEventListener('click', () => createCardData({ type: 'note' }));
+            
+            controls.linkInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    handleLinkInput(controls.linkInput.value);
+                }
+            });
+
+            controls.uploadBtn.addEventListener('click', () => controls.uploadFileInput.click());
+            controls.uploadFileInput.addEventListener('change', (e) => {
+                if(e.target.files.length > 0) handleFile(e.target.files[0]);
+                e.target.value = null; // Reset input
+            });
+
+            controls.resetBtn.addEventListener('click', () => {
+                if (confirm('Are you sure? This will delete all pages and cards.')) {
+                    localStorage.removeItem('scratchpadState');
+                    init();
+                }
+            });
+
+            controls.exportBtn.addEventListener('click', () => {
+                const stateString = JSON.stringify(appState, null, 2);
+                const blob = new Blob([stateString], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `scratchpad-layout.json`;
+                a.click();
+                URL.revokeObjectURL(a.href);
+            });
+
+            controls.importBtn.addEventListener('click', () => controls.importFileInput.click());
+            controls.importFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        try {
+                            const newState = JSON.parse(ev.target.result);
+                            if (newState.pages && newState.currentPageId) {
+                                appState = newState;
+                                render(); // This will call scheduleHeightCheck
+                                saveState();
+                            } else {
+                                throw new Error("Invalid format.");
+                            }
+                        } catch (err) {
+                            alert('Error: Could not import file.');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+                e.target.value = null; // Reset input
+            });
+
+            addPageBtn.addEventListener('click', () => {
+                createPage();
+                // createPage calls switchPage -> render -> renderCanvas -> scheduleHeightCheck
+            });
+
+            // ===== INITIALIZATION =====
+            function init() {
+                let savedState = null;
+                try {
+                    savedState = JSON.parse(localStorage.getItem('scratchpadState'));
+                } catch (e) {
+                    savedState = null;
+                }
+
+                if (savedState && savedState.pages && Object.keys(savedState.pages).length > 0) {
+                    appState = savedState;
+                    if (!appState.currentPageId || !appState.pages[appState.currentPageId]) {
+                        appState.currentPageId = Object.keys(savedState.pages)[0];
+                    }
+                    render();
+                } else {
+                    appState = { pages: {}, currentPageId: null };
+                    createPage('Page 1'); // This will also render and save
+                }
+            }
+            
+            init();
+
+            // ===== FOURTHWALL SCROLLBAR FIX =====
+            let lastHeight = 0;
+            let resizeTimer;
+
+            /**
+             * Sends the current scrollHeight to the parent window if it has changed.
+             * This is the *only* function that should send a postMessage. 
+             */
+            function sendHeight() {
+                // Use scrollHeight for content height 
+                const height = document.body.scrollHeight;
+                
+                // Only send message if height has *actually* changed 
+                if (height !== lastHeight) {
+                    lastHeight = height;
+                    window.parent.postMessage({ frameHeight: height }, '*'); 
+                }
+            }
+
+            /**
+             * A debounced version of sendHeight() to be called on content changes.
+             * This ensures we don't spam messages during rapid changes. 
+             */
+            function scheduleHeightCheck() {
+                // Clear any pending checks 
+                clearTimeout(resizeTimer);
+                // Schedule a new check after 150ms 
+                resizeTimer = setTimeout(sendHeight, 150);
+            }
+
+            // Send height on initial load (with a slight delay) 
+            // This fixes the "Content Cut-Off" race condition. 
+            window.addEventListener('load', () => {
+                setTimeout(sendHeight, 100);
+            });
+
+            // Send height on window resize (debounced) 
+            window.addEventListener('resize', () => {
+                // Use scheduleHeightCheck for built-in debounce
+                scheduleHeightCheck();
+            });
+            
+            // ===== END OF SCROLLBAR FIX =====
+        });
+    </script>
+</body>
+</html>
