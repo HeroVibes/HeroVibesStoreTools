@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soundboard Tool</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* ============================================
+       DESIGN SYSTEM VARIABLES
+       ============================================ */
+    :root {
+      --bg-primary: #191919;
+      --bg-secondary: #1F1F1F;
+      --bg-hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --error: #FF6B6B;
+      --success: #51CF66;
+    }
+
+    /* ============================================
+       BASE STYLES
+       ============================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      /* min-height: 100vh; <-- REMOVED this line to fix "Failure to Shrink" bug */
+      padding: 24px 16px;
+    }
+
+    /* Remove red outline on focus */
+    button:focus,
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+    }
+
+    /* ============================================
+       SOUNDBOARD CONTAINER
+       ============================================ */
+    #soundboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    /* ============================================
+       MENU BAR
+       ============================================ */
+    #menu-bar {
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--outline);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .menu-dropdown {
+      position: relative;
+    }
+
+    .menu-button {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: 6px;
+      color: var(--text-primary);
+      padding: 6px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .menu-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .menu-button:hover {
+      background: var(--bg-hover);
+    }
+
+    .menu-button:hover::before {
+      left: 125%;
+    }
+
+    .menu-content {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: 6px;
+      min-width: 180px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .menu-dropdown.active .menu-content {
+      display: block;
+    }
+
+    .menu-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .menu-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .menu-item:first-child {
+      border-radius: 6px 6px 0 0;
+    }
+
+    .menu-item:last-child {
+      border-radius: 0 0 6px 6px;
+    }
+
+    .menu-item.danger:hover {
+      background: var(--error);
+      color: white;
+    }
+
+    .menu-separator {
+      height: 1px;
+      background: var(--outline);
+      margin: 4px 0;
+    }
+
+    .toggle-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      border: 1px solid var(--outline);
+      background: var(--bg-primary);
+      transition: all 0.2s ease;
+    }
+
+    .toggle-indicator.active {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .stop-button, .help-button, .record-button {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stop-button {
+      background: rgba(255, 107, 107, 0.1);
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .record-button {
+      margin-left: auto;
+    }
+
+    .record-button.recording {
+      background: rgba(255, 107, 107, 0.2);
+      border-color: var(--error);
+      color: var(--error);
+      animation: pulse-record 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse-record {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .stop-button::before, .help-button::before, .record-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .stop-button:hover {
+      background: var(--error);
+      color: white;
+      border-color: var(--error);
+    }
+
+    .help-button:hover {
+      background: var(--bg-hover);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .record-button:hover:not(.recording) {
+      background: var(--bg-hover);
+      color: var(--error);
+      border-color: var(--error);
+    }
+
+    .stop-button:hover::before, .help-button:hover::before, .record-button:hover::before {
+      left: 125%;
+    }
+
+    .stop-icon {
+      width: 12px;
+      height: 12px;
+      background: currentColor;
+      border-radius: 2px;
+    }
+    
+    .version-display {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+
+    /* ============================================
+       RECORDER INTERFACE
+       ============================================ */
+    #recorder-container {
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--outline);
+      padding: 16px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    #recorder-container.active {
+      display: flex;
+    }
+
+    .recorder-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .recorder-control-button {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: 6px;
+      color: var(--text-primary);
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .recorder-control-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .recorder-control-button:hover {
+      background: var(--bg-hover);
+    }
+
+    .recorder-control-button:hover::before {
+      left: 125%;
+    }
+
+    .recorder-control-button.recording {
+      background: rgba(255, 107, 107, 0.2);
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .recorder-control-button.has-recording {
+      background: rgba(81, 207, 102, 0.2);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .recorder-control-button.mic-active {
+      background: rgba(135, 169, 255, 0.2);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .recorder-control-button.playing {
+      background: rgba(135, 169, 255, 0.2);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .recorder-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .recorder-timer {
+      font-weight: bold;
+      color: var(--accent);
+      min-width: 60px;
+    }
+
+    /* ============================================
+       SOUND CARDS WRAPPER
+       ============================================ */
+    #sound-cards-container {
+      padding: 24px 16px;
+    }
+
+    #sound-cards-wrapper {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    /* ============================================
+       SOUND CARD
+       ============================================ */
+    .sound-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--outline);
+      border-radius: 8px;
+      padding: 16px;
+      aspect-ratio: 1/1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      --glow-color: var(--accent);
+      cursor: grab;
+    }
+
+    .sound-card:active {
+      cursor: grabbing;
+    }
+
+    .sound-card.dragging {
+      opacity: 0.3;
+    }
+
+    .sound-card.drag-over {
+      border-color: var(--accent);
+      transform: scale(1.05);
+    }
+
+    .sound-card.file-drag-over {
+      border-color: var(--success);
+      background: var(--bg-hover);
+      transform: scale(1.05);
+    }
+
+    .sound-card:hover:not(.dragging) {
+      border-color: var(--bg-hover);
+      transform: translateY(-2px);
+    }
+
+    .sound-card.playing,
+    .sound-card.active-hotkey {
+      border-color: var(--glow-color);
+      box-shadow: 0 0 20px rgba(135, 169, 255, 0.3);
+      animation: pulse-glow 0.4s ease-out;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(135, 169, 255, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 30px rgba(135, 169, 255, 0.6);
+      }
+    }
+
+    /* ============================================
+       PLAY BUTTON
+       ============================================ */
+    .play-button-wrapper {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .play-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      color: var(--accent);
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .play-circle::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .play-circle:hover {
+      background: var(--bg-hover);
+      transform: scale(1.05);
+    }
+
+    .play-circle:hover::before {
+      left: 125%;
+    }
+
+    .play-circle:active {
+      transform: scale(0.95);
+    }
+
+    /* ============================================
+       CARD CONTROLS
+       ============================================ */
+    .card-controls {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .control-button {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .control-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .control-button:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .control-button:hover::before {
+      left: 125%;
+    }
+
+    .control-button.uploaded {
+      color: var(--success);
+    }
+
+    .delete-button:hover {
+      color: var(--error);
+      border-color: var(--error);
+    }
+
+    /* VOLUME CONTROL */
+    .volume-control-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .volume-button {
+      width: 100%;
+      height: 100%;
+    }
+
+    .volume-button.muted {
+      color: var(--error);
+    }
+
+    .volume-slider-popup-background {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: 6px;
+      padding: 12px 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 10;
+      width: 40px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .volume-control-wrapper:hover .volume-slider-popup-background {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .volume-slider {
+      width: 90px;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--outline);
+      border-radius: 2px;
+      outline: none;
+      transform: rotate(-90deg);
+      transform-origin: center;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: grab;
+    }
+
+    .volume-slider::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: grab;
+      border: none;
+    }
+
+    /* ============================================
+       SOUND NAME
+       ============================================ */
+    .sound-name-wrapper {
+      width: 100%;
+      min-height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sound-name-display {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .sound-name-display:hover {
+      background: var(--bg-hover);
+    }
+
+    .name-edit-input {
+      width: 100%;
+      padding: 4px 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: bold;
+      text-align: center;
+      outline: none;
+    }
+
+    /* ============================================
+       ADD CARD
+       ============================================ */
+    .add-card {
+      background: var(--bg-primary);
+      border: 2px dashed var(--outline);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      aspect-ratio: 1/1;
+    }
+
+    .add-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-hover);
+    }
+
+    .add-button {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 32px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .add-card:hover .add-button {
+      color: var(--accent);
+      transform: scale(1.1);
+    }
+
+    /* ============================================
+       POPUP / MODAL
+       ============================================ */
+    .popup {
+      position: fixed; /* This matches the fix instructions */
+      display: none;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+
+    .popup-content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: 8px;
+      padding: 24px 16px;
+      width: 90%;
+      max-width: 400px;
+      position: relative;
+    }
+
+    .popup-content h3 {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .popup-description {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .popup-note {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .close-popup {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s ease;
+    }
+
+    .close-popup:hover {
+      color: var(--error);
+    }
+
+    /* HOTKEY DISPLAY */
+    .hotkey-display {
+      background: var(--bg-primary);
+      border: 1px solid var(--outline);
+      border-radius: 6px;
+      padding: 16px;
+      margin: 16px 0;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .hotkey-display:hover {
+      border-color: var(--accent);
+      background: var(--bg-hover);
+    }
+
+    #current-hotkey-text {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    .hotkey-prompt {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: block;
+      margin-top: 4px;
+    }
+
+    /* HELP POPUP */
+    .help-list {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0;
+    }
+
+    .help-list li {
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      padding-left: 24px;
+      position: relative;
+    }
+
+    .help-list li::before {
+      content: '•';
+      color: var(--accent);
+      font-size: 20px;
+      position: absolute;
+      left: 0;
+      top: -2px;
+    }
+
+    .help-list strong {
+      color: var(--accent);
+    }
+
+    /* BUTTON GROUP */
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .action-button {
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--outline);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .action-button:hover::before {
+      left: 125%;
+    }
+
+    .action-button.success {
+      background: var(--bg-secondary);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .action-button.success:hover {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .action-button.danger {
+      background: var(--bg-secondary);
+      color: var(--error);
+      border-color: var(--outline);
+    }
+
+    .action-button.danger:hover {
+      background: var(--error);
+      color: var(--text-primary);
+      border-color: var(--error);
+    }
+
+    /* ============================================
+       HIDDEN INPUT
+       ============================================ */
+    .upload-input {
+      display: none;
+    }
+
+    /* ============================================
+       MOBILE RESPONSIVE
+       ============================================ */
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 12px;
+      }
+
+      #sound-cards-container {
+        padding: 16px 12px;
+      }
+
+      #sound-cards-wrapper {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+      }
+
+      .sound-card {
+        padding: 12px;
+      }
+
+      .play-circle {
+        width: 52px;
+        height: 52px;
+        font-size: 20px;
+      }
+
+      .card-controls {
+        gap: 4px;
+      }
+
+      .control-button {
+        font-size: 12px;
+      }
+
+      .sound-name-display {
+        font-size: 12px;
+      }
+
+      .add-button {
+        font-size: 24px;
+      }
+
+      .recorder-controls {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #sound-cards-wrapper {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+      }
+
+      .sound-card {
+        padding: 10px;
+      }
+
+      .play-circle {
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+      }
+
+      .popup-content {
+        padding: 20px 12px;
+      }
+
+      .button-group {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .add-button {
+        font-size: 20px;
+      }
+
+      #menu-bar {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="soundboard-container">
+    
+    <div id="menu-bar">
+      <div class="menu-dropdown" id="menu-dropdown">
+        <button class="menu-button">
+          <i class="fas fa-bars"></i>
+          Menu
+        </button>
+        <div class="menu-content">
+     
+           <div class="menu-item" id="reset-button">
+            <span>Reset to Default</span>
+            <i class="fas fa-redo"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-dropdown" id="effects-dropdown">
+        <button class="menu-button">
+          <i class="fas fa-magic"></i>
+   
+           Effects
+        </button>
+        <div class="menu-content">
+          <div class="menu-item" id="reverse-toggle">
+            <span>Reverse</span>
+            <div class="toggle-indicator" id="reverse-indicator"></div>
+          </div>
+          <div class="menu-item" id="reverb-toggle">
+            <span>Reverb</span>
+    
+             <div class="toggle-indicator" id="reverb-indicator"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="record-button" id="record-toggle-button" title="Toggle Recording">
+        <i class="fas fa-circle"></i>
+      </button>
+
+      <button class="stop-button" id="stop-all-button" title="Stop All Sounds">
+        <div class="stop-icon"></div>
+ 
+       </button>
+
+      <button class="help-button" id="help-button" title="Help & Tips">
+        <i class="fas fa-question"></i>
+      </button>
+      
+      <span class="version-display">V1.0.0</span>
+    </div>
+
+    <div id="recorder-container">
+      <div class="recorder-controls">
+        <button class="recorder-control-button" id="recorder-start-button">
+          <i class="fas fa-circle"></i>
+          <span>Start Recording</span>
+   
+         </button>
+        <button class="recorder-control-button" id="recorder-stop-button" style="display:none;">
+          <i class="fas fa-stop"></i>
+          <span>Stop Recording</span>
+        </button>
+        <button class="recorder-control-button" id="recorder-mic-toggle">
+          <i class="fas fa-microphone-slash"></i>
+          <span>Enable Mic</span>
+        </button>
+        <button class="recorder-control-button" id="recorder-playback-button" style="display:none;">
+ 
+           <i class="fas fa-play"></i>
+          <span>Play Recording</span>
+        </button>
+        <button class="recorder-control-button" id="recorder-download-button" style="display:none;">
+          <i class="fas fa-download"></i>
+          <span>Download MP3</span>
+        </button>
+      </div>
+      <div class="recorder-status">
+        <span id="recorder-status-text">Ready to record</span>
+    
+         <span class="recorder-timer" id="recorder-timer">0:00</span>
+      </div>
+    </div>
+
+    <div id="sound-cards-container">
+      <div id="sound-cards-wrapper"></div>
+    </div>
+  </div>
+
+  <div id="hotkey-popup" class="popup">
+    <div class="popup-content">
+      <button class="close-popup" title="Close">&times;</button>
+      <h3>Set Hotkey</h3>
+      <p class="popup-description">Press a key combination (e.g., Ctrl + S, Cmd + Shift + A).</p>
+      <p class="popup-note">Note: Hotkeys only 
+work when this browser tab is active.</p>
+      <div id="hotkey-display" class="hotkey-display">
+        <span id="current-hotkey-text">No hotkey set</span>
+        <span class="hotkey-prompt">(Click to set new)</span>
+      </div>
+      <div class="button-group">
+        <button id="hotkey-clear-button" class="action-button danger">Clear Hotkey</button>
+        <button id="hotkey-confirm-button" class="action-button success">Set Hotkey</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="help-popup" class="popup">
+    <div 
+ class="popup-content">
+      <button class="close-popup" title="Close">&times;</button>
+      <h3>Soundboard Help & Tips</h3>
+      <ul class="help-list">
+        <li><strong>Keyboard Shortcuts:</strong> Assign hotkeys to any sound by clicking the keyboard icon.
+ Use key combinations like Cmd+Shift+1 for quick access!</li>
+        <li><strong>Drag & Drop:</strong> Click and drag any sound card to reorder your soundboard.
+ You can also drag audio files from your computer directly onto cards!</li>
+        <li><strong>Privacy First:</strong> Everything runs locally in your browser.
+ Your audio files never leave your device and aren't uploaded anywhere.</li>
+        <li><strong>Recording:</strong> Click the record button to capture your soundboard performance.
+ Optionally enable microphone to add your voice. Download as MP3!</li>
+        <li><strong>Reverse Effect:</strong> Enable Reverse mode from the Effects menu to play all sounds backwards for creative effects.</li>
+        <li><strong>Reverb Effect:</strong> Add a professional reverb effect to all your sounds from the Effects menu.</li>
+        <li><strong>Volume Control:</strong> Hover over the volume icon to access individual volume sliders for each sound.</li>
+        <li><strong>Custom Names:</strong> Click on any sound name to rename it for better organization.</li>
+   
+       </ul>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js"></script>
+  <script>
+    /* ============================================
+       GLOBAL VARIABLES & CONSTANTS
+       ============================================ */
+    const soundCardsWrapper = document.getElementById('sound-cards-wrapper');
+    const hotkeyPopup = document.getElementById('hotkey-popup');
+    const helpPopup = document.getElementById('help-popup');
+    const hotkeyDisplay = document.getElementById('hotkey-display');
+    const currentHotkeyText = document.getElementById('current-hotkey-text');
+    const hotkeyPrompt = document.querySelector('.hotkey-prompt');
+    const hotkeyConfirmButton = document.getElementById('hotkey-confirm-button');
+    const hotkeyClearButton = document.getElementById('hotkey-clear-button');
+    const stopAllButton = document.getElementById('stop-all-button');
+    const helpButton = document.getElementById('help-button');
+    const recordToggleButton = document.getElementById('record-toggle-button');
+    let soundboardData = [];
+    let activeCardId = null;
+    let currentRecordedHotkey = { key: null, ctrlKey: false, shiftKey: false, altKey: false, metaKey: false };
+    let isRecordingHotkey = false;
+    let draggedCardId = null;
+    let playingAudioInstances = [];
+    // Effects state
+    let reverbEnabled = false;
+    let reverseEnabled = false;
+    // Audio context for effects and recording
+    let audioContext = null;
+    let reverbNode = null;
+    let masterGainNode = null;
+    let recordingDestination = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let isRecording = false;
+    let micEnabled = false;
+    let micStream = null;
+    let micGainNode = null;
+    let recordingStartTime = 0;
+    let recordingTimerInterval = null;
+    let recordedBlob = null;
+    let playbackAudio = null; // Track playback audio separately
+
+    const DEFAULT_STARTING_CARDS = 9;
+    const MAX_SOUND_NAME_LENGTH = 15;
+    const GLOW_COLORS = ['#87A9FF', '#51CF66', '#FFD43B', '#FF6B6B', '#9775FA'];
+    // Musical note frequencies (C major scale)
+    const NOTE_FREQUENCIES = [
+      { note: 'C4', freq: 261.63 },
+      { note: 'D4', freq: 293.66 },
+      { note: 'E4', freq: 329.63 },
+      { note: 'F4', freq: 349.23 },
+      { note: 'G4', freq: 392.00 },
+      { note: 'A4', freq: 440.00 },
+      { note: 'B4', freq: 493.88 },
+      { note: 'C5', freq: 
+ 523.25 },
+      { note: 'D5', freq: 587.33 }
+    ];
+    /* ============================================
+       MENU FUNCTIONALITY
+       ============================================ */
+    // Menu dropdown toggle
+    document.querySelectorAll('.menu-dropdown').forEach(dropdown => {
+      const button = dropdown.querySelector('.menu-button');
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.menu-dropdown').forEach(d => {
+          if (d !== dropdown) d.classList.remove('active');
+        });
+        dropdown.classList.toggle('active');
+    
+      });
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.menu-dropdown').forEach(d => d.classList.remove('active'));
+    });
+    // Reset button
+    document.getElementById('reset-button').addEventListener('click', () => {
+      stopAllSounds();
+      initializeSoundboardFresh();
+      document.querySelectorAll('.menu-dropdown').forEach(d => d.classList.remove('active'));
+    });
+    // Reverse toggle
+    document.getElementById('reverse-toggle').addEventListener('click', (e) => {
+      e.stopPropagation();
+      reverseEnabled = !reverseEnabled;
+      document.getElementById('reverse-indicator').classList.toggle('active', reverseEnabled);
+    });
+    // Reverb toggle
+    document.getElementById('reverb-toggle').addEventListener('click', (e) => {
+      e.stopPropagation();
+      reverbEnabled = !reverbEnabled;
+      document.getElementById('reverb-indicator').classList.toggle('active', reverbEnabled);
+      
+      if (reverbEnabled && !audioContext) {
+        initializeAudioContext();
+      }
+    });
+    // Record toggle button
+    recordToggleButton.addEventListener('click', () => {
+      const recorderContainer = document.getElementById('recorder-container');
+      recorderContainer.classList.toggle('active');
+      scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+    });
+    // Stop all sounds button
+    stopAllButton.addEventListener('click', () => {
+      stopAllSounds();
+    });
+    // Help button
+    helpButton.addEventListener('click', () => {
+      helpPopup.style.display = 'flex';
+      scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+    });
+    function stopAllSounds() {
+      // Stop soundboard audio
+      playingAudioInstances.forEach(audio => {
+        if (audio && audio.stop) {
+          try { audio.stop(); } catch(e) {}
+        }
+      });
+      playingAudioInstances = [];
+      
+      // Stop playback audio
+      if (playbackAudio && !playbackAudio.paused) {
+        playbackAudio.pause();
+        playbackAudio.currentTime = 0;
+        playbackAudio = null;
+        
+        // Reset playback button
+        const playbackButton = document.getElementById('recorder-playback-button');
+        playbackButton.classList.remove('playing');
+        playbackButton.querySelector('i').className = 'fas fa-play';
+        playbackButton.querySelector('span').textContent = 'Play Recording';
+        
+        const recorderStatusText = document.getElementById('recorder-status-text');
+        recorderStatusText.textContent = 'Playback stopped';
+      }
+    }
+
+    /* ============================================
+       RECORDER FUNCTIONALITY
+       ============================================ */
+    const recorderStartButton = document.getElementById('recorder-start-button');
+    const recorderStopButton = document.getElementById('recorder-stop-button');
+    const recorderMicToggle = document.getElementById('recorder-mic-toggle');
+    const recorderPlaybackButton = document.getElementById('recorder-playback-button');
+    const recorderDownloadButton = document.getElementById('recorder-download-button');
+    const recorderStatusText = document.getElementById('recorder-status-text');
+    const recorderTimer = document.getElementById('recorder-timer');
+
+    recorderStartButton.addEventListener('click', startRecording);
+    recorderStopButton.addEventListener('click', stopRecording);
+    recorderMicToggle.addEventListener('click', toggleMicrophone);
+    recorderPlaybackButton.addEventListener('click', togglePlayback);
+    recorderDownloadButton.addEventListener('click', downloadRecording);
+    async function toggleMicrophone() {
+      if (!micEnabled) {
+        try {
+          micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          micEnabled = true;
+          recorderMicToggle.classList.add('mic-active');
+          recorderMicToggle.querySelector('i').className = 'fas fa-microphone';
+          recorderMicToggle.querySelector('span').textContent = 'Disable Mic';
+          recorderStatusText.textContent = 'Microphone enabled';
+        } catch (error) {
+          console.error('Error accessing microphone:', error);
+          recorderStatusText.textContent = 'Error: Could not access microphone';
+        }
+      } else {
+        if (micStream) {
+          micStream.getTracks().forEach(track => track.stop());
+          micStream = null;
+        }
+        micEnabled = false;
+        recorderMicToggle.classList.remove('mic-active');
+        recorderMicToggle.querySelector('i').className = 'fas fa-microphone-slash';
+        recorderMicToggle.querySelector('span').textContent = 'Enable Mic';
+        recorderStatusText.textContent = 'Microphone disabled';
+      }
+    }
+
+    async function startRecording() {
+      if (!audioContext) {
+        initializeAudioContext();
+      }
+
+      try {
+        // Create a mixer node that combines all audio sources
+        const mixerNode = audioContext.createGain();
+        mixerNode.gain.value = 1.0;
+        
+        // Create recording destination
+        recordingDestination = audioContext.createMediaStreamDestination();
+        // Connect the mixer to the recording destination
+        mixerNode.connect(recordingDestination);
+        // Connect the master gain (soundboard audio) to the mixer
+        masterGainNode.connect(mixerNode);
+        // If mic is enabled, create a separate gain node and connect to mixer
+        if (micEnabled && micStream) {
+          const micSource = audioContext.createMediaStreamSource(micStream);
+          micGainNode = audioContext.createGain();
+          micGainNode.gain.value = 1.0; // Adjust mic volume if needed
+          
+          micSource.connect(micGainNode);
+          micGainNode.connect(mixerNode);
+        }
+        
+        // Start MediaRecorder
+        mediaRecorder = new MediaRecorder(recordingDestination.stream);
+        recordedChunks = [];
+        
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            recordedChunks.push(e.data);
+          }
+        };
+        
+        mediaRecorder.onstop = async () => {
+          const webmBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+          // Convert to MP3
+          recorderStatusText.textContent = 'Converting to MP3...';
+          recordedBlob = await convertToMP3(webmBlob);
+          
+          recorderPlaybackButton.style.display = 'inline-flex';
+          recorderDownloadButton.style.display = 'inline-flex';
+          recorderPlaybackButton.classList.add('has-recording');
+          recorderDownloadButton.classList.add('has-recording');
+          recorderStatusText.textContent = 'Recording saved';
+          // Disconnect mixer after recording
+          masterGainNode.disconnect(mixerNode);
+          if (micGainNode) {
+            micGainNode.disconnect(mixerNode);
+          }
+        };
+        
+        mediaRecorder.start();
+        isRecording = true;
+        recordingStartTime = Date.now();
+        // UI updates
+        recorderStartButton.style.display = 'none';
+        recorderStopButton.style.display = 'inline-flex';
+        recorderStopButton.classList.add('recording');
+        recorderStatusText.textContent = 'Recording...';
+        recordToggleButton.classList.add('recording');
+        
+        // Start timer
+        recordingTimerInterval = setInterval(updateRecordingTimer, 100);
+      } catch (error) {
+        console.error('Error starting recording:', error);
+        recorderStatusText.textContent = 'Error: Could not start recording';
+      }
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        
+        // UI updates
+        recorderStopButton.style.display = 'none';
+        recorderStartButton.style.display = 'inline-flex';
+        recorderStopButton.classList.remove('recording');
+        recordToggleButton.classList.remove('recording');
+        
+        // Stop timer
+        clearInterval(recordingTimerInterval);
+      }
+    }
+
+    function updateRecordingTimer() {
+      const elapsed = Date.now() - recordingStartTime;
+      const minutes = Math.floor(elapsed / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+      recorderTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function togglePlayback() {
+      if (!recordedBlob) return;
+      // If currently playing, stop it
+      if (playbackAudio && !playbackAudio.paused) {
+        playbackAudio.pause();
+        playbackAudio.currentTime = 0;
+        playbackAudio = null;
+        
+        recorderPlaybackButton.classList.remove('playing');
+        recorderPlaybackButton.querySelector('i').className = 'fas fa-play';
+        recorderPlaybackButton.querySelector('span').textContent = 'Play Recording';
+        recorderStatusText.textContent = 'Playback stopped';
+      } else {
+        // Start playing
+        const url = URL.createObjectURL(recordedBlob);
+        playbackAudio = new Audio(url);
+        
+        playbackAudio.play();
+        recorderPlaybackButton.classList.add('playing');
+        recorderPlaybackButton.querySelector('i').className = 'fas fa-stop';
+        recorderPlaybackButton.querySelector('span').textContent = 'Stop Playback';
+        recorderStatusText.textContent = 'Playing recording...';
+        playbackAudio.onended = () => {
+          recorderPlaybackButton.classList.remove('playing');
+          recorderPlaybackButton.querySelector('i').className = 'fas fa-play';
+          recorderPlaybackButton.querySelector('span').textContent = 'Play Recording';
+          recorderStatusText.textContent = 'Playback finished';
+          playbackAudio = null;
+        };
+      }
+    }
+
+    async function convertToMP3(webmBlob) {
+      // Decode WebM to raw audio data
+      const arrayBuffer = await webmBlob.arrayBuffer();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      
+      // Get audio data
+      const channels = audioBuffer.numberOfChannels;
+      const sampleRate = audioBuffer.sampleRate;
+      const samples = audioBuffer.getChannelData(0); // Mono for simplicity
+      
+      // Convert to 16-bit PCM
+      const buffer = new Int16Array(samples.length);
+      for (let i = 0; i < samples.length; i++) {
+        const s = Math.max(-1, Math.min(1, samples[i]));
+        buffer[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      }
+      
+      // Encode to MP3
+      const mp3encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
+      const mp3Data = [];
+      const sampleBlockSize = 1152;
+      
+      for (let i = 0; i < buffer.length; i += sampleBlockSize) {
+        const sampleChunk = buffer.subarray(i, i + sampleBlockSize);
+        const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
+        if (mp3buf.length > 0) {
+          mp3Data.push(mp3buf);
+        }
+      }
+      
+      const mp3buf = mp3encoder.flush();
+      if (mp3buf.length > 0) {
+        mp3Data.push(mp3buf);
+      }
+      
+      return new Blob(mp3Data, { type: 'audio/mp3' });
+    }
+
+    function downloadRecording() {
+      if (recordedBlob) {
+        const url = URL.createObjectURL(recordedBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `soundboard-recording-${Date.now()}.mp3`;
+        a.click();
+        recorderStatusText.textContent = 'Download started';
+      }
+    }
+
+    /* ============================================
+       AUDIO CONTEXT & EFFECTS
+       ============================================ */
+    function initializeAudioContext() {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      // Create master gain node for all soundboard audio
+      masterGainNode = audioContext.createGain();
+      masterGainNode.gain.value = 1.0;
+      masterGainNode.connect(audioContext.destination);
+      
+      reverbNode = audioContext.createConvolver();
+      reverbNode.connect(audioContext.destination);
+      
+      const rate = audioContext.sampleRate;
+      const length = rate * 2.5;
+      const impulse = audioContext.createBuffer(2, length, rate);
+      const impulseL = impulse.getChannelData(0);
+      const impulseR = impulse.getChannelData(1);
+      for (let i = 0; i < length; i++) {
+        const n = length - i;
+        impulseL[i] = (Math.random() * 2 - 1) * Math.pow(n / length, 2);
+        impulseR[i] = (Math.random() * 2 - 1) * Math.pow(n / length, 2);
+      }
+      
+      reverbNode.buffer = impulse;
+    }
+
+    async function reverseAudioBuffer(audioBuffer) {
+      const numberOfChannels = audioBuffer.numberOfChannels;
+      const reversedBuffer = audioContext.createBuffer(
+        numberOfChannels,
+        audioBuffer.length,
+        audioBuffer.sampleRate
+      );
+      for (let channel = 0; channel < numberOfChannels; channel++) {
+        const channelData = audioBuffer.getChannelData(channel);
+        const reversedData = reversedBuffer.getChannelData(channel);
+        
+        for (let i = 0; i < channelData.length; i++) {
+          reversedData[i] = channelData[channelData.length - 1 - i];
+        }
+      }
+      
+      return reversedBuffer;
+    }
+
+    async function playAudioWithEffects(audioSrc, volume) {
+      if (!audioContext) {
+        initializeAudioContext();
+      }
+      
+      // Fetch and decode audio
+      const response = await fetch(audioSrc);
+      const arrayBuffer = await response.arrayBuffer();
+      let audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      // Apply reverse effect if enabled
+      if (reverseEnabled) {
+        audioBuffer = await reverseAudioBuffer(audioBuffer);
+      }
+      
+      // Create buffer source
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      
+      const gainNode = audioContext.createGain();
+      gainNode.gain.value = volume;
+      
+      source.connect(gainNode);
+      if (reverbEnabled) {
+        const dryGain = audioContext.createGain();
+        const wetGain = audioContext.createGain();
+        dryGain.gain.value = 0.6;
+        wetGain.gain.value = 0.4;
+        
+        gainNode.connect(dryGain);
+        dryGain.connect(masterGainNode);
+        
+        gainNode.connect(wetGain);
+        wetGain.connect(reverbNode);
+      } else {
+        gainNode.connect(masterGainNode);
+      }
+      
+      source.start(0);
+      // Track for stop all functionality
+      playingAudioInstances.push(source);
+      source.onended = () => {
+        const index = playingAudioInstances.indexOf(source);
+        if (index > -1) {
+          playingAudioInstances.splice(index, 1);
+        }
+      };
+    }
+
+    /* ============================================
+       AUDIO GENERATION
+       ============================================ */
+    function generateToneAudio(frequency, duration = 0.5) {
+      const tempAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const offlineContext = new OfflineAudioContext(1, tempAudioContext.sampleRate * duration, tempAudioContext.sampleRate);
+      const offlineOscillator = offlineContext.createOscillator();
+      const offlineGain = offlineContext.createGain();
+      
+      offlineOscillator.connect(offlineGain);
+      offlineGain.connect(offlineContext.destination);
+      offlineOscillator.frequency.value = frequency;
+      offlineOscillator.type = 'sine';
+      
+      offlineGain.gain.setValueAtTime(0, 0);
+      offlineGain.gain.linearRampToValueAtTime(0.3, 0.02);
+      offlineGain.gain.exponentialRampToValueAtTime(0.01, duration * 0.95);
+      
+      offlineOscillator.start(0);
+      offlineOscillator.stop(duration);
+      return offlineContext.startRendering().then(buffer => {
+        return audioBufferToWav(buffer);
+      });
+    }
+
+    function audioBufferToWav(buffer) {
+      const length = buffer.length * buffer.numberOfChannels * 2 + 44;
+      const arrayBuffer = new ArrayBuffer(length);
+      const view = new DataView(arrayBuffer);
+      const channels = [];
+      let offset = 0;
+      let pos = 0;
+
+      setUint32(0x46464952);
+      setUint32(length - 8);
+      setUint32(0x45564157);
+      setUint32(0x20746d66);
+      setUint32(16);
+      setUint16(1);
+      setUint16(buffer.numberOfChannels);
+      setUint32(buffer.sampleRate);
+      setUint32(buffer.sampleRate * 2 * buffer.numberOfChannels);
+      setUint16(buffer.numberOfChannels * 2);
+      setUint16(16);
+      setUint32(0x61746164);
+      setUint32(length - pos - 4);
+      for (let i = 0; i < buffer.numberOfChannels; i++)
+        channels.push(buffer.getChannelData(i));
+      while (pos < length) {
+        for (let i = 0; i < buffer.numberOfChannels; i++) {
+          let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+          sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+          view.setInt16(pos, sample, true);
+          pos += 2;
+        }
+        offset++;
+      }
+
+      function setUint16(data) {
+        view.setUint16(pos, data, true);
+        pos += 2;
+      }
+
+      function setUint32(data) {
+        view.setUint32(pos, data, true);
+        pos += 4;
+      }
+
+      const blob = new Blob([arrayBuffer], { type: 'audio/wav' });
+      return URL.createObjectURL(blob);
+    }
+
+    /* ============================================
+       UTILITY FUNCTIONS
+       ============================================ */
+    function getRandomGlowColor() {
+      return GLOW_COLORS[Math.floor(Math.random() * GLOW_COLORS.length)];
+    }
+
+    function generateUniqueId() {
+      return 'card_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function getCardData(id) {
+      return soundboardData.find(card => card.id === id);
+    }
+
+    function formatHotkey(hotkey) {
+      if (!hotkey || !hotkey.key) return 'No Hotkey';
+      let parts = [];
+      
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      
+      if (hotkey.metaKey) parts.push(isMac ? 'Cmd' : 'Win');
+      if (hotkey.ctrlKey) parts.push('Ctrl');
+      if (hotkey.shiftKey) parts.push('Shift');
+      if (hotkey.altKey) parts.push(isMac ? 'Opt' : 'Alt');
+      
+      let keyDisplay = hotkey.key;
+      if (keyDisplay === ' ') keyDisplay = 'Space';
+      else if (keyDisplay === 'Enter') keyDisplay = 'Enter';
+      else if (keyDisplay === 'Tab') keyDisplay = 'Tab';
+      else if (keyDisplay === 'Escape') keyDisplay = 'Esc';
+      else if (keyDisplay.startsWith('Arrow')) keyDisplay = keyDisplay.replace('Arrow', '');
+      else if (keyDisplay.length === 1) keyDisplay = keyDisplay.toUpperCase();
+      
+      parts.push(keyDisplay);
+      return parts.join(' + ');
+    }
+
+    /* ============================================
+       DRAG AND DROP FUNCTIONS (CARD REORDERING)
+       ============================================ */
+    function handleDragStart(e) {
+      const card = e.target.closest('.sound-card');
+      if (!card || card.classList.contains('add-card')) return;
+      
+      draggedCardId = card.dataset.cardId;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', draggedCardId);
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function handleDragEnter(e) {
+      const card = e.target.closest('.sound-card');
+      if (card && !card.classList.contains('add-card') && card.dataset.cardId !== draggedCardId) {
+        card.classList.add('drag-over');
+      }
+    }
+
+    function handleDragLeave(e) {
+      const card = e.target.closest('.sound-card');
+      if (card) {
+        card.classList.remove('drag-over');
+      }
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const dropCard = e.target.closest('.sound-card');
+      if (!dropCard || dropCard.classList.contains('add-card') || !draggedCardId) return;
+      
+      const dropCardId = dropCard.dataset.cardId;
+      if (dropCardId === draggedCardId) return;
+      const draggedIndex = soundboardData.findIndex(card => card.id === draggedCardId);
+      const dropIndex = soundboardData.findIndex(card => card.id === dropCardId);
+      if (draggedIndex === -1 || dropIndex === -1) return;
+      
+      const [draggedItem] = soundboardData.splice(draggedIndex, 1);
+      soundboardData.splice(dropIndex, 0, draggedItem);
+      
+      renderSoundboard();
+      
+      return false;
+    }
+
+    function handleDragEnd(e) {
+      document.querySelectorAll('.sound-card').forEach(card => {
+        card.classList.remove('dragging', 'drag-over');
+      });
+      draggedCardId = null;
+    }
+
+    /* ============================================
+       FILE DROP FUNCTIONS (AUDIO FILE UPLOADS)
+       ============================================ */
+    function handleFileDragOver(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const card = e.target.closest('.sound-card');
+      if (card && !card.classList.contains('add-card')) {
+        card.classList.add('file-drag-over');
+      }
+    }
+
+    function handleFileDragLeave(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const card = e.target.closest('.sound-card');
+      if (card) {
+        card.classList.remove('file-drag-over');
+      }
+    }
+
+    function handleFileDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const card = e.target.closest('.sound-card');
+      if (!card || card.classList.contains('add-card')) return;
+      
+      card.classList.remove('file-drag-over');
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith('audio/')) {
+          const cardId = card.dataset.cardId;
+          const cardData = getCardData(cardId);
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            card.audio.src = e.target.result;
+            cardData.audioSrc = e.target.result;
+            cardData.isPreset = false;
+            
+            const uploadBtn = card.querySelector('[data-action="upload"]');
+            uploadBtn.classList.add('uploaded');
+            uploadBtn.title = file.name;
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    }
+
+    /* ============================================
+       HOTKEY POPUP FUNCTIONS
+       ============================================ */
+    function openHotkeyPopup(cardId) {
+      activeCardId = cardId;
+      const cardData = getCardData(cardId);
+      currentHotkeyText.textContent = cardData.hotkey ? formatHotkey(cardData.hotkey) : 'No hotkey set';
+      hotkeyPrompt.style.display = 'block';
+      isRecordingHotkey = false;
+      currentRecordedHotkey = { key: null, ctrlKey: false, shiftKey: false, altKey: false, metaKey: false };
+      hotkeyPopup.style.display = 'flex';
+      scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+      setTimeout(() => {
+        if (!isRecordingHotkey) {
+          hotkeyDisplay.click();
+        }
+      }, 50);
+    }
+
+    hotkeyDisplay.addEventListener('click', () => {
+      if (!isRecordingHotkey) {
+        currentHotkeyText.textContent = 'Waiting for input...';
+        hotkeyPrompt.style.display = 'none';
+        isRecordingHotkey = true;
+        currentRecordedHotkey = { key: null, ctrlKey: false, shiftKey: false, altKey: false, metaKey: false };
+      }
+    });
+    hotkeyConfirmButton.addEventListener('click', () => {
+      if (activeCardId && currentRecordedHotkey.key) {
+        const cardData = getCardData(activeCardId);
+        
+        soundboardData.forEach(data => {
+          if (data.id !== activeCardId && data.hotkey &&
+              data.hotkey.key.toLowerCase() === currentRecordedHotkey.key.toLowerCase() &&
+        
+              data.hotkey.shiftKey === currentRecordedHotkey.shiftKey &&
+              data.hotkey.altKey === currentRecordedHotkey.altKey &&
+              data.hotkey.metaKey === currentRecordedHotkey.metaKey) {
+            data.hotkey = null;
+            const oldCardHotkeyButton = document.querySelector(`[data-card-id="${data.id}"] [data-action="hotkey"]`);
+            if (oldCardHotkeyButton) oldCardHotkeyButton.title = 'Set Hotkey';
+          
+          }
+        });
+        
+        cardData.hotkey = { ...currentRecordedHotkey };
+        currentHotkeyText.textContent = formatHotkey(cardData.hotkey) + ' (Saved!)';
+        const hotkeyButton = document.querySelector(`[data-card-id="${activeCardId}"] [data-action="hotkey"]`);
+        if (hotkeyButton) hotkeyButton.title = 'Hotkey: ' + formatHotkey(cardData.hotkey);
+      } else if (activeCardId) {
+        currentHotkeyText.textContent = 'No hotkey set (Not saved)';
+      }
+      setTimeout(() => {
+        hotkeyPopup.style.display = 'none';
+        isRecordingHotkey = false;
+        scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+      }, 1000);
+    });
+
+    hotkeyClearButton.addEventListener('click', () => {
+      if (activeCardId) {
+        const cardData = getCardData(activeCardId);
+        cardData.hotkey = null;
+        currentHotkeyText.textContent = 'Hotkey Cleared!';
+        hotkeyPrompt.style.display = 'block';
+        const hotkeyButton = document.querySelector(`[data-card-id="${activeCardId}"] [data-action="hotkey"]`);
+        if (hotkeyButton) hotkeyButton.title = 'Set Hotkey';
+      }
+      setTimeout(() => {
+       
+         hotkeyPopup.style.display = 'none';
+        isRecordingHotkey = false;
+        scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+      }, 1000);
+    });
+    /* ============================================
+       HOTKEY TRIGGER & KEYBOARD EVENTS
+       ============================================ */
+    window.addEventListener('keydown', (event) => {
+      const anyPopupOpen = hotkeyPopup.style.display === 'flex' || helpPopup.style.display === 'flex';
+
+      if (isRecordingHotkey) {
+        event.preventDefault();
+        
+        if (['Control', 'Shift', 'Alt', 'Meta'].includes(event.key)) {
+          return;
+        }
+   
+           
+        currentRecordedHotkey = {
+          key: event.key,
+          ctrlKey: event.ctrlKey,
+          shiftKey: event.shiftKey,
+          altKey: event.altKey,
+          metaKey: event.metaKey
+        };
+        currentHotkeyText.textContent = formatHotkey(currentRecordedHotkey);
+
+        setTimeout(() => {
+  
+           if (isRecordingHotkey) {
+            hotkeyConfirmButton.click();
+          }
+        }, 500);
+      } else if (!anyPopupOpen) {
+        triggerSoundboardHotkeys(event);
+      }
+    });
+    function triggerSoundboardHotkeys(event) {
+      soundboardData.forEach(cardData => {
+        if (cardData.hotkey) {
+          const h = cardData.hotkey;
+          if (event.key.toLowerCase() === h.key.toLowerCase() &&
+              event.ctrlKey === h.ctrlKey &&
+              event.shiftKey === h.shiftKey &&
+              event.altKey === h.altKey &&
+  
+               event.metaKey === h.metaKey) {
+            event.preventDefault();
+            
+            const cardElement = document.querySelector(`[data-card-id="${cardData.id}"]`);
+            if (cardElement && cardElement.audio && cardElement.audio.src) {
+              playAudioWithEffects(cardElement.audio.src, cardElement.audio.volume);
+             
+   
+              cardElement.style.setProperty('--glow-color', getRandomGlowColor());
+              cardElement.classList.add('active-hotkey');
+              setTimeout(() => cardElement.classList.remove('active-hotkey'), 300);
+            }
+          }
+        }
+      });
+    }
+
+    /* ============================================
+       POPUP CLOSE HANDLERS
+       ============================================ */
+    document.querySelectorAll('.close-popup').forEach(btn => {
+      btn.addEventListener('click', () => {
+        hotkeyPopup.style.display = 'none';
+        helpPopup.style.display = 'none';
+        isRecordingHotkey = false;
+        scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+      });
+    });
+    window.addEventListener('click', (e) => {
+      if (e.target === hotkeyPopup) {
+        hotkeyPopup.style.display = 'none';
+        isRecordingHotkey = false;
+        scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+      }
+      if (e.target === helpPopup) {
+        helpPopup.style.display = 'none';
+        scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+      }
+    });
+    /* ============================================
+       SOUND CARD CREATION
+       ============================================ */
+    function createSoundCardElement(cardData, isAddButton = false) {
+      const card = document.createElement('div');
+      if (isAddButton) {
+        card.className = 'sound-card add-card';
+        card.innerHTML = `
+          <button class="add-button" title="Add New Sound Card">
+            <i class="fas fa-plus"></i>
+          </button>
+        `;
+        card.addEventListener('click', () => {
+          const newCardData = {
+            id: generateUniqueId(),
+            audioSrc: null,
+            name: `Sound ${soundboardData.length + 1}`,
+            hotkey: null,
+            volume: 1.0,
+            isMuted: false,
+   
+             isPreset: false
+          };
+          soundboardData.push(newCardData);
+          renderSoundboard();
+        });
+        return card;
+      }
+
+      card.className = 'sound-card';
+      card.dataset.cardId = cardData.id;
+      card.draggable = true;
+      card.audio = new Audio(cardData.audioSrc || '');
+      card.audio.volume = cardData.volume || 1.0;
+      card.dataset.isMuted = cardData.isMuted ? 'true' : 'false';
+
+      card.addEventListener('dragstart', handleDragStart);
+      card.addEventListener('dragover', handleDragOver);
+      card.addEventListener('dragenter', handleDragEnter);
+      card.addEventListener('dragleave', handleDragLeave);
+      card.addEventListener('drop', handleDrop);
+      card.addEventListener('dragend', handleDragEnd);
+
+      card.addEventListener('dragover', handleFileDragOver);
+      card.addEventListener('dragleave', handleFileDragLeave);
+      card.addEventListener('drop', handleFileDrop);
+      card.innerHTML = `
+        <div class="play-button-wrapper">
+          <button class="play-circle" data-action="play">
+            <i class="fas fa-play"></i>
+          </button>
+        </div>
+        <div class="card-controls">
+          <button class="control-button" data-action="upload" title="Upload Sound">
+            <i class="fas fa-upload"></i>
+        
+           </button>
+          <button class="control-button" data-action="hotkey" title="${cardData.hotkey ? 'Hotkey: ' + formatHotkey(cardData.hotkey) : 'Set Hotkey'}">
+            <i class="fas fa-keyboard"></i>
+          </button>
+          <button class="control-button delete-button" data-action="delete" title="Delete Card">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+          <div class="volume-control-wrapper">
+   
+             <button class="control-button volume-button ${cardData.isMuted ? 'muted' : ''}" data-action="volume" title="Volume">
+              <i class="fas ${cardData.isMuted ? 'fa-volume-mute' : 'fa-volume-up'}"></i>
+            </button>
+            <div class="volume-slider-popup-background">
+              <input type="range" class="volume-slider" min="0" max="1" step="0.01" value="${cardData.volume ||
+ 1.0}">
+            </div>
+          </div>
+        </div>
+        <div class="sound-name-wrapper">
+          <span class="sound-name-display">${cardData.name || 'Unnamed Sound'}</span>
+          <input type="text" class="name-edit-input" maxlength="${MAX_SOUND_NAME_LENGTH}" placeholder="Sound Name" style="display:none;">
+        </div>
+        <input type="file" class="upload-input" accept="audio/*" style="display:none;">
+      `;
+
+     
+       /* PLAY BUTTON */
+      const playBtn = card.querySelector('[data-action="play"]');
+      playBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (card.audio.src) {
+          playAudioWithEffects(card.audio.src, card.audio.volume);
+          
+          card.style.setProperty('--glow-color', getRandomGlowColor());
+          card.classList.add('playing');
+          setTimeout(() => card.classList.remove('playing'), 300);
+     
+         } else {
+          alert('Upload a sound first.');
+        }
+      });
+
+      /* UPLOAD BUTTON */
+      const uploadBtn = card.querySelector('[data-action="upload"]');
+      const uploadInput = card.querySelector('.upload-input');
+      uploadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        uploadInput.click();
+      });
+      uploadInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            card.audio.src = e.target.result;
+            cardData.audioSrc = e.target.result;
+            cardData.isPreset = false;
+      
+             uploadBtn.classList.add('uploaded');
+            uploadBtn.title = file.name;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      /* HOTKEY BUTTON */
+      const hotkeyBtn = card.querySelector('[data-action="hotkey"]');
+      hotkeyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openHotkeyPopup(cardData.id);
+      });
+      /* DELETE BUTTON */
+      const deleteBtn = card.querySelector('[data-action="delete"]');
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        soundboardData = soundboardData.filter(c => c.id !== cardData.id);
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.8)';
+        setTimeout(() => {
+          renderSoundboard();
+        }, 200);
+      });
+      /* VOLUME CONTROL */
+      const volumeButton = card.querySelector('.volume-button');
+      const volumeIcon = volumeButton.querySelector('i');
+      const volumeSlider = card.querySelector('.volume-slider');
+
+      const updateVolumeIcon = (volumeValue, isMutedState) => {
+        if (isMutedState) {
+          volumeIcon.className = 'fas fa-volume-mute';
+          volumeButton.classList.add('muted');
+        } else if (volumeValue === 0) {
+          volumeIcon.className = 'fas fa-volume-off';
+          volumeButton.classList.remove('muted');
+        } else if (volumeValue > 0 && volumeValue <= 0.5) {
+          volumeIcon.className = 'fas fa-volume-down';
+          volumeButton.classList.remove('muted');
+        } else {
+          volumeIcon.className = 'fas fa-volume-up';
+          volumeButton.classList.remove('muted');
+        }
+      };
+
+      if (cardData.isMuted) {
+        card.audio.muted = true;
+        updateVolumeIcon(0, true);
+      } else {
+        card.audio.volume = cardData.volume;
+        updateVolumeIcon(cardData.volume, false);
+      }
+
+      volumeSlider.addEventListener('input', (e) => {
+        const newVolume = parseFloat(e.target.value);
+        card.audio.volume = newVolume;
+        cardData.volume = newVolume;
+        cardData.isMuted = false;
+        card.audio.muted = false;
+        updateVolumeIcon(newVolume, false);
+      });
+      volumeButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (card.audio.muted) {
+          card.audio.muted = false;
+          card.dataset.isMuted = 'false';
+          cardData.isMuted = false;
+          card.audio.volume = cardData.volume > 0 ? cardData.volume : 0.5;
+          volumeSlider.value = card.audio.volume;
+          updateVolumeIcon(card.audio.volume, false);
+  
+         } else {
+          card.audio.muted = true;
+          card.dataset.isMuted = 'true';
+          cardData.isMuted = true;
+          updateVolumeIcon(0, true);
+        }
+      });
+      /* SOUND NAME EDITING */
+      const soundNameDisplay = card.querySelector('.sound-name-display');
+      const nameEditInput = card.querySelector('.name-edit-input');
+      soundNameDisplay.addEventListener('click', (e) => {
+        e.stopPropagation();
+        soundNameDisplay.style.display = 'none';
+        nameEditInput.style.display = 'block';
+        nameEditInput.value = cardData.name || '';
+        nameEditInput.focus();
+        nameEditInput.select();
+      });
+      nameEditInput.addEventListener('blur', () => {
+        cardData.name = nameEditInput.value.trim().substring(0, MAX_SOUND_NAME_LENGTH) || 'Unnamed Sound';
+        soundNameDisplay.textContent = cardData.name;
+        nameEditInput.style.display = 'none';
+        soundNameDisplay.style.display = 'block';
+      });
+      nameEditInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          nameEditInput.blur();
+        }
+      });
+      nameEditInput.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+      if (cardData.audioSrc && !cardData.isPreset) {
+        uploadBtn.classList.add('uploaded');
+        uploadBtn.title = 'Sound Loaded';
+      }
+
+      return card;
+    }
+
+    /* ============================================
+       RENDER SOUNDBOARD
+       ============================================ */
+    function renderSoundboard() {
+      soundCardsWrapper.innerHTML = '';
+      soundboardData.forEach(cardData => {
+        const cardElement = createSoundCardElement(cardData);
+        soundCardsWrapper.appendChild(cardElement);
+      });
+      const addCard = createSoundCardElement(null, true);
+      soundCardsWrapper.appendChild(addCard);
+      scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+    }
+
+    /* ============================================
+       INITIALIZE SOUNDBOARD
+       ============================================ */
+    async function initializeSoundboardFresh() {
+      soundboardData = [];
+      for (let i = 0; i < DEFAULT_STARTING_CARDS; i++) {
+        const hotkeyKey = (i + 1).toString();
+        const defaultHotkey = {
+          key: hotkeyKey,
+          ctrlKey: false,
+          shiftKey: false,
+          altKey: false,
+          metaKey: false
+        };
+        const noteData = NOTE_FREQUENCIES[i % NOTE_FREQUENCIES.length];
+        const audioUrl = await generateToneAudio(noteData.freq);
+        soundboardData.push({
+          id: generateUniqueId(),
+          audioSrc: audioUrl,
+          name: `Sound ${i + 1}`,
+          hotkey: defaultHotkey,
+          volume: 1.0,
+          isMuted: false,
+          isPreset: true
+        });
+      }
+      
+      renderSoundboard();
+    }
+
+    /* ============================================
+       INITIALIZATION
+       ============================================ */
+    initializeSoundboardFresh();
+
+    // ===== FOURTHWALL SCROLLBAR FIX V3 (Definitive) =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
+    function sendHeight() {
+      // Use scrollHeight for content height
+      const height = document.body.scrollHeight;
+      
+      // Only send message if height has *actually* changed 
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
+    function scheduleHeightCheck() {
+        // Clear any pending checks
+        clearTimeout(resizeTimer);
+        // Schedule a new check after 150ms
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    // Send height on initial load (with a slight delay)
+    // This fixes the "Content Cut-Off" race condition.
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    // Send height on window resize (debounced)
+    window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
+        scheduleHeightCheck();
+    });
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+</body>
+</html>
