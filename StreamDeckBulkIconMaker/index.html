@@ -2323,6 +2323,8 @@
             var height = document.body.scrollHeight;
             // Only send if height has changed to prevent feedback loop
             if (height !== lastHeight) {
+            // Only send if height has changed by more than a small threshold to prevent feedback loop
+            if (Math.abs(height - lastHeight) > 2) {
                 lastHeight = height;
                 window.parent.postMessage({ frameHeight: height }, '*');
             }
