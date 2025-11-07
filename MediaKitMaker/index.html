@@ -1,0 +1,2066 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Media Kit Maker | HeroVibes</title>
+  <style>
+    /* ============================================
+       DESIGN SYSTEM
+       ============================================ */
+    :root {
+      --bg-primary: #191919;
+      --bg-secondary: #1F1F1F;
+      --bg-tertiary: #252525;
+      --hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --accent-secondary: #6B8FE8;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --success: #10b981;
+      --radius: 8px;
+      --padding-y: 24px;
+      --padding-x: 16px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: var(--padding-y) var(--padding-x);
+      /* min-height: 100vh; <-- REMOVED per iFrame "Failure to Shrink" fix */
+    }
+
+    /* ============================================
+       CONTAINER
+       ============================================ */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ============================================
+       LAYOUT
+       ============================================ */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 1024px) {
+      .layout {
+        grid-template-columns: 1fr 600px;
+        align-items: start;
+      }
+    }
+
+    /* ============================================
+       CARD
+       ============================================ */
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: var(--padding-y) var(--padding-x);
+      transition: border-color 0.3s;
+    }
+
+    .card:hover {
+      border-color: rgba(135, 169, 255, 0.2);
+    }
+
+    .card-title {
+      font-size: 20px; /* <-- UPDATED from 16px per Design Guide */
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-icon {
+      font-size: 18px;
+    }
+
+    .card-description {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: -12px;
+      margin-bottom: 16px;
+    }
+
+    /* ============================================
+       FORM ELEMENTS - USER INPUT SECTION
+       ============================================ */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-label-required::after {
+      content: '*';
+      color: var(--accent);
+      margin-left: 2px;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .form-input:hover,
+    .form-textarea:hover,
+    .form-select:hover {
+      border-color: rgba(135, 169, 255, 0.3);
+    }
+
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.1);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 70px;
+      line-height: 1.5;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-hint {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    /* ============================================
+       PROFILE PHOTO UPLOAD
+       ============================================ */
+    .profile-upload-area {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .profile-preview-container {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .profile-preview {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--outline);
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+
+    .profile-preview-placeholder {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 2px dashed var(--outline);
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .profile-preview-placeholder:hover {
+      border-color: var(--accent);
+      background: var(--bg-tertiary);
+    }
+
+    .profile-upload-controls {
+      flex: 1;
+    }
+
+    .file-upload-input {
+      display: none;
+    }
+
+    .btn-upload {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-upload:hover {
+      background: var(--hover);
+      border-color: var(--accent);
+    }
+
+    /* ============================================
+       SOCIAL PLATFORMS
+       ============================================ */
+    .social-platforms-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .social-platform-item {
+      background: var(--bg-primary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .social-platform-item:hover {
+      border-color: rgba(135, 169, 255, 0.3);
+      background: var(--bg-tertiary);
+    }
+
+    /* ============================================
+       SPONSOR LOGOS SECTION
+       ============================================ */
+    .sponsor-logos-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .sponsor-logo-item {
+      position: relative;
+      aspect-ratio: 1;
+      background: var(--bg-primary);
+      border: 2px dashed var(--outline);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .sponsor-logo-item:hover {
+      border-color: var(--accent);
+      background: var(--bg-tertiary);
+    }
+
+    .sponsor-logo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 8px;
+    }
+
+    .sponsor-logo-placeholder {
+      font-size: 20px;
+      color: var(--text-secondary);
+    }
+
+    .sponsor-logo-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .sponsor-logo-item:hover .sponsor-logo-remove {
+      display: flex;
+    }
+
+    /* ============================================
+       TAGS INPUT
+       ============================================ */
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px;
+      background: var(--bg-primary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      min-height: 48px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: var(--accent);
+      color: #000;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .tag-remove {
+      cursor: pointer;
+      font-weight: bold;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .tag-remove:hover {
+      opacity: 1;
+    }
+
+    .tag-input {
+      flex: 1;
+      min-width: 120px;
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 12px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    /* ============================================
+       STATS INPUTS
+       ============================================ */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    /* ============================================
+       DEMOGRAPHICS GRID
+       ============================================ */
+    .demographics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    /* ============================================
+       COLOR PICKER
+       ============================================ */
+    .custom-color-picker {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .color-picker-input {
+      width: 60px;
+      height: 40px;
+      padding: 4px;
+      background: var(--bg-primary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .color-picker-input::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .color-picker-input::-webkit-color-swatch {
+      border: none;
+      border-radius: 4px;
+    }
+
+    /* ============================================
+       BACKGROUND PATTERN OPTIONS
+       ============================================ */
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .pattern-option {
+      aspect-ratio: 1;
+      border: 2px solid var(--outline);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      text-align: center;
+      padding: 4px;
+      background: var(--bg-primary);
+    }
+
+    .pattern-option:hover {
+      border-color: var(--accent);
+      transform: scale(1.05);
+    }
+
+    .pattern-option.active {
+      border-color: var(--accent);
+      background: var(--bg-tertiary);
+      box-shadow: 0 0 0 2px rgba(135, 169, 255, 0.2);
+    }
+
+    /* ============================================
+       BUTTON
+       ============================================ */
+    .btn {
+      position: relative;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      width: 100%;
+      font-family: inherit;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      background: var(--hover);
+      transform: translateY(-1px);
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .btn:hover::before {
+      left: 125%;
+    }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn:disabled:hover {
+      transform: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+      color: #000;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #9bb8ff 0%, #7fa0f0 100%);
+    }
+
+    /* ============================================
+       DOWNLOAD CONTROLS
+       ============================================ */
+    .download-controls {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .resolution-select {
+      flex: 0 0 140px;
+      padding: 12px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .resolution-select:hover {
+      border-color: rgba(135, 169, 255, 0.3);
+    }
+
+    .resolution-select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.1);
+    }
+
+    .download-btn-wrapper {
+      flex: 1;
+    }
+
+    /* ============================================
+       PREVIEW - MEDIA KIT DISPLAY AREA
+       ============================================ */
+    .preview-container {
+      position: relative;
+    }
+
+    @media (min-width: 1024px) {
+      .preview-container {
+        position: sticky;
+        top: 24px;
+        max-height: calc(100vh - 48px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent) var(--bg-primary);
+      }
+
+      .preview-container::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .preview-container::-webkit-scrollbar-track {
+        background: var(--bg-primary);
+        border-radius: 4px;
+      }
+
+      .preview-container::-webkit-scrollbar-thumb {
+        background: var(--accent);
+        border-radius: 4px;
+      }
+
+      .preview-container::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-secondary);
+      }
+    }
+
+    .preview-wrapper {
+      background: var(--bg-primary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .preview-canvas {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+      display: block;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ============================================
+       FLOATING PREVIEW BUTTON (MOBILE)
+       ============================================ */
+    .floating-preview-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+      color: #000;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(135, 169, 255, 0.4);
+      z-index: 1000;
+      transition: all 0.3s;
+    }
+
+    .floating-preview-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 30px rgba(135, 169, 255, 0.6);
+    }
+
+    .floating-preview-btn:active {
+      transform: scale(0.95);
+    }
+
+    @media (min-width: 1024px) {
+      .floating-preview-btn {
+        display: none;
+      }
+    }
+
+    /* ============================================
+       ALERT/STATUS
+       ============================================ */
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-size: 12px;
+      margin-top: 12px;
+      border: 1px solid;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #10b981;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .alert-info {
+      background: rgba(135, 169, 255, 0.1);
+      border-color: rgba(135, 169, 255, 0.3);
+      color: var(--accent);
+    }
+
+    /* ============================================
+       LOADING STATE
+       ============================================ */
+    .loading {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--text-secondary);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ============================================
+       MOBILE OPTIMIZATION
+       ============================================ */
+    @media (max-width: 767px) {
+      body {
+        padding: 16px 12px;
+        padding-bottom: 100px;
+      }
+
+      .card {
+        padding: 20px 16px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .demographics-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .social-platforms-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-upload-area {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .sponsor-logos-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .download-controls {
+        flex-direction: column;
+      }
+
+      .resolution-select {
+        flex: 1;
+      }
+    }
+
+    /* ============================================
+       TOOLTIP
+       ============================================ */
+    .tooltip {
+      position: relative;
+      display: inline-flex;
+      cursor: help;
+    }
+
+    .tooltip-text {
+      visibility: hidden;
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #000;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      white-space: nowrap;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="layout">
+      
+      <div>
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">👤</span>
+            Personal Information
+          </h2>
+          
+          <div class="form-group">
+            <label class="form-label form-label-required">Profile Photo</label>
+            <div class="profile-upload-area">
+              <div class="profile-preview-container">
+                <div id="profilePreviewPlaceholder" class="profile-preview-placeholder">
+                  📷
+                </div>
+                <img id="profilePreview" class="profile-preview" style="display: none;">
+              </div>
+              <div class="profile-upload-controls">
+                <input type="file" id="profilePhoto" class="file-upload-input" accept="image/*">
+                <button class="btn-upload" onclick="document.getElementById('profilePhoto').click()">
+                  📁 Choose Photo
+                </button>
+                <p class="form-hint">Square images work best (min. 400x400px)</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label form-label-required">Full Name / Brand</label>
+              <input type="text" id="creatorName" class="form-input" placeholder="e.g. HeroVibes">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Location</label>
+              <input type="text" id="location" class="form-input" placeholder="e.g. London, UK">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label form-label-required">Professional Title</label>
+            <input type="text" id="tagline" class="form-input" placeholder="e.g. Content Creator & Educator">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label form-label-required">Bio</label>
+            <textarea id="bio" class="form-textarea" placeholder="Brief professional bio (2-3 sentences)..."></textarea>
+          </div>
+
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label form-label-required">Contact Email</label>
+              <input type="email" id="email" class="form-input" placeholder="hello@example.com">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Website</label>
+              <input type="url" id="website" class="form-input" placeholder="https://yoursite.com">
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <h2 class="card-title">
+            <span class="card-icon">📱</span>
+            Social Media Presence
+          </h2>
+          
+          <div class="social-platforms-grid">
+            <div class="social-platform-item">
+              <input type="text" id="platform1" class="form-input" placeholder="Platform" value="YouTube" style="margin-bottom: 4px;">
+              <input type="text" id="followers1" class="form-input" placeholder="Followers">
+            </div>
+
+            <div class="social-platform-item">
+              <input type="text" id="platform2" class="form-input" placeholder="Platform" value="Instagram" style="margin-bottom: 4px;">
+              <input type="text" id="followers2" class="form-input" placeholder="Followers">
+            </div>
+
+            <div class="social-platform-item">
+              <input type="text" id="platform3" class="form-input" placeholder="Platform" value="TikTok" style="margin-bottom: 4px;">
+              <input type="text" id="followers3" class="form-input" placeholder="Followers">
+            </div>
+
+            <div class="social-platform-item">
+              <input type="text" id="platform4" class="form-input" placeholder="Platform" value="X (Twitter)" style="margin-bottom: 4px;">
+              <input type="text" id="followers4" class="form-input" placeholder="Followers">
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <h2 class="card-title">
+            <span class="card-icon">📊</span>
+            Engagement Metrics
+          </h2>
+          
+          <div class="stats-grid">
+            <div class="form-group">
+              <label class="form-label">
+                Engagement Rate
+                <span class="tooltip">ℹ️
+                  <span class="tooltip-text">Average likes/comments ÷ followers</span>
+                </span>
+              </label>
+              <input type="text" id="engagement" class="form-input" placeholder="e.g. 8.5%">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Average Views</label>
+              <input type="text" id="avgViews" class="form-input" placeholder="e.g. 25K">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Avg. Retention</label>
+              <input type="text" id="watchTime" class="form-input" placeholder="e.g. 6:31">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Monthly Reach</label>
+              <input type="text" id="monthlyReach" class="form-input" placeholder="e.g. 500K">
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <h2 class="card-title">
+            <span class="card-icon">👥</span>
+            Audience Demographics
+          </h2>
+          
+          <div class="demographics-grid">
+            <div class="form-group">
+              <label class="form-label">Age Range</label>
+              <input type="text" id="audienceAge" class="form-input" placeholder="e.g. 18-34 (72%)">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Gender Split</label>
+              <input type="text" id="audienceGender" class="form-input" placeholder="e.g. 65% M / 35% F">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Top Locations</label>
+              <input type="text" id="audienceLocation" class="form-input" placeholder="e.g. US, UK, Canada">
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <h2 class="card-title">
+            <span class="card-icon">🎯</span>
+            Content Categories
+          </h2>
+          
+          <div class="form-group">
+            <label class="form-label">Categories</label>
+            <div class="tags-container" id="tagsContainer">
+              <input type="text" id="tagInput" class="tag-input" placeholder="Type and press Enter or use commas...">
+            </div>
+            <p class="form-hint">Press Enter or use commas to add multiple tags</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <h2 class="card-title">
+            <span class="card-icon">🤝</span>
+            Collaborations & Sponsors
+          </h2>
+           
+          <div class="form-group">
+            <label class="form-label">Sponsor Logos</label>
+            <p class="form-hint" style="margin-bottom: 8px;">Upload up to 6 brand logos (PNG recommended)</p>
+            <div class="sponsor-logos-grid" id="sponsorLogosGrid">
+              <div class="sponsor-logo-item" onclick="document.getElementById('sponsorLogo0').click()">
+                <input type="file" id="sponsorLogo0" class="file-upload-input" accept="image/*" onchange="handleSponsorUpload(0, event)">
+                <span class="sponsor-logo-placeholder">+</span>
+              </div>
+              <div class="sponsor-logo-item" onclick="document.getElementById('sponsorLogo1').click()">
+                <input type="file" id="sponsorLogo1" class="file-upload-input" accept="image/*" onchange="handleSponsorUpload(1, event)">
+                <span class="sponsor-logo-placeholder">+</span>
+              </div>
+              <div class="sponsor-logo-item" onclick="document.getElementById('sponsorLogo2').click()">
+                <input type="file" id="sponsorLogo2" class="file-upload-input" accept="image/*" onchange="handleSponsorUpload(2, event)">
+                <span class="sponsor-logo-placeholder">+</span>
+              </div>
+              <div class="sponsor-logo-item" onclick="document.getElementById('sponsorLogo3').click()">
+                <input type="file" id="sponsorLogo3" class="file-upload-input" accept="image/*" onchange="handleSponsorUpload(3, event)">
+                <span class="sponsor-logo-placeholder">+</span>
+              </div>
+              <div class="sponsor-logo-item" onclick="document.getElementById('sponsorLogo4').click()">
+                <input type="file" id="sponsorLogo4" class="file-upload-input" accept="image/*" onchange="handleSponsorUpload(4, event)">
+                <span class="sponsor-logo-placeholder">+</span>
+              </div>
+              <div class="sponsor-logo-item" onclick="document.getElementById('sponsorLogo5').click()">
+                <input type="file" id="sponsorLogo5" class="file-upload-input" accept="image/*" onchange="handleSponsorUpload(5, event)">
+                <span class="sponsor-logo-placeholder">+</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Additional Brands (Text)</label>
+            <div class="tags-container" id="collabTagsContainer">
+              <input type="text" id="collabTagInput" class="tag-input" placeholder="Type and press Enter or use commas...">
+            </div>
+            <p class="form-hint">Press Enter or use commas to add brand names</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <h2 class="card-title">
+            <span class="card-icon">🎨</span>
+            Design Customization
+          </h2>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Background Color</label>
+              <div class="custom-color-picker">
+                <input type="color" id="bgColor" class="color-picker-input" value="#191919">
+                <input type="text" id="bgColorText" class="form-input" value="#191919" placeholder="#191919">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Text Color</label>
+              <div class="custom-color-picker">
+                <input type="color" id="textColor" class="color-picker-input" value="#D4D4D4">
+                <input type="text" id="textColorText" class="form-input" value="#D4D4D4" placeholder="#D4D4D4">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Accent Color</label>
+            <div class="custom-color-picker">
+              <input type="color" id="accentColor" class="color-picker-input" value="#87A9FF">
+              <input type="text" id="accentColorText" class="form-input" value="#87A9FF" placeholder="#87A9FF">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Font Style</label>
+            <select id="fontStyle" class="form-select">
+              <option value="sans-serif">Modern Sans-Serif</option>
+              <option value="serif">Classic Serif</option>
+              <option value="monospace">Tech Monospace</option>
+              <option value="cursive">Elegant Script</option>
+              <option value="'Comic Sans MS', cursive">Playful Rounded</option>
+              <option value="'Brush Script MT', cursive">Handwritten</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Background Pattern</label>
+            <div class="pattern-grid">
+              <div class="pattern-option active" data-pattern="none" onclick="selectPattern('none')">
+                None
+              </div>
+              <div class="pattern-option" data-pattern="dots" onclick="selectPattern('dots')">
+                Dots
+              </div>
+              <div class="pattern-option" data-pattern="grid" onclick="selectPattern('grid')">
+                Grid
+              </div>
+              <div class="pattern-option" data-pattern="diagonal" onclick="selectPattern('diagonal')">
+                Diagonal
+              </div>
+              <div class="pattern-option" data-pattern="circles" onclick="selectPattern('circles')">
+                Circles
+              </div>
+              <div class="pattern-option" data-pattern="waves" onclick="selectPattern('waves')">
+                Waves
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-container" id="previewSection">
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">👁️</span>
+            Live Preview
+          </h2>
+          <div class="preview-wrapper">
+            <svg id="mediakitSvg" width="600" height="800" viewBox="0 0 600 800" class="preview-canvas">
+              </svg>
+          </div>
+          
+          <div class="download-controls">
+            <select id="resolutionSelect" class="resolution-select">
+              <option value="2400x3200">4K (2400×3200)</option>
+              <option value="1800x2400">High (1800×2400)</option>
+              <option value="1200x1600">Medium (1200×1600)</option>
+              <option value="600x800">Standard (600×800)</option>
+            </select>
+            
+            <div class="download-btn-wrapper">
+              <button id="downloadBtn" class="btn btn-primary">
+                <span>💾</span>
+                <span id="downloadText">Download JPEG</span>
+              </button>
+            </div>
+          </div>
+          
+          <div id="statusAlert" style="display: none;"></div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <h2 class="card-title">
+            <span class="card-icon">💡</span>
+            Pro Tips
+          </h2>
+          <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+            <p style="margin-bottom: 10px;">✓ Use high-resolution logos (minimum 400x400px)</p>
+            <p style="margin-bottom: 10px;">✓ Keep your bio concise and impactful</p>
+            <p style="margin-bottom: 10px;">✓ Include specific metrics and percentages</p>
+            <p style="margin-bottom: 10px;">✓ Update your media kit quarterly</p>
+            <p>✓ 4K resolution recommended for print materials</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <h2 class="card-title">
+            <span class="card-icon">🔧</span>
+            Debug Info
+          </h2>
+          <div style="font-size: 12px; color: var(--text-secondary);">
+            <div style="margin-bottom: 8px;">
+              <strong>Last Update:</strong> <span id="debugUpdate">Not generated yet</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+              <strong>Profile Image:</strong> <span id="debugImage">No image</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+              <strong>Sponsor Logos:</strong> <span id="debugSponsors">0 uploaded</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+              <strong>Export Resolution:</strong> <span id="debugResolution">2400×3200</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+              <strong>BG Color:</strong> <span id="debugBgColor">#191919</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+              <strong>Text Color:</strong> <span id="debugTextColor">#D4D4D4</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+              <strong>Accent Color:</strong> <span id="debugAccentColor">#87A9FF</span>
+            </div>
+            <div style="margin-top: 8px;">
+              <strong>Version:</strong> <span id="debugVersion">V1.0.0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="floating-preview-btn" id="floatingPreviewBtn" onclick="scrollToPreview()">
+    👁️
+  </button>
+
+  <script>
+    // ============================================
+    // FLOATING PREVIEW BUTTON SCROLL
+    // ============================================
+    function scrollToPreview() {
+      const previewSection = document.getElementById('previewSection');
+      previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ============================================
+    // STATE MANAGEMENT
+    // ============================================
+    let mediaKitData = {
+      profilePhoto: null,
+      creatorName: 'HeroVibes',
+      tagline: 'Content Creator, YouTuber',
+      bio: "Content creator, livestreamer | Elgato Partner",
+      email: 'contact.herovibes@gmail.com',
+      website: 'https://herovibes.store',
+      location: 'London, UK',
+      platforms: [
+        { name: 'YouTube', followers: '' },
+        { name: 'Instagram', followers: '' },
+        { name: 'TikTok', followers: '' },
+        { name: 'X (Twitter)', followers: '' }
+      ],
+      engagement: '',
+      avgViews: '',
+      watchTime: '',
+      monthlyReach: '',
+      audienceAge: '',
+      audienceGender: '',
+      audienceLocation: '',
+      categories: ['Tech', 'Education', 'Filmmaking'],
+      collabTags: [],
+      sponsorLogos: [],
+      bgColor: '#191919',
+      textColor: '#D4D4D4',
+      accentColor: '#87A9FF',
+      fontStyle: 'sans-serif',
+      bgPattern: 'none'
+    };
+
+    // ============================================
+    // RESOLUTION SELECT HANDLER
+    // ============================================
+    document.getElementById('resolutionSelect').addEventListener('change', function() {
+      document.getElementById('debugResolution').textContent = this.value.replace('x', '×');
+    });
+
+    // ============================================
+    // PROFILE PHOTO UPLOAD HANDLER
+    // ============================================
+    document.getElementById('profilePhoto').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          mediaKitData.profilePhoto = event.target.result;
+          document.getElementById('profilePreview').src = event.target.result;
+          document.getElementById('profilePreview').style.display = 'block';
+          document.getElementById('profilePreviewPlaceholder').style.display = 'none';
+          updateDebugInfo();
+          generateMediaKit();
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // ============================================
+    // SPONSOR LOGO UPLOAD HANDLER
+    // ============================================
+    function handleSponsorUpload(index, event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          if (!mediaKitData.sponsorLogos) {
+            mediaKitData.sponsorLogos = [];
+          }
+          mediaKitData.sponsorLogos[index] = e.target.result;
+          
+          const container = event.target.parentElement;
+          const placeholder = container.querySelector('.sponsor-logo-placeholder');
+          
+          let img = container.querySelector('img');
+          if (!img) {
+            img = document.createElement('img');
+            container.appendChild(img);
+          }
+          
+          img.src = e.target.result;
+          if (placeholder) placeholder.style.display = 'none';
+          
+          let removeBtn = container.querySelector('.sponsor-logo-remove');
+          if (!removeBtn) {
+            removeBtn = document.createElement('button');
+            removeBtn.className = 'sponsor-logo-remove';
+            removeBtn.innerHTML = '×';
+            removeBtn.onclick = function(evt) {
+              evt.stopPropagation();
+              removeSponsorLogo(index);
+            };
+            container.appendChild(removeBtn);
+          }
+          
+          updateDebugInfo();
+          generateMediaKit();
+          scheduleHeightCheck(); // <-- ADDED: Notify scrollbar fix of height change
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeSponsorLogo(index) {
+      mediaKitData.sponsorLogos[index] = null;
+      const container = document.getElementById(`sponsorLogo${index}`).parentElement;
+      const img = container.querySelector('img');
+      const removeBtn = container.querySelector('.sponsor-logo-remove');
+      const placeholder = container.querySelector('.sponsor-logo-placeholder');
+      
+      if (img) img.remove();
+      if (removeBtn) removeBtn.remove();
+      if (placeholder) placeholder.style.display = 'block';
+      
+      updateDebugInfo();
+      generateMediaKit();
+      scheduleHeightCheck(); // <-- ADDED: Notify scrollbar fix of height change
+    }
+
+    // ============================================
+    // CATEGORY TAGS INPUT HANDLER (ENTER + COMMA)
+    // ============================================
+    const tagInput = document.getElementById('tagInput');
+    const tagsContainer = document.getElementById('tagsContainer');
+
+    mediaKitData.categories.forEach(tag => addTagToUI(tag, tagsContainer, 'categories'));
+
+    tagInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        processTags(this.value, 'categories', tagsContainer);
+        this.value = '';
+      }
+    });
+    tagInput.addEventListener('input', function(e) {
+      if (this.value.includes(',')) {
+        processTags(this.value, 'categories', tagsContainer);
+        this.value = '';
+      }
+    });
+
+    // ============================================
+    // COLLAB TAGS INPUT HANDLER (ENTER + COMMA)
+    // ============================================
+    const collabTagInput = document.getElementById('collabTagInput');
+    const collabTagsContainer = document.getElementById('collabTagsContainer');
+
+    collabTagInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        processTags(this.value, 'collabTags', collabTagsContainer);
+        this.value = '';
+      }
+    });
+    collabTagInput.addEventListener('input', function(e) {
+      if (this.value.includes(',')) {
+        processTags(this.value, 'collabTags', collabTagsContainer);
+        this.value = '';
+      }
+    });
+
+    function processTags(input, type, container) {
+      const tags = input.split(',').map(t => t.trim()).filter(t => t.length > 0);
+      tags.forEach(tag => {
+        if (!mediaKitData[type].includes(tag)) {
+          mediaKitData[type].push(tag);
+          addTagToUI(tag, container, type);
+        }
+      });
+      if (tags.length > 0) {
+        generateMediaKit();
+      }
+    }
+
+    function addTagToUI(tagText, container, type) {
+      const tag = document.createElement('div');
+      tag.className = 'tag';
+      tag.innerHTML = `
+        ${tagText}
+        <span class="tag-remove" onclick="removeTag('${escapeHtml(tagText)}', '${type}')">×</span>
+      `;
+      const input = container.querySelector('.tag-input');
+      container.insertBefore(tag, input);
+      scheduleHeightCheck(); // <-- ADDED: Notify scrollbar fix of height change
+    }
+
+    function removeTag(tagText, type) {
+      mediaKitData[type] = mediaKitData[type].filter(t => t !== tagText);
+      const container = type === 'categories' ? tagsContainer : collabTagsContainer;
+      const tags = container.querySelectorAll('.tag');
+      tags.forEach(tag => {
+        if (tag.textContent.includes(tagText)) {
+          tag.remove();
+          scheduleHeightCheck(); // <-- ADDED: Notify scrollbar fix of height change
+        }
+      });
+      generateMediaKit();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ============================================
+    // PATTERN SELECTION
+    // ============================================
+    function selectPattern(pattern) {
+      document.querySelectorAll('.pattern-option').forEach(opt => {
+        opt.classList.remove('active');
+      });
+      document.querySelector(`[data-pattern="${pattern}"]`).classList.add('active');
+      mediaKitData.bgPattern = pattern;
+      generateMediaKit();
+    }
+
+    // ============================================
+    // INPUT CHANGE HANDLERS
+    // ============================================
+    const inputs = [
+      'creatorName', 'tagline', 'bio', 'email', 'website', 'location',
+      'platform1', 'followers1', 'platform2', 'followers2',
+      'platform3', 'followers3', 'platform4', 'followers4',
+      'engagement', 'avgViews', 'watchTime', 'monthlyReach',
+      'audienceAge', 'audienceGender', 'audienceLocation',
+      'fontStyle'
+    ];
+    inputs.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.addEventListener('input', function() {
+          updateMediaKitData();
+          generateMediaKit();
+        });
+      }
+    });
+
+    // Background Color
+    document.getElementById('bgColor').addEventListener('input', function() {
+      document.getElementById('bgColorText').value = this.value;
+      updateMediaKitData();
+      generateMediaKit();
+    });
+    document.getElementById('bgColorText').addEventListener('input', function() {
+      if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+        document.getElementById('bgColor').value = this.value;
+        updateMediaKitData();
+        generateMediaKit();
+      }
+    });
+
+    // Text Color
+    document.getElementById('textColor').addEventListener('input', function() {
+      document.getElementById('textColorText').value = this.value;
+      updateMediaKitData();
+      generateMediaKit();
+    });
+    document.getElementById('textColorText').addEventListener('input', function() {
+      if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+        document.getElementById('textColor').value = this.value;
+        updateMediaKitData();
+        generateMediaKit();
+      }
+    });
+
+    // Accent Color
+    document.getElementById('accentColor').addEventListener('input', function() {
+      document.getElementById('accentColorText').value = this.value;
+      updateMediaKitData();
+      generateMediaKit();
+    });
+    document.getElementById('accentColorText').addEventListener('input', function() {
+      if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+        document.getElementById('accentColor').value = this.value;
+        updateMediaKitData();
+        generateMediaKit();
+      }
+    });
+
+    // ============================================
+    // UPDATE DATA FROM INPUTS
+    // ============================================
+    function updateMediaKitData() {
+      mediaKitData = {
+        ...mediaKitData,
+        creatorName: document.getElementById('creatorName').value,
+        tagline: document.getElementById('tagline').value,
+        bio: document.getElementById('bio').value,
+        email: document.getElementById('email').value,
+        website: document.getElementById('website').value,
+        location: document.getElementById('location').value,
+        platforms: [
+          {
+            name: document.getElementById('platform1').value,
+            followers: document.getElementById('followers1').value
+          },
+          {
+            name: document.getElementById('platform2').value,
+            followers: document.getElementById('followers2').value
+          },
+          {
+            name: document.getElementById('platform3').value,
+            followers: document.getElementById('followers3').value
+          },
+          {
+            name: document.getElementById('platform4').value,
+            followers: document.getElementById('followers4').value
+          }
+        ],
+        engagement: document.getElementById('engagement').value,
+        avgViews: document.getElementById('avgViews').value,
+        watchTime: document.getElementById('watchTime').value,
+        monthlyReach: document.getElementById('monthlyReach').value,
+        audienceAge: document.getElementById('audienceAge').value,
+        audienceGender: document.getElementById('audienceGender').value,
+        audienceLocation: document.getElementById('audienceLocation').value,
+        bgColor: document.getElementById('bgColor').value,
+        textColor: document.getElementById('textColor').value,
+        accentColor: document.getElementById('accentColor').value,
+        fontStyle: document.getElementById('fontStyle').value
+      };
+      updateDebugInfo();
+    }
+
+    // ============================================
+    // DEBUG INFO UPDATE
+    // ============================================
+    function updateDebugInfo() {
+      const now = new Date().toLocaleTimeString();
+      document.getElementById('debugUpdate').textContent = now;
+      
+      document.getElementById('debugImage').textContent = mediaKitData.profilePhoto ? 'Loaded ✓' : 'No image';
+      
+      const sponsorCount = mediaKitData.sponsorLogos.filter(logo => logo).length;
+      document.getElementById('debugSponsors').textContent = `${sponsorCount} uploaded`;
+      
+      document.getElementById('debugBgColor').textContent = mediaKitData.bgColor;
+      document.getElementById('debugTextColor').textContent = mediaKitData.textColor;
+      document.getElementById('debugAccentColor').textContent = mediaKitData.accentColor;
+    }
+
+    // ============================================
+    // SVG MEDIA KIT GENERATOR
+    // ============================================
+    function generateMediaKit() {
+      const svg = document.getElementById('mediakitSvg');
+      const bgColor = mediaKitData.bgColor;
+      const textColor = mediaKitData.textColor;
+      const accent = mediaKitData.accentColor;
+      const font = mediaKitData.fontStyle;
+      const pattern = mediaKitData.bgPattern;
+
+      // Calculate gradient colors based on background
+      const bgLighter = lightenColor(bgColor, 10);
+      const textSecondary = adjustOpacity(textColor, 0.6);
+
+      let svgContent = '';
+
+      // Define gradients, patterns, and filters
+      svgContent += `
+        <defs>
+          <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:${bgLighter};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${bgColor};stop-opacity:1" />
+          </linearGradient>
+          <clipPath id="circleClip">
+            <circle cx="110" cy="90" r="50"/>
+          </clipPath>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+      `;
+
+      // Background patterns
+      if (pattern === 'dots') {
+        svgContent += `
+          <pattern id="dotsPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+            <circle cx="10" cy="10" r="2" fill="${accent}" opacity="0.1"/>
+          </pattern>
+        `;
+      } else if (pattern === 'grid') {
+        svgContent += `
+          <pattern id="gridPattern" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="${accent}" stroke-width="0.5" opacity="0.15"/>
+          </pattern>
+        `;
+      } else if (pattern === 'diagonal') {
+        svgContent += `
+          <pattern id="diagonalPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="20" stroke="${accent}" stroke-width="1" opacity="0.1"/>
+          </pattern>
+        `;
+      } else if (pattern === 'circles') {
+        svgContent += `
+          <pattern id="circlesPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+            <circle cx="20" cy="20" r="15" fill="none" stroke="${accent}" stroke-width="1" opacity="0.08"/>
+          </pattern>
+        `;
+      } else if (pattern === 'waves') {
+        svgContent += `
+          <pattern id="wavesPattern" x="0" y="0" width="40" height="20" patternUnits="userSpaceOnUse">
+            <path d="M0,10 Q10,0 20,10 T40,10" fill="none" stroke="${accent}" stroke-width="1" opacity="0.1"/>
+          </pattern>
+        `;
+      }
+
+      svgContent += `</defs>`;
+
+      // Background with optional pattern
+      svgContent += `<rect width="600" height="800" fill="url(#bgGradient)"/>`;
+      if (pattern !== 'none') {
+        svgContent += `<rect width="600" height="800" fill="url(#${pattern}Pattern)"/>`;
+      }
+
+      // HEADER SECTION - Compact Layout
+      let yPos = 60;
+      // Profile Photo (Left Side)
+      if (mediaKitData.profilePhoto) {
+        svgContent += `
+          <image href="${mediaKitData.profilePhoto}" x="60" y="40" width="100" height="100" clip-path="url(#circleClip)" preserveAspectRatio="xMidYMid slice"/>
+          <circle cx="110" cy="90" r="50" fill="none" stroke="${accent}" stroke-width="3" filter="url(#glow)"/>
+        `;
+      } else {
+        svgContent += `
+          <circle cx="110" cy="90" r="50" fill="${adjustOpacity(bgColor, 1.2)}" stroke="${accent}" stroke-width="3"/>
+          <text x="110" y="100" text-anchor="middle" fill="${textSecondary}" font-size="28" font-family="${font}">📷</text>
+        `;
+      }
+
+      // Text Section (Right Side)
+      const textStartX = 185;
+      // Name
+      svgContent += `
+        <text x="${textStartX}" y="70" fill="${textColor}" font-size="26" font-weight="bold" font-family="${font}">
+          ${escapeXml(mediaKitData.creatorName || 'Your Name')}
+        </text>
+      `;
+      // Title & Location
+      let headerLine = mediaKitData.tagline || 'Your Title';
+      if (mediaKitData.location) {
+        headerLine += ' • ' + mediaKitData.location;
+      }
+      svgContent += `
+        <text x="${textStartX}" y="92" fill="${accent}" font-size="13" font-family="${font}">
+          ${escapeXml(headerLine)}
+        </text>
+      `;
+      // Separator line
+      svgContent += `
+        <line x1="${textStartX}" y1="100" x2="520" y2="100" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
+      `;
+      // Bio (wrapped, 2 lines max)
+      if (mediaKitData.bio) {
+        const bioLines = wrapText(mediaKitData.bio, 52);
+        bioLines.slice(0, 2).forEach((line, i) => {
+          svgContent += `
+            <text x="${textStartX}" y="${114 + (i * 14)}" fill="${textSecondary}" font-size="11" font-family="${font}">
+              ${escapeXml(line)}
+            </text>
+          `;
+        });
+      }
+
+      yPos = 165;
+
+      // Divider
+      svgContent += `<line x1="80" y1="${yPos}" x2="520" y2="${yPos}" stroke="${accent}" stroke-width="2" opacity="0.3"/>`;
+      yPos += 25;
+
+      // SOCIAL REACH Header
+      svgContent += `
+        <text x="300" y="${yPos}" text-anchor="middle" fill="${accent}" font-size="16" font-weight="bold" font-family="${font}" letter-spacing="2">
+          SOCIAL REACH
+        </text>
+      `;
+      yPos += 25;
+
+      // Social Platforms & Engagement Metrics - 4x2 Grid
+      const activePlatforms = mediaKitData.platforms.filter(p => p.name && p.followers);
+      const stats = [
+        { label: 'Engagement', value: mediaKitData.engagement },
+        { label: 'Avg Views', value: mediaKitData.avgViews },
+        { label: 'Avg. Retention', value: mediaKitData.watchTime },
+        { label: 'Monthly Reach', value: mediaKitData.monthlyReach }
+      ].filter(s => s.value);
+      const allMetrics = [...activePlatforms.map(p => ({ type: 'platform', ...p })), ...stats.map(s => ({ type: 'stat', ...s }))];
+      if (allMetrics.length > 0) {
+        const cols = 4;
+        const boxWidth = 110;
+        const boxHeight = 55;
+        const gapX = 10;
+        const gapY = 12;
+        const startX = 70;
+        allMetrics.slice(0, 8).forEach((metric, i) => {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          const x = startX + (col * (boxWidth + gapX));
+          const y = yPos + (row * (boxHeight + gapY));
+
+          svgContent += `
+            <rect x="${x}" y="${y}" width="${boxWidth}" height="${boxHeight}" rx="6" fill="${bgLighter}" stroke="${accent}" stroke-width="1.5"/>
+          `;
+
+          if (metric.type === 'platform') {
+            svgContent += `
+              <text x="${x + boxWidth/2}" y="${y + 22}" text-anchor="middle" fill="${textColor}" font-size="11" font-weight="600" font-family="${font}">
+                ${escapeXml(metric.name)}
+              </text>
+              <text x="${x + boxWidth/2}" y="${y + 40}" text-anchor="middle" fill="${accent}" font-size="17" font-weight="bold" font-family="${font}">
+                ${escapeXml(metric.followers)}
+              </text>
+            `;
+          } else {
+            svgContent += `
+              <text x="${x + boxWidth/2}" y="${y + 20}" text-anchor="middle" fill="${textSecondary}" font-size="9" font-family="${font}">
+                ${metric.label}
+              </text>
+              <text x="${x + boxWidth/2}" y="${y + 40}" text-anchor="middle" fill="${accent}" font-size="17" font-weight="bold" font-family="${font}">
+                ${escapeXml(metric.value)}
+              </text>
+            `;
+          }
+        });
+
+        yPos += (Math.ceil(Math.min(allMetrics.length, 8) / cols) * (boxHeight + gapY)) + 15;
+      }
+
+      // Audience Demographics
+      const hasDemographics = mediaKitData.audienceAge || mediaKitData.audienceGender || mediaKitData.audienceLocation;
+      if (hasDemographics) {
+        yPos += 5;
+        svgContent += `
+          <text x="300" y="${yPos}" text-anchor="middle" fill="${textSecondary}" font-size="10" font-weight="600" font-family="${font}">
+            AUDIENCE DEMOGRAPHICS
+          </text>
+        `;
+        yPos += 14;
+
+        const demoData = [
+          mediaKitData.audienceAge,
+          mediaKitData.audienceGender,
+          mediaKitData.audienceLocation
+        ].filter(d => d).join(' • ');
+        const demoLines = wrapText(demoData, 75);
+        demoLines.slice(0, 1).forEach((line, i) => {
+          svgContent += `
+            <text x="300" y="${yPos + (i * 12)}" text-anchor="middle" fill="${textSecondary}" font-size="9" font-family="${font}">
+              ${escapeXml(line)}
+            </text>
+          `;
+        });
+        yPos += 18;
+      }
+
+      // Content Categories
+      if (mediaKitData.categories.length > 0) {
+        yPos += 5;
+        svgContent += `<line x1="80" y1="${yPos}" x2="520" y2="${yPos}" stroke="${accent}" stroke-width="2" opacity="0.3"/>`;
+        yPos += 23;
+        svgContent += `
+          <text x="300" y="${yPos}" text-anchor="middle" fill="${accent}" font-size="16" font-weight="bold" font-family="${font}" letter-spacing="2">
+            CONTENT CATEGORIES
+          </text>
+        `;
+        yPos += 30;
+
+        const tags = mediaKitData.categories.slice(0, 12);
+        const maxWidth = 440;
+        let rows = [];
+        let currentRow = [];
+        let currentRowWidth = 0;
+        
+        tags.forEach((tag) => {
+          const tagWidth = (tag.length * 6.5) + 18;
+          
+          if (currentRowWidth + tagWidth > maxWidth && currentRow.length > 0) {
+            rows.push(currentRow);
+            currentRow = [];
+            currentRowWidth = 0;
+          }
+          
+          currentRow.push({ text: tag, width: tagWidth });
+          currentRowWidth += tagWidth + 8;
+        });
+        if (currentRow.length > 0) {
+          rows.push(currentRow);
+        }
+        
+        const rowHeight = 28;
+        rows.forEach((row, rowIndex) => {
+          const totalRowWidth = row.reduce((sum, tag) => sum + tag.width, 0) + (row.length - 1) * 8;
+          let currentX = (600 - totalRowWidth) / 2;
+          
+          row.forEach((tag) => {
+            const tagY = yPos - 15 + (rowIndex * rowHeight);
+            
+            svgContent += `
+              <rect x="${currentX}" y="${tagY}" width="${tag.width}" height="22" rx="11" fill="${accent}" opacity="0.9"/>
+              <text x="${currentX + tag.width/2}" y="${tagY + 15}" text-anchor="middle" fill="#000" font-size="10" font-weight="600" font-family="${font}">
+                ${escapeXml(tag.text)}
+              </text>
+            `;
+            currentX += tag.width + 8;
+          });
+        });
+        yPos += 10 + (rows.length * rowHeight);
+      }
+
+      // Collabs & Sponsors Section
+      const activeSponsors = mediaKitData.sponsorLogos.filter(logo => logo);
+      const hasCollabs = activeSponsors.length > 0 || mediaKitData.collabTags.length > 0;
+      if (hasCollabs) {
+        yPos += 5;
+        svgContent += `<line x1="80" y1="${yPos}" x2="520" y2="${yPos}" stroke="${accent}" stroke-width="2" opacity="0.3"/>`;
+        yPos += 23;
+        svgContent += `
+          <text x="300" y="${yPos}" text-anchor="middle" fill="${accent}" font-size="16" font-weight="bold" font-family="${font}" letter-spacing="2">
+            COLLABS & SPONSORS
+          </text>
+        `;
+        yPos += 20;
+
+        // Sponsor Logos - 6x1 Grid
+        if (activeSponsors.length > 0) {
+          const logoSize = 60;
+          const logoGap = 12;
+          const totalWidth = (activeSponsors.length * logoSize) + ((activeSponsors.length - 1) * logoGap);
+          const startX = (600 - totalWidth) / 2;
+
+          activeSponsors.slice(0, 6).forEach((logo, i) => {
+            const x = startX + (i * (logoSize + logoGap));
+            const y = yPos;
+
+            svgContent += `
+              <rect x="${x}" y="${y}" width="${logoSize}" height="${logoSize}" rx="6" fill="${bgLighter}" stroke="${accent}" stroke-width="1"/>
+              <image href="${logo}" x="${x + 5}" y="${y + 5}" width="${logoSize - 10}" height="${logoSize - 10}" preserveAspectRatio="xMidYMid meet"/>
+            `;
+          });
+          yPos += logoSize + 25;
+        }
+
+        // Brand Tags (Text collaborations as pills) - CENTER ALIGNED
+        if (mediaKitData.collabTags.length > 0) {
+          const tags = mediaKitData.collabTags.slice(0, 12);
+          const maxWidth = 440;
+          let rows = [];
+          let currentRow = [];
+          let currentRowWidth = 0;
+          
+          tags.forEach((tag) => {
+            const tagWidth = (tag.length * 6.5) + 18;
+            
+            if (currentRowWidth + tagWidth > maxWidth && currentRow.length > 0) {
+              rows.push(currentRow);
+              currentRow = [];
+              currentRowWidth = 0;
+            }
+            
+            currentRow.push({ text: tag, width: tagWidth });
+            currentRowWidth += tagWidth + 8;
+          });
+          if (currentRow.length > 0) {
+            rows.push(currentRow);
+          }
+          
+          const rowHeight = 28;
+          rows.forEach((row, rowIndex) => {
+            const totalRowWidth = row.reduce((sum, tag) => sum + tag.width, 0) + (row.length - 1) * 8;
+            let currentX = (600 - totalRowWidth) / 2;
+            
+            row.forEach((tag) => {
+              const tagY = yPos - 15 + (rowIndex * rowHeight);
+              
+              svgContent += `
+                <rect x="${currentX}" y="${tagY}" width="${tag.width}" height="22" rx="11" fill="${accent}" opacity="0.9"/>
+                <text x="${currentX + tag.width/2}" y="${tagY + 15}" text-anchor="middle" fill="#000" font-size="10" font-weight="600" font-family="${font}">
+                  ${escapeXml(tag.text)}
+                </text>
+              `;
+              currentX += tag.width + 8;
+            });
+          });
+          yPos += 10 + (rows.length * rowHeight);
+        }
+      }
+
+      // Footer with contact info
+      yPos = Math.max(yPos + 12, 740);
+      svgContent += `<line x1="80" y1="${yPos}" x2="520" y2="${yPos}" stroke="${accent}" stroke-width="1" opacity="0.3"/>`;
+      yPos += 18;
+      
+      // Contact info
+      let contactLine = '';
+      if (mediaKitData.email) {
+        contactLine += `📧 ${mediaKitData.email}`;
+      }
+
+      if (contactLine) {
+        svgContent += `
+          <text x="300" y="${yPos + 10}" text-anchor="middle" fill="${textColor}" font-size="10" font-family="${font}">
+            ${escapeXml(contactLine)}
+          </text>
+        `;
+      }
+
+      if (mediaKitData.website) {
+        svgContent += `
+          <text x="300" y="${yPos + 24}" text-anchor="middle" fill="${accent}" font-size="9" font-family="${font}">
+            🌐 ${escapeXml(mediaKitData.website)}
+          </text>
+        `;
+      }
+
+      svg.innerHTML = svgContent;
+    }
+
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    function escapeXml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    function wrapText(text, maxChars) {
+      if (!text) return [];
+      const words = text.split(' ');
+      const lines = [];
+      let currentLine = '';
+
+      words.forEach(word => {
+        if ((currentLine + word).length <= maxChars) {
+          currentLine += (currentLine ? ' ' : '') + word;
+        } else {
+          if (currentLine) lines.push(currentLine);
+          currentLine = word;
+        }
+      });
+
+      if (currentLine) lines.push(currentLine);
+      return lines;
+    }
+
+    function lightenColor(color, percent) {
+      const num = parseInt(color.replace("#",""), 16);
+      const amt = Math.round(2.55 * percent);
+      const R = Math.min(255, (num >> 16) + amt);
+      const G = Math.min(255, (num >> 8 & 0x00FF) + amt);
+      const B = Math.min(255, (num & 0x0000FF) + amt);
+      return "#" + (0x1000000 + (R << 16) + (G << 8) + B).toString(16).slice(1);
+    }
+
+    function adjustOpacity(color, factor) {
+      const num = parseInt(color.replace("#",""), 16);
+      const R = Math.round((num >> 16) * factor);
+      const G = Math.round((num >> 8 & 0x00FF) * factor);
+      const B = Math.round((num & 0x0000FF) * factor);
+      return "#" + (0x1000000 + (R << 16) + (G << 8) + B).toString(16).slice(1);
+    }
+
+    // ============================================
+    // DOWNLOAD HANDLER
+    // ============================================
+    document.getElementById('downloadBtn').addEventListener('click', async function() {
+      const btn = this;
+      const downloadText = document.getElementById('downloadText');
+      const statusAlert = document.getElementById('statusAlert');
+      const resolutionSelect = document.getElementById('resolutionSelect');
+      
+      // Get selected resolution
+      const [width, height] = resolutionSelect.value.split('x').map(Number);
+      
+      btn.disabled = true;
+      downloadText.innerHTML = '<span class="loading"></span> Generating...';
+      statusAlert.style.display = 'none';
+
+      try {
+        const svg = document.getElementById('mediakitSvg');
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+        
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          
+          // Fill background with selected background color
+          ctx.fillStyle = mediaKitData.bgColor;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Draw scaled SVG
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          canvas.toBlob(function(blob) {
+            const downloadUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const resLabel = resolutionSelect.options[resolutionSelect.selectedIndex].text.split(' ')[0];
+            a.href = downloadUrl;
+            a.download = `mediakit-${mediaKitData.creatorName.replace(/\s+/g, '-').toLowerCase()}-${resLabel}-${Date.now()}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            URL.revokeObjectURL(downloadUrl);
+            URL.revokeObjectURL(url);
+            
+            statusAlert.className = 'alert alert-success';
+            statusAlert.innerHTML = `✓ Media kit downloaded successfully at ${width}×${height}!`;
+            statusAlert.style.display = 'block';
+            
+            btn.disabled = false;
+            downloadText.textContent = 'Download JPEG';
+            
+            setTimeout(() => {
+              statusAlert.style.display = 'none';
+            }, 3000);
+          }, 'image/jpeg', 0.95);
+        };
+        
+        img.onerror = function() {
+          throw new Error('Failed to load SVG image');
+        };
+        
+        img.src = url;
+        
+      } catch (error) {
+        console.error('Download error:', error);
+        statusAlert.className = 'alert alert-error';
+        statusAlert.textContent = '✗ Download failed. Please try again.';
+        statusAlert.style.display = 'block';
+        
+        btn.disabled = false;
+        downloadText.textContent = 'Download JPEG';
+      }
+    });
+
+    // ============================================
+    // INITIALIZE
+    // ============================================
+    updateMediaKitData();
+    generateMediaKit();
+    updateDebugInfo();
+
+    // ============================================
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    // ============================================
+    let lastHeight = 0;
+    let resizeTimer;
+
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      // Only send message if height has *actually* changed
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
+    function scheduleHeightCheck() {
+        // Clear any pending checks
+        clearTimeout(resizeTimer);
+        // Schedule a new check
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    // Send height on initial load (with a slight delay)
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    // Send height on window resize (debounced)
+    window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
+        scheduleHeightCheck();
+    });
+    
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+</body>
+</html>
