@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Password Generator - HeroVibes</title>
+  <style>
+    /* ========== HEROVIBES DESIGN SYSTEM ========== */
+    .hv-password-generator {
+      --primary-bg: #191919;
+      --secondary-bg: #1F1F1F;
+      --hover-color: #323232;
+      --outline-color: #323232;
+      --accent-color: #87A9FF;
+      --primary-text: #D4D4D4;
+      --secondary-text: #8C8C8C;
+      --border-radius: 8px;
+      
+      /* Strength colors */
+      --strength-weak: #f44336;
+      --strength-fair: #ff9800;
+      --strength-good: #ffc107;
+      --strength-strong: #4caf50;
+    }
+
+    .hv-password-generator * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .hv-password-generator {
+      font-family: sans-serif;
+      background: var(--primary-bg);
+      color: var(--primary-text);
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* ========== MAIN CONTAINER ========== */
+    .hv-password-generator .container {
+      background: var(--secondary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--border-radius);
+      padding: 24px 16px;
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+    }
+
+    /* ========== VERSION NUMBER ========== */
+    .hv-password-generator .version {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 10px;
+      color: var(--secondary-text);
+      opacity: 0.6;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* ========== PASSWORD DISPLAY AREA ========== */
+    .hv-password-generator .password-wrapper {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .hv-password-generator #password {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 14px;
+      letter-spacing: 1px;
+      border: 1px solid var(--outline-color);
+      border-radius: var(--border-radius);
+      background: var(--primary-bg);
+      color: var(--primary-text);
+      transition: all 0.3s ease;
+      font-family: monospace;
+    }
+
+    .hv-password-generator #password:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+    }
+
+    /* Rainbow border effect for strongest passwords */
+    .hv-password-generator #password.rainbow-border {
+      border: 2px solid transparent;
+      background-image: 
+        linear-gradient(var(--primary-bg), var(--primary-bg)),
+        conic-gradient(from 0deg, #f44336, #ff9800, #ffc107, #4caf50, #00bcd4, #2196f3, #9c27b0, #f44336);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      animation: rotateBorder 4s linear infinite, pulseGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes rotateBorder {
+      from { filter: hue-rotate(0deg); }
+      to { filter: hue-rotate(360deg); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(135, 169, 255, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(135, 169, 255, 0.6);
+      }
+    }
+
+    /* ========== ACTION BUTTONS ========== */
+    .hv-password-generator .action-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .hv-password-generator .btn {
+      position: relative;
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: var(--border-radius);
+      background: var(--secondary-bg);
+      color: var(--primary-text);
+      border: 1px solid var(--outline-color);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 12px;
+      transition: all 0.2s ease;
+      font-family: sans-serif;
+    }
+
+    /* Shimmer effect */
+    .hv-password-generator .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .hv-password-generator .btn:hover::before {
+      left: 125%;
+    }
+
+    .hv-password-generator .btn:hover {
+      background: var(--hover-color);
+      border-color: var(--accent-color);
+    }
+
+    .hv-password-generator .btn:active {
+      transform: scale(0.98);
+    }
+
+    .hv-password-generator .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+    }
+
+    .hv-password-generator .btn-icon {
+      flex: 0 0 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hv-password-generator .btn.copied {
+      background: var(--hover-color);
+      border-color: var(--strength-strong);
+    }
+
+    /* ========== LENGTH SLIDER SECTION ========== */
+    .hv-password-generator .slider-section {
+      margin-bottom: 20px;
+    }
+
+    .hv-password-generator .slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .hv-password-generator .slider-label span:first-child {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--primary-text);
+    }
+
+    .hv-password-generator .slider-label span:last-child {
+      font-size: 14px;
+      color: var(--accent-color);
+      font-weight: bold;
+    }
+
+    .hv-password-generator input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      background: linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) 20%, var(--outline-color) 20%, var(--outline-color) 100%);
+      transition: opacity 0.2s;
+    }
+
+    .hv-password-generator input[type="range"]:hover {
+      opacity: 0.9;
+    }
+
+    .hv-password-generator input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-color);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .hv-password-generator input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .hv-password-generator input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-color);
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .hv-password-generator input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* ========== STRENGTH INDICATOR ========== */
+    .hv-password-generator .strength-section {
+      margin-bottom: 20px;
+    }
+
+    .hv-password-generator .strength-label {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--primary-text);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .hv-password-generator .strength-indicator {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .hv-password-generator .strength-bar {
+      flex: 1;
+      height: 6px;
+      background: var(--outline-color);
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+
+    .hv-password-generator .strength-details {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hv-password-generator .strength-text {
+      font-size: 12px;
+      color: var(--secondary-text);
+    }
+
+    .hv-password-generator .entropy-text {
+      font-size: 12px;
+      color: var(--accent-color);
+      font-weight: bold;
+    }
+
+    /* ========== OPTIONS SECTION ========== */
+    .hv-password-generator .options-section {
+      margin-bottom: 20px;
+    }
+
+    .hv-password-generator .section-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--primary-text);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .hv-password-generator .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .hv-password-generator .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: var(--border-radius);
+      transition: background 0.2s ease;
+    }
+
+    .hv-password-generator .checkbox-wrapper:hover {
+      background: var(--hover-color);
+    }
+
+    .hv-password-generator .checkbox-wrapper input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--accent-color);
+    }
+
+    .hv-password-generator .checkbox-wrapper label {
+      font-size: 12px;
+      color: var(--primary-text);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .hv-password-generator .pronounceable-toggle {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--outline-color);
+    }
+
+    /* ========== EXCLUDE CHARACTERS SECTION ========== */
+    .hv-password-generator .exclude-section {
+      margin-bottom: 20px;
+    }
+
+    .hv-password-generator .exclude-section label {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--primary-text);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .hv-password-generator #excludeChars {
+      width: 100%;
+      padding: 10px 16px;
+      font-size: 12px;
+      border: 1px solid var(--outline-color);
+      border-radius: var(--border-radius);
+      background: var(--primary-bg);
+      color: var(--primary-text);
+      transition: all 0.3s ease;
+      font-family: monospace;
+    }
+
+    .hv-password-generator #excludeChars:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+    }
+
+    .hv-password-generator #excludeChars::placeholder {
+      color: var(--secondary-text);
+    }
+
+    /* ========== GENERATE BUTTON ========== */
+    .hv-password-generator .generate-btn {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--accent-color);
+      color: var(--primary-bg);
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hv-password-generator .generate-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .hv-password-generator .generate-btn:hover::before {
+      left: 125%;
+    }
+
+    .hv-password-generator .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(135, 169, 255, 0.3);
+    }
+
+    .hv-password-generator .generate-btn:active {
+      transform: translateY(0);
+    }
+
+    .hv-password-generator .generate-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+    }
+
+    /* ========== MOBILE OPTIMIZATIONS ========== */
+    @media (max-width: 480px) {
+      .hv-password-generator {
+        padding: 12px;
+      }
+
+      .hv-password-generator .container {
+        padding: 20px 12px;
+      }
+
+      .hv-password-generator .options-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .hv-password-generator #password {
+        font-size: 12px;
+        padding: 12px;
+      }
+
+      .hv-password-generator .btn {
+        font-size: 11px;
+        padding: 10px 12px;
+      }
+    }
+
+    /* ========== ACCESSIBILITY ========== */
+    @media (prefers-reduced-motion: reduce) {
+      .hv-password-generator *,
+      .hv-password-generator *::before,
+      .hv-password-generator *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="hv-password-generator">
+    <div class="container">
+    <!-- ========== VERSION NUMBER ========== -->
+    <div class="version">v1.0.0</div>
+
+    <!-- ========== PASSWORD DISPLAY AREA ========== -->
+    <div class="password-wrapper">
+      <input type="text" id="password" readonly aria-label="Generated password" />
+    </div>
+
+    <!-- ========== ACTION BUTTONS ========== -->
+    <div class="action-buttons">
+      <button class="btn" id="toggleVisibility" type="button" aria-label="Toggle password visibility">
+        Hide
+      </button>
+      <button class="btn btn-icon" id="copyPassword" type="button" aria-label="Copy password to clipboard">
+        ⧉
+      </button>
+    </div>
+
+    <!-- ========== LENGTH SLIDER SECTION ========== -->
+    <div class="slider-section">
+      <div class="slider-label">
+        <span>Length</span>
+        <span id="lengthValue">16</span>
+      </div>
+      <input 
+        type="range" 
+        id="lengthRange" 
+        min="5" 
+        max="50" 
+        value="16"
+        aria-label="Password length"
+      />
+    </div>
+
+    <!-- ========== STRENGTH INDICATOR ========== -->
+    <div class="strength-section">
+      <span class="strength-label">Strength</span>
+      <div class="strength-indicator">
+        <div class="strength-bar" id="bar1"></div>
+        <div class="strength-bar" id="bar2"></div>
+        <div class="strength-bar" id="bar3"></div>
+        <div class="strength-bar" id="bar4"></div>
+      </div>
+      <div class="strength-details">
+        <div class="strength-text" id="strengthText">Generating...</div>
+        <div class="entropy-text" id="entropyText"></div>
+      </div>
+    </div>
+
+    <!-- ========== OPTIONS SECTION ========== -->
+    <div class="options-section">
+      <span class="section-title">Character Types</span>
+      <div class="options-grid">
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="includeUppercase" checked />
+          <label for="includeUppercase">Uppercase (A-Z)</label>
+        </div>
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="includeLowercase" checked />
+          <label for="includeLowercase">Lowercase (a-z)</label>
+        </div>
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="includeNumbers" checked />
+          <label for="includeNumbers">Numbers (0-9)</label>
+        </div>
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="includeSymbols" checked />
+          <label for="includeSymbols">Symbols (!@#$)</label>
+        </div>
+      </div>
+      
+      <!-- Pronounceable Mode Toggle -->
+      <div class="pronounceable-toggle">
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="pronounceableMode" />
+          <label for="pronounceableMode">Pronounceable Mode (easier to remember)</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== EXCLUDE CHARACTERS SECTION ========== -->
+    <div class="exclude-section">
+      <label for="excludeChars">Exclude Characters</label>
+      <input 
+        type="text" 
+        id="excludeChars" 
+        placeholder="e.g. O0l1!|"
+        aria-label="Characters to exclude from password"
+      />
+    </div>
+
+    <!-- ========== GENERATE BUTTON ========== -->
+    <button class="generate-btn" id="generateBtn" type="button">
+      Generate New Password
+    </button>
+  </div>
+  </div>
+
+  <script>
+    // ========== DOM ELEMENTS ==========
+    const passwordField = document.getElementById('password');
+    const lengthRange = document.getElementById('lengthRange');
+    const lengthValue = document.getElementById('lengthValue');
+    const includeUppercase = document.getElementById('includeUppercase');
+    const includeLowercase = document.getElementById('includeLowercase');
+    const includeNumbers = document.getElementById('includeNumbers');
+    const includeSymbols = document.getElementById('includeSymbols');
+    const excludeChars = document.getElementById('excludeChars');
+    const toggleVisibility = document.getElementById('toggleVisibility');
+    const copyPassword = document.getElementById('copyPassword');
+    const generateBtn = document.getElementById('generateBtn');
+    const strengthText = document.getElementById('strengthText');
+    const entropyText = document.getElementById('entropyText');
+    const pronounceableMode = document.getElementById('pronounceableMode');
+
+    const strengthBars = [
+      document.getElementById('bar1'),
+      document.getElementById('bar2'),
+      document.getElementById('bar3'),
+      document.getElementById('bar4')
+    ];
+
+    // ========== CHARACTER SETS ==========
+    const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
+    const NUMBERS = '0123456789';
+    const SYMBOLS = '!@#$%^&*()-_=+[]{};:,.<>?/\\|`~';
+
+    // Syllable patterns for pronounceable passwords
+    const CONSONANTS = 'bcdfghjklmnprstvwxyz';
+    const VOWELS = 'aeiou';
+    const PRONOUNCEABLE_SYMBOLS = '!@#$%';
+
+    // ========== STATE ==========
+    let showPassword = true;
+
+    // ========== ENTROPY CALCULATION ==========
+    function calculateEntropy(password, charsetSize) {
+      if (!password || password.includes('⚠️')) return 0;
+      // Entropy = log2(possibilities^length)
+      // = length * log2(possibilities)
+      const entropy = password.length * Math.log2(charsetSize);
+      return Math.round(entropy);
+    }
+
+    // ========== STRENGTH CALCULATION ==========
+    function calculateStrength(password) {
+      if (!password || password.includes('⚠️')) return 0;
+
+      let score = 0;
+      const hasUpper = /[A-Z]/.test(password);
+      const hasLower = /[a-z]/.test(password);
+      const hasNumber = /\d/.test(password);
+      const hasSymbol = /[^A-Za-z0-9]/.test(password);
+
+      if (hasUpper) score++;
+      if (hasLower) score++;
+      if (hasNumber) score++;
+      if (hasSymbol) score++;
+
+      // Length bonus
+      const length = password.length;
+      if (length >= 16 && score === 4) return 4;
+      if (length >= 12 && score >= 3) return 3;
+      if (length >= 8 && score >= 2) return 2;
+      if (length >= 5 && score >= 1) return 1;
+      return 0;
+    }
+
+    // ========== UPDATE STRENGTH INDICATOR ==========
+    function updateStrength(password, charsetSize) {
+      const strength = calculateStrength(password);
+      const colors = [
+        'var(--strength-weak)',
+        'var(--strength-fair)', 
+        'var(--strength-good)',
+        'var(--strength-strong)'
+      ];
+      const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+
+      strengthBars.forEach((bar, i) => {
+        if (i < strength) {
+          bar.style.backgroundColor = colors[strength - 1];
+        } else {
+          bar.style.backgroundColor = 'var(--outline-color)';
+        }
+      });
+
+      // Update text label
+      if (strength === 0) {
+        strengthText.textContent = 'No password generated';
+        strengthText.style.color = 'var(--secondary-text)';
+        entropyText.textContent = '';
+      } else {
+        strengthText.textContent = labels[strength - 1];
+        strengthText.style.color = colors[strength - 1];
+        
+        // Display entropy
+        const entropy = calculateEntropy(password, charsetSize);
+        entropyText.textContent = `${entropy} bits`;
+      }
+
+      // Rainbow border for strongest passwords
+      if (strength === 4) {
+        passwordField.classList.add('rainbow-border');
+      } else {
+        passwordField.classList.remove('rainbow-border');
+      }
+    }
+
+    // ========== PRONOUNCEABLE PASSWORD GENERATION ==========
+    function generatePronounceable(length) {
+      let password = '';
+      const array = new Uint32Array(Math.ceil(length * 1.5));
+      crypto.getRandomValues(array);
+      let arrayIndex = 0;
+
+      // Build syllables (consonant-vowel pairs)
+      while (password.length < length) {
+        // Add consonant
+        if (password.length < length) {
+          const consonant = CONSONANTS[array[arrayIndex++] % CONSONANTS.length];
+          password += includeUppercase.checked && (array[arrayIndex] % 3 === 0) 
+            ? consonant.toUpperCase() 
+            : consonant;
+        }
+
+        // Add vowel
+        if (password.length < length) {
+          password += VOWELS[array[arrayIndex++] % VOWELS.length];
+        }
+
+        // Occasionally add a number
+        if (includeNumbers.checked && password.length < length && array[arrayIndex++] % 4 === 0) {
+          password += NUMBERS[array[arrayIndex++] % NUMBERS.length];
+        }
+
+        // Occasionally add a symbol (at syllable boundaries for easier typing)
+        if (includeSymbols.checked && password.length < length && array[arrayIndex++] % 6 === 0) {
+          password += PRONOUNCEABLE_SYMBOLS[array[arrayIndex++] % PRONOUNCEABLE_SYMBOLS.length];
+        }
+      }
+
+      // Trim to exact length
+      password = password.substring(0, length);
+
+      // Calculate charset size for pronounceable mode
+      let charsetSize = CONSONANTS.length + VOWELS.length;
+      if (includeNumbers.checked) charsetSize += NUMBERS.length;
+      if (includeSymbols.checked) charsetSize += PRONOUNCEABLE_SYMBOLS.length;
+
+      return { password, charsetSize };
+    }
+
+    // ========== PASSWORD GENERATION ==========
+    function generatePassword() {
+      const length = parseInt(lengthRange.value);
+
+      // Check if pronounceable mode is enabled
+      if (pronounceableMode.checked) {
+        const result = generatePronounceable(length);
+        passwordField.value = result.password;
+        updateStrength(result.password, result.charsetSize);
+        scheduleHeightCheck();
+        return;
+      }
+
+      // Standard random generation
+      let chars = '';
+      const excluded = new Set(excludeChars.value.split(''));
+
+      if (includeUppercase.checked) chars += UPPERCASE;
+      if (includeLowercase.checked) chars += LOWERCASE;
+      if (includeNumbers.checked) chars += NUMBERS;
+      if (includeSymbols.checked) chars += SYMBOLS;
+
+      // Filter out excluded characters
+      chars = [...chars].filter(c => !excluded.has(c)).join('');
+
+      if (!chars.length) {
+        passwordField.value = '⚠️ No valid characters selected';
+        updateStrength('', 0);
+        scheduleHeightCheck();
+        return;
+      }
+
+      // Use crypto.getRandomValues for better randomness
+      let password = '';
+      const array = new Uint32Array(length);
+      crypto.getRandomValues(array);
+      
+      for (let i = 0; i < length; i++) {
+        password += chars[array[i] % chars.length];
+      }
+
+      passwordField.value = password;
+      updateStrength(password, chars.length);
+      scheduleHeightCheck();
+    }
+
+    // ========== UPDATE SLIDER GRADIENT ==========
+    function updateSliderGradient() {
+      const val = parseInt(lengthRange.value);
+      const min = parseInt(lengthRange.min);
+      const max = parseInt(lengthRange.max);
+      const percent = ((val - min) / (max - min)) * 100;
+      
+      lengthRange.style.background = `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${percent}%, var(--outline-color) ${percent}%, var(--outline-color) 100%)`;
+    }
+
+    // ========== UPDATE FUNCTION ==========
+    function update() {
+      lengthValue.textContent = lengthRange.value;
+      updateSliderGradient();
+      generatePassword();
+    }
+
+    // ========== EVENT LISTENERS ==========
+    lengthRange.addEventListener('input', update);
+    includeUppercase.addEventListener('change', update);
+    includeLowercase.addEventListener('change', update);
+    includeNumbers.addEventListener('change', update);
+    includeSymbols.addEventListener('change', update);
+    excludeChars.addEventListener('input', update);
+    generateBtn.addEventListener('click', generatePassword);
+    pronounceableMode.addEventListener('change', update);
+
+    // ========== KEYBOARD SHORTCUTS ==========
+    document.addEventListener('keydown', (e) => {
+      // Check if we're focused on an input field (exclude shortcut behavior)
+      const isInputFocused = document.activeElement === excludeChars;
+      
+      // Ctrl/Cmd + G to generate
+      if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+        e.preventDefault();
+        generatePassword();
+      }
+      
+      // Ctrl/Cmd + C when password field is focused
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c' && document.activeElement === passwordField) {
+        // Let default copy behavior work, but show our feedback
+        setTimeout(() => {
+          const originalText = copyPassword.textContent;
+          copyPassword.textContent = '✓';
+          copyPassword.classList.add('copied');
+          
+          setTimeout(() => {
+            copyPassword.textContent = originalText;
+            copyPassword.classList.remove('copied');
+          }, 2000);
+        }, 10);
+      }
+
+      // Enter key to generate (if not in an input field)
+      if (e.key === 'Enter' && !isInputFocused) {
+        e.preventDefault();
+        generatePassword();
+      }
+    });
+
+    // Toggle visibility
+    toggleVisibility.addEventListener('click', () => {
+      showPassword = !showPassword;
+      passwordField.type = showPassword ? 'text' : 'password';
+      toggleVisibility.textContent = showPassword ? 'Hide' : 'Show';
+      scheduleHeightCheck();
+    });
+
+    // Copy to clipboard
+    copyPassword.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(passwordField.value);
+        const originalText = copyPassword.textContent;
+        copyPassword.textContent = '✓';
+        copyPassword.classList.add('copied');
+        
+        setTimeout(() => {
+          copyPassword.textContent = originalText;
+          copyPassword.classList.remove('copied');
+          scheduleHeightCheck();
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+        // Fallback for older browsers
+        passwordField.select();
+        document.execCommand('copy');
+      }
+    });
+
+    // ========== INITIALIZE ==========
+    update();
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      // Only send message if height has *actually* changed
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
+    function scheduleHeightCheck() {
+        // Clear any pending checks
+        clearTimeout(resizeTimer);
+        // Schedule a new check
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    // Send height on initial load (with a slight delay)
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    // Send height on window resize (debounced)
+    window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
+        scheduleHeightCheck();
+    });
+    
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+</body>
+</html>
