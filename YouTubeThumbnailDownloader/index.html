@@ -30,6 +30,7 @@
       background: var(--bg-primary);
       color: var(--text-primary);
       padding: 24px 16px;
+      overflow-x: hidden;
     }
 
     /* ===== MAIN CONTAINER ===== */
@@ -40,7 +41,7 @@
       background: var(--bg-secondary);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
-      padding: 40px 16px;
+      padding: 40px 16px 40px 16px;
     }
 
     /* ===== INPUT SECTION ===== */
@@ -184,6 +185,8 @@
       font-weight: 600;
       font-family: sans-serif;
       transition: var(--transition);
+      z-index: 10;
+      pointer-events: auto;
     }
 
     /* Shimmer effect */
@@ -197,6 +200,7 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
       transform: skewX(-25deg);
       transition: left 0.7s ease-in-out;
+      pointer-events: none;
     }
 
     .btn-download:hover {
