@@ -78,7 +78,7 @@
     }
 
     .card-title {
-      font-size: 20px; /* <-- UPDATED from 16px per Design Guide */
+      font-size: 20px;
       font-weight: bold;
       margin-bottom: 20px;
       color: var(--text-primary);
@@ -1139,7 +1139,7 @@
               <strong>Accent Color:</strong> <span id="debugAccentColor">#87A9FF</span>
             </div>
             <div style="margin-top: 8px;">
-              <strong>Version:</strong> <span id="debugVersion">V1.0.0</span>
+              <strong>Version:</strong> <span id="debugVersion">V1.0.1</span>
             </div>
           </div>
         </div>
@@ -1167,8 +1167,8 @@
       profilePhoto: null,
       creatorName: 'HeroVibes',
       tagline: 'Content Creator, YouTuber',
-      bio: "Content creator, livestreamer | Elgato Partner",
-      email: 'contact.herovibes@gmail.com',
+      bio: "I'm an Elgato Ambassador, working towards a great future in the world of tech and filmmaking!",
+      email: 'hello@herovibes.store',
       website: 'https://herovibes.store',
       location: 'London, UK',
       platforms: [
@@ -1259,7 +1259,7 @@
           
           updateDebugInfo();
           generateMediaKit();
-          scheduleHeightCheck(); // <-- ADDED: Notify scrollbar fix of height change
+          scheduleHeightCheck(); // Notify scrollbar fix of height change
         };
         reader.readAsDataURL(file);
       }
@@ -1278,7 +1278,7 @@
       
       updateDebugInfo();
       generateMediaKit();
-      scheduleHeightCheck(); // <-- ADDED: Notify scrollbar fix of height change
+      scheduleHeightCheck(); // Notify scrollbar fix of height change
     }
 
     // ============================================
@@ -1287,7 +1287,7 @@
     const tagInput = document.getElementById('tagInput');
     const tagsContainer = document.getElementById('tagsContainer');
 
-    mediaKitData.categories.forEach(tag => addTagToUI(tag, tagsContainer, 'categories'));
+    // MOVED: Initial tag population moved to window.onload to prevent race condition
 
     tagInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
@@ -1345,7 +1345,7 @@
       `;
       const input = container.querySelector('.tag-input');
       container.insertBefore(tag, input);
-      scheduleHeightCheck(); // <-- ADDED: Notify scrollbar fix of height change
+      scheduleHeightCheck(); // Notify scrollbar fix of height change
     }
 
     function removeTag(tagText, type) {
@@ -1355,7 +1355,7 @@
       tags.forEach(tag => {
         if (tag.textContent.includes(tagText)) {
           tag.remove();
-          scheduleHeightCheck(); // <-- ADDED: Notify scrollbar fix of height change
+          scheduleHeightCheck(); // Notify scrollbar fix of height change
         }
       });
       generateMediaKit();
@@ -2012,13 +2012,6 @@
     });
 
     // ============================================
-    // INITIALIZE
-    // ============================================
-    updateMediaKitData();
-    generateMediaKit();
-    updateDebugInfo();
-
-    // ============================================
     // ===== FOURTHWALL SCROLLBAR FIX =====
     // ============================================
     let lastHeight = 0;
@@ -2050,7 +2043,20 @@
     }
 
     // Send height on initial load (with a slight delay)
+    // This fixes the "Content Cut-Off" race condition.
     window.addEventListener('load', () => {
+        // ===== INITIALIZE TOOL =====
+        // Run all initialization *after* page has loaded
+        // to prevent race condition.
+        updateMediaKitData();
+        generateMediaKit();
+        updateDebugInfo();
+        
+        // Populate initial tags *after* load
+        mediaKitData.categories.forEach(tag => addTagToUI(tag, tagsContainer, 'categories'));
+        
+        // ===== SEND INITIAL HEIGHT =====
+        // Now send the height after a brief delay
         setTimeout(sendHeight, 100);
     });
 
