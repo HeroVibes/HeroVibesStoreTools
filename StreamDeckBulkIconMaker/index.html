@@ -2318,36 +2318,24 @@
 
         // ===== FOURTHWALL SCROLLBAR FIX =====
         let lastHeight = 0;
-        let heightCheckInterval;
-
+        
         function sendHeight() {
-            const height = document.body.scrollHeight;
-            // Only send if height actually changed to prevent feedback loop
+            var height = document.body.scrollHeight;
+            // Only send if height has changed to prevent feedback loop
             if (height !== lastHeight) {
                 lastHeight = height;
                 window.parent.postMessage({ frameHeight: height }, '*');
             }
         }
 
-        // Initial height send
-        window.addEventListener('load', () => {
-            setTimeout(sendHeight, 100);
-            
-            // Set up periodic height check (less aggressive than resize)
-            heightCheckInterval = setInterval(sendHeight, 500);
-            
-            // Stop checking after 7 seconds (by then everything should be loaded)
-            setTimeout(() => {
-                clearInterval(heightCheckInterval);
-            }, 7000);
+        window.onload = sendHeight;
+        
+        // Use ResizeObserver instead of window.onresize to prevent feedback loop
+        const resizeObserver = new ResizeObserver(() => {
+            sendHeight();
         });
-
-        // Send height on window resize (debounced)
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(sendHeight, 250);
-        });
+        
+        resizeObserver.observe(document.body);
     </script>
 </body>
 </html>
