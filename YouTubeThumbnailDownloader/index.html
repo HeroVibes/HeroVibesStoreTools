@@ -28,14 +28,16 @@
     html, body {
       height: auto;
       overflow-x: hidden;
+      position: relative;
     }
 
     body {
       font-family: sans-serif;
       background: var(--bg-primary);
       color: var(--text-primary);
-      padding: 24px 16px;
+      padding: 24px 16px 48px 16px;
       position: relative;
+      z-index: 1;
     }
 
     /* ===== MAIN CONTAINER ===== */
@@ -48,6 +50,7 @@
       border-radius: var(--radius);
       padding: 40px 16px;
       position: relative;
+      z-index: 1;
     }
 
     /* ===== HELP BUTTON ===== */
@@ -68,7 +71,7 @@
       align-items: center;
       justify-content: center;
       transition: var(--transition);
-      z-index: 100;
+      z-index: 10;
     }
 
     .help-button:hover {
@@ -93,7 +96,7 @@
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 99999;
       padding: 20px;
     }
 
@@ -113,6 +116,7 @@
       overflow-y: auto;
       position: relative;
       animation: slideUp 0.3s ease;
+      z-index: 100000;
     }
 
     .modal-close {
@@ -230,6 +234,7 @@
       padding: 16px;
       margin-bottom: 20px;
       display: none;
+      min-height: 120px;
     }
 
     .error-message.show {
@@ -260,12 +265,18 @@
 
     /* ===== THUMBNAIL DISPLAY AREA ===== */
     .thumbnail-display {
-      display: none;
-      animation: fadeIn 0.4s ease;
+      min-height: 380px;
     }
 
-    .thumbnail-display.show {
-      display: block;
+    .thumbnail-display-content {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .thumbnail-display-content.show {
+      opacity: 1;
+      visibility: visible;
     }
 
     .thumbnail-wrapper {
@@ -275,6 +286,10 @@
       margin-bottom: 16px;
       background: var(--bg-primary);
       border: 1px solid var(--outline);
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     #thumbnailImage {
@@ -302,12 +317,20 @@
       pointer-events: none;
     }
 
+    .thumbnail-placeholder {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+      padding: 40px 20px;
+    }
+
     /* ===== QUALITY INFO ===== */
     .quality-info {
       font-size: 12px;
       color: var(--text-secondary);
       text-align: center;
       margin-bottom: 16px;
+      min-height: 18px;
     }
 
     /* ===== DOWNLOAD BUTTON ===== */
@@ -327,6 +350,12 @@
       transition: var(--transition);
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      pointer-events: auto;
+    }
+
+    .btn-download:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     /* Shimmer effect */
@@ -344,12 +373,12 @@
       z-index: 1;
     }
 
-    .btn-download:hover {
+    .btn-download:not(:disabled):hover {
       background: var(--bg-hover);
       border-color: var(--accent);
     }
 
-    .btn-download:hover::before {
+    .btn-download:not(:disabled):hover::before {
       left: 125%;
     }
 
@@ -358,7 +387,7 @@
       box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
     }
 
-    .btn-download:active {
+    .btn-download:not(:disabled):active {
       transform: scale(0.98);
     }
 
@@ -397,7 +426,7 @@
     /* ===== MOBILE OPTIMIZATION ===== */
     @media screen and (max-width: 768px) {
       body {
-        padding: 16px;
+        padding: 16px 16px 48px 16px;
       }
 
       .tool-container {
@@ -417,6 +446,14 @@
         padding: 20px;
         max-height: 90vh;
       }
+
+      .thumbnail-display {
+        min-height: 320px;
+      }
+
+      .thumbnail-wrapper {
+        min-height: 240px;
+      }
     }
 
     @media screen and (max-width: 480px) {
@@ -432,6 +469,14 @@
         width: 28px;
         height: 28px;
         font-size: 14px;
+      }
+
+      .thumbnail-display {
+        min-height: 280px;
+      }
+
+      .thumbnail-wrapper {
+        min-height: 200px;
       }
     }
   </style>
@@ -518,21 +563,27 @@
 
     <!-- ===== THUMBNAIL DISPLAY AREA ===== -->
     <div class="thumbnail-display" id="thumbnailDisplay">
-      <div class="thumbnail-wrapper">
-        <img 
-          id="thumbnailImage" 
-          src="" 
-          alt="YouTube Thumbnail"
-          title="Click to open in new tab"
-        />
-        <div class="thumbnail-overlay" id="qualityBadge"></div>
+      <div class="thumbnail-display-content" id="thumbnailContent">
+        <div class="thumbnail-wrapper">
+          <img 
+            id="thumbnailImage" 
+            src="" 
+            alt="YouTube Thumbnail"
+            title="Click to open in new tab"
+            style="display: none;"
+          />
+          <div class="thumbnail-placeholder" id="thumbnailPlaceholder">
+            Thumbnail will appear here
+          </div>
+          <div class="thumbnail-overlay" id="qualityBadge" style="display: none;"></div>
+        </div>
+        
+        <div class="quality-info" id="qualityInfo"></div>
+        
+        <button class="btn-download" id="downloadButton" type="button" disabled>
+          Download Thumbnail
+        </button>
       </div>
-      
-      <div class="quality-info" id="qualityInfo"></div>
-      
-      <button class="btn-download" id="downloadButton" type="button">
-        Download Thumbnail
-      </button>
     </div>
 
   </div>
@@ -544,7 +595,9 @@
     const errorMessage = document.getElementById('errorMessage');
     const errorText = document.getElementById('errorText');
     const thumbnailDisplay = document.getElementById('thumbnailDisplay');
+    const thumbnailContent = document.getElementById('thumbnailContent');
     const thumbnailImage = document.getElementById('thumbnailImage');
+    const thumbnailPlaceholder = document.getElementById('thumbnailPlaceholder');
     const downloadButton = document.getElementById('downloadButton');
     const qualityBadge = document.getElementById('qualityBadge');
     const qualityInfo = document.getElementById('qualityInfo');
@@ -556,32 +609,40 @@
     let currentThumbnailUrl = '';
     let currentQuality = '';
     let debounceTimer;
+    let lastHeight = 0;
 
     // ===== HELP MODAL HANDLERS =====
     helpButton.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       helpModal.classList.add('show');
-      document.body.style.overflow = 'hidden';
+      setTimeout(() => {
+        sendHeight();
+      }, 100);
     });
 
     closeModal.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       helpModal.classList.remove('show');
-      document.body.style.overflow = '';
+      setTimeout(() => {
+        sendHeight();
+      }, 100);
     });
 
     helpModal.addEventListener('click', (e) => {
       if (e.target === helpModal) {
         helpModal.classList.remove('show');
-        document.body.style.overflow = '';
+        setTimeout(() => {
+          sendHeight();
+        }, 100);
       }
     });
 
     // ===== AUTO-FOCUS INPUT ON LOAD =====
     window.addEventListener('load', () => {
       videoInput.focus();
+      sendHeight();
     });
 
     // ===== INPUT HANDLER WITH DEBOUNCE =====
@@ -696,28 +757,39 @@
 
     // ===== SHOW THUMBNAIL =====
     function showThumbnail(url, quality) {
+      thumbnailPlaceholder.style.display = 'none';
+      thumbnailImage.style.display = 'block';
       thumbnailImage.src = url;
+      qualityBadge.style.display = 'block';
       qualityBadge.textContent = quality;
       qualityInfo.textContent = `Quality: ${quality} • Click image to open full size`;
-      thumbnailDisplay.classList.add('show');
-      setTimeout(sendHeight, 150);
+      thumbnailContent.classList.add('show');
+      downloadButton.disabled = false;
+      errorMessage.classList.remove('show');
     }
 
     // ===== SHOW ERROR =====
     function showError(message) {
       errorText.textContent = message;
       errorMessage.classList.add('show');
-      thumbnailDisplay.classList.remove('show');
-      setTimeout(sendHeight, 150);
+      thumbnailContent.classList.remove('show');
+      thumbnailPlaceholder.style.display = 'block';
+      thumbnailImage.style.display = 'none';
+      qualityBadge.style.display = 'none';
+      downloadButton.disabled = true;
     }
 
     // ===== HIDE ALL MESSAGES =====
     function hideAllMessages() {
       errorMessage.classList.remove('show');
-      thumbnailDisplay.classList.remove('show');
+      thumbnailContent.classList.remove('show');
+      thumbnailPlaceholder.style.display = 'block';
+      thumbnailImage.style.display = 'none';
+      qualityBadge.style.display = 'none';
       currentThumbnailUrl = '';
       currentQuality = '';
-      setTimeout(sendHeight, 150);
+      qualityInfo.textContent = '';
+      downloadButton.disabled = true;
     }
 
     // ===== THUMBNAIL CLICK TO OPEN =====
@@ -732,7 +804,7 @@
       e.preventDefault();
       e.stopPropagation();
       
-      if (!currentThumbnailUrl) return;
+      if (!currentThumbnailUrl || downloadButton.disabled) return;
 
       try {
         const response = await fetch(currentThumbnailUrl);
@@ -762,7 +834,7 @@
       }
       
       // Enter to download if thumbnail is showing
-      if (e.key === 'Enter' && thumbnailDisplay.classList.contains('show')) {
+      if (e.key === 'Enter' && !downloadButton.disabled) {
         e.preventDefault();
         downloadButton.click();
       }
@@ -770,18 +842,34 @@
       // Escape to close modal
       if (e.key === 'Escape' && helpModal.classList.contains('show')) {
         helpModal.classList.remove('show');
-        document.body.style.overflow = '';
+        setTimeout(() => {
+          sendHeight();
+        }, 100);
       }
     });
 
     // ===== FOURTHWALL SCROLLBAR FIX =====
     function sendHeight() {
-      var height = document.body.scrollHeight;
-      window.parent.postMessage({ frameHeight: height }, '*');
+      const height = document.body.scrollHeight;
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
     }
 
+    // Send height on load and periodically check for changes
     window.onload = sendHeight;
-    window.onresize = sendHeight;
+    
+    // Use MutationObserver to detect DOM changes
+    const observer = new MutationObserver(() => {
+      sendHeight();
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true
+    });
   </script>
 </body>
 </html>
