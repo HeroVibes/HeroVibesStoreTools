@@ -42,11 +42,6 @@
     .container {
       max-width: 1400px;
       margin: 0 auto;
-      /*
-        REMOVED: padding-bottom: 200px;
-        This was adding unnecessary whitespace at the bottom.
-        The body padding is sufficient.
-      */
     }
 
     /* ===== TIMER ROWS ===== */
@@ -706,8 +701,9 @@
         clearInterval(timer.interval);
         wrapper.remove();
         timers = timers.filter(t => t !== timer);
-        renderRows(); // This will re-render and call scheduleHeightCheck()
+        renderRows(); // Re-render the rows
         updateURL();
+        scheduleHeightCheck(); // Manually trigger height check
       });
       
       // ===== TITLE EDIT =====
@@ -727,14 +723,14 @@
       updateRing();
 
       timer.element = wrapper;
-      timers.push(timer);
-      renderRows(); // Call renderRows *after* pushing
+      timers.push(timer); // Add timer to the array
+      // Do NOT call renderRows() here.
       return timer;
     }
 
     // ===== RENDER ROWS FUNCTION =====
     function renderRows() {
-      rowsContainer.innerHTML = '';
+      rowsContainer.innerHTML = ''; // Clear existing rows
       const chunked = chunkArray(timers, maxPerRow);
 
       chunked.forEach((row) => {
@@ -749,8 +745,9 @@
           addBtn.setAttribute('aria-label', 'Add New Timer');
           addBtn.onclick = () => {
             createTimer(5);
+            renderRows(); // Re-render after adding
             updateURL();
-            // scheduleHeightCheck(); // No longer needed here, renderRows will call it
+            scheduleHeightCheck(); // Manually trigger height check
           };
           rowDiv.appendChild(addBtn);
         }
@@ -767,16 +764,16 @@
         addBtn.setAttribute('aria-label', 'Add New Timer');
         addBtn.onclick = () => {
           createTimer(5);
+          renderRows(); // Re-render after adding
           updateURL();
-          // scheduleHeightCheck(); // No longer needed here
+          scheduleHeightCheck(); // Manually trigger height check
         };
         newRow.appendChild(addBtn);
         rowsContainer.appendChild(newRow);
       }
       
-      // IMPORTANT:
-      // Call height check *after* the DOM has been fully re-rendered
-      scheduleHeightCheck();
+      // Do NOT call scheduleHeightCheck() here.
+      // It will be called by the function that *called* renderRows().
     }
 
     // ===== CHUNK ARRAY HELPER =====
@@ -861,12 +858,13 @@
         });
       } else {
         defaultTimes.forEach(min => createTimer(min, `${min}m Timer`));
-        updateURL();
+        updateURL(); // Only update URL if we used defaults
       }
-      // Initial renderRows is handled inside createTimer
+      
+      renderRows(); // Call renderRows ONCE after all timers are created
     }
 
-    initializeTimers();
+    initializeTimers(); // Run initialization
 
     // ===== FOURTHWALL SCROLLBAR FIX (STABLE VERSION) =====
     let lastHeight = 0;
@@ -899,6 +897,8 @@
     }
 
     // Send height on initial load (with a slight delay)
+    // This now runs AFTER initializeTimers() has built the DOM
+    // and AFTER the browser has loaded CSS, fonts, etc.
     window.addEventListener('load', () => {
         setTimeout(sendHeight, 100);
     });
