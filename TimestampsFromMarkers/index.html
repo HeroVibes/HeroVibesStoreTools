@@ -1,0 +1,623 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Timestamp Converter</title>
+  
+  <style>
+    /* ========== DESIGN TOKENS ========== */
+    :root {
+      --primary-bg: #191919;
+      --secondary-bg: #1F1F1F;
+      --hover-color: #323232;
+      --outline-color: #323232;
+      --accent-color: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+    }
+    
+    /* ========== BODY RESET (IFRAME FIX) ========== */
+    /* This body style fixes the "Failure to Shrink" bug */
+    /* by NOT including min-height: 100vh */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background: var(--primary-bg);
+    }
+    
+    /* ========== ISOLATED CONTAINER WRAPPER ========== */
+    .timestamp-converter-wrapper {
+      /* Re-declarations to ensure isolation */
+      --primary-bg: #191919;
+      --secondary-bg: #1F1F1F;
+      --hover-color: #323232;
+      --outline-color: #323232;
+      --accent-color: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+      
+      background: transparent;
+      color: var(--text-primary);
+      font-family: sans-serif;
+      padding: 0;
+      margin: 0;
+      display: block;
+      width: 100%;
+    }
+
+    .timestamp-converter-wrapper * {
+      box-sizing: border-box;
+    }
+
+    /* ========== MAIN CONTAINER ========== */
+    .timestamp-converter-wrapper .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--secondary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      display: block;
+    }
+
+    /* ========== FILE UPLOAD ZONE ========== */
+    .timestamp-converter-wrapper .upload-zone {
+      background: var(--primary-bg);
+      border: 2px dashed var(--outline-color);
+      border-radius: var(--radius);
+      padding: 32px 16px;
+      text-align: center;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      display: block;
+    }
+
+    .timestamp-converter-wrapper .upload-zone:hover {
+      border-color: var(--accent-color);
+      background: var(--hover-color);
+    }
+
+    .timestamp-converter-wrapper .upload-zone.drag-over {
+      border-color: var(--accent-color);
+      background: var(--hover-color);
+    }
+
+    .timestamp-converter-wrapper .upload-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      color: var(--accent-color);
+      display: block;
+    }
+
+    .timestamp-converter-wrapper .upload-text {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      display: block;
+      font-family: sans-serif;
+    }
+
+    .timestamp-converter-wrapper .upload-subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: block;
+      font-family: sans-serif;
+      margin: 0;
+    }
+
+    .timestamp-converter-wrapper .file-input {
+      display: none;
+    }
+
+    /* ========== FILE INFO DISPLAY ========== */
+    .timestamp-converter-wrapper .file-info {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--primary-bg);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      border: 1px solid var(--outline-color);
+    }
+
+    .timestamp-converter-wrapper .file-info.active {
+      display: flex;
+    }
+
+    .timestamp-converter-wrapper .file-details {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .timestamp-converter-wrapper .file-icon {
+      font-size: 24px;
+      color: var(--accent-color);
+    }
+
+    .timestamp-converter-wrapper .file-name {
+      font-size: 14px;
+      color: var(--text-primary);
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+      font-family: sans-serif;
+      margin: 0;
+    }
+
+    .timestamp-converter-wrapper .file-type {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      display: block;
+      font-family: sans-serif;
+    }
+
+    /* ========== BUTTONS ========== */
+    .timestamp-converter-wrapper .btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--secondary-bg);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      font-family: sans-serif;
+      transition: all 0.3s ease;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .timestamp-converter-wrapper .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+      pointer-events: none;
+    }
+
+    .timestamp-converter-wrapper .btn:hover::before {
+      left: 125%;
+    }
+
+    .timestamp-converter-wrapper .btn:hover {
+      background: var(--hover-color);
+    }
+
+    .timestamp-converter-wrapper .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
+
+    .timestamp-converter-wrapper .btn-clear {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+
+    .timestamp-converter-wrapper .btn-primary {
+      width: 100%;
+      margin-top: 16px;
+      font-weight: bold;
+      display: block;
+    }
+
+    /* ========== OUTPUT AREA ========== */
+    .timestamp-converter-wrapper .output-section {
+      display: none;
+      margin-top: 24px;
+    }
+
+    .timestamp-converter-wrapper .output-section.active {
+      display: block;
+    }
+
+    .timestamp-converter-wrapper .output-label {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      display: block;
+      font-family: sans-serif;
+    }
+
+    .timestamp-converter-wrapper .output-textarea {
+      width: 100%;
+      min-height: 300px;
+      background: var(--primary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      padding: 16px;
+      color: var(--text-primary);
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.8;
+      resize: vertical;
+      outline: none;
+      display: block;
+    }
+
+    .timestamp-converter-wrapper .output-textarea:focus {
+      border-color: var(--accent-color);
+    }
+
+    /* ========== STATUS MESSAGES ========== */
+    .timestamp-converter-wrapper .status-message {
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      font-size: 12px;
+      display: none;
+      font-family: sans-serif;
+    }
+
+    .timestamp-converter-wrapper .status-message.active {
+      display: block;
+    }
+
+    .timestamp-converter-wrapper .status-success {
+      background: rgba(135, 169, 255, 0.1);
+      border: 1px solid var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    .timestamp-converter-wrapper .status-error {
+      background: rgba(255, 99, 99, 0.1);
+      border: 1px solid #ff6363;
+      color: #ff6363;
+    }
+    
+    /* ========== VERSION NUMBER (NEW) ========== */
+    .timestamp-converter-wrapper .tool-version {
+      font-family: sans-serif;
+      font-size: 10px;
+      color: var(--text-secondary);
+      text-align: right;
+      margin-top: 16px;
+      padding-right: 4px;
+    }
+
+    /* ========== MOBILE OPTIMIZATION ========== */
+    @media (max-width: 640px) {
+      .timestamp-converter-wrapper .container {
+        padding: 16px 12px;
+      }
+
+      .timestamp-converter-wrapper .upload-zone {
+        padding: 24px 12px;
+      }
+
+      .timestamp-converter-wrapper .upload-icon {
+        font-size: 36px;
+      }
+
+      .timestamp-converter-wrapper .file-details {
+        gap: 8px;
+      }
+
+      .timestamp-converter-wrapper .file-name {
+        font-size: 12px;
+      }
+
+      .timestamp-converter-wrapper .output-textarea {
+        min-height: 250px;
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="timestamp-converter-wrapper">
+    
+    <div class="container">
+
+      <div class="status-message" id="statusMessage"></div>
+
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-icon">📁</div>
+        <div class="upload-text">Click or drag file here</div>
+        <div class="upload-subtext">Supports .csv (Premiere Pro) and .edl (DaVinci Resolve)</div>
+        <input type="file" class="file-input" id="fileInput" accept=".csv,.edl">
+      </div>
+
+     
+      <div class="file-info" id="fileInfo">
+        <div class="file-details">
+          <div class="file-icon">📄</div>
+          <div>
+            <div class="file-name" id="fileName">No file selected</div>
+            <div class="file-type" id="fileType"></div>
+          </div>
+        </div>
+        <button class="btn btn-clear" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="output-section" id="outputSection">
+        <label class="output-label">YouTube Timestamps</label>
+        <textarea class="output-textarea" id="outputText" readonly></textarea>
+        <button class="btn btn-primary" id="copyBtn">Copy to Clipboard</button>
+      </div>
+      
+      <div class="tool-version">V1.0.0</div>
+
+    </div> </div> <script>
+    // ========== ELEMENT REFERENCES ==========
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileType = document.getElementById('fileType');
+    const clearBtn = document.getElementById('clearBtn');
+    const outputSection = document.getElementById('outputSection');
+    const outputText = document.getElementById('outputText');
+    const copyBtn = document.getElementById('copyBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    
+    // ========== FILE UPLOAD HANDLERS ==========
+    uploadZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+    
+    // ========== DRAG AND DROP ==========
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('drag-over');
+    });
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('drag-over');
+    });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+    
+    // ========== CLEAR BUTTON ==========
+    clearBtn.addEventListener('click', () => {
+      resetTool();
+    });
+    
+    // ========== COPY TO CLIPBOARD ==========
+    copyBtn.addEventListener('click', ()async => {
+      try {
+        await navigator.clipboard.writeText(outputText.value);
+        showStatus('Copied to clipboard!', 'success');
+      } catch (err) {
+        console.error('Failed to copy: ', err);
+        showStatus('Failed to copy to clipboard.', 'error');
+      }
+    });
+    
+    // ========== FILE PROCESSOR ==========
+    function handleFile(file) {
+      const fileExtension = file.name.split('.').pop().toLowerCase();
+      // Validate file type
+      if (!['csv', 'edl'].includes(fileExtension)) {
+        showStatus('Invalid file type. Please upload a .csv or .edl file.', 'error');
+        return;
+      }
+
+      // Validate file size (2MB limit)
+      if (file.size > 2 * 1024 * 1024) {
+        showStatus('File size must be under 2MB.', 'error');
+        return;
+      }
+
+      // Update UI
+      fileName.textContent = file.name;
+      fileType.textContent = fileExtension.toUpperCase() + ' file';
+      fileInfo.classList.add('active');
+      scheduleHeightCheck(); // Height Changed
+
+      // Read and process file
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target.result;
+        if (fileExtension === 'csv') {
+          processCSV(content);
+        } else if (fileExtension === 'edl') {
+          processEDL(content);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // ========== PREMIERE PRO CSV PROCESSOR ==========
+    function processCSV(content) {
+      try {
+        const lines = content.split('\n');
+        let output = "";
+        let markerCount = 0;
+
+        for (let i = 1; i < lines.length; i++) {
+          const columns = lines[i].split('\t');
+          if (columns.length < 3) continue;
+
+          const name = columns[0].trim();
+          const timecode = columns[2].trim();
+          
+          if (!name || !timecode) continue;
+          const formattedTime = formatTimecode(timecode);
+          output += `${formattedTime} - ${name}\n`;
+          markerCount++;
+        }
+
+        if (markerCount === 0) {
+          showStatus('No valid markers found in CSV file.', 'error');
+          return;
+        }
+
+        outputText.value = output;
+        outputSection.classList.add('active');
+        scheduleHeightCheck(); // Height Changed
+        showStatus(`Successfully converted ${markerCount} marker${markerCount !== 1 ? 's' : ''}.`, 'success');
+      } catch (error) {
+        showStatus('Error processing CSV file. Please check the file format.', 'error');
+        console.error('CSV Processing Error:', error);
+      }
+    }
+
+    // ========== DAVINCI RESOLVE EDL PROCESSOR ==========
+    function processEDL(content) {
+      try {
+        const lines = content.split('\n');
+        let output = "";
+        let markerCount = 0;
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          // Look for lines with marker metadata
+          if (line.includes('|M:')) {
+            // Extract timecode from previous line
+            const previousLine = lines[i - 1];
+            const timecodeMatch = previousLine.match(/(\d{2}:\d{2}:\d{2}:\d{2})/);
+            
+            // Extract marker name
+            const markerMatch = line.match(/\|M:([^|]+)/);
+            if (timecodeMatch && markerMatch) {
+              const timecode = timecodeMatch[1];
+              const markerName = markerMatch[1].trim();
+              
+              const formattedTime = formatTimecode(timecode);
+              output += `${formattedTime} - ${markerName}\n`;
+              markerCount++;
+            }
+          }
+        }
+
+        if (markerCount === 0) {
+          showStatus('No valid markers found in EDL file.', 'error');
+          return;
+        }
+
+        outputText.value = output;
+        outputSection.classList.add('active');
+        scheduleHeightCheck(); // Height Changed
+        showStatus(`Successfully converted ${markerCount} marker${markerCount !== 1 ? 's' : ''}.`, 'success');
+      } catch (error) {
+        showStatus('Error processing EDL file. Please check the file format.', 'error');
+        console.error('EDL Processing Error:', error);
+      }
+    }
+
+    // ========== TIMECODE FORMATTER ==========
+    function formatTimecode(timecode) {
+      // Handle both : and ; separators (drop/non-drop frame)
+      const parts = timecode.split(/[:;]/).map(num => parseInt(num, 10));
+      
+      if (parts.length < 3) return timecode; // Return original if invalid
+      
+      const hours = parts[0] || 0;
+      const minutes = parts[1] || 0;
+      const seconds = parts[2] || 0;
+      // Format for YouTube (omit hours if zero)
+      if (hours > 0) {
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      } else {
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+    }
+
+    // ========== STATUS MESSAGE DISPLAY ==========
+    function showStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message ${type === 'success' ? 'status-success' : 'status-error'} active`;
+      scheduleHeightCheck(); // Height Changed
+      
+      setTimeout(() => {
+        statusMessage.classList.remove('active');
+        scheduleHeightCheck(); // Height Changed
+      }, 4000);
+    }
+
+    // ========== RESET TOOL ==========
+    function resetTool() {
+      fileInput.value = '';
+      fileName.textContent = 'No file selected';
+      fileType.textContent = '';
+      fileInfo.classList.remove('active');
+      outputSection.classList.remove('active');
+      outputText.value = '';
+      statusMessage.classList.remove('active');
+      scheduleHeightCheck(); // Height Changed
+    }
+
+    // ========== TROUBLESHOOTING & DEBUG ==========
+    // Uncomment the line below to enable debug logging
+    // window.DEBUG_MODE = true;
+    if (window.DEBUG_MODE) {
+      console.log('✅ Timestamp Converter initialized');
+      console.log('📋 Supported formats: CSV (Premiere Pro), EDL (DaVinci Resolve)');
+    }
+    
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    // This is the "Definitive Iframe Scrollbar Script"
+    let lastHeight = 0;
+    let resizeTimer;
+
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
+    function sendHeight() {
+      // Use scrollHeight for content height
+      const height = document.body.scrollHeight;
+      
+      // Only send message if height has *actually* changed
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
+    function scheduleHeightCheck() {
+        // Clear any pending checks
+        clearTimeout(resizeTimer);
+        // Schedule a new check after 150ms
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    // Send height on initial load (with a slight delay)
+    // This fixes the "Content Cut-Off" race condition.
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    // Send height on window resize (debounced)
+    window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
+        scheduleHeightCheck();
+    });
+    
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+</body>
+</html>
