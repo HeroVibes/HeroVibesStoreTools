@@ -461,6 +461,7 @@
       qualityBadge.textContent = quality;
       qualityInfo.textContent = `Quality: ${quality} • Click image to open full size`;
       thumbnailDisplay.classList.add('show');
+      sendHeight();
     }
 
     // ===== SHOW ERROR =====
@@ -468,6 +469,7 @@
       errorText.textContent = message;
       errorMessage.classList.add('show');
       thumbnailDisplay.classList.remove('show');
+      sendHeight();
     }
 
     // ===== HIDE ALL MESSAGES =====
@@ -476,6 +478,7 @@
       thumbnailDisplay.classList.remove('show');
       currentThumbnailUrl = '';
       currentQuality = '';
+      sendHeight();
     }
 
     // ===== THUMBNAIL CLICK TO OPEN =====
@@ -523,13 +526,16 @@
     });
 
     // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
     function sendHeight() {
       var height = document.body.scrollHeight;
-      window.parent.postMessage({ frameHeight: height }, '*');
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
     }
 
-    window.onload = sendHeight;
-    window.onresize = sendHeight;
+    window.addEventListener('load', sendHeight);
   </script>
 </body>
 </html>
