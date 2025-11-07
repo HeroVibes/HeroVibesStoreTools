@@ -938,7 +938,7 @@
 <body>
   
   <!-- VERSION BADGE -->
-  <div class="version-badge" title="QR Code Generator Version">v1.0.2</div>
+  <div class="version-badge" title="QR Code Generator Version">v1.0.3</div>
 
   <div class="page-wrapper">
     
@@ -1697,7 +1697,7 @@
     });
 
     // ====================================
-    // QR CODE GENERATION WITH TRANSPARENCY FIX
+    // QR CODE GENERATION - FIXED
     // ====================================
     function updateQRCode() {
       const text = input.value.trim();
@@ -1713,26 +1713,30 @@
       
       updatePreviewBackground(bgColor);
 
-      // Generate QR code on canvas first
-      let darkColor, lightColor;
+      // Determine initial colors for QR generation
+      let initialDarkColor, initialLightColor;
       
       if (qrColor === 'gradient') {
-        darkColor = '#000000';
-        lightColor = '#FFFFFF';
+        initialDarkColor = '#000000';
+        initialLightColor = '#FFFFFF';
       } else if (qrColor === '#ffffff' && bgColor === '#000000') {
-        darkColor = '#FFFFFF';
-        lightColor = '#000000';
+        initialDarkColor = '#FFFFFF';
+        initialLightColor = '#000000';
+      } else if (qrColor === '#ffffff' && bgColor === 'transparent') {
+        // White QR on transparent: generate white on black, then make black transparent
+        initialDarkColor = '#FFFFFF';
+        initialLightColor = '#000000';
       } else {
-        darkColor = (qrColor === '#ffffff') ? '#FFFFFF' : '#000000';
-        lightColor = (bgColor === 'transparent') ? '#FFFFFF' : bgColor;
+        initialDarkColor = '#000000';
+        initialLightColor = '#FFFFFF';
       }
 
       QRCode.toCanvas(canvas, text, {
         width: 800,
         margin: 2,
         color: {
-          dark: darkColor,
-          light: lightColor
+          dark: initialDarkColor,
+          light: initialLightColor
         },
         errorCorrectionLevel: 'H'
       }, (err) => {
@@ -1753,18 +1757,17 @@
 
     function applyStyleAndLogo(canvas, qrColor, bgColor) {
       const ctx = canvas.getContext('2d');
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
       
       // Apply gradient if selected
       if (qrColor === 'gradient') {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = canvas.width;
         tempCanvas.height = canvas.height;
         const tempCtx = tempCanvas.getContext('2d');
         
-        // Handle background - transparent or solid color
+        // Handle background
         if (bgColor !== 'transparent') {
           tempCtx.fillStyle = bgColor;
           tempCtx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1792,31 +1795,49 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(tempCanvas, 0, 0);
       } else if (qrColor !== '#000000' && qrColor !== '#ffffff') {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
+        // Apply custom color (not black or white)
         const rgb = hexToRgb(qrColor);
         
         for (let i = 0; i < data.length; i += 4) {
+          // Apply custom color to dark pixels (QR code pixels)
           if (data[i] < 128) {
             data[i] = rgb.r;
             data[i + 1] = rgb.g;
             data[i + 2] = rgb.b;
+          } else if (bgColor !== 'transparent') {
+            // Apply background color to light pixels
+            const bgRgb = hexToRgb(bgColor);
+            data[i] = bgRgb.r;
+            data[i + 1] = bgRgb.g;
+            data[i + 2] = bgRgb.b;
           }
         }
         
         ctx.putImageData(imageData, 0, 0);
       }
       
-      // Handle transparent background by making white pixels transparent
+      // Handle transparent background by making appropriate pixels transparent
       if (bgColor === 'transparent') {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
         
         for (let i = 0; i < data.length; i += 4) {
-          // If pixel is white (or very light), make it transparent
-          if (data[i] > 250 && data[i + 1] > 250 && data[i + 2] > 250) {
-            data[i + 3] = 0; // Set alpha to 0 (transparent)
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          
+          // If white QR is selected, make black pixels transparent
+          // If any other QR color is selected, make white pixels transparent
+          if (qrColor === '#ffffff') {
+            // White QR on transparent: make black/dark pixels transparent
+            if (r < 128 && g < 128 && b < 128) {
+              data[i + 3] = 0;
+            }
+          } else {
+            // Other colors on transparent: make white/light pixels transparent
+            if (r > 250 && g > 250 && b > 250) {
+              data[i + 3] = 0;
+            }
           }
         }
         
