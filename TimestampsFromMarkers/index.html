@@ -401,14 +401,34 @@
       resetTool();
     });
     
-    // ========== COPY TO CLIPBOARD ==========
-    copyBtn.addEventListener('click', ()async => {
+    // ========== COPY TO CLIPBOARD (REVISED FOR COMPATIBILITY) ==========
+    copyBtn.addEventListener('click', () => {
       try {
-        await navigator.clipboard.writeText(outputText.value);
-        showStatus('Copied to clipboard!', 'success');
+        // Select the text
+        outputText.select();
+        
+        // For mobile devices which may not support .select() well
+        // This sets the selection range
+        outputText.setSelectionRange(0, 99999); 
+    
+        // Execute the copy command
+        const successful = document.execCommand('copy');
+        
+        if (successful) {
+          showStatus('Copied to clipboard!', 'success');
+        } else {
+          showStatus('Failed to copy. Please copy manually.', 'error');
+        }
       } catch (err) {
-        console.error('Failed to copy: ', err);
-        showStatus('Failed to copy to clipboard.', 'error');
+        console.error('Copy to clipboard failed:', err);
+        showStatus('Failed to copy. Please copy manually.', 'error');
+      }
+      
+      // Deselect text after copying
+      if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+      } else if (document.selection) {
+        document.selection.empty();
       }
     });
     
