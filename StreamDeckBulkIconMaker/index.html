@@ -40,8 +40,37 @@
 
         /* ===== MAIN CONTAINER ===== */
         .main-wrapper {
-            max-width: 600px;
+            max-width: 1200px;
             margin: 0 auto;
+        }
+
+        /* ===== TWO COLUMN LAYOUT ===== */
+        .layout-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .layout-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+            }
+
+            .left-column {
+                order: 1;
+            }
+
+            .right-column {
+                order: 2;
+            }
+        }
+
+        .left-column,
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
         /* ===== COLLAPSIBLE SECTIONS ===== */
@@ -49,7 +78,6 @@
             background: var(--bg-secondary);
             border: 1px solid var(--outline);
             border-radius: var(--radius);
-            margin-bottom: 16px;
             overflow: hidden;
             transition: all 0.3s ease;
         }
@@ -227,7 +255,7 @@
         }
 
         .help-section {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .help-section:last-child {
@@ -238,38 +266,13 @@
             font-size: 14px;
             font-weight: 700;
             color: var(--accent);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            margin-bottom: 6px;
         }
 
         .help-section p {
             font-size: 12px;
             color: var(--text-secondary);
-            line-height: 1.6;
-            margin-bottom: 8px;
-        }
-
-        .help-section ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .help-section li {
-            font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.6;
-            margin-bottom: 6px;
-            padding-left: 16px;
-            position: relative;
-        }
-
-        .help-section li::before {
-            content: '•';
-            position: absolute;
-            left: 0;
-            color: var(--accent);
-            font-weight: 700;
+            line-height: 1.5;
         }
 
         /* ===== PREVIEW SECTION ===== */
@@ -310,6 +313,13 @@
             overflow: hidden;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             z-index: 1;
+        }
+
+        @media (max-width: 767px) {
+            .preview-area {
+                width: 250px;
+                height: 250px;
+            }
         }
 
         #iconPreview {
@@ -793,27 +803,10 @@
             cursor: pointer;
         }
 
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         /* ===== RESPONSIVE ===== */
         @media (max-width: 640px) {
             body {
                 padding: 16px 12px;
-            }
-
-            .preview-area {
-                width: 250px;
-                height: 250px;
             }
 
             .checkbox-grid,
@@ -830,150 +823,161 @@
 </head>
 <body>
     <div class="main-wrapper">
-        <!-- PREVIEW -->
-        <div class="collapsible-section">
-            <div class="section-header" onclick="toggleSection(this)">
-                <div class="section-title">
-                    <i class="fas fa-eye"></i>
-                    <span>Preview</span>
-                </div>
-                <i class="fas fa-chevron-down toggle-icon"></i>
-            </div>
-            <div class="section-content">
-                <div class="preview-container">
-                    <div class="preview-area">
-                        <canvas id="iconPreview" width="300" height="300"></canvas>
-                        <div class="preview-overlay-text">SELECT AN ICON</div>
+        <div class="layout-container">
+            <!-- LEFT COLUMN -->
+            <div class="left-column">
+                <!-- CONTENT -->
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <i class="fas fa-images"></i>
+                            <span>Content</span>
+                        </div>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
-                </div>
-                <div class="preview-stats">
-                    <div class="stat-card">
-                        <div class="stat-label">Icons Selected</div>
-                        <div class="stat-value" id="selectedCount">0</div>
-                    </div>
-                    <div class="stat-card clickable" id="sizeCard">
-                        <div class="stat-label">Resolution</div>
-                        <div class="stat-value">
-                            <span id="currentSize">144</span>px
+                    <div class="section-content">
+                        <div class="tab-navigation">
+                            <button class="tab-btn active" id="showIconsBtn">Icons</button>
+                            <button class="tab-btn" id="showTxBtn">Textures</button>
+                            <button class="tab-btn" id="showBgBtn">Gradients</button>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- CONTENT -->
-        <div class="collapsible-section">
-            <div class="section-header" onclick="toggleSection(this)">
-                <div class="section-title">
-                    <i class="fas fa-images"></i>
-                    <span>Content</span>
-                </div>
-                <i class="fas fa-chevron-down toggle-icon"></i>
-            </div>
-            <div class="section-content">
-                <div class="tab-navigation">
-                    <button class="tab-btn active" id="showIconsBtn">Icons</button>
-                    <button class="tab-btn" id="showTxBtn">Textures</button>
-                    <button class="tab-btn" id="showBgBtn">Gradients</button>
-                </div>
-                <div class="content-wrapper">
-                    <div id="iconsContent" class="content-grid active">
-                        <div class="grid-item upload-area">
-                            <label for="uploadIcon">+ Upload</label>
-                            <input type="file" id="uploadIcon" accept="image/*,.svg">
-                        </div>
-                    </div>
-                    <div id="txContent" class="content-grid">
-                        <div class="grid-item upload-area">
-                            <label for="uploadTx">+ Upload</label>
-                            <input type="file" id="uploadTx" accept="image/*">
-                        </div>
-                    </div>
-                    <div id="bgContent" class="content-grid">
-                        <div class="grid-item upload-area">
-                            <label for="uploadBg">+ Upload</label>
-                            <input type="file" id="uploadBg" accept="image/*">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SETTINGS -->
-        <div class="collapsible-section">
-            <div class="section-header" onclick="toggleSection(this)">
-                <div class="section-title">
-                    <i class="fas fa-sliders-h"></i>
-                    <span>Settings</span>
-                </div>
-                <div class="section-header-right">
-                    <button class="help-btn" onclick="openHelpModal(event)" title="Help">
-                        <i class="fas fa-question"></i>
-                    </button>
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </div>
-            </div>
-            <div class="section-content">
-                <div class="input-group">
-                    <label for="iconName">Icon Name</label>
-                    <input type="text" id="iconName" value="Custom Icon" placeholder="Enter icon name...">
-                </div>
-
-                <div class="input-group">
-                    <label>Options</label>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="saveAsZip">
-                            <label for="saveAsZip">Multi-Size & ZIP</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="edgeOnOff" checked>
-                            <label for="edgeOnOff">Edge On/Off</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="edgeGlowOnOff" checked>
-                            <label for="edgeGlowOnOff">Edge Glow</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="logoGlowOnOff">
-                            <label for="logoGlowOnOff">Logo Glow</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <div class="color-grid">
-                        <div class="color-picker-item">
-                            <label for="iconColor">Icon</label>
-                            <div class="color-input-wrapper">
-                                <input type="color" id="iconColor" value="#FFFFFF">
-                                <input type="text" id="iconColorHex" value="#FFFFFF" class="hex-input" maxlength="7">
+                        <div class="content-wrapper">
+                            <div id="iconsContent" class="content-grid active">
+                                <div class="grid-item upload-area">
+                                    <label for="uploadIcon">+ Upload</label>
+                                    <input type="file" id="uploadIcon" accept="image/*,.svg">
+                                </div>
                             </div>
-                        </div>
-                        <div class="color-picker-item">
-                            <label for="backgroundColor">Background</label>
-                            <div class="color-input-wrapper">
-                                <input type="color" id="backgroundColor" value="#000000">
-                                <input type="text" id="backgroundColorHex" value="#000000" class="hex-input" maxlength="7">
+                            <div id="txContent" class="content-grid">
+                                <div class="grid-item upload-area">
+                                    <label for="uploadTx">+ Upload</label>
+                                    <input type="file" id="uploadTx" accept="image/*">
+                                </div>
                             </div>
-                        </div>
-                        <div class="color-picker-item">
-                            <label for="glowColor">Glow</label>
-                            <div class="color-input-wrapper">
-                                <input type="color" id="glowColor" value="#87A9FF">
-                                <input type="text" id="glowColorHex" value="#87A9FF" class="hex-input" maxlength="7">
+                            <div id="bgContent" class="content-grid">
+                                <div class="grid-item upload-area">
+                                    <label for="uploadBg">+ Upload</label>
+                                    <input type="file" id="uploadBg" accept="image/*">
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="gradient-warning" id="gradientWarning">
-                        ⚠️ A gradient is active. Turn off the gradient first to use a solid background color.
+                </div>
+
+                <!-- SETTINGS -->
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <i class="fas fa-sliders-h"></i>
+                            <span>Settings</span>
+                        </div>
+                        <div class="section-header-right">
+                            <button class="help-btn" onclick="openHelpModal(event)" title="Help">
+                                <i class="fas fa-question"></i>
+                            </button>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="input-group">
+                            <label for="iconName">Icon Name</label>
+                            <input type="text" id="iconName" value="Custom Icon" placeholder="Enter icon name...">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Options</label>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="saveAsZip">
+                                    <label for="saveAsZip">Multi-Size & ZIP</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="edgeOnOff" checked>
+                                    <label for="edgeOnOff">Edge On/Off</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="edgeGlowOnOff" checked>
+                                    <label for="edgeGlowOnOff">Edge Glow</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="logoGlowOnOff">
+                                    <label for="logoGlowOnOff">Logo Glow</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <div class="color-grid">
+                                <div class="color-picker-item">
+                                    <label for="iconColor">Icon</label>
+                                    <div class="color-input-wrapper">
+                                        <input type="color" id="iconColor" value="#FFFFFF">
+                                        <input type="text" id="iconColorHex" value="#FFFFFF" class="hex-input" maxlength="7">
+                                    </div>
+                                </div>
+                                <div class="color-picker-item">
+                                    <label for="backgroundColor">Background</label>
+                                    <div class="color-input-wrapper">
+                                        <input type="color" id="backgroundColor" value="#000000">
+                                        <input type="text" id="backgroundColorHex" value="#000000" class="hex-input" maxlength="7">
+                                    </div>
+                                </div>
+                                <div class="color-picker-item">
+                                    <label for="glowColor">Glow</label>
+                                    <div class="color-input-wrapper">
+                                        <input type="color" id="glowColor" value="#87A9FF">
+                                        <input type="text" id="glowColorHex" value="#87A9FF" class="hex-input" maxlength="7">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="gradient-warning" id="gradientWarning">
+                                ⚠️ A gradient is active. Turn off the gradient first to use a solid background color.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="right-column">
+                <!-- PREVIEW -->
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <i class="fas fa-eye"></i>
+                            <span>Preview</span>
+                        </div>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="preview-container">
+                            <div class="preview-area">
+                                <canvas id="iconPreview" width="300" height="300"></canvas>
+                                <div class="preview-overlay-text">SELECT AN ICON</div>
+                            </div>
+                        </div>
+                        <div class="preview-stats">
+                            <div class="stat-card">
+                                <div class="stat-label">Icons Selected</div>
+                                <div class="stat-value" id="selectedCount">0</div>
+                            </div>
+                            <div class="stat-card clickable" id="sizeCard">
+                                <div class="stat-label">Resolution</div>
+                                <div class="stat-value">
+                                    <span id="currentSize">144</span>px
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <button id="downloadBtn" class="btn btn-success">
-                        <i class="fas fa-download"></i> Download Icons
-                    </button>
+                <!-- DOWNLOAD BUTTON -->
+                <div class="collapsible-section">
+                    <div class="section-content" style="padding: 24px;">
+                        <button id="downloadBtn" class="btn btn-success">
+                            <i class="fas fa-download"></i> Download Icons
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -985,7 +989,7 @@
             <div class="modal-header">
                 <div class="modal-title">
                     <i class="fas fa-circle-info"></i>
-                    <span>Tool Guide</span>
+                    <span>Quick Guide</span>
                 </div>
                 <button class="modal-close" onclick="closeHelpModal()">
                     <i class="fas fa-times"></i>
@@ -993,56 +997,32 @@
             </div>
             <div class="modal-body">
                 <div class="help-section">
-                    <h3>Resolution (Click to Change)</h3>
-                    <p>Click the Resolution stat card to cycle through available sizes: 72px, 96px, 144px (recommended), 288px, and 500px. This determines the size of your downloaded icon.</p>
-                </div>
-
-                <div class="help-section">
-                    <h3>Icon Name</h3>
-                    <p>The base name for your exported files. If downloading multiple icons, each will be appended with the icon's name.</p>
+                    <h3>Resolution</h3>
+                    <p>Click the Resolution card to cycle through sizes (72px, 96px, 144px, 288px, 500px). Default is 144px.</p>
                 </div>
 
                 <div class="help-section">
                     <h3>Multi-Size & ZIP</h3>
-                    <p>When enabled, generates icons in all 5 sizes (72px, 96px, 144px, 288px, 500px) and packages them into a ZIP file organized by resolution folders.</p>
+                    <p>Generates icons in all 5 sizes and packages them into a ZIP file organized by folders.</p>
                 </div>
 
                 <div class="help-section">
-                    <h3>Edge On/Off</h3>
-                    <p>Toggles the corner bracket decorations that appear on your icon. These are the L-shaped lines in each corner.</p>
-                </div>
-
-                <div class="help-section">
-                    <h3>Edge Glow</h3>
-                    <p>Adds a glow effect to the corner brackets using your selected Glow color. Only visible when Edge On/Off is enabled.</p>
-                </div>
-
-                <div class="help-section">
-                    <h3>Logo Glow</h3>
-                    <p>Adds a glow effect around your icon/logo using your selected Glow color for extra visual impact.</p>
-                </div>
-
-                <div class="help-section">
-                    <h3>Color Pickers</h3>
-                    <ul>
-                        <li><strong>Icon:</strong> Controls the color of your selected icon/logo</li>
-                        <li><strong>Background:</strong> Sets a solid background color (disabled when using gradients)</li>
-                        <li><strong>Glow:</strong> Determines the color of glow effects for both edges and logos</li>
-                    </ul>
+                    <h3>Effects</h3>
+                    <p><strong>Edge On/Off:</strong> Toggle corner bracket decorations.<br>
+                    <strong>Edge Glow:</strong> Adds glow to brackets (requires Edge On).<br>
+                    <strong>Logo Glow:</strong> Adds glow around your icon.</p>
                 </div>
 
                 <div class="help-section">
                     <h3>Content Tabs</h3>
-                    <ul>
-                        <li><strong>Icons:</strong> Select or upload custom icons/logos for your Stream Deck</li>
-                        <li><strong>Textures:</strong> Add overlay patterns to give your icon depth and style</li>
-                        <li><strong>Gradients:</strong> Apply gradient backgrounds instead of solid colors</li>
-                    </ul>
+                    <p><strong>Icons:</strong> Select or upload logos.<br>
+                    <strong>Textures:</strong> Add overlay patterns.<br>
+                    <strong>Gradients:</strong> Apply gradient backgrounds (disables solid background color).</p>
                 </div>
 
                 <div class="help-section">
                     <h3>Multi-Selection</h3>
-                    <p>You can select multiple icons to batch-generate Stream Deck buttons with the same styling. Perfect for creating a consistent set!</p>
+                    <p>Select multiple icons to batch-generate with the same styling.</p>
                 </div>
             </div>
         </div>
@@ -1811,7 +1791,8 @@
 
             if (backgroundData && backgroundData.id === 'off') {
                 targetCtx.fillStyle = bgColor;
-                targetCtx.fillRect(0, 0, targetSize, targetSize);} else if (backgroundData) {
+                targetCtx.fillRect(0, 0, targetSize, targetSize);
+            } else if (backgroundData) {
                 if (backgroundData.type === 'color') {
                     targetCtx.fillStyle = backgroundData.value;
                     targetCtx.fillRect(0, 0, targetSize, targetSize);
@@ -1826,360 +1807,298 @@
                         const img = await loadImage(backgroundData.src);
                         targetCtx.drawImage(img, 0, 0, targetSize, targetSize);
                     } catch (error) {
-                        console.error('Error drawing custom background image:', error);
-                        targetCtx.fillStyle = bgColor;
-                        targetCtx.fillRect(0, 0, targetSize, targetSize);
-                    }
-                }
-            } else {
-                targetCtx.fillStyle = bgColor;
-                targetCtx.fillRect(0, 0, targetSize, targetSize);
-            }
-
+console.error('Error drawing custom background image:', error);
+targetCtx.fillStyle = bgColor;
+targetCtx.fillRect(0, 0, targetSize, targetSize);
+}
+}
+} else {
+targetCtx.fillStyle = bgColor;
+targetCtx.fillRect(0, 0, targetSize, targetSize);
+}
             if (textureData && textureData.textureOpacity > 0) {
-                drawPattern(targetCtx, textureData, targetSize / 300, targetSize, targetSize, false);
-            } else if (textureData && textureData.type === 'custom-image') {
-                try {
-                    const img = await loadImage(textureData.src);
-                    targetCtx.globalAlpha = textureData.textureOpacity || 1;
-                    targetCtx.drawImage(img, 0, 0, targetSize, targetSize);
-                    targetCtx.globalAlpha = 1;
-                } catch (error) {
-                    console.error('Error drawing custom texture image:', error);
-                }
+            drawPattern(targetCtx, textureData, targetSize / 300, targetSize, targetSize, false);
+        } else if (textureData && textureData.type === 'custom-image') {
+            try {
+                const img = await loadImage(textureData.src);
+                targetCtx.globalAlpha = textureData.textureOpacity || 1;
+                targetCtx.drawImage(img, 0, 0, targetSize, targetSize);
+                targetCtx.globalAlpha = 1;
+            } catch (error) {
+                console.error('Error drawing custom texture image:', error);
+            }
+        }
+
+        if (iconData) {
+            if (logoGlowOn) {
+                targetCtx.shadowColor = glowColor;
+                targetCtx.shadowBlur = 15 * (targetSize / 300);
+                targetCtx.shadowOffsetX = 0;
+                targetCtx.shadowOffsetY = 0;
             }
 
-            if (iconData) {
-                if (logoGlowOn) {
-                    targetCtx.shadowColor = glowColor;
-                    targetCtx.shadowBlur = 15 * (targetSize / 300);
-                    targetCtx.shadowOffsetX = 0;
-                    targetCtx.shadowOffsetY = 0;
-                }
-
-                if (iconData.type === 'fa-icon') {
+            if (iconData.type === 'fa-icon') {
+                targetCtx.fillStyle = iconColor;
+                const fontFamily = iconData.class.includes('fa-brands') ? '"Font Awesome 6 Brands"' : '"Font Awesome 6 Free"';
+                targetCtx.font = `900 ${iconFontSize}px ${fontFamily}`;
+                targetCtx.textAlign = 'center';
+                targetCtx.textBaseline = 'middle';
+                targetCtx.fillText(iconData.unicode, targetSize / 2, targetSize / 2);
+            } else if (iconData.type === 'custom-image') {
+                try {
+                    const img = await loadImage(iconData.src);
+                    const imgAspectRatio = img.width / img.height;
+                    let drawWidth = iconImageDrawSize;
+                    let drawHeight = iconImageDrawSize;
+                    if (imgAspectRatio > 1) { 
+                        drawHeight = drawWidth / imgAspectRatio;
+                    } else { 
+                        drawWidth = drawHeight * imgAspectRatio;
+                    }
+                    const drawX = (targetSize - drawWidth) / 2;
+                    const drawY = (targetSize - drawHeight) / 2;
+                    targetCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                } catch (error) {
+                    console.error('Error drawing custom icon image:', error);
                     targetCtx.fillStyle = iconColor;
-                    const fontFamily = iconData.class.includes('fa-brands') ? '"Font Awesome 6 Brands"' : '"Font Awesome 6 Free"';
-                    targetCtx.font = `900 ${iconFontSize}px ${fontFamily}`;
+                    targetCtx.font = `bold ${50 * (targetSize / 300)}px Arial`;
                     targetCtx.textAlign = 'center';
                     targetCtx.textBaseline = 'middle';
-                    targetCtx.fillText(iconData.unicode, targetSize / 2, targetSize / 2);
-                } else if (iconData.type === 'custom-image') {
-                    try {
-                        const img = await loadImage(iconData.src);
-                        const imgAspectRatio = img.width / img.height;
-                        let drawWidth = iconImageDrawSize;
-                        let drawHeight = iconImageDrawSize;
-                        if (imgAspectRatio > 1) { 
-                            drawHeight = drawWidth / imgAspectRatio;
-                        } else { 
-                            drawWidth = drawHeight * imgAspectRatio;
-                        }
-                        const drawX = (targetSize - drawWidth) / 2;
-                        const drawY = (targetSize - drawHeight) / 2;
-                        targetCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-                    } catch (error) {
-                        console.error('Error drawing custom icon image:', error);
-                        targetCtx.fillStyle = iconColor;
-                        targetCtx.font = `bold ${50 * (targetSize / 300)}px Arial`;
-                        targetCtx.textAlign = 'center';
-                        targetCtx.textBaseline = 'middle';
-                        targetCtx.fillText('?', targetSize / 2, targetSize / 2);
-                    }
-                } else if (iconData.type === 'custom-svg') {
-                    try {
-                        const img = await renderSvgIcon(iconData.src, iconColor); 
-                        const imgAspectRatio = img.width / img.height; 
-                        let drawWidth = iconImageDrawSize;
-                        let drawHeight = iconImageDrawSize;
-                        if (imgAspectRatio > 1) { 
-                            drawHeight = drawWidth / imgAspectRatio;
-                        } else { 
-                            drawWidth = drawHeight * imgAspectRatio;
-                        }
-                        const drawX = (targetSize - drawWidth) / 2;
-                        const drawY = (targetSize - drawHeight) / 2;
-                        targetCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-                    } catch (error) {
-                        console.error('Error drawing custom SVG icon:', error);
-                        targetCtx.fillStyle = iconColor;
-                        targetCtx.font = `bold ${50 * (targetSize / 300)}px Arial`;
-                        targetCtx.textAlign = 'center';
-                        targetCtx.textBaseline = 'middle';
-                        targetCtx.fillText('SVG?', targetSize / 2, targetSize / 2);
-                    }
+                    targetCtx.fillText('?', targetSize / 2, targetSize / 2);
                 }
-                targetCtx.shadowBlur = 0;
-                targetCtx.shadowColor = 'transparent';
-                targetCtx.shadowOffsetX = 0;
-                targetCtx.shadowOffsetY = 0;
-            }
-
-            if (edgeOn) {
-                if (edgeGlowOn) {
-                    targetCtx.shadowColor = glowColor;
-                    targetCtx.shadowBlur = 15 * (targetSize / 300);
-                    targetCtx.shadowOffsetX = 0;
-                    targetCtx.shadowOffsetY = 0;
-                }
-
-                targetCtx.strokeStyle = glowColor;
-                targetCtx.lineWidth = baseEdgeLineWidth * (targetSize / 300);
-                targetCtx.lineCap = 'round';
-                targetCtx.lineJoin = 'round';
-
-                const offset = baseEdgeOffset * (targetSize / 300);
-                const lineLength = baseEdgeLineLength * (targetSize / 300);
-
-                targetCtx.beginPath();
-                targetCtx.moveTo(offset, offset + lineLength);
-                targetCtx.lineTo(offset, offset);
-                targetCtx.lineTo(offset + lineLength, offset);
-                targetCtx.moveTo(targetSize - offset - lineLength, offset);
-                targetCtx.lineTo(targetSize - offset, offset);
-                targetCtx.lineTo(targetSize - offset, offset + lineLength);
-                targetCtx.moveTo(targetSize - offset, targetSize - offset - lineLength);
-                targetCtx.lineTo(targetSize - offset, targetSize - offset);
-                targetCtx.lineTo(targetSize - offset - lineLength, targetSize - offset);
-                targetCtx.moveTo(offset + lineLength, targetSize - offset);
-                targetCtx.lineTo(offset, targetSize - offset);
-                targetCtx.lineTo(offset, targetSize - offset - lineLength); 
-                targetCtx.stroke();
-
-                targetCtx.shadowBlur = 0;
-                targetCtx.shadowColor = 'transparent';
-                targetCtx.shadowOffsetX = 0;
-                targetCtx.shadowOffsetY = 0;
-            }
-        }
-
-        function debounce(func, delay) {
-            let timeout;
-            return function(...args) {
-                const context = this;
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(context, args), delay);
-            };
-        }
-
-        const debouncedDrawPreview = debounce(() => {
-            document.fonts.ready.then(drawPreview);
-        }, 100);
-
-        async function drawPreview() {
-            const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
-            const currentTx = texturesData.find(tx => tx.id === selectedTextureId);
-            const latestIcon = iconsData.find(icon => icon.id === latestSelectedIconId);
-
-            if (latestIcon) {
-                previewOverlayText.style.display = 'none';
-            } else {
-                previewOverlayText.style.display = 'block';
-            }
-
-            await renderIconToCanvas(
-                latestIcon,
-                currentBg,
-                currentTx,
-                iconColorInput.value,
-                backgroundColorInput.value,
-                glowColorInput.value,
-                edgeOnOffCheckbox.checked,
-                logoGlowOnOffCheckbox.checked,
-                edgeGlowOnOffCheckbox.checked,
-                iconPreview,
-                ctx,
-                300
-            );
-        }
-
-        function normalizeHex(hex) {
-            if (!hex) return '';
-            hex = hex.startsWith('#') ? hex : '#' + hex;
-            if (hex.length === 4 && /^#[0-9a-fA-F]{3}$/.test(hex)) {
-                return '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
-            }
-            return hex.toUpperCase();
-        }
-
-        function isValidHex(hex) {
-            return /^#?([0-9a-fA-F]{3}){1,2}$/.test(hex);
-        }
-
-        function updateColorInputs(colorPickerElement, hexInputElement, newColor) {
-            const normalizedColor = normalizeHex(newColor);
-            colorPickerElement.value = normalizedColor;
-            hexInputElement.value = normalizedColor;
-        }
-
-        // ===== TAB SWITCHING =====
-        showIconsBtn.addEventListener('click', () => {
-            showIconsBtn.classList.add('active');
-            showTxBtn.classList.remove('active');
-            showBgBtn.classList.remove('active');
-            iconsContent.classList.add('active');
-            txContent.classList.remove('active');
-            bgContent.classList.remove('active');
-        });
-
-        showTxBtn.addEventListener('click', () => {
-            showTxBtn.classList.add('active');
-            showIconsBtn.classList.remove('active');
-            showBgBtn.classList.remove('active');
-            txContent.classList.add('active');
-            iconsContent.classList.remove('active');
-            bgContent.classList.remove('active');
-        });
-
-        showBgBtn.addEventListener('click', () => {
-            showBgBtn.classList.add('active');
-            showIconsBtn.classList.remove('active');
-            showTxBtn.classList.remove('active');
-            bgContent.classList.add('active');
-            iconsContent.classList.remove('active');
-            txContent.classList.remove('active');
-        });
-
-        // ===== COLOR SYNC WITH DEBOUNCE =====
-        function setupColorSync(colorPicker, hexInput) {
-            colorPicker.addEventListener('input', () => {
-                updateColorInputs(colorPicker, hexInput, colorPicker.value);
-                debouncedDrawPreview();
-            });
-
-            let hexInputTimeout;
-            hexInput.addEventListener('input', () => {
-                const value = hexInput.value;
-                
-                clearTimeout(hexInputTimeout);
-                
-                if (value.length === 7 && isValidHex(value)) {
-                    hexInputTimeout = setTimeout(() => {
-                        updateColorInputs(colorPicker, hexInput, value);
-                        debouncedDrawPreview();
-                    }, 300);
-                } else if (value.length === 4 && isValidHex(value)) {
-                    hexInputTimeout = setTimeout(() => {
-                        updateColorInputs(colorPicker, hexInput, value);
-                        debouncedDrawPreview();
-                    }, 300);
-                }
-            });
-        }
-
-        setupColorSync(iconColorInput, iconColorHexInput);
-        setupColorSync(backgroundColorInput, backgroundColorHexInput);
-        setupColorSync(glowColorInput, glowColorHexInput);
-
-        // ===== CHECKBOX & NAME LISTENERS =====
-        document.querySelectorAll('.checkbox-item input, #iconName').forEach(input => {
-            input.addEventListener('change', () => {
-                debouncedDrawPreview();
-            });
-        });
-
-        // ===== DOWNLOAD FUNCTIONALITY =====
-        downloadBtn.addEventListener('click', async () => {
-            if (selectedIcons.length === 0) {
-                alert('Please select at least one icon to download.');
-                return;
-            }
-
-            const baseFileName = iconNameInput.value.trim() || 'CustomIcon';
-            const saveAsZip = document.getElementById('saveAsZip').checked;
-            const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
-            const currentTx = texturesData.find(tx => tx.id === selectedTextureId);
-            const bgColor = backgroundColorInput.value;
-            const iconColor = iconColorInput.value;
-            const glowColor = glowColorInput.value;
-            const edgeOn = edgeOnOffCheckbox.checked;
-            const logoGlowOn = logoGlowOnOffCheckbox.checked;
-            const edgeGlowOn = edgeGlowOnOffCheckbox.checked;
-
-            let zip;
-            if (saveAsZip) {
-                zip = new JSZip();
-                const sizesToGenerate = [500, 288, 144, 96, 72];
-                const recommendedSize = 144;
-
-                downloadBtn.disabled = true;
-                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating ZIP...';
-
+            } else if (iconData.type === 'custom-svg') {
                 try {
-                    for (const iconId of selectedIcons) {
-                        const iconData = iconsData.find(i => i.id === iconId);
-                        if (!iconData) {
-                            console.warn(`Icon with ID ${iconId} not found. Skipping.`);
-                            continue;
-                        }
-
-                        const cleanIconName = iconData.name.replace(/[^a-z0-9]/gi, '_');
-
-                        for (const size of sizesToGenerate) {
-                            const exportCanvas = document.createElement('canvas');
-                            exportCanvas.width = size;
-                            exportCanvas.height = size;
-                            const exportCtx = exportCanvas.getContext('2d');
-
-                            await renderIconToCanvas(
-                                iconData,
-                                currentBg,
-                                currentTx,
-                                iconColor,
-                                bgColor,
-                                glowColor,
-                                edgeOn,
-                                logoGlowOn,
-                                edgeGlowOn,
-                                exportCanvas,
-                                exportCtx,
-                                size
-                            );
-
-                            const dataURL = exportCanvas.toDataURL('image/png');
-                            const base64Data = dataURL.split(',')[1];
-                            
-                            let folderName = `${size}px`;
-                            if (size === recommendedSize) {
-                                folderName = `${size}px (Recommended)`;
-                            }
-
-                            zip.file(`${folderName}/${baseFileName}_${cleanIconName}.png`, base64Data, { base64: true });
-                        }
+                    const img = await renderSvgIcon(iconData.src, iconColor); 
+                    const imgAspectRatio = img.width / img.height; 
+                    let drawWidth = iconImageDrawSize;
+                    let drawHeight = iconImageDrawSize;
+                    if (imgAspectRatio > 1) { 
+                        drawHeight = drawWidth / imgAspectRatio;
+                    } else { 
+                        drawWidth = drawHeight * imgAspectRatio;
                     }
-
-                    const zipBlob = await zip.generateAsync({ type: 'blob' });
-                    const zipFileName = `${baseFileName}_Icons.zip`;
-                    const zipLink = document.createElement('a');
-                    zipLink.href = URL.createObjectURL(zipBlob);
-                    zipLink.download = zipFileName;
-                    document.body.appendChild(zipLink);
-                    zipLink.click();
-                    document.body.removeChild(zipLink);
-                    URL.revokeObjectURL(zipLink.href);
-
+                    const drawX = (targetSize - drawWidth) / 2;
+                    const drawY = (targetSize - drawHeight) / 2;
+                    targetCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
                 } catch (error) {
-                    console.error('Error during ZIP icon download:', error);
-                    alert('An error occurred during ZIP download. Please check the console for details.');
-                } finally {
-                    downloadBtn.disabled = false;
-                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons';
+                    console.error('Error drawing custom SVG icon:', error);
+                    targetCtx.fillStyle = iconColor;
+                    targetCtx.font = `bold ${50 * (targetSize / 300)}px Arial`;
+                    targetCtx.textAlign = 'center';
+                    targetCtx.textBaseline = 'middle';
+                    targetCtx.fillText('SVG?', targetSize / 2, targetSize / 2);
                 }
+            }
+            targetCtx.shadowBlur = 0;
+            targetCtx.shadowColor = 'transparent';
+            targetCtx.shadowOffsetX = 0;
+            targetCtx.shadowOffsetY = 0;
+        }
 
-            } else {
-                downloadBtn.disabled = true;
-                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
-                try {
-                    for (const iconId of selectedIcons) {
-                        const iconData = iconsData.find(i => i.id === iconId);
-                        if (!iconData) {
-                            console.warn(`Icon with ID ${iconId} not found. Skipping.`);
-                            continue;
-                        }
+        if (edgeOn) {
+            if (edgeGlowOn) {
+                targetCtx.shadowColor = glowColor;
+                targetCtx.shadowBlur = 15 * (targetSize / 300);
+                targetCtx.shadowOffsetX = 0;
+                targetCtx.shadowOffsetY = 0;
+            }
 
+            targetCtx.strokeStyle = glowColor;
+            targetCtx.lineWidth = baseEdgeLineWidth * (targetSize / 300);
+            targetCtx.lineCap = 'round';
+            targetCtx.lineJoin = 'round';
+
+            const offset = baseEdgeOffset * (targetSize / 300);
+            const lineLength = baseEdgeLineLength * (targetSize / 300);
+
+            targetCtx.beginPath();
+            targetCtx.moveTo(offset, offset + lineLength);
+            targetCtx.lineTo(offset, offset);
+            targetCtx.lineTo(offset + lineLength, offset);
+            targetCtx.moveTo(targetSize - offset - lineLength, offset);
+            targetCtx.lineTo(targetSize - offset, offset);
+            targetCtx.lineTo(targetSize - offset, offset + lineLength);
+            targetCtx.moveTo(targetSize - offset, targetSize - offset - lineLength);
+            targetCtx.lineTo(targetSize - offset, targetSize - offset);
+            targetCtx.lineTo(targetSize - offset - lineLength, targetSize - offset);
+            targetCtx.moveTo(offset + lineLength, targetSize - offset);
+            targetCtx.lineTo(offset, targetSize - offset);
+            targetCtx.lineTo(offset, targetSize - offset - lineLength); 
+            targetCtx.stroke();
+
+            targetCtx.shadowBlur = 0;
+            targetCtx.shadowColor = 'transparent';
+            targetCtx.shadowOffsetX = 0;
+            targetCtx.shadowOffsetY = 0;
+        }
+    }
+
+    function debounce(func, delay) {
+        let timeout;
+        return function(...args) {
+            const context = this;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+
+    const debouncedDrawPreview = debounce(() => {
+        document.fonts.ready.then(drawPreview);
+    }, 100);
+
+    async function drawPreview() {
+        const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
+        const currentTx = texturesData.find(tx => tx.id === selectedTextureId);
+        const latestIcon = iconsData.find(icon => icon.id === latestSelectedIconId);
+
+        if (latestIcon) {
+            previewOverlayText.style.display = 'none';
+        } else {
+            previewOverlayText.style.display = 'block';
+        }
+
+        await renderIconToCanvas(
+            latestIcon,
+            currentBg,
+            currentTx,
+            iconColorInput.value,
+            backgroundColorInput.value,
+            glowColorInput.value,
+            edgeOnOffCheckbox.checked,
+            logoGlowOnOffCheckbox.checked,
+            edgeGlowOnOffCheckbox.checked,
+            iconPreview,
+            ctx,
+            300
+        );
+    }
+
+    function normalizeHex(hex) {
+        if (!hex) return '';
+        hex = hex.startsWith('#') ? hex : '#' + hex;
+        if (hex.length === 4 && /^#[0-9a-fA-F]{3}$/.test(hex)) {
+            return '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+        }
+        return hex.toUpperCase();
+    }
+
+    function isValidHex(hex) {
+        return /^#?([0-9a-fA-F]{3}){1,2}$/.test(hex);
+    }
+
+    function updateColorInputs(colorPickerElement, hexInputElement, newColor) {
+        const normalizedColor = normalizeHex(newColor);
+        colorPickerElement.value = normalizedColor;
+        hexInputElement.value = normalizedColor;
+    }
+
+    // ===== TAB SWITCHING =====
+    showIconsBtn.addEventListener('click', () => {
+        showIconsBtn.classList.add('active');
+        showTxBtn.classList.remove('active');
+        showBgBtn.classList.remove('active');
+        iconsContent.classList.add('active');
+        txContent.classList.remove('active');
+        bgContent.classList.remove('active');
+    });
+
+    showTxBtn.addEventListener('click', () => {
+        showTxBtn.classList.add('active');
+        showIconsBtn.classList.remove('active');
+        showBgBtn.classList.remove('active');
+        txContent.classList.add('active');
+        iconsContent.classList.remove('active');
+        bgContent.classList.remove('active');
+    });
+
+    showBgBtn.addEventListener('click', () => {
+        showBgBtn.classList.add('active');
+        showIconsBtn.classList.remove('active');
+        showTxBtn.classList.remove('active');
+        bgContent.classList.add('active');
+        iconsContent.classList.remove('active');
+        txContent.classList.remove('active');
+    });
+
+    // ===== COLOR SYNC WITH DEBOUNCE =====
+    function setupColorSync(colorPicker, hexInput) {
+        colorPicker.addEventListener('input', () => {
+            updateColorInputs(colorPicker, hexInput, colorPicker.value);
+            debouncedDrawPreview();
+        });
+
+        let hexInputTimeout;
+        hexInput.addEventListener('input', () => {
+            const value = hexInput.value;
+            
+            clearTimeout(hexInputTimeout);
+            
+            if (value.length === 7 && isValidHex(value)) {
+                hexInputTimeout = setTimeout(() => {
+                    updateColorInputs(colorPicker, hexInput, value);
+                    debouncedDrawPreview();
+                }, 300);
+            } else if (value.length === 4 && isValidHex(value)) {
+                hexInputTimeout = setTimeout(() => {
+                    updateColorInputs(colorPicker, hexInput, value);
+                    debouncedDrawPreview();
+                }, 300);
+            }
+        });
+    }
+
+    setupColorSync(iconColorInput, iconColorHexInput);
+    setupColorSync(backgroundColorInput, backgroundColorHexInput);
+    setupColorSync(glowColorInput, glowColorHexInput);
+
+    // ===== CHECKBOX & NAME LISTENERS =====
+    document.querySelectorAll('.checkbox-item input, #iconName').forEach(input => {
+        input.addEventListener('change', () => {
+            debouncedDrawPreview();
+        });
+    });
+
+    // ===== DOWNLOAD FUNCTIONALITY =====
+    downloadBtn.addEventListener('click', async () => {
+        if (selectedIcons.length === 0) {
+            alert('Please select at least one icon to download.');
+            return;
+        }
+
+        const baseFileName = iconNameInput.value.trim() || 'CustomIcon';
+        const saveAsZip = document.getElementById('saveAsZip').checked;
+        const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
+        const currentTx = texturesData.find(tx => tx.id === selectedTextureId);
+        const bgColor = backgroundColorInput.value;
+        const iconColor = iconColorInput.value;
+        const glowColor = glowColorInput.value;
+        const edgeOn = edgeOnOffCheckbox.checked;
+        const logoGlowOn = logoGlowOnOffCheckbox.checked;
+        const edgeGlowOn = edgeGlowOnOffCheckbox.checked;
+
+        let zip;
+        if (saveAsZip) {
+            zip = new JSZip();
+            const sizesToGenerate = [500, 288, 144, 96, 72];
+            const recommendedSize = 144;
+
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating ZIP...';
+
+            try {
+                for (const iconId of selectedIcons) {
+                    const iconData = iconsData.find(i => i.id === iconId);
+                    if (!iconData) {
+                        console.warn(`Icon with ID ${iconId} not found. Skipping.`);
+                        continue;
+                    }
+
+                    const cleanIconName = iconData.name.replace(/[^a-z0-9]/gi, '_');
+
+                    for (const size of sizesToGenerate) {
                         const exportCanvas = document.createElement('canvas');
-                        exportCanvas.width = selectedSize;
-                        exportCanvas.height = selectedSize;
+                        exportCanvas.width = size;
+                        exportCanvas.height = size;
                         const exportCtx = exportCanvas.getContext('2d');
 
                         await renderIconToCanvas(
@@ -2194,160 +2113,214 @@
                             edgeGlowOn,
                             exportCanvas,
                             exportCtx,
-                            selectedSize
+                            size
                         );
 
-                        const cleanIconName = iconData.name.replace(/[^a-z0-9]/gi, '_');
-                        const fileName = `${baseFileName}_${cleanIconName}.png`;
                         const dataURL = exportCanvas.toDataURL('image/png');
+                        const base64Data = dataURL.split(',')[1];
+                        
+                        let folderName = `${size}px`;
+                        if (size === recommendedSize) {
+                            folderName = `${size}px (Recommended)`;
+                        }
 
-                        const link = document.createElement('a');
-                        link.download = fileName;
-                        link.href = dataURL;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                        zip.file(`${folderName}/${baseFileName}_${cleanIconName}.png`, base64Data, { base64: true });
                     }
-                } catch (error) {
-                    console.error('Error during single icon download:', error);
-                    alert('An error occurred during download. Please check the console for details.');
-                } finally {
-                    downloadBtn.disabled = false;
-                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons';
                 }
+
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                const zipFileName = `${baseFileName}_Icons.zip`;
+                const zipLink = document.createElement('a');
+                zipLink.href = URL.createObjectURL(zipBlob);
+                zipLink.download = zipFileName;
+                document.body.appendChild(zipLink);
+                zipLink.click();
+                document.body.removeChild(zipLink);
+                URL.revokeObjectURL(zipLink.href);
+
+            } catch (error) {
+                console.error('Error during ZIP icon download:', error);
+                alert('An error occurred during ZIP download. Please check the console for details.');
+            } finally {
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons';
             }
-        });
 
-        // ===== UPLOAD HANDLERS =====
-        document.getElementById('uploadIcon').addEventListener('change', async (event) => {
-            if (event.target.files.length > 0) {
-                const file = event.target.files[0];
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    customIconCount++;
-                    const isSVG = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
-                    const newIconType = isSVG ? 'custom-svg' : 'custom-image';
+        } else {
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+            try {
+                for (const iconId of selectedIcons) {
+                    const iconData = iconsData.find(i => i.id === iconId);
+                    if (!iconData) {
+                        console.warn(`Icon with ID ${iconId} not found. Skipping.`);
+                        continue;
+                    }
 
-                    const newIcon = { 
-                        id: 'custom-icon-' + Date.now(), 
-                        name: `Custom ${customIconCount}`, 
-                        type: newIconType, 
-                        src: e.target.result 
-                    };
-                    iconsData.unshift(newIcon);
-                    await populateGrid(iconsContent, iconsData, 'icon');
-                    
-                    clearSelection(iconsContent.querySelectorAll('.grid-item:not(.upload-area)'));
-                    const newIconElement = iconsContent.querySelector(`[data-id="${newIcon.id}"]`);
-                    if (newIconElement) newIconElement.classList.add('selected');
-                    selectedIcons = [newIcon.id];
-                    latestSelectedIconId = newIcon.id;
-                    updateSelectedCount();
-                    
-                    debouncedDrawPreview();
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+                    const exportCanvas = document.createElement('canvas');
+                    exportCanvas.width = selectedSize;
+                    exportCanvas.height = selectedSize;
+                    const exportCtx = exportCanvas.getContext('2d');
 
-        document.getElementById('uploadTx').addEventListener('change', async (event) => {
-            if (event.target.files.length > 0) {
-                const file = event.target.files[0];
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    customTextureCount++;
-                    const newTx = { 
-                        id: 'custom-tx-' + Date.now(), 
-                        name: `Custom ${customTextureCount}`, 
-                        type: 'custom-image', 
-                        src: e.target.result, 
-                        textureOpacity: 0.8 
-                    };
-                    texturesData.unshift(newTx);
-                    await populateGrid(txContent, texturesData, 'texture');
-                    
-                    clearSelection(txContent.querySelectorAll('.grid-item:not(.upload-area)'));
-                    const newTxElement = txContent.querySelector(`[data-id="${newTx.id}"]`);
-                    if (newTxElement) newTxElement.classList.add('selected');
-                    selectedTextureId = newTx.id;
-                    
-                    debouncedDrawPreview();
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+                    await renderIconToCanvas(
+                        iconData,
+                        currentBg,
+                        currentTx,
+                        iconColor,
+                        bgColor,
+                        glowColor,
+                        edgeOn,
+                        logoGlowOn,
+                        edgeGlowOn,
+                        exportCanvas,
+                        exportCtx,
+                        selectedSize
+                    );
 
-        document.getElementById('uploadBg').addEventListener('change', async (event) => {
-            if (event.target.files.length > 0) {
-                const file = event.target.files[0];
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    customBackgroundCount++;
-                    const newBg = { 
-                        id: 'custom-bg-' + Date.now(), 
-                        name: `Custom ${customBackgroundCount}`, 
-                        type: 'custom-image', 
-                        src: e.target.result 
-                    };
-                    backgroundsData.unshift(newBg);
-                    await populateGrid(bgContent, backgroundsData, 'background');
-                    
-                    clearSelection(bgContent.querySelectorAll('.grid-item:not(.upload-area)'));
-                    const newBgElement = bgContent.querySelector(`[data-id="${newBg.id}"]`);
-                    if (newBgElement) newBgElement.classList.add('selected');
-                    selectedBackgroundId = newBg.id;
-                    
-                    debouncedDrawPreview();
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+                    const cleanIconName = iconData.name.replace(/[^a-z0-9]/gi, '_');
+                    const fileName = `${baseFileName}_${cleanIconName}.png`;
+                    const dataURL = exportCanvas.toDataURL('image/png');
 
-        // ===== INITIALIZATION =====
-        document.fonts.ready.then(async () => {
-            await populateGrid(iconsContent, iconsData, 'icon');
-            await populateGrid(txContent, texturesData, 'texture');
-            await populateGrid(bgContent, backgroundsData, 'background');
-            debouncedDrawPreview();
-            iconColorHexInput.value = normalizeHex(iconColorInput.value);
-            backgroundColorHexInput.value = normalizeHex(backgroundColorInput.value);
-            glowColorHexInput.value = normalizeHex(glowColorInput.value);
-            updateSelectedCount();
-            checkGradientWarning();
-        });
-
-        // ===== FOURTHWALL SCROLLBAR FIX =====
-        let lastHeight = 0;
-        let heightCheckInterval;
-
-        function sendHeight() {
-            const height = document.body.scrollHeight;
-            // Only send if height actually changed to prevent feedback loop
-            if (height !== lastHeight) {
-                lastHeight = height;
-                window.parent.postMessage({ frameHeight: height }, '*');
+                    const link = document.createElement('a');
+                    link.download = fileName;
+                    link.href = dataURL;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            } catch (error) {
+                console.error('Error during single icon download:', error);
+                alert('An error occurred during download. Please check the console for details.');
+            } finally {
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons';
             }
         }
+    });
 
-        // Initial height send
-        window.addEventListener('load', () => {
-            setTimeout(sendHeight, 100);
-            
-            // Set up periodic height check (less aggressive than resize)
-            heightCheckInterval = setInterval(sendHeight, 500);
-            
-            // Stop checking after 10 seconds (by then everything should be loaded)
-            setTimeout(() => {
-                clearInterval(heightCheckInterval);
-            }, 10000);
-        });
+    // ===== UPLOAD HANDLERS =====
+    document.getElementById('uploadIcon').addEventListener('change', async (event) => {
+        if (event.target.files.length > 0) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                customIconCount++;
+                const isSVG = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
+                const newIconType = isSVG ? 'custom-svg' : 'custom-image';
 
-        // Send height on window resize (debounced)
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(sendHeight, 250);
-        });
-    </script>
+                const newIcon = { 
+                    id: 'custom-icon-' + Date.now(), 
+                    name: `Custom ${customIconCount}`, 
+                    type: newIconType, 
+                    src: e.target.result 
+                };
+                iconsData.unshift(newIcon);
+                await populateGrid(iconsContent, iconsData, 'icon');
+                
+                clearSelection(iconsContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                const newIconElement = iconsContent.querySelector(`[data-id="${newIcon.id}"]`);
+                if (newIconElement) newIconElement.classList.add('selected');
+                selectedIcons = [newIcon.id];
+                latestSelectedIconId = newIcon.id;
+                updateSelectedCount();
+                
+                debouncedDrawPreview();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('uploadTx').addEventListener('change', async (event) => {
+        if (event.target.files.length > 0) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                customTextureCount++;
+                const newTx = { 
+                    id: 'custom-tx-' + Date.now(), 
+                    name: `Custom ${customTextureCount}`, 
+                    type: 'custom-image', 
+                    src: e.target.result, 
+                    textureOpacity: 0.8 
+                };
+                texturesData.unshift(newTx);
+                await populateGrid(txContent, texturesData, 'texture');
+                
+                clearSelection(txContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                const newTxElement = txContent.querySelector(`[data-id="${newTx.id}"]`);
+                if (newTxElement) newTxElement.classList.add('selected');
+                selectedTextureId = newTx.id;
+                
+                debouncedDrawPreview();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('uploadBg').addEventListener('change', async (event) => {
+        if (event.target.files.length > 0) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                customBackgroundCount++;
+                const newBg = { 
+                    id: 'custom-bg-' + Date.now(), 
+                    name: `Custom ${customBackgroundCount}`, 
+                    type: 'custom-image', 
+                    src: e.target.result 
+                };
+                backgroundsData.unshift(newBg);
+                await populateGrid(bgContent, backgroundsData, 'background');
+                
+                clearSelection(bgContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                const newBgElement = bgContent.querySelector(`[data-id="${newBg.id}"]`);
+                if (newBgElement) newBgElement.classList.add('selected');
+                selectedBackgroundId = newBg.id;
+                
+                debouncedDrawPreview();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // ===== INITIALIZATION =====
+    document.fonts.ready.then(async () => {
+        await populateGrid(iconsContent, iconsData, 'icon');
+        await populateGrid(txContent, texturesData, 'texture');
+        await populateGrid(bgContent, backgroundsData, 'background');
+        debouncedDrawPreview();
+        iconColorHexInput.value = normalizeHex(iconColorInput.value);
+        backgroundColorHexInput.value = normalizeHex(backgroundColorInput.value);
+        glowColorHexInput.value = normalizeHex(glowColorInput.value);
+        updateSelectedCount();
+        checkGradientWarning();
+    });
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let heightCheckInterval;
+
+    function sendHeight() {
+        const height = document.body.scrollHeight;
+        if (height !== lastHeight) {
+            lastHeight = height;
+            window.parent.postMessage({ frameHeight: height }, '*');
+        }
+    }
+
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+        heightCheckInterval = setInterval(sendHeight, 500);
+        setTimeout(() => {
+            clearInterval(heightCheckInterval);
+        }, 10000);
+    });
+
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(sendHeight, 250);
+    });
+</script>
 </body>
 </html>
