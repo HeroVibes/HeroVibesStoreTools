@@ -1,2451 +1,1187 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Scratchpad Tool</title>
-
     <style>
-
         /* ===== CSS VARIABLES ===== */
-
         :root {
-
             --primary-bg: #191919;
-
             --secondary-bg: #1F1F1F;
-
             --hover-color: #323232;
-
             --outline-color: #323232;
-
             --accent-color: #87A9FF;
-
             --primary-text: #D4D4D4;
-
             --secondary-text: #8C8C8C;
-
             --radius: 8px;
-
             --card-note: #e6b628;
-
             --card-image: #31a414;
-
             --card-link: #2e4e79;
-
             --card-youtube: #9c06bb;
-
             --card-code: #272822;
-
         }
-
-
 
         /* ===== GLOBAL STYLES ===== */
-
         * { box-sizing: border-box; }
-
         
-
         body, html {
-
             margin: 0;
-
             padding: 0;
-
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-
             background: var(--primary-bg);
-
             color: var(--primary-text);
-
             width: 100%;
-
+            height: 100%;
         }
-
-
 
         body {
-
             overflow-x: hidden;
-
         }
-
-
 
         /* ===== MAIN CONTAINER ===== */
-
         #scratchpad-container {
-
             display: flex;
-
             flex-direction: column;
-
             width: 100%;
-
+            height: 100%;
             background: var(--primary-bg);
-
         }
-
-
 
         /* ===== CONTROLS BAR ===== */
-
         #controls {
-
             display: flex;
-
             align-items: center;
-
             gap: 10px;
-
             padding: 16px;
-
             background: var(--secondary-bg);
-
             border-bottom: 1px solid var(--outline-color);
-
             flex-shrink: 0;
-
             flex-wrap: wrap;
-
         }
-
-
 
         .control-group {
-
             display: flex;
-
             gap: 10px;
-
             align-items: center;
-
         }
-
-
 
         /* ===== BUTTONS ===== */
-
         button, .btn {
-
             position: relative;
-
             padding: 10px 16px;
-
             border-radius: var(--radius);
-
             background: var(--secondary-bg);
-
             color: var(--primary-text);
-
             border: 1px solid rgba(255,255,255,0.06);
-
             cursor: pointer;
-
             overflow: hidden;
-
             font-size: 14px;
-
             font-family: inherit;
-
             transition: background-color 0.2s;
-
         }
-
-
 
         button::before, .btn::before {
-
             content: '';
-
             position: absolute;
-
             top: 0;
-
             left: -100%;
-
             width: 75%;
-
             height: 100%;
-
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-
             transform: skewX(-25deg);
-
             transition: left 0.7s ease-in-out;
-
         }
-
-
 
         button:hover::before, .btn:hover::before {
-
             left: 125%;
-
         }
-
-
 
         button:hover, .btn:hover {
-
             background: var(--hover-color);
-
         }
-
-
 
         button:focus-visible, .btn:focus-visible {
-
             outline: none;
-
             box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
-
         }
-
-
 
         button:active {
-
             transform: scale(0.98);
-
         }
-
-
 
         /* ===== INPUT FIELD ===== */
-
         #link-input {
-
             padding: 10px 16px;
-
             border-radius: var(--radius);
-
             background: var(--primary-bg);
-
             color: var(--primary-text);
-
             border: 1px solid var(--outline-color);
-
             font-size: 14px;
-
             font-family: inherit;
-
             min-width: 200px;
-
             transition: border-color 0.2s;
-
         }
-
-
 
         #link-input:focus {
-
             outline: none;
-
             border-color: var(--accent-color);
-
         }
-
-
 
         #link-input::placeholder {
-
             color: var(--secondary-text);
-
         }
-
-
 
         /* ===== CANVAS AREA ===== */
-
         #canvas {
-
             position: relative;
-
             background: var(--primary-bg);
-
             background-image: 
-
                 linear-gradient(rgba(135,169,255,0.03) 1px, transparent 1px),
-
                 linear-gradient(90deg, rgba(135,169,255,0.03) 1px, transparent 1px);
-
             background-size: 20px 20px;
-
             width: 100%;
-
-            min-height: calc(100vh - 53px);
-
-            padding-bottom: 200px;
-
+            flex-grow: 1;
+            overflow: auto;
         }
-
-
 
         /* ===== PAGE CONTROLS ===== */
-
         #page-controls {
-
             position: absolute;
-
             top: 15px;
-
             right: 20px;
-
             z-index: 1001;
-
             display: flex;
-
             flex-direction: column;
-
             align-items: flex-end;
-
             gap: 8px;
-
         }
-
-
 
         #page-list {
-
             list-style: none;
-
             margin: 0;
-
             padding: 8px;
-
             display: flex;
-
             flex-direction: column;
-
             gap: 6px;
-
             background: var(--secondary-bg);
-
             border-radius: var(--radius);
-
             border: 1px solid var(--outline-color);
-
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-
             max-width: 180px;
-
         }
-
-
 
         .page-item {
-
             padding: 8px 12px 8px 24px;
-
             cursor: pointer;
-
             border-radius: 6px;
-
             font-size: 14px;
-
             font-weight: 500;
-
             color: var(--primary-text);
-
             transition: background-color 0.2s;
-
             white-space: nowrap;
-
             overflow: hidden;
-
             text-overflow: ellipsis;
-
             text-align: right;
-
             position: relative;
-
         }
-
-
 
         .page-item:hover {
-
             background: var(--hover-color);
-
         }
-
-
 
         .page-item.active {
-
             font-weight: 700;
-
             color: var(--accent-color);
-
         }
-
-
 
         .page-item.active::before {
-
             content: '';
-
             position: absolute;
-
             left: 8px;
-
             top: 50%;
-
             transform: translateY(-50%);
-
             width: 8px;
-
             height: 8px;
-
             background-color: var(--accent-color);
-
             border-radius: 50%;
-
             box-shadow: 0 0 8px var(--accent-color);
-
         }
-
-
 
         .page-rename-input {
-
             width: 100%;
-
             padding: 4px;
-
             margin: 0;
-
             border: 1px solid var(--accent-color);
-
             background: var(--primary-bg);
-
             color: var(--primary-text);
-
             font-family: inherit;
-
             font-size: 14px;
-
             font-weight: 500;
-
             text-align: right;
-
             outline: none;
-
             border-radius: 4px;
-
         }
-
-
 
         #add-page-btn {
-
             width: 36px;
-
             height: 36px;
-
             border-radius: 50%;
-
             border: 1px solid var(--outline-color);
-
             background: var(--secondary-bg);
-
             cursor: pointer;
-
             font-weight: 600;
-
             font-size: 20px;
-
             padding: 0;
-
             color: var(--primary-text);
-
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-
             transition: background-color 0.2s, transform 0.2s;
-
         }
-
-
 
         #add-page-btn::before {
-
             display: none;
-
         }
-
-
 
         #add-page-btn:hover {
-
             background: var(--hover-color);
-
             transform: scale(1.05);
-
         }
-
-
 
         /* ===== CARD STYLES ===== */
-
         .card {
-
             position: absolute;
-
             width: 280px;
-
             border-radius: var(--radius);
-
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-
             display: flex;
-
             flex-direction: column;
-
             border: 1px solid var(--outline-color);
-
             transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
-
             background: var(--secondary-bg);
-
         }
-
-
 
         .card.dragging {
-
             box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-
             transform: scale(1.03);
-
         }
-
-
 
         .card-header {
-
             height: 32px;
-
             cursor: grab;
-
             border-bottom: 1px solid var(--outline-color);
-
             background: var(--hover-color);
-
             display: flex;
-
             align-items: center;
-
             padding: 0 12px;
-
             border-radius: var(--radius) var(--radius) 0 0;
-
         }
-
-
 
         .card-header:active {
-
             cursor: grabbing;
-
         }
-
-
 
         .card-type-label {
-
             font-size: 12px;
-
             font-weight: 600;
-
             text-transform: uppercase;
-
             letter-spacing: 0.5px;
-
             color: var(--secondary-text);
-
         }
-
-
 
         .card-body {
-
             flex-grow: 1;
-
             display: flex;
-
             position: relative;
-
             overflow: hidden;
-
             background: var(--secondary-bg);
-
             min-height: 120px;
-
         }
-
-
 
         .card-note .card-body,
-
         .card-link .card-body {
-
             padding: 16px;
-
         }
-
-
 
         .card-code .card-body {
-
             padding: 0;
-
             background: #272822;
-
         }
-
-
 
         /* Card type specific colors */
-
         .card-note .card-header { border-left: 4px solid var(--card-note); }
-
         .card-image .card-header { border-left: 4px solid var(--card-image); }
-
         .card-link .card-header { border-left: 4px solid var(--card-link); }
-
         .card-youtube .card-header { border-left: 4px solid var(--card-youtube); }
-
         .card-code .card-header { border-left: 4px solid var(--card-code); background: #1e1e1e; }
 
-
-
         /* ===== CARD CONTENT STYLES ===== */
-
         .card-text-content {
-
             background: transparent;
-
             border: none;
-
             resize: none;
-
             font-family: inherit;
-
             font-size: 14px;
-
             height: 100%;
-
             width: 100%;
-
             outline: none;
-
             color: var(--primary-text);
-
             line-height: 1.6;
-
         }
-
-
 
         .card-text-content::placeholder {
-
             color: var(--secondary-text);
-
         }
-
-
 
         .card-image-content {
-
             width: 100%;
-
             height: auto;
-
             display: block;
-
         }
-
-
 
         .card-link-content {
-
             font-size: 14px;
-
             color: var(--accent-color);
-
             text-decoration: none;
-
             overflow-wrap: break-word;
-
             word-break: break-all;
-
             line-height: 1.6;
-
         }
-
-
 
         .card-link-content:hover {
-
             text-decoration: underline;
-
         }
-
-
 
         .card-code-content {
-
             width: 100%;
-
             margin: 0 !important;
-
             max-height: 400px;
-
             overflow: auto !important;
-
             padding: 16px;
-
             scrollbar-width: thin;
-
             scrollbar-color: #5f5f5f #272822;
-
         }
-
-
 
         .card-code-content > code[class*="language-"] {
-
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-
             font-size: 13px;
-
             color: #f8f8f2;
-
             text-shadow: none !important;
-
             white-space: pre-wrap !important;
-
             word-break: break-all !important;
-
             line-height: 1.5;
-
         }
-
-
 
         .code-editor {
-
             flex-grow: 1;
-
             background: #272822;
-
             color: #f8f8f2;
-
             border: none;
-
             resize: none;
-
             outline: none;
-
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-
             font-size: 13px;
-
             padding: 16px;
-
             line-height: 1.5;
-
         }
-
-
 
         .card-code-content::-webkit-scrollbar {
-
             width: 8px;
-
             height: 8px;
-
         }
-
-
 
         .card-code-content::-webkit-scrollbar-track {
-
             background: #272822;
-
         }
-
-
 
         .card-code-content::-webkit-scrollbar-thumb {
-
             background-color: #5f5f5f;
-
             border-radius: 4px;
-
         }
-
-
 
         .card-code-content::-webkit-scrollbar-thumb:hover {
-
             background-color: #7a7a7a;
-
         }
-
-
 
         /* ===== YOUTUBE STYLES ===== */
-
         .card-body iframe {
-
             width: 100%;
-
             height: 100%;
-
             min-height: 180px;
-
             border: none;
-
         }
-
-
 
         /* ===== CARD FOOTER ===== */
-
         .card-footer {
-
             display: flex;
-
             justify-content: flex-end;
-
             align-items: center;
-
             gap: 8px;
-
             padding: 8px 12px;
-
             border-top: 1px solid var(--outline-color);
-
             background: var(--hover-color);
-
             border-radius: 0 0 var(--radius) var(--radius);
-
         }
-
-
 
         .card-btn {
-
             width: 28px;
-
             height: 28px;
-
             border-radius: 6px;
-
             border: 1px solid var(--outline-color);
-
             cursor: pointer;
-
             padding: 0;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             transition: all 0.2s ease-in-out;
-
             background: var(--secondary-bg);
-
         }
-
-
 
         .card-btn::before {
-
             display: none;
-
         }
-
-
 
         .card-btn:hover {
-
             background: var(--primary-bg);
-
             transform: scale(1.08);
-
         }
-
-
 
         .card-btn:active {
-
             transform: scale(0.95);
-
         }
-
-
 
         .card-btn svg {
-
             opacity: 0.7;
-
             transition: opacity 0.2s;
-
         }
-
-
 
         .card:hover .card-btn svg {
-
             opacity: 1;
-
         }
-
-
 
         .delete-btn {
-
             background: #ff5f57;
-
             border-color: #e0443e;
-
         }
-
-
 
         .delete-btn:hover {
-
             background: #ff4940;
-
         }
-
-
 
         .copy-btn.confirmed {
-
             background: #28c840;
-
             border-color: #22a034;
-
         }
-
-
 
         .copy-btn.confirmed svg {
-
             opacity: 1;
-
         }
-
-
 
         .toggle-view-btn {
-
             background: var(--accent-color);
-
             border-color: var(--accent-color);
-
         }
-
-
 
         .toggle-view-btn:hover {
-
             background: #6a8edb;
-
         }
 
-
-
-        .download-btn {
-
-            background: #2196f3;
-
-            border-color: #1e88e5;
-
-        }
-
-
-
-        .download-btn:hover {
-
-            background: #1e88e5;
-
-        }
-
-
-
-        /* ===== MODAL STYLES ===== */
-
-        #modal-overlay {
-
-            position: fixed;
-
-            top: 0;
-
-            left: 0;
-
-            width: 100%;
-
-            height: 100%;
-
-            background: rgba(0,0,0,0.7);
-
+        /* ===== HELP MODAL ===== */
+        #help-modal {
             display: none;
-
-            align-items: center;
-
-            justify-content: center;
-
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.1);
             z-index: 10000;
-
+            align-items: center;
+            justify-content: center;
         }
 
-
-
-        #help-dialog {
-
+        .modal-content {
             background: var(--secondary-bg);
-
-            padding: 24px;
-
+            padding: 20px;
             border-radius: var(--radius);
-
-            max-width: 500px;
-
-            color: var(--primary-text);
-
-            position: relative;
-
+            max-width: 80%;
+            max-height: 80vh;
+            overflow: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
-
-
-        #help-dialog h2 {
-
-            margin-top: 0;
-
-        }
-
-
-
-        #help-dialog p {
-
-            line-height: 1.6;
-
-        }
-
-
-
-        #close-modal {
-
-            position: absolute;
-
-            top: 10px;
-
-            right: 10px;
-
-            background: none;
-
-            border: none;
-
-            color: var(--primary-text);
-
+        .modal-content h2 {
             font-size: 18px;
-
-            cursor: pointer;
-
+            margin: 0 0 12px;
         }
 
-
-
-        #close-modal:hover {
-
-            color: var(--accent-color);
-
+        .modal-content ul {
+            padding-left: 20px;
+            margin: 0 0 12px;
         }
 
+        .modal-content li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
 
+        .modal-content .version {
+            font-size: 12px;
+            color: var(--secondary-text);
+            text-align: right;
+            margin: 0;
+        }
 
         /* ===== MOBILE RESPONSIVE ===== */
-
         @media (max-width: 768px) {
-
             #controls {
-
                 padding: 12px;
-
                 gap: 8px;
-
             }
-
-
 
             button, .btn {
-
                 padding: 8px 12px;
-
                 font-size: 13px;
-
             }
-
-
 
             #link-input {
-
                 min-width: 150px;
-
                 font-size: 13px;
-
             }
-
-
 
             .card {
-
                 width: 240px;
-
             }
-
-
 
             #page-controls {
-
                 top: 10px;
-
                 right: 10px;
-
             }
-
-
 
             #page-list {
-
                 max-width: 150px;
-
             }
-
-
 
             .page-item {
-
                 font-size: 13px;
-
                 padding: 6px 10px 6px 20px;
-
             }
-
-
 
             #add-page-btn {
-
                 width: 32px;
-
                 height: 32px;
-
                 font-size: 18px;
-
             }
-
         }
-
-
 
         @media (max-width: 480px) {
-
             #controls {
-
                 gap: 6px;
-
             }
-
-
 
             button, .btn {
-
                 padding: 6px 10px;
-
                 font-size: 12px;
-
             }
-
-
 
             #link-input {
-
                 min-width: 120px;
-
                 font-size: 12px;
-
             }
-
-
 
             .card {
-
                 width: 200px;
-
             }
-
-
 
             .card-header {
-
                 height: 28px;
-
             }
-
-
 
             .card-type-label {
-
                 font-size: 10px;
-
             }
-
         }
-
     </style>
-
 </head>
-
 <body>
-
     <!-- MAIN CONTAINER -->
-
     <div id="scratchpad-container">
-
         <!-- CONTROLS BAR -->
-
         <div id="controls">
-
             <button id="add-note-btn" title="Add a new note (N)">Add Note</button>
-
             <div class="control-group">
-
                 <input type="text" id="link-input" placeholder="Paste link or code...">
-
             </div>
-
             <button id="upload-btn" title="Upload an image">Upload</button>
-
             <button id="export-btn" title="Export layout">Export</button>
-
             <button id="import-btn" title="Import layout">Import</button>
-
             <button id="reset-btn" title="Clear all">Reset</button>
-
-            <button id="help-btn" title="Help">?</button>
-
+            <button id="help-btn" title="Help & Tips">?</button>
         </div>
-
-
 
         <!-- CANVAS AREA -->
-
         <div id="canvas">
-
             <!-- PAGE CONTROLS -->
-
             <div id="page-controls">
-
                 <ul id="page-list"></ul>
-
                 <button id="add-page-btn" title="Add a new page">+</button>
-
             </div>
-
         </div>
-
     </div>
-
-
 
     <!-- HELP MODAL -->
-
-    <div id="modal-overlay">
-
-        <div id="help-dialog">
-
-            <button id="close-modal">✕</button>
-
-            <h2>How to Use Scratchpad Tool</h2>
-
-            <p>Add notes by clicking "Add Note" or pressing "N". Paste links, YouTube URLs, or code snippets into the input field and press Enter to create cards. Upload images via the "Upload" button or drag-and-drop. Drag cards around the canvas to organize. Use pages to separate different workspaces. Export/Import layouts as JSON. Copy or delete individual cards using the footer buttons.</p>
-
-            <p>Version: 1.0</p>
-
+    <div id="help-modal">
+        <div class="modal-content">
+            <h2>Tips & How to Use</h2>
+            <ul>
+                <li>Add a note by clicking 'Add Note' or pressing 'N'.</li>
+                <li>Paste links, code snippets, or images directly using Ctrl+V (or Cmd+V on Mac).</li>
+                <li>Drag cards by their header to reposition them.</li>
+                <li>Double-click on code cards to edit the code.</li>
+                <li>Add new pages using the '+' button in the page controls.</li>
+                <li>Double-click a page name in the list to rename it.</li>
+                <li>Export or import your layout as JSON using the buttons.</li>
+                <li>Use the reset button to clear everything (confirmation required).</li>
+            </ul>
+            <p class="version">Version 1.1</p>
+            <button id="close-help" class="btn">Close</button>
         </div>
-
     </div>
 
-
-
     <!-- HIDDEN FILE INPUTS -->
-
     <input type="file" id="import-file-input" style="display: none;" accept=".json">
-
     <input type="file" id="upload-file-input" style="display: none;" accept="image/*">
 
-
-
     <script>
-
         document.addEventListener('DOMContentLoaded', () => {
-
             // ===== DOM ELEMENTS =====
-
             const canvas = document.getElementById('canvas');
-
             const pageList = document.getElementById('page-list');
-
             const addPageBtn = document.getElementById('add-page-btn');
-
-            const modalOverlay = document.getElementById('modal-overlay');
-
-            const closeModal = document.getElementById('close-modal');
-
             const controls = {
-
                 addNoteBtn: document.getElementById('add-note-btn'),
-
                 linkInput: document.getElementById('link-input'),
-
                 uploadBtn: document.getElementById('upload-btn'),
-
                 exportBtn: document.getElementById('export-btn'),
-
                 importBtn: document.getElementById('import-btn'),
-
                 resetBtn: document.getElementById('reset-btn'),
-
-                helpBtn: document.getElementById('help-btn'),
-
                 importFileInput: document.getElementById('import-file-input'),
-
-                uploadFileInput: document.getElementById('upload-file-input')
-
+                uploadFileInput: document.getElementById('upload-file-input'),
+                helpBtn: document.getElementById('help-btn')
             };
-
-
+            const helpModal = document.getElementById('help-modal');
+            const closeHelp = document.getElementById('close-help');
 
             // ===== STATE MANAGEMENT =====
-
             let appState = {};
-
             let highestZ = 0;
-
             const gridSize = 20;
-
+            const maxCanvasHeight = 2000;
             
-
             // ===== ICONS =====
-
             const icons = {
-
                 clipboard: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>',
-
                 tick: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
-
                 x: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
-
                 link: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>',
-
-                play: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
-
-                download: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>'
-
+                play: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>'
             };
-
-
 
             // ===== HELPER FUNCTIONS =====
-
             const saveState = () => {
-
                 localStorage.setItem('scratchpadState', JSON.stringify(appState));
-
             };
-
-
 
             const createPage = (name) => {
-
                 const newPageId = `page-${Date.now()}`;
-
                 appState.pages[newPageId] = {
-
                     id: newPageId,
-
                     name: name || `Page ${Object.keys(appState.pages).length + 1}`,
-
                     cards: []
-
                 };
-
                 switchPage(newPageId, true);
-
             };
-
-
 
             const switchPage = (pageId, isNew = false) => {
-
                 if (appState.pages[pageId]) {
-
                     appState.currentPageId = pageId;
-
                     render();
-
                     if (!isNew) saveState();
-
                     setTimeout(scheduleHeightCheck, 100);
-
                 }
-
             };
-
-
 
             const renamePage = (pageId, newName) => {
-
                 if (appState.pages[pageId] && newName.trim()) {
-
                     appState.pages[pageId].name = newName.trim();
-
                 }
-
                 renderPageList();
-
                 saveState();
-
             };
-
-
 
             const getCurrentPage = () => appState.pages[appState.currentPageId];
 
-
-
             const render = () => {
-
                 renderPageList();
-
                 renderCanvas();
-
             };
-
-
 
             const renderPageList = () => {
-
                 pageList.innerHTML = '';
-
                 Object.values(appState.pages).forEach(page => {
-
                     const li = document.createElement('li');
-
                     li.className = 'page-item';
-
                     li.textContent = page.name;
-
                     if (page.id === appState.currentPageId) li.classList.add('active');
-
                     
-
                     li.addEventListener('click', () => switchPage(page.id));
-
                     
-
                     li.addEventListener('dblclick', () => {
-
                         li.innerHTML = `<input type="text" class="page-rename-input" value="${page.name}" />`;
-
                         const input = li.querySelector('input');
-
                         input.focus();
-
                         input.select();
-
                         
-
                         const finishRename = () => {
-
                             renamePage(page.id, input.value);
-
                         };
-
                         
-
                         input.addEventListener('blur', finishRename);
-
                         input.addEventListener('keydown', e => {
-
                             if (e.key === 'Enter') finishRename();
-
                             else if (e.key === 'Escape') renderPageList();
-
                         });
-
                     });
-
                     
-
                     pageList.appendChild(li);
-
                 });
-
             };
-
-
 
             const renderCanvas = () => {
-
                 canvas.querySelectorAll('.card').forEach(card => card.remove());
-
                 highestZ = 0;
-
                 
-
                 const currentPage = getCurrentPage();
-
                 if (!currentPage) return;
-
                 
-
                 currentPage.cards.forEach(cardData => {
-
                     highestZ = Math.max(highestZ, cardData.z || 0);
-
                     createCardElement(cardData);
-
                 });
-
                 
-
                 setTimeout(scheduleHeightCheck, 100);
-
             };
-
-
 
             const escapeHtml = (unsafe) => {
-
                 if (typeof unsafe !== 'string') return '';
-
                 return unsafe
-
                     .replace(/&/g, "&amp;")
-
                     .replace(/</g, "&lt;")
-
                     .replace(/>/g, "&gt;")
-
                     .replace(/"/g, "&quot;")
-
                     .replace(/'/g, "&#039;");
-
             };
-
             
-
             const isCodeSnippet = (text) => {
-
                 const codeChars = ['{', '}', ';', '/>', '</', '=>', 'import ', 'def ', 'function', 'const ', 'let ', 'var '];
-
                 const lineCount = (text.match(/\n/g) || []).length;
-
                 if (lineCount > 1 && text.length > 20) return true;
-
                 return codeChars.some(char => text.includes(char));
-
             };
-
             
-
             const fetchYouTubeData = async (url) => {
-
                 const endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
-
                 const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(endpoint)}`;
-
                 try {
-
                     const response = await fetch(proxyUrl);
-
                     if (!response.ok) return null;
-
                     const data = await response.json();
-
                     return (data.thumbnail_url && data.html) ? data : null;
-
                 } catch (error) {
-
                     console.error("YouTube oEmbed fetch failed:", error);
-
                     return null;
-
                 }
-
             };
-
-
 
             const getCardTypeLabel = (type) => {
-
                 const labels = {
-
                     note: 'Note',
-
                     image: 'Image',
-
                     link: 'Link',
-
                     youtube: 'Video',
-
                     code: 'Code'
-
                 };
-
                 return labels[type] || type;
-
             };
-
-
 
             const createCardData = (data) => {
-
                 const currentPage = getCurrentPage();
-
                 if (!currentPage) return;
-
                 
-
                 const cardData = {
-
                     id: `card-${Date.now()}`,
-
                     type: data.type,
-
                     content: data.content || '',
-
                     x: `${(currentPage.cards.length % 8) * 40 + 40}px`,
-
                     y: `${(currentPage.cards.length % 8) * 40 + 60}px`,
-
                     z: 0,
-
                     ytData: data.ytData || null
-
                 };
-
                 
-
                 currentPage.cards.push(cardData);
-
                 highestZ++;
-
                 cardData.z = highestZ;
-
                 createCardElement(cardData);
-
                 saveState();
-
                 setTimeout(scheduleHeightCheck, 100);
-
             };
-
-
 
             const createCardElement = (cardData) => {
-
                 const card = document.createElement('div');
-
                 card.id = cardData.id;
-
                 card.className = `card card-${cardData.type}`;
-
                 card.style.left = cardData.x;
-
                 card.style.top = cardData.y;
-
                 card.style.zIndex = cardData.z;
 
-
-
                 let contentHtml = '';
-
                 let footerHtml = '';
 
-
-
                 if (cardData.ytData) {
-
                     const toggleIcon = cardData.type === 'youtube' ? icons.link : icons.play;
-
                     footerHtml += `<button type="button" class="card-btn toggle-view-btn" title="Toggle view">${toggleIcon}</button>`;
-
                 }
-
                 
-
-                footerHtml += `<button type="button" class="card-btn download-btn" title="Download">${icons.download}</button>`;
-
-                
-
                 switch (cardData.type) {
-
                     case 'note':
-
                         contentHtml = `<textarea class="card-text-content" placeholder="Enter your note...">${cardData.content}</textarea>`;
-
                         break;
-
                     case 'image':
-
                         contentHtml = `<img src="${cardData.content}" class="card-image-content" alt="User image">`;
-
                         break;
-
                     case 'link':
-
                         contentHtml = `<a href="${cardData.content}" target="_blank" class="card-link-content" title="${cardData.content}">${cardData.content}</a>`;
-
                         break;
-
                     case 'youtube':
-
                         if (cardData.ytData && cardData.ytData.html) {
-
                             contentHtml = cardData.ytData.html
-
                                 .replace(/width="\d+"/g, 'width="100%"')
-
                                 .replace(/height="\d+"/g, 'height="100%"');
-
                         }
-
                         break;
-
                     case 'code':
-
                         contentHtml = `<pre class="card-code-content"><code class="language-javascript">${escapeHtml(cardData.content)}</code></pre>`;
-
                         break;
-
                 }
-
                 
-
                 card.innerHTML = `
-
                     <div class="card-header">
-
                         <span class="card-type-label">${getCardTypeLabel(cardData.type)}</span>
-
                     </div>
-
                     <div class="card-body">${contentHtml}</div>
-
                     <div class="card-footer">
-
                         ${footerHtml}
-
                         <button type="button" class="card-btn copy-btn" title="Copy">${icons.clipboard}</button>
-
                         <button type="button" class="card-btn delete-btn" title="Delete">${icons.x}</button>
-
                     </div>
-
                 `;
-
                 
-
                 canvas.appendChild(card);
-
                 
-
                 card.querySelector('.card-header').addEventListener('mousedown', (e) => startDrag(e, cardData, card));
-
                 card.querySelector('.delete-btn').addEventListener('click', () => deleteCard(cardData.id));
-
                 card.querySelector('.copy-btn').addEventListener('click', (e) => copyCardContent(e.currentTarget, cardData));
-
-                card.querySelector('.download-btn').addEventListener('click', () => downloadCardContent(cardData));
-
                 
-
                 const cardBody = card.querySelector('.card-body');
 
-
-
                 if (cardData.type === 'note') {
-
                     const textarea = cardBody.querySelector('.card-text-content');
-
                     textarea.addEventListener('input', (e) => {
-
                         cardData.content = e.target.value;
-
                         saveState();
-
                     });
-
                 } else if (cardData.type === 'code') {
-
                     cardBody.addEventListener('dblclick', () => {
-
                         cardBody.innerHTML = `<textarea class="code-editor">${cardData.content}</textarea>`;
-
                         const editor = cardBody.querySelector('.code-editor');
-
                         editor.focus();
-
                         editor.addEventListener('blur', () => {
-
                             cardData.content = editor.value;
-
                             renderCanvas();
-
                             saveState();
-
                         });
-
                     });
-
                 }
-
                 
-
                 const toggleBtn = card.querySelector('.toggle-view-btn');
-
                 if (toggleBtn) {
-
                     toggleBtn.addEventListener('click', () => {
-
                         cardData.type = cardData.type === 'youtube' ? 'link' : 'youtube';
-
                         renderCanvas();
-
                         saveState();
-
                     });
-
                 }
-
             };
-
             
-
             const handleLinkInput = async (url) => {
-
                 if (!url.trim()) return;
-
                 
-
                 const ytData = await fetchYouTubeData(url);
-
                 if (ytData) {
-
                     createCardData({ type: 'youtube', content: url, ytData: ytData });
-
                 } else if (isCodeSnippet(url)) {
-
                     createCardData({ type: 'code', content: url });
-
                 } else {
-
                     createCardData({ type: 'link', content: url });
-
                 }
-
                 controls.linkInput.value = '';
-
             };
-
             
-
             const startDrag = (e, cardData, cardElement) => {
-
                 e.preventDefault();
-
                 highestZ++;
-
                 cardElement.style.zIndex = cardData.z = highestZ;
-
                 cardElement.classList.add('dragging');
-
                 
-
                 const initialX = e.clientX;
-
                 const initialY = e.clientY;
-
                 const initialLeft = cardElement.offsetLeft;
-
                 const initialTop = cardElement.offsetTop;
-
                 
-
                 const onMove = (moveEvent) => {
-
                     const deltaX = moveEvent.clientX - initialX;
-
                     const deltaY = moveEvent.clientY - initialY;
-
                     let newX = initialLeft + deltaX;
-
                     let newY = initialTop + deltaY;
-
                     
-
                     if (moveEvent.ctrlKey) {
-
                         newX = Math.round(newX / gridSize) * gridSize;
-
                         newY = Math.round(newY / gridSize) * gridSize;
-
                     }
-
                     
-
                     newX = Math.max(0, newX);
-
                     newY = Math.max(0, newY);
-
+                    newY = Math.min(newY, maxCanvasHeight - cardElement.offsetHeight);
                     
-
                     cardElement.style.left = `${newX}px`;
-
                     cardElement.style.top = `${newY}px`;
-
                 };
-
                 
-
                 const onUp = () => {
-
                     document.removeEventListener('mousemove', onMove);
-
                     document.removeEventListener('mouseup', onUp);
-
                     cardElement.classList.remove('dragging');
-
                     cardData.x = cardElement.style.left;
-
                     cardData.y = cardElement.style.top;
-
                     saveState();
-
                     setTimeout(scheduleHeightCheck, 100);
-
                 };
-
                 
-
                 document.addEventListener('mousemove', onMove);
-
                 document.addEventListener('mouseup', onUp);
-
             };
-
-
 
             const deleteCard = (cardId) => {
-
                 const page = getCurrentPage();
-
                 if (!page) return;
-
                 page.cards = page.cards.filter(c => c.id !== cardId);
-
                 renderCanvas();
-
                 saveState();
-
                 setTimeout(scheduleHeightCheck, 100);
-
             };
-
-
 
             const copyCardContent = async (copyBtn, cardData) => {
-
                 if (copyBtn.classList.contains('confirmed')) return;
-
                 
-
                 let success = false;
-
                 try {
-
                     if (['note', 'link', 'youtube', 'code'].includes(cardData.type)) {
-
                         await navigator.clipboard.writeText(cardData.content);
-
                         success = true;
-
                     } else if (cardData.type === 'image') {
-
                         const response = await fetch(cardData.content);
-
                         const blob = await response.blob();
-
                         await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
-
                         success = true;
-
                     }
-
                 } catch (err) {
-
                     console.error('Copy failed:', err);
-
                 }
-
                 
-
                 if (success) {
-
                     copyBtn.innerHTML = icons.tick;
-
                     copyBtn.classList.add('confirmed');
-
                     setTimeout(() => {
-
                         copyBtn.innerHTML = icons.clipboard;
-
                         copyBtn.classList.remove('confirmed');
-
                     }, 1500);
-
                 }
-
             };
-
-
-
-            const downloadCardContent = (cardData) => {
-
-                let blob, filename;
-
-                switch (cardData.type) {
-
-                    case 'note':
-
-                        blob = new Blob([cardData.content], { type: 'text/plain' });
-
-                        filename = 'note.txt';
-
-                        break;
-
-                    case 'code':
-
-                        blob = new Blob([cardData.content], { type: 'text/javascript' });
-
-                        filename = 'code.js';
-
-                        break;
-
-                    case 'image':
-
-                        if (cardData.content.startsWith('data:')) {
-
-                            const [header, data] = cardData.content.split(',');
-
-                            const mime = header.match(/:(.*?);/)[1];
-
-                            const binary = atob(data);
-
-                            const array = new Uint8Array(binary.length);
-
-                            for (let i = 0; i < binary.length; i++) {
-
-                                array[i] = binary.charCodeAt(i);
-
-                            }
-
-                            blob = new Blob([array], { type: mime });
-
-                            filename = `image.${mime.split('/')[1]}`;
-
-                        }
-
-                        break;
-
-                    case 'link':
-
-                    case 'youtube':
-
-                        blob = new Blob([cardData.content], { type: 'text/plain' });
-
-                        filename = 'link.txt';
-
-                        break;
-
-                }
-
-                if (blob) {
-
-                    const a = document.createElement('a');
-
-                    a.href = URL.createObjectURL(blob);
-
-                    a.download = filename;
-
-                    a.click();
-
-                    URL.revokeObjectURL(a.href);
-
-                }
-
-            };
-
-
 
             const handleFile = (file) => {
-
                 if (file?.type.startsWith('image/')) {
-
                     const reader = new FileReader();
-
                     reader.onload = (e) => createCardData({ type: 'image', content: e.target.result });
-
                     reader.readAsDataURL(file);
-
                 } else {
-
                     alert('Only image files are supported.');
-
                 }
-
             };
 
-
-
             // ===== EVENT LISTENERS =====
-
             window.addEventListener('keydown', (e) => {
-
                 const activeElement = document.activeElement;
-
                 if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') return;
-
                 
-
                 if (e.key.toLowerCase() === 'n') {
-
                     e.preventDefault();
-
                     createCardData({ type: 'note' });
-
                 }
-
             });
-
-
 
             window.addEventListener('paste', (e) => {
-
                 if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
-
                 
-
                 const items = e.clipboardData.items;
-
                 for (let i = 0; i < items.length; i++) {
-
                     if (items[i].type.includes('image')) {
-
                         handleFile(items[i].getAsFile());
-
                         return;
-
                     }
-
                 }
-
                 
-
                 const text = e.clipboardData.getData('text/plain');
-
                 if (text) handleLinkInput(text);
-
             });
-
-
 
             canvas.addEventListener('dragover', (e) => e.preventDefault());
-
             canvas.addEventListener('drop', (e) => {
-
                 e.preventDefault();
-
                 if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
-
             });
-
-
 
             controls.addNoteBtn.addEventListener('click', () => createCardData({ type: 'note' }));
-
             
-
             controls.linkInput.addEventListener('keydown', (e) => {
-
                 if (e.key === 'Enter') {
-
                     handleLinkInput(controls.linkInput.value);
-
                 }
-
             });
-
-
 
             controls.uploadBtn.addEventListener('click', () => controls.uploadFileInput.click());
-
             controls.uploadFileInput.addEventListener('change', (e) => {
-
                 handleFile(e.target.files[0]);
-
             });
-
-
 
             controls.resetBtn.addEventListener('click', () => {
-
                 if (confirm('Are you sure? This will delete all pages and cards.')) {
-
                     localStorage.removeItem('scratchpadState');
-
                     init();
-
                 }
-
             });
-
-
 
             controls.exportBtn.addEventListener('click', () => {
-
                 const stateStr = JSON.stringify(appState, null, 2);
-
                 const blob = new Blob([stateStr], { type: 'application/json' });
-
                 const a = document.createElement('a');
-
                 a.href = URL.createObjectURL(blob);
-
                 a.download = `scratchpad-${Date.now()}.json`;
-
                 a.click();
-
                 URL.revokeObjectURL(a.href);
-
             });
-
-
 
             controls.importBtn.addEventListener('click', () => controls.importFileInput.click());
-
             controls.importFileInput.addEventListener('change', (e) => {
-
                 const file = e.target.files[0];
-
                 if (file) {
-
                     const reader = new FileReader();
-
                     reader.onload = (ev) => {
-
                         try {
-
                             const newState = JSON.parse(ev.target.result);
-
                             if (newState.pages && newState.currentPageId) {
-
                                 appState = newState;
-
                                 render();
-
                                 saveState();
-
                             } else {
-
                                 throw new Error("Invalid format.");
-
                             }
-
                         } catch (err) {
-
                             alert('Error: Could not import file. Please check the file format.');
-
                         }
-
                     };
-
                     reader.readAsText(file);
-
                 }
-
             });
-
-
 
             addPageBtn.addEventListener('click', () => createPage());
 
-
-
             controls.helpBtn.addEventListener('click', () => {
-
-                modalOverlay.style.display = 'flex';
-
+                helpModal.style.display = 'flex';
             });
 
-
-
-            closeModal.addEventListener('click', () => {
-
-                modalOverlay.style.display = 'none';
-
+            closeHelp.addEventListener('click', () => {
+                helpModal.style.display = 'none';
             });
 
-
-
-            modalOverlay.addEventListener('click', (e) => {
-
-                if (e.target === modalOverlay) {
-
-                    modalOverlay.style.display = 'none';
-
+            helpModal.addEventListener('click', (e) => {
+                if (e.target === helpModal) {
+                    helpModal.style.display = 'none';
                 }
-
             });
-
-
 
             // ===== INITIALIZATION =====
-
             function init() {
-
                 let savedState = null;
-
                 try {
-
                     savedState = JSON.parse(localStorage.getItem('scratchpadState'));
-
                 } catch (e) {
-
                     savedState = null;
-
                 }
-
                 
-
                 if (savedState && savedState.pages && Object.keys(savedState.pages).length > 0) {
-
                     appState = savedState;
-
                     if (!appState.currentPageId || !appState.pages[appState.currentPageId]) {
-
                         appState.currentPageId = Object.keys(savedState.pages)[0];
-
                     }
-
                     render();
-
                 } else {
-
                     appState = { pages: {}, currentPageId: null };
-
                     createPage('Page 1');
-
                 }
-
                 
-
                 setTimeout(scheduleHeightCheck, 200);
-
             }
-
-
 
             init();
-
         });
-
     </script>
-
-
 
     <script>
-
         // ===== FOURTHWALL SCROLLBAR FIX =====
-
         let lastHeight = 0;
-
         let resizeTimer;
 
-
-
         function sendHeight() {
-
             const height = document.body.scrollHeight;
-
             
-
             if (height !== lastHeight) {
-
                 lastHeight = height;
-
                 window.parent.postMessage({ frameHeight: height }, '*');
-
             }
-
         }
-
-
 
         function scheduleHeightCheck() {
-
             clearTimeout(resizeTimer);
-
             resizeTimer = setTimeout(sendHeight, 150);
-
         }
 
-
-
         window.addEventListener('load', () => {
-
             setTimeout(sendHeight, 100);
-
         });
-
-
 
         window.addEventListener('resize', () => {
-
             scheduleHeightCheck();
-
         });
-
         // ===== END OF SCROLLBAR FIX =====
-
     </script>
-
 </body>
-
 </html>
