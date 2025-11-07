@@ -35,13 +35,36 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             padding: 24px 16px;
-            min-height: 100vh;
         }
 
         /* ===== MAIN CONTAINER ===== */
         .main-wrapper {
-            max-width: 600px;
+            max-width: 1200px;
             margin: 0 auto;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr 400px;
+            }
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
         /* ===== COLLAPSIBLE SECTIONS ===== */
@@ -49,7 +72,6 @@
             background: var(--bg-secondary);
             border: 1px solid var(--outline);
             border-radius: var(--radius);
-            margin-bottom: 16px;
             overflow: hidden;
             transition: all 0.3s ease;
         }
@@ -125,9 +147,9 @@
 
         .section-content {
             padding: 0 24px 24px 24px;
-            max-height: 5000px;
+            max-height: 3000px;
             opacity: 1;
-            transition: all 0.3s ease;
+            transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
             overflow: hidden;
         }
 
@@ -135,6 +157,11 @@
             max-height: 0;
             opacity: 0;
             padding: 0 24px;
+        }
+
+        /* Add spacing between header and content */
+        .section-content > *:first-child {
+            margin-top: 16px;
         }
 
         /* ===== HELP MODAL ===== */
@@ -146,7 +173,7 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.8);
-            z-index: 9999;
+            z-index: 999999;
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -172,6 +199,8 @@
             overflow-y: auto;
             box-shadow: 0 8px 32px rgba(135, 169, 255, 0.3);
             animation: slideUp 0.3s ease;
+            position: relative;
+            z-index: 1000000;
         }
 
         @keyframes slideUp {
@@ -442,6 +471,7 @@
             cursor: pointer;
             position: relative;
             transition: all 0.3s ease;
+            flex-shrink: 0;
         }
 
         .checkbox-item input[type="checkbox"]:checked {
@@ -793,27 +823,22 @@
             cursor: pointer;
         }
 
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1023px) {
+            .preview-area {
+                width: 250px;
+                height: 250px;
             }
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 640px) {
             body {
                 padding: 16px 12px;
             }
 
             .preview-area {
-                width: 250px;
-                height: 250px;
+                width: 220px;
+                height: 220px;
             }
 
             .checkbox-grid,
@@ -830,158 +855,165 @@
 </head>
 <body>
     <div class="main-wrapper">
-        <!-- PREVIEW -->
-        <div class="collapsible-section">
-            <div class="section-header" onclick="toggleSection(this)">
-                <div class="section-title">
-                    <i class="fas fa-eye"></i>
-                    <span>Preview</span>
-                </div>
-                <i class="fas fa-chevron-down toggle-icon"></i>
-            </div>
-            <div class="section-content">
-                <div class="preview-container">
-                    <div class="preview-area">
-                        <canvas id="iconPreview" width="300" height="300"></canvas>
-                        <div class="preview-overlay-text">SELECT AN ICON</div>
+        <div class="container">
+            <!-- LEFT COLUMN -->
+            <div class="left-column">
+                <!-- CONTENT -->
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <i class="fas fa-images"></i>
+                            <span>Content</span>
+                        </div>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
-                </div>
-                <div class="preview-stats">
-                    <div class="stat-card">
-                        <div class="stat-label">Icons Selected</div>
-                        <div class="stat-value" id="selectedCount">0</div>
-                    </div>
-                    <div class="stat-card clickable" id="sizeCard">
-                        <div class="stat-label">Resolution</div>
-                        <div class="stat-value">
-                            <span id="currentSize">144</span>px
+                    <div class="section-content">
+                        <div class="tab-navigation">
+                            <button class="tab-btn active" id="showIconsBtn">Icons</button>
+                            <button class="tab-btn" id="showTxBtn">Textures</button>
+                            <button class="tab-btn" id="showBgBtn">Gradients</button>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- CONTENT -->
-        <div class="collapsible-section">
-            <div class="section-header" onclick="toggleSection(this)">
-                <div class="section-title">
-                    <i class="fas fa-images"></i>
-                    <span>Content</span>
-                </div>
-                <i class="fas fa-chevron-down toggle-icon"></i>
-            </div>
-            <div class="section-content">
-                <div class="tab-navigation">
-                    <button class="tab-btn active" id="showIconsBtn">Icons</button>
-                    <button class="tab-btn" id="showTxBtn">Textures</button>
-                    <button class="tab-btn" id="showBgBtn">Gradients</button>
-                </div>
-                <div class="content-wrapper">
-                    <div id="iconsContent" class="content-grid active">
-                        <div class="grid-item upload-area">
-                            <label for="uploadIcon">+ Upload</label>
-                            <input type="file" id="uploadIcon" accept="image/*,.svg">
-                        </div>
-                    </div>
-                    <div id="txContent" class="content-grid">
-                        <div class="grid-item upload-area">
-                            <label for="uploadTx">+ Upload</label>
-                            <input type="file" id="uploadTx" accept="image/*">
-                        </div>
-                    </div>
-                    <div id="bgContent" class="content-grid">
-                        <div class="grid-item upload-area">
-                            <label for="uploadBg">+ Upload</label>
-                            <input type="file" id="uploadBg" accept="image/*">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SETTINGS -->
-        <div class="collapsible-section">
-            <div class="section-header" onclick="toggleSection(this)">
-                <div class="section-title">
-                    <i class="fas fa-sliders-h"></i>
-                    <span>Settings</span>
-                </div>
-                <div class="section-header-right">
-                    <button class="help-btn" onclick="openHelpModal(event)" title="Help">
-                        <i class="fas fa-question"></i>
-                    </button>
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </div>
-            </div>
-            <div class="section-content">
-                <div class="input-group">
-                    <label for="iconName">Icon Name</label>
-                    <input type="text" id="iconName" value="Custom Icon" placeholder="Enter icon name...">
-                </div>
-
-                <div class="input-group">
-                    <label>Options</label>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="saveAsZip">
-                            <label for="saveAsZip">Multi-Size & ZIP</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="edgeOnOff" checked>
-                            <label for="edgeOnOff">Edge On/Off</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="edgeGlowOnOff" checked>
-                            <label for="edgeGlowOnOff">Edge Glow</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="logoGlowOnOff">
-                            <label for="logoGlowOnOff">Logo Glow</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <div class="color-grid">
-                        <div class="color-picker-item">
-                            <label for="iconColor">Icon</label>
-                            <div class="color-input-wrapper">
-                                <input type="color" id="iconColor" value="#FFFFFF">
-                                <input type="text" id="iconColorHex" value="#FFFFFF" class="hex-input" maxlength="7">
+                        <div class="content-wrapper">
+                            <div id="iconsContent" class="content-grid active">
+                                <div class="grid-item upload-area">
+                                    <label for="uploadIcon">+ Upload</label>
+                                    <input type="file" id="uploadIcon" accept="image/*,.svg">
+                                </div>
                             </div>
-                        </div>
-                        <div class="color-picker-item">
-                            <label for="backgroundColor">Background</label>
-                            <div class="color-input-wrapper">
-                                <input type="color" id="backgroundColor" value="#000000">
-                                <input type="text" id="backgroundColorHex" value="#000000" class="hex-input" maxlength="7">
+                            <div id="txContent" class="content-grid">
+                                <div class="grid-item upload-area">
+                                    <label for="uploadTx">+ Upload</label>
+                                    <input type="file" id="uploadTx" accept="image/*">
+                                </div>
                             </div>
-                        </div>
-                        <div class="color-picker-item">
-                            <label for="glowColor">Glow</label>
-                            <div class="color-input-wrapper">
-                                <input type="color" id="glowColor" value="#87A9FF">
-                                <input type="text" id="glowColorHex" value="#87A9FF" class="hex-input" maxlength="7">
+                            <div id="bgContent" class="content-grid">
+                                <div class="grid-item upload-area">
+                                    <label for="uploadBg">+ Upload</label>
+                                    <input type="file" id="uploadBg" accept="image/*">
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="gradient-warning" id="gradientWarning">
-                        ⚠️ A gradient is active. Turn off the gradient first to use a solid background color.
+                </div>
+
+                <!-- SETTINGS -->
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <i class="fas fa-sliders-h"></i>
+                            <span>Settings</span>
+                        </div>
+                        <div class="section-header-right">
+                            <button class="help-btn" onclick="openHelpModal(event)" title="Help">
+                                <i class="fas fa-question"></i>
+                            </button>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="input-group">
+                            <label for="iconName">Icon Name</label>
+                            <input type="text" id="iconName" value="Custom Icon" placeholder="Enter icon name...">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Options</label>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="saveAsZip">
+                                    <label for="saveAsZip">Multi-Size & ZIP</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="edgeOnOff" checked>
+                                    <label for="edgeOnOff">Edge On/Off</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="edgeGlowOnOff" checked>
+                                    <label for="edgeGlowOnOff">Edge Glow</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="logoGlowOnOff">
+                                    <label for="logoGlowOnOff">Logo Glow</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <div class="color-grid">
+                                <div class="color-picker-item">
+                                    <label for="iconColor">Icon</label>
+                                    <div class="color-input-wrapper">
+                                        <input type="color" id="iconColor" value="#FFFFFF">
+                                        <input type="text" id="iconColorHex" value="#FFFFFF" class="hex-input" maxlength="7">
+                                    </div>
+                                </div>
+                                <div class="color-picker-item">
+                                    <label for="backgroundColor">Background</label>
+                                    <div class="color-input-wrapper">
+                                        <input type="color" id="backgroundColor" value="#000000">
+                                        <input type="text" id="backgroundColorHex" value="#000000" class="hex-input" maxlength="7">
+                                    </div>
+                                </div>
+                                <div class="color-picker-item">
+                                    <label for="glowColor">Glow</label>
+                                    <div class="color-input-wrapper">
+                                        <input type="color" id="glowColor" value="#87A9FF">
+                                        <input type="text" id="glowColorHex" value="#87A9FF" class="hex-input" maxlength="7">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="gradient-warning" id="gradientWarning">
+                                ⚠️ A gradient is active. Turn off the gradient first to use a solid background color.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="right-column">
+                <!-- PREVIEW -->
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <i class="fas fa-eye"></i>
+                            <span>Preview</span>
+                        </div>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="preview-container">
+                            <div class="preview-area">
+                                <canvas id="iconPreview" width="300" height="300"></canvas>
+                                <div class="preview-overlay-text">SELECT AN ICON</div>
+                            </div>
+                        </div>
+                        <div class="preview-stats">
+                            <div class="stat-card">
+                                <div class="stat-label">Icons Selected</div>
+                                <div class="stat-value" id="selectedCount">0</div>
+                            </div>
+                            <div class="stat-card clickable" id="sizeCard">
+                                <div class="stat-label">Resolution</div>
+                                <div class="stat-value">
+                                    <span id="currentSize">144</span>px
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <button id="downloadBtn" class="btn btn-success">
-                        <i class="fas fa-download"></i> Download Icons
-                    </button>
-                </div>
+                <!-- DOWNLOAD BUTTON -->
+                <button id="downloadBtn" class="btn btn-success">
+                    <i class="fas fa-download"></i> Download Icons
+                </button>
             </div>
         </div>
     </div>
 
     <!-- HELP MODAL -->
-    <div class="modal-overlay" id="helpModal" onclick="closeHelpModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">
                     <i class="fas fa-circle-info"></i>
@@ -1052,16 +1084,24 @@
         // ===== HELP MODAL =====
         function openHelpModal(event) {
             event.stopPropagation();
-            document.getElementById('helpModal').classList.add('active');
+            const modal = document.getElementById('helpModal');
+            modal.classList.add('active');
+            // Prevent body scroll
             document.body.style.overflow = 'hidden';
         }
 
-        function closeHelpModal(event) {
-            if (!event || event.target.classList.contains('modal-overlay') || event.target.closest('.modal-close')) {
-                document.getElementById('helpModal').classList.remove('active');
-                document.body.style.overflow = '';
-            }
+        function closeHelpModal() {
+            const modal = document.getElementById('helpModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
         }
+
+        // Close modal when clicking overlay (but not the content)
+        document.getElementById('helpModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeHelpModal();
+            }
+        });
 
         // Close modal with Escape key
         document.addEventListener('keydown', (e) => {
@@ -1077,9 +1117,6 @@
             
             content.classList.toggle('collapsed');
             icon.classList.toggle('collapsed');
-            
-            // Send height update after animation completes
-            setTimeout(sendHeight, 350);
         }
 
         // ===== SIZE CYCLER =====
@@ -1793,7 +1830,7 @@
             selectedCountEl.textContent = selectedIcons.length;
         }
 
-        async function renderIconToCanvas(iconData, backgroundData, textureData, iconColor, bgColor, glowColor, edgeOn, logoGlowOn, edgeGlowOn, targetCanvas, targetCtx, targetSize) {
+        async functionrenderIconToCanvas(iconData, backgroundData, textureData, iconColor, bgColor, glowColor, edgeOn, logoGlowOn, edgeGlowOn, targetCanvas, targetCtx, targetSize) {
             targetCtx.shadowBlur = 0;
             targetCtx.shadowColor = 'transparent';
             targetCtx.shadowOffsetX = 0;
@@ -1811,7 +1848,8 @@
 
             if (backgroundData && backgroundData.id === 'off') {
                 targetCtx.fillStyle = bgColor;
-                targetCtx.fillRect(0, 0, targetSize, targetSize);} else if (backgroundData) {
+                targetCtx.fillRect(0, 0, targetSize, targetSize);
+            } else if (backgroundData) {
                 if (backgroundData.type === 'color') {
                     targetCtx.fillStyle = backgroundData.value;
                     targetCtx.fillRect(0, 0, targetSize, targetSize);
@@ -2323,8 +2361,6 @@
             var height = document.body.scrollHeight;
             // Only send if height has changed to prevent feedback loop
             if (height !== lastHeight) {
-            // Only send if height has changed by more than a small threshold to prevent feedback loop
-            if (Math.abs(height - lastHeight) > 2) {
                 lastHeight = height;
                 window.parent.postMessage({ frameHeight: height }, '*');
             }
