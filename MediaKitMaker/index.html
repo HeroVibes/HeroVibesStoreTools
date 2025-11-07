@@ -573,11 +573,30 @@
 
     @media (min-width: 1024px) {
       .preview-container {
-        /* REMOVED: 'position: sticky' and 'max-height' rules.
-          REASON: These are incompatible with the Fourthwall Scrollbar Fix script.
-          The script creates a very tall, non-scrolling iframe,
-          which prevents sticky/fixed positioning from working as desired.
-        */
+        position: sticky;
+        top: 24px;
+        max-height: calc(100vh - 48px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent) var(--bg-primary);
+      }
+
+      .preview-container::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .preview-container::-webkit-scrollbar-track {
+        background: var(--bg-primary);
+        border-radius: 4px;
+      }
+
+      .preview-container::-webkit-scrollbar-thumb {
+        background: var(--accent);
+        border-radius: 4px;
+      }
+
+      .preview-container::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-secondary);
       }
     }
 
@@ -602,17 +621,37 @@
        FLOATING PREVIEW BUTTON (MOBILE)
        ============================================ */
     .floating-preview-btn {
-      /* REMOVED: 'position: fixed'.
-        REASON: This is incompatible with the Fourthwall Scrollbar Fix script.
-        The button would be fixed to the iframe, not the parent window,
-        and would scroll off-screen. This is not a premium experience.
-      */
-      display: none !important; /* Hide button on all devices */
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+      color: #000;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(135, 169, 255, 0.4);
+      z-index: 1000;
+      transition: all 0.3s;
+    }
+
+    .floating-preview-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 30px rgba(135, 169, 255, 0.6);
+    }
+
+    .floating-preview-btn:active {
+      transform: scale(0.95);
     }
 
     @media (min-width: 1024px) {
       .floating-preview-btn {
-        display: none !important;
+        display: none;
       }
     }
 
@@ -1100,7 +1139,7 @@
               <strong>Accent Color:</strong> <span id="debugAccentColor">#87A9FF</span>
             </div>
             <div style="margin-top: 8px;">
-              <strong>Version:</strong> <span id="debugVersion">V1.0.2</span>
+              <strong>Version:</strong> <span id="debugVersion">V1.0.1</span>
             </div>
           </div>
         </div>
@@ -1247,6 +1286,8 @@
     // ============================================
     const tagInput = document.getElementById('tagInput');
     const tagsContainer = document.getElementById('tagsContainer');
+
+    // MOVED: Initial tag population moved to window.onload to prevent race condition
 
     tagInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
@@ -1813,8 +1854,7 @@
       }
 
       // Footer with contact info
-      // ADDED: Increased padding from 12 to 25
-      yPos = Math.max(yPos + 25, 740);
+      yPos = Math.max(yPos + 12, 740);
       svgContent += `<line x1="80" y1="${yPos}" x2="520" y2="${yPos}" stroke="${accent}" stroke-width="1" opacity="0.3"/>`;
       yPos += 18;
       
