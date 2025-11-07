@@ -39,7 +39,7 @@
     .container {
       max-width: 1400px;
       margin: 0 auto;
-      padding-bottom: 200px; /* Extra space for popup */
+      padding-bottom: 200px;
     }
 
     /* ===== TIMER ROWS ===== */
@@ -315,6 +315,14 @@
       border-radius: var(--radius);
       outline: none;
       transition: border-color 0.2s ease;
+      -moz-appearance: textfield;
+    }
+
+    /* REMOVE UP/DOWN ARROWS FROM NUMBER INPUTS */
+    .popup input::-webkit-outer-spin-button,
+    .popup input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
 
     .popup input:focus {
@@ -656,7 +664,6 @@
           popup.classList.remove('hidden');
           setTimeout(() => hInput.focus(), 100);
           
-          // Trigger height recalculation after popup opens
           requestAnimationFrame(sendHeight);
         }
       });
@@ -702,6 +709,8 @@
         timers = timers.filter(t => t !== timer);
         renderRows();
         updateURL();
+        // TRIGGER HEIGHT RECALCULATION AFTER DELETION
+        scheduleHeightCheck();
       });
 
       // ===== TITLE EDIT =====
@@ -745,6 +754,8 @@
           addBtn.onclick = () => {
             createTimer(5);
             updateURL();
+            // TRIGGER HEIGHT RECALCULATION AFTER ADDITION
+            scheduleHeightCheck();
           };
           rowDiv.appendChild(addBtn);
         }
@@ -762,6 +773,8 @@
         addBtn.onclick = () => {
           createTimer(5);
           updateURL();
+          // TRIGGER HEIGHT RECALCULATION AFTER ADDITION
+          scheduleHeightCheck();
         };
         newRow.appendChild(addBtn);
         rowsContainer.appendChild(newRow);
@@ -818,7 +831,6 @@
       popup.classList.add('hidden');
       currentEditing = null;
       
-      // Trigger height recalculation after popup closes
       requestAnimationFrame(sendHeight);
     });
 
@@ -827,7 +839,6 @@
       popup.classList.add('hidden');
       currentEditing = null;
       
-      // Trigger height recalculation after popup closes
       requestAnimationFrame(sendHeight);
     });
 
@@ -861,22 +872,18 @@
     let heightCheckTimeout = null;
 
     function sendHeight() {
-      // Clear any pending height checks
       if (heightCheckTimeout) {
         clearTimeout(heightCheckTimeout);
       }
 
-      // Calculate actual content height
       const contentHeight = document.body.scrollHeight;
       
-      // Only send if height actually changed (prevents infinite loop)
       if (Math.abs(contentHeight - lastHeight) > 5) {
         lastHeight = contentHeight;
         window.parent.postMessage({ frameHeight: contentHeight }, '*');
       }
     }
 
-    // Debounced height check
     function scheduleHeightCheck() {
       if (heightCheckTimeout) {
         clearTimeout(heightCheckTimeout);
@@ -887,7 +894,6 @@
     window.onload = sendHeight;
     window.onresize = scheduleHeightCheck;
 
-    // Use debounced observer to prevent infinite loops
     const observer = new MutationObserver(() => {
       scheduleHeightCheck();
     });
@@ -895,7 +901,7 @@
     observer.observe(rowsContainer, { 
       childList: true, 
       subtree: true,
-      attributes: false // Don't watch attribute changes
+      attributes: false
     });
   </script>
 </body>
