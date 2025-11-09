@@ -382,10 +382,10 @@
             border-radius: var(--radius);
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             z-index: 1001;
-            width: 320px; /* FIX 3 */
+            width: 320px;
             max-height: 280px;
             overflow-y: auto;
-            overflow-x: hidden;
+            /* FIX 5: Re-enabled horizontal scroll if needed */
         }
 
         #emojiSearch {
@@ -395,7 +395,7 @@
 
         #emojiList {
             display: grid;
-            grid-template-columns: repeat(8, 1fr); /* FIX 3 */
+            grid-template-columns: repeat(8, 1fr);
             gap: 4px;
         }
 
@@ -534,6 +534,17 @@
         }
         #createLinkButton:hover {
             background: var(--accent-color);
+            filter: brightness(0.9);
+        }
+        
+        /* FIX 4: Remove Link Button */
+        #removeLinkButton {
+            background: var(--danger-color);
+            color: #FFF;
+            border-color: var(--danger-color);
+            margin-right: auto;
+        }
+        #removeLinkButton:hover {
             filter: brightness(0.9);
         }
         
@@ -808,7 +819,7 @@
             <input type="text" id="replaceWord" placeholder="Replace..." autocomplete="off" />
             <div class="btn-wrapper">
                 <button onclick="replaceOne()">Replace</button>
-                <span class="btn-tooltip">Replace (Ctrl+Enter)</span>
+                <span class="btn-tooltip">Replace (Ctrl/Cmd+Enter)</span>
             </div>
             <div class="btn-wrapper">
                 <button onclick="replaceAll()">Replace All</button>
@@ -886,7 +897,7 @@
         <div class="editor" contenteditable="true" id="editor" spellcheck="true"><p><br></p></div>
     </div>
     <div id="stats-bar">
-        <span class="version">V.1.1.2</span>
+        <span class="version">V.1.0.3</span>
         <div>
             <span id="char-count">0</span> characters · 
             <span id="word-count">0</span> words ·
@@ -912,7 +923,7 @@
             <ul>
                 <li><kbd>Enter</kbd>: Jump to the <strong>next</strong> match.</li>
                 <li><kbd>Shift + Enter</kbd>: Jump to the <strong>previous</strong> match.</li>
-                <li><kbd>Ctrl + Enter</kbd>: <strong>Replace</strong> the current match and jump to the next one.</li>
+                <li><kbd>Ctrl/Cmd + Enter</kbd>: <strong>Replace</strong> the current match and jump to the next one.</li>
                 <li>Click the <strong>Red (X)</strong> button to clear the inputs and exit Find mode.</li>
             </ul>
 
@@ -940,6 +951,7 @@
             <p>Enter the URL you want to link to:</p>
             <input type="text" id="linkUrlInput" placeholder="https://www.herovibes.store" />
             <div class="modal-actions">
+                <button id="removeLinkButton">Remove</button>
                 <button id="closeLinkButton">Cancel</button>
                 <button id="createLinkButton">Create</button>
             </div>
@@ -974,6 +986,7 @@
     const linkModalBackdrop = document.getElementById('linkModalBackdrop');
     const closeLinkButton = document.getElementById('closeLinkButton');
     const createLinkButton = document.getElementById('createLinkButton');
+    const removeLinkButton = document.getElementById('removeLinkButton'); // FIX 4
     const linkUrlInput = document.getElementById('linkUrlInput');
     const findWordInput = document.getElementById('findWord');
     const replaceWordInput = document.getElementById('replaceWord');
@@ -987,8 +1000,7 @@
     let currentMatchIndex = -1;
     let currentLinkToEdit = null;
     
-    // ===== EMOJI DATA (FIX 3) =====
-    // Curated list based on emoji-data, ~100 common emojis
+    // ===== EMOJI DATA (FIX 5: Expanded) =====
     const emojiList = [
         { e: '😀', k: ['grinning', 'happy', 'smile'] }, { e: '😃', k: ['happy', 'joy'] }, { e: '😄', k: ['laugh', 'happy'] },
         { e: '😁', k: ['grin', 'smile'] }, { e: '😆', k: ['laugh', 'haha'] }, { e: '😅', k: ['sweat', 'relief'] },
@@ -1017,11 +1029,25 @@
         { e: '🙏', k: ['pray', 'thanks', 'please'] }, { e: '👋', k: ['wave', 'hello', 'bye'] }, { e: '❤️', k: ['heart', 'love'] },
         { e: '🔥', k: ['fire', 'hot', 'lit'] }, { e: '✨', k: ['sparkles', 'magic'] }, { e: '🎉', k: ['party', 'celebration'] },
         { e: '💯', k: ['hundred', 'perfect', '100'] }, { e: '✅', k: ['check', 'green', 'yes'] }, { e: '❌', k: ['x', 'red', 'no'] },
-        { e: '🧠', k: ['brain', 'mind'] }, { e: '👀', k: ['eyes', 'looking'] }, { e: '👋', k: ['wave', 'hello'] },
-        { e: '🚀', k: ['rocket', 'space', 'launch'] }, { e: '💡', k: ['idea', 'lightbulb'] }, { e: '💻', k: ['computer', 'laptop'] },
-        { e: '📱', k: ['phone', 'mobile'] }, { e: '💰', k: ['money', 'cash', 'bag'] }, { e: '📈', k: ['chart', 'graph', 'up'] },
-        { e: '❓', k: ['question', 'mark'] }, { e: '❗', k: ['exclamation', 'bang'] }, { e: '➡️', k: ['arrow', 'right'] },
-        { e: '⬆️', k: ['arrow', 'up'] }, { e: '⬇️', k: ['arrow', 'down'] }, { e: '⬅️', k: ['arrow', 'left'] }
+        { e: '🧠', k: ['brain', 'mind'] }, { e: '👀', k: ['eyes', 'looking'] }, { e: '🚀', k: ['rocket', 'space', 'launch'] },
+        { e: '💡', k: ['idea', 'lightbulb'] }, { e: '💻', k: ['computer', 'laptop'] }, { e: '📱', k: ['phone', 'mobile'] },
+        { e: '💰', k: ['money', 'cash', 'bag'] }, { e: '📈', k: ['chart', 'graph', 'up'] }, { e: '❓', k: ['question', 'mark'] },
+        { e: '❗', k: ['exclamation', 'bang'] }, { e: '➡️', k: ['arrow', 'right'] }, { e: '⬆️', k: ['arrow', 'up'] },
+        { e: '⬇️', k: ['arrow', 'down'] }, { e: '⬅️', k: ['arrow', 'left'] }, { e: '💧', k: ['water', 'drop'] },
+        { e: '🌊', k: ['wave', 'ocean', 'water'] }, { e: '💦', k: ['sweat', 'water'] }, { e: '🏊', k: ['swim', 'sport', 'water'] },
+        { e: '⛵', k: ['boat', 'sail', 'water'] }, { e: '🚢', k: ['ship', 'water'] }, { e: '🚤', k: ['speedboat', 'water'] },
+        { e: '🏞️', k: ['park', 'nature'] }, { e: '🏖️', k: ['beach', 'sand'] }, { e: '⚽', k: ['soccer', 'football', 'sport'] },
+        { e: '🏀', k: ['basketball', 'sport'] }, { e: '🏈', k: ['football', 'sport'] }, { e: '⚾', k: ['baseball', 'sport'] },
+        { e: '🎾', k: ['tennis', 'sport'] }, { e: '🏐', k: ['volleyball', 'sport'] }, { e: '🏉', k: ['rugby', 'sport'] },
+        { e: '🎱', k: ['pool', 'billiards', 'sport'] }, { e: '🏓', k: ['ping pong', 'sport'] }, { e: '🏸', k: ['badminton', 'sport'] },
+        { e: '🥅', k: ['goal', 'net', 'sport'] }, { e: '🏒', k: ['hockey', 'sport'] }, { e: '🏑', k: ['field hockey', 'sport'] },
+        { e: '🏏', k: ['cricket', 'sport'] }, { e: '⛳', k: ['golf', 'sport'] }, { e: '🏹', k: ['bow', 'arrow', 'sport'] },
+        { e: '🎣', k: ['fishing', 'sport'] }, { e: '🥊', k: ['boxing', 'glove', 'sport'] }, { e: '🥋', k: ['martial arts', 'judo'] },
+        { e: '⛸️', k: ['skating', 'ice', 'sport'] }, { e: '🎿', k: ['ski', 'sport'] }, { e: '⛷️', k: ['skier', 'sport'] },
+        { e: '🏂', k: ['snowboarder', 'sport'] }, { e: '🏋️', k: ['weightlifting', 'gym', 'sport'] }, { e: '🚴', k: ['biking', 'cycling', 'sport'] },
+        { e: '🤸', k: ['cartwheel', 'gymnastics'] }, { e: '🤼', k: ['wrestling', 'sport'] }, { e: '🤽', k: ['water polo', 'sport'] },
+        { e: '🤾', k: ['handball', 'sport'] }, { e: '🎮', k: ['game', 'controller', 'gaming'] }, { e: '🕹️', k: ['joystick', 'game', 'gaming'] },
+        { e: '🎲', k: ['die', 'dice', 'game'] }, { e: '🎯', k: ['target', 'darts', 'game'] }
     ];
 
     // ===== HISTORY MANAGEMENT =====
@@ -1360,8 +1386,8 @@
         document.getElementById('reading-time').textContent = readingTime;
     }
 
-    // ===== AI ARTIFACT DETECTION & REMOVAL =====
-    const aiCharactersRegex = /[\u2013\u2014\u201C\u201D\u2018\u2019\u2026\u1680\u2000-\u200A\u202F\u205F\u3000\u25A0\u200B\uFEFF\u00AD\u2060-\u2064\u201A\u201B\u201E\u201F\u0060\u00B4\u02B9\u02BB-\u02BD\u05F3\u02BA\u05F4\u2033\u2034\u2032\u2035-\u2037\u02EE\u00AB\u00BB\uFF08\uFF09\u2015\u2212\u2012\u2010\u2011\u23AF\u2796\uFF0D\u2025\u22EE\u22EF\uFF0E\uFF0C\u2024\uFE52\u2219\u00B7\u0430\u0410\u0441\u0421\u0435\u0415\u0395\u0396\u0397\u0456\u0406\u0399\u0131\u0269\u0458\u0408\u039A\u039C\u039D\u043E\u041E\u039F\u0440\u0420\u03A1\u03A4\u0445\u0425\u03A7\u03BD]/g;
+    // ===== AI ARTIFACT DETECTION & REMOVAL (FIX 1) =====
+    const aiCharactersRegex = /[\u2013\u2014\u201C\u201D\u2018\u2019\u2026\u1680\u2000-\u200A\u202F\u205F\u3000\u25A0\u200B\uFEFF\u00AD\u2060-\u2064\u201A\u201B\u201E\u201F\u0060\u00B4\u02B9\u02BB-\u02BD\u05F3\u02BA\u05F4\u2033\u2034\u2032\u2035-\u2037\u02EE\u00AB\u00BB\uFF08\uFF09\u2015\u2212\u2012\u2010\u2011\u23AF\u2796\uFF0D\u2025\u22EE\u22EF\uFF0E\uFF0C\uFE52\u2219\u00B7]/g;
 
     function highlightInTextNodes(regex, className) {
         removeHighlight(className);
@@ -1395,43 +1421,19 @@
 
     function removeAIArtifacts() {
         saveState();
+        // FIX 1: Removed homoglyphs
         const replacements = { 
             '[\u2013\u2014\u2015\u2212\u2012\u2010\u2011\u23AF\u2796\uFF0D]': '-', 
             '[\u201C\u201D\u201E\u201F\u00AB\u00BB]': '"', 
             '[\u2018\u2019\u201A\u201B\u0060\u00B4\u02B9\u02BB-\u02BD\u05F3\u02BA\u05F4\u2033\u2034\u2032\u2035-\u2037\u02EE]': "'", 
             '[\u2026\u2025\u22EE\u22EF]': '...', 
-            '[\uFF0E\u2024\uFE52\u2219\u00B7]': '.',
+            '[\uFF0E\uFE52\u2219\u00B7]': '.', // \u2024 removed
             '\uFF0C': ',',
             '[\u1680\u2000-\u200A\u202F\u205F\u3000\u200B\uFEFF\u00AD\u2060-\u2064]': ' ',
             '\uFF08': '(',
             '\uFF09': ')',
             '&lt;': '<',
             '&gt;': '>',
-            '[\u0430\u03B1]': 'a',
-            '[\u0410\u0391]': 'A',
-            '\u0392': 'B',
-            '\u0441': 'c',
-            '\u0421': 'C',
-            '[\u0435]': 'e',
-            '[\u0415\u0395]': 'E',
-            '\u0396': 'Z',
-            '\u0397': 'H',
-            '[\u0456\u0399\u0131]': 'i',
-            '[\u0406]': 'I',
-            '\u0269': 'i',
-            '[\u0458]': 'j',
-            '[\u0408]': 'J',
-            '\u039A': 'K',
-            '\u039C': 'M',
-            '\u039D': 'N',
-            '[\u043E\u03BF]': 'o',
-            '[\u041E\u039F]': 'O',
-            '[\u0440\u03A1]': 'p',
-            '[\u0420]': 'P',
-            '\u03A4': 'T',
-            '[\u0445\u03A7]': 'x',
-            '[\u0425]': 'X',
-            '\u03BD': 'v',
             '\u25A0': '[square]'
         };
         let content = editor.innerHTML;
@@ -1590,8 +1592,8 @@
     
     const turndownService = new TurndownService({ 
         headingStyle: 'atx',
-        emDelimiter: '*',      // Italic: *text*
-        strongDelimiter: '**'  // Bold: **text**
+        emDelimiter: '*',
+        strongDelimiter: '**'
     });
 
     turndownService.addRule('strikethrough', {
@@ -1602,6 +1604,16 @@
     turndownService.addRule('underline', {
         filter: 'u',
         replacement: (content) => '__' + content + '__'
+    });
+    
+    // FIX 2: Correct Link formatting
+    turndownService.addRule('link', {
+        filter: 'a',
+        replacement: function (content, node) {
+            let href = node.getAttribute('href');
+            if (!href) href = '';
+            return '[' + content + '](' + href + ')';
+        }
     });
     
     turndownService.addRule('alignment', {
@@ -1660,7 +1672,7 @@
         scheduleHeightCheck();
     }
 
-    // ===== EMOJI PICKER (FIX 3) =====
+    // ===== EMOJI PICKER =====
     function loadEmojis(list = emojiList) {
         const emojiListEl = document.getElementById('emojiList');
         emojiListEl.innerHTML = '';
@@ -1733,6 +1745,7 @@
             linkModal.querySelector('h3').textContent = 'Update Link';
             createLinkButton.textContent = 'Update';
             linkUrlInput.value = currentLinkToEdit.getAttribute('href');
+            removeLinkButton.classList.remove('hidden');
         } else {
             saveSelection();
             if (savedRange.collapsed) {
@@ -1742,6 +1755,7 @@
             linkModal.querySelector('h3').textContent = 'Add Link';
             createLinkButton.textContent = 'Create';
             linkUrlInput.value = '';
+            removeLinkButton.classList.add('hidden');
         }
         linkModal.classList.remove('hidden');
         linkUrlInput.focus();
@@ -1753,8 +1767,23 @@
         currentLinkToEdit = null;
     }
     
+    function removeLink() {
+        restoreSelection();
+        document.execCommand('unlink', false, null);
+        closeLinkModal();
+        scheduleHeightCheck();
+        updateToolbarStates();
+    }
+    
     function createLink() {
         let url = linkUrlInput.value;
+        
+        // FIX 4: Handle blank input as "remove link"
+        if (url === '') {
+            removeLink();
+            return;
+        }
+        
         if (url) {
             let hasProtocol = url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/');
             let hasWWW = url.startsWith('www.');
@@ -1771,7 +1800,7 @@
         
         if (currentLinkToEdit) {
             currentLinkToEdit.setAttribute('href', url);
-            // FIX 2: Remove title attribute setting
+            currentLinkToEdit.setAttribute('title', url);
         } else {
             document.execCommand('createLink', false, url);
             
@@ -1779,7 +1808,8 @@
             if (selection.rangeCount > 0) {
                 let parentLink = selection.getRangeAt(0).startContainer.parentElement.closest('a');
                 if (parentLink) {
-                    // FIX 2: Remove title attribute setting
+                    parentLink.setAttribute('title', url);
+                    
                     if (parentLink.previousSibling && parentLink.previousSibling.nodeType === 3 && parentLink.previousSibling.textContent === '\u00A0') {
                         parentLink.previousSibling.remove();
                     }
@@ -1799,6 +1829,7 @@
     linkModalBackdrop.addEventListener('click', closeLinkModal);
     closeLinkButton.addEventListener('click', closeLinkModal);
     createLinkButton.addEventListener('click', createLink);
+    removeLinkButton.addEventListener('click', removeLink);
     linkUrlInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -1888,12 +1919,11 @@
         }
     }
 
-    // ===== PLAIN TEXT CONVERSION (FIX 8) =====
+    // ===== PLAIN TEXT CONVERSION =====
     function convertToPlainText() {
         saveState();
         const plainText = editor.innerText;
         const lines = plainText.split('\n');
-        // Removed the &nbsp; replacement
         editor.innerHTML = lines.map(line => `<p>${line || '<br>'}</p>`).join('');
         updateToolbarStates();
         scheduleHeightCheck();
