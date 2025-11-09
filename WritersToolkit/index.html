@@ -382,10 +382,10 @@
             border-radius: var(--radius);
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             z-index: 1001;
-            width: 360px;
+            width: 320px; /* FIX 3 */
             max-height: 280px;
             overflow-y: auto;
-            overflow-x: hidden; /* FIX 3 */
+            overflow-x: hidden;
         }
 
         #emojiSearch {
@@ -395,7 +395,7 @@
 
         #emojiList {
             display: grid;
-            grid-template-columns: repeat(9, 1fr);
+            grid-template-columns: repeat(8, 1fr); /* FIX 3 */
             gap: 4px;
         }
 
@@ -886,7 +886,7 @@
         <div class="editor" contenteditable="true" id="editor" spellcheck="true"><p><br></p></div>
     </div>
     <div id="stats-bar">
-        <span class="version">V.1.1.1</span>
+        <span class="version">V.1.1.2</span>
         <div>
             <span id="char-count">0</span> characters · 
             <span id="word-count">0</span> words ·
@@ -938,7 +938,7 @@
         <div class="modal-content" id="linkModalContent">
             <h3></h3>
             <p>Enter the URL you want to link to:</p>
-            <input type="text" id="linkUrlInput" placeholder="httpswww.herovibes.store" />
+            <input type="text" id="linkUrlInput" placeholder="https://www.herovibes.store" />
             <div class="modal-actions">
                 <button id="closeLinkButton">Cancel</button>
                 <button id="createLinkButton">Create</button>
@@ -987,10 +987,42 @@
     let currentMatchIndex = -1;
     let currentLinkToEdit = null;
     
-    // ===== EMOJI DATA (Truncated) =====
-    const emojiData = {
-        '😀': ['grinning', 'happy', 'smile'], '😃': ['happy', 'joy'], '😄': ['laugh', 'happy'], '😁': ['grin', 'smile'], '😆': ['laugh', 'haha'], '😅': ['sweat', 'relief'], '🤣': ['rofl', 'laughing'], '😂': ['tears', 'joy', 'crying'], '🙂': ['smile', 'happy'], '🙃': ['upside', 'silly'], '😉': ['wink', 'flirt'], '😊': ['blush', 'happy'], '😇': ['angel', 'innocent'], '🥰': ['love', 'hearts'], '😍': ['love', 'heart eyes'], '🤩': ['star', 'excited'], '😘': ['kiss', 'love'], '😗': ['kiss'], '😚': ['kiss'], '😙': ['kiss'], '🥲': ['tear', 'happy'], '😋': ['yum', 'delicious'], '😛': ['tongue', 'silly'], '😜': ['wink', 'tongue'], '🤪': ['crazy', 'goofy'], '🤨': ['suspicious', 'raised eyebrow'], '🧐': ['monocle', 'thinking'], '🤓': ['nerd', 'geek'], '😎': ['cool', 'sunglasses'], '🥳': ['party', 'celebrate'], '😏': ['smirk'], '😒': ['unamused'], '😞': ['sad', 'disappointed'], '😔': ['sad', 'pensive'], '😟': ['worried'], '😕': ['confused'], '🙁': ['sad', 'frown'], '☹️': ['sad'], '😮': ['surprised'], '😯': ['shocked'], '😲': ['astonished'], '😳': ['flushed', 'embarrassed'], '🥺': ['pleading', 'puppy eyes'], '😦': ['frown', 'sad'], '😧': ['anguished'], '😨': ['fearful', 'scared'], '😰': ['anxious', 'sweat'], '😥': ['sad', 'relieved'], '😢': ['cry', 'tear'], '😭': ['crying', 'sob'], '😱': ['scream', 'shocked'], '😖': ['confounded'], '😣': ['persevering'], '😤': ['triumph', 'frustrated'], '😠': ['angry'], '😡': ['rage', 'angry'], '🤬': ['cursing', 'symbols'], '🤯': ['mind blown'], '🥵': ['hot', 'sweating'], '🥶': ['cold', 'freezing'], '😴': ['sleeping', 'zzz'], '😈': ['devil', 'horns'], '👿': ['devil', 'angry'], '💀': ['skull', 'dead'], '💩': ['poop'], '🤡': ['clown'], '👹': ['ogre', 'monster'], '👺': ['goblin'], '👻': ['ghost'], '👽': ['alien'], '👾': ['space invader'], '🤖': ['robot'], '👍': ['thumbs up', 'yes', 'like'], '👎': ['thumbs down', 'no'], '🙏': ['pray', 'thanks', 'please'], '👋': ['wave', 'hello', 'bye'], '❤️': ['heart', 'love'], '🔥': ['fire', 'hot', 'lit'], '✨': ['sparkles', 'magic'], '🎉': ['party', 'celebration'], '💯': ['hundred', 'perfect', '100']
-    };
+    // ===== EMOJI DATA (FIX 3) =====
+    // Curated list based on emoji-data, ~100 common emojis
+    const emojiList = [
+        { e: '😀', k: ['grinning', 'happy', 'smile'] }, { e: '😃', k: ['happy', 'joy'] }, { e: '😄', k: ['laugh', 'happy'] },
+        { e: '😁', k: ['grin', 'smile'] }, { e: '😆', k: ['laugh', 'haha'] }, { e: '😅', k: ['sweat', 'relief'] },
+        { e: '🤣', k: ['rofl', 'laughing'] }, { e: '😂', k: ['tears', 'joy', 'crying'] }, { e: '🙂', k: ['smile', 'happy'] },
+        { e: '🙃', k: ['upside', 'silly'] }, { e: '😉', k: ['wink', 'flirt'] }, { e: '😊', k: ['blush', 'happy'] },
+        { e: '😇', k: ['angel', 'innocent'] }, { e: '🥰', k: ['love', 'hearts'] }, { e: '😍', k: ['love', 'heart eyes'] },
+        { e: '🤩', k: ['star', 'excited'] }, { e: '😘', k: ['kiss', 'love'] }, { e: '😗', k: ['kiss'] },
+        { e: '😚', k: ['kiss'] }, { e: '😙', k: ['kiss'] }, { e: '😋', k: ['yum', 'delicious'] },
+        { e: '😛', k: ['tongue', 'silly'] }, { e: '😜', k: ['wink', 'tongue'] }, { e: '🤪', k: ['crazy', 'goofy'] },
+        { e: '🤨', k: ['suspicious', 'raised eyebrow'] }, { e: '🧐', k: ['monocle', 'thinking'] }, { e: '🤓', k: ['nerd', 'geek'] },
+        { e: '😎', k: ['cool', 'sunglasses'] }, { e: '🥳', k: ['party', 'celebrate'] }, { e: '😏', k: ['smirk'] },
+        { e: '😒', k: ['unamused'] }, { e: '😞', k: ['sad', 'disappointed'] }, { e: '😔', k: ['sad', 'pensive'] },
+        { e: '😟', k: ['worried'] }, { e: '😕', k: ['confused'] }, { e: '🙁', k: ['sad', 'frown'] },
+        { e: '😮', k: ['surprised'] }, { e: '😯', k: ['shocked'] }, { e: '😲', k: ['astonished'] },
+        { e: '😳', k: ['flushed', 'embarrassed'] }, { e: '🥺', k: ['pleading', 'puppy eyes'] }, { e: '😦', k: ['frown', 'sad'] },
+        { e: '😧', k: ['anguished'] }, { e: '😨', k: ['fearful', 'scared'] }, { e: '😰', k: ['anxious', 'sweat'] },
+        { e: '😥', k: ['sad', 'relieved'] }, { e: '😢', k: ['cry', 'tear'] }, { e: '😭', k: ['crying', 'sob'] },
+        { e: '😱', k: ['scream', 'shocked'] }, { e: '😖', k: ['confounded'] }, { e: '😣', k: ['persevering'] },
+        { e: '😤', k: ['triumph', 'frustrated'] }, { e: '😠', k: ['angry'] }, { e: '😡', k: ['rage', 'angry'] },
+        { e: '🤬', k: ['cursing', 'symbols'] }, { e: '🤯', k: ['mind blown'] }, { e: '🥵', k: ['hot', 'sweating'] },
+        { e: '🥶', k: ['cold', 'freezing'] }, { e: '😴', k: ['sleeping', 'zzz'] }, { e: '😈', k: ['devil', 'horns'] },
+        { e: '👿', k: ['devil', 'angry'] }, { e: '💀', k: ['skull', 'dead'] }, { e: '💩', k: ['poop'] },
+        { e: '🤡', k: ['clown'] }, { e: '👹', k: ['ogre', 'monster'] }, { e: '👺', k: ['goblin'] },
+        { e: '👻', k: ['ghost'] }, { e: '👽', k: ['alien'] }, { e: '👾', k: ['space invader'] },
+        { e: '🤖', k: ['robot'] }, { e: '👍', k: ['thumbs up', 'yes', 'like'] }, { e: '👎', k: ['thumbs down', 'no'] },
+        { e: '🙏', k: ['pray', 'thanks', 'please'] }, { e: '👋', k: ['wave', 'hello', 'bye'] }, { e: '❤️', k: ['heart', 'love'] },
+        { e: '🔥', k: ['fire', 'hot', 'lit'] }, { e: '✨', k: ['sparkles', 'magic'] }, { e: '🎉', k: ['party', 'celebration'] },
+        { e: '💯', k: ['hundred', 'perfect', '100'] }, { e: '✅', k: ['check', 'green', 'yes'] }, { e: '❌', k: ['x', 'red', 'no'] },
+        { e: '🧠', k: ['brain', 'mind'] }, { e: '👀', k: ['eyes', 'looking'] }, { e: '👋', k: ['wave', 'hello'] },
+        { e: '🚀', k: ['rocket', 'space', 'launch'] }, { e: '💡', k: ['idea', 'lightbulb'] }, { e: '💻', k: ['computer', 'laptop'] },
+        { e: '📱', k: ['phone', 'mobile'] }, { e: '💰', k: ['money', 'cash', 'bag'] }, { e: '📈', k: ['chart', 'graph', 'up'] },
+        { e: '❓', k: ['question', 'mark'] }, { e: '❗', k: ['exclamation', 'bang'] }, { e: '➡️', k: ['arrow', 'right'] },
+        { e: '⬆️', k: ['arrow', 'up'] }, { e: '⬇️', k: ['arrow', 'down'] }, { e: '⬅️', k: ['arrow', 'left'] }
+    ];
 
     // ===== HISTORY MANAGEMENT =====
     function saveState() {
@@ -1091,7 +1123,6 @@
     editor.addEventListener('keydown', (e) => {
         const isModKey = e.ctrlKey || e.metaKey;
 
-        // FIX 1: Alignment on Enter
         if (e.key === 'Enter' && !isModKey && !e.shiftKey) {
             const selection = window.getSelection();
             if (selection.rangeCount > 0) {
@@ -1181,18 +1212,15 @@
     blockFormatSelect.addEventListener('change', (e) => changeBlockType(e.target.value));
     fontSizeSelect.addEventListener('change', (e) => changeFontSize(e.target.value));
     
-    // Gets all top-level blocks in the current selection
     function getSelectedBlocks() {
         const selection = window.getSelection();
         if (!selection.rangeCount) return [];
         
         const range = selection.getRangeAt(0);
-        const commonAncestor = range.commonAncestorContainer;
         
         let startNode = range.startContainer;
         let endNode = range.endContainer;
 
-        // Find the top-level block for start and end
         while (startNode && startNode.parentNode.id !== 'editor') {
             startNode = startNode.parentNode;
         }
@@ -1200,7 +1228,7 @@
             endNode = endNode.parentNode;
         }
 
-        if (!startNode || !endNode) return [getParentBlock()].filter(Boolean); // Fallback
+        if (!startNode || !endNode) return [getParentBlock()].filter(Boolean);
 
         const blocks = [];
         let currentNode = startNode;
@@ -1231,13 +1259,11 @@
         return null;
     }
 
-    // FIX 4: Multi-block alignment
     function cycleAlignment() {
         const alignments = ['left', 'center', 'right', 'justify'];
         const blocks = getSelectedBlocks();
         if (blocks.length === 0) return;
         
-        // Get alignment of the *first* block to determine the *next* alignment
         const currentAlign = blocks[0].style.textAlign || 'left';
         let currentIndex = alignments.indexOf(currentAlign);
         if (currentIndex === -1) currentIndex = 0;
@@ -1245,9 +1271,8 @@
         let nextIndex = (currentIndex + 1) % alignments.length;
         const nextAlignment = alignments[nextIndex];
         
-        // Apply to all selected blocks
         blocks.forEach(block => {
-            if (block) { // Ensure block is not null
+            if (block) {
                  block.style.textAlign = nextAlignment;
             }
         });
@@ -1335,8 +1360,7 @@
         document.getElementById('reading-time').textContent = readingTime;
     }
 
-    // ===== AI ARTIFACT DETECTION & REMOVAL (FIX 8) =====
-    // Removed \u00A0 (non-breaking space) from the list
+    // ===== AI ARTIFACT DETECTION & REMOVAL =====
     const aiCharactersRegex = /[\u2013\u2014\u201C\u201D\u2018\u2019\u2026\u1680\u2000-\u200A\u202F\u205F\u3000\u25A0\u200B\uFEFF\u00AD\u2060-\u2064\u201A\u201B\u201E\u201F\u0060\u00B4\u02B9\u02BB-\u02BD\u05F3\u02BA\u05F4\u2033\u2034\u2032\u2035-\u2037\u02EE\u00AB\u00BB\uFF08\uFF09\u2015\u2212\u2012\u2010\u2011\u23AF\u2796\uFF0D\u2025\u22EE\u22EF\uFF0E\uFF0C\u2024\uFE52\u2219\u00B7\u0430\u0410\u0441\u0421\u0435\u0415\u0395\u0396\u0397\u0456\u0406\u0399\u0131\u0269\u0458\u0408\u039A\u039C\u039D\u043E\u041E\u039F\u0440\u0420\u03A1\u03A4\u0445\u0425\u03A7\u03BD]/g;
 
     function highlightInTextNodes(regex, className) {
@@ -1371,7 +1395,6 @@
 
     function removeAIArtifacts() {
         saveState();
-        // FIX 8: Removed \u00A0 from this list
         const replacements = { 
             '[\u2013\u2014\u2015\u2212\u2012\u2010\u2011\u23AF\u2796\uFF0D]': '-', 
             '[\u201C\u201D\u201E\u201F\u00AB\u00BB]': '"', 
@@ -1379,7 +1402,7 @@
             '[\u2026\u2025\u22EE\u22EF]': '...', 
             '[\uFF0E\u2024\uFE52\u2219\u00B7]': '.',
             '\uFF0C': ',',
-            '[\u1680\u2000-\u200A\u202F\u205F\u3000\u200B\uFEFF\u00AD\u2060-\u2064]': ' ', // \u00A0 removed
+            '[\u1680\u2000-\u200A\u202F\u205F\u3000\u200B\uFEFF\u00AD\u2060-\u2064]': ' ',
             '\uFF08': '(',
             '\uFF09': ')',
             '&lt;': '<',
@@ -1435,7 +1458,7 @@
         scheduleHeightCheck();
     }
 
-    // ===== FIND & REPLACE (FIX 5) =====
+    // ===== FIND & REPLACE =====
     function highlightFindMatches() {
         const findValue = findWordInput.value;
         removeHighlight('find-match');
@@ -1449,7 +1472,7 @@
             editor.classList.remove('find-active');
             clearFindReplaceButton.classList.add('hidden');
         }
-        currentMatchIndex = -1; // Reset index on new highlight
+        currentMatchIndex = -1;
     }
 
     findWordInput.addEventListener('input', highlightFindMatches);
@@ -1495,18 +1518,17 @@
         }
         
         editor.normalize();
-        highlightFindMatches(); // Re-run search
+        highlightFindMatches();
         
         let newMatches = Array.from(editor.querySelectorAll('mark.find-match'));
         if (newMatches.length > 0) {
-            // Try to set index to the same position or next
             currentMatchIndex = (replaceIndex < newMatches.length) ? replaceIndex : 0;
             
             const nextMatchNode = newMatches[currentMatchIndex];
             nextMatchNode.classList.add('current');
             nextMatchNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
         } else {
-            currentMatchIndex = -1; // No matches left
+            currentMatchIndex = -1;
         }
 
         updateToolbarStates();
@@ -1519,10 +1541,8 @@
         const replace = replaceWordInput.value;
         if (!find) return;
 
-        // Use the regex from highlighter, but global
         const regex = new RegExp(find.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
         
-        // Find all text nodes
         const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
         const nodesToProcess = [];
         let node;
@@ -1532,12 +1552,10 @@
             }
         }
         
-        // Replace content in nodes
         nodesToProcess.forEach(node => {
             node.nodeValue = node.nodeValue.replace(regex, replace);
         });
 
-        // Clear inputs and highlights
         clearFindReplace();
         updateToolbarStates();
         scheduleHeightCheck();
@@ -1577,7 +1595,7 @@
     });
 
     turndownService.addRule('strikethrough', {
-        filter: ['s', 'strike', 'del'], // FIX 2
+        filter: ['s', 'strike', 'del'],
         replacement: (content) => '~~' + content + '~~'
     });
     
@@ -1642,7 +1660,30 @@
         scheduleHeightCheck();
     }
 
-    // ===== EMOJI PICKER =====
+    // ===== EMOJI PICKER (FIX 3) =====
+    function loadEmojis(list = emojiList) {
+        const emojiListEl = document.getElementById('emojiList');
+        emojiListEl.innerHTML = '';
+        list.forEach(item => {
+            const button = document.createElement('button');
+            button.textContent = item.e;
+            button.onclick = () => insertEmoji(item.e);
+            button.setAttribute('title', item.k[0]);
+            emojiListEl.appendChild(button);
+        });
+    }
+
+    function searchEmoji() {
+        const search = document.getElementById('emojiSearch').value.toLowerCase();
+        const filteredList = emojiList.filter(item => {
+            return item.e.includes(search) || item.k.some(kw => kw.includes(search));
+        });
+        loadEmojis(filteredList);
+    }
+    
+    emojiButton.addEventListener('click', toggleEmojiPopup);
+    document.getElementById('emojiSearch').addEventListener('input', searchEmoji);
+
     function saveSelection() {
         const selection = window.getSelection();
         if (selection.rangeCount > 0) {
@@ -1671,33 +1712,6 @@
         }
     }
     
-    emojiButton.addEventListener('click', toggleEmojiPopup);
-
-    function loadEmojis() {
-        const emojiList = document.getElementById('emojiList');
-        emojiList.innerHTML = '';
-        Object.keys(emojiData).forEach(emoji => {
-            const button = document.createElement('button');
-            button.textContent = emoji;
-            button.onclick = () => insertEmoji(emoji);
-            button.setAttribute('title', emojiData[emoji][0]);
-            emojiList.appendChild(button);
-        });
-    }
-
-    function searchEmoji() {
-        const search = document.getElementById('emojiSearch').value.toLowerCase();
-        const buttons = document.querySelectorAll('#emojiList button');
-        buttons.forEach(button => {
-            const emoji = button.textContent;
-            const keywords = emojiData[emoji] || [];
-            const isVisible = keywords.some(kw => kw.includes(search)) || emoji.includes(search);
-            button.style.display = isVisible ? '' : 'none';
-        });
-    }
-
-    document.getElementById('emojiSearch').addEventListener('input', searchEmoji);
-
     function insertEmoji(emoji) {
         editor.focus();
         restoreSelection();
@@ -1741,7 +1755,6 @@
     
     function createLink() {
         let url = linkUrlInput.value;
-        // FIX 4: Add www. and https://
         if (url) {
             let hasProtocol = url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/');
             let hasWWW = url.startsWith('www.');
@@ -1758,7 +1771,7 @@
         
         if (currentLinkToEdit) {
             currentLinkToEdit.setAttribute('href', url);
-            currentLinkToEdit.setAttribute('title', url); // FIX 7
+            // FIX 2: Remove title attribute setting
         } else {
             document.execCommand('createLink', false, url);
             
@@ -1766,8 +1779,7 @@
             if (selection.rangeCount > 0) {
                 let parentLink = selection.getRangeAt(0).startContainer.parentElement.closest('a');
                 if (parentLink) {
-                    parentLink.setAttribute('title', url);
-                    
+                    // FIX 2: Remove title attribute setting
                     if (parentLink.previousSibling && parentLink.previousSibling.nodeType === 3 && parentLink.previousSibling.textContent === '\u00A0') {
                         parentLink.previousSibling.remove();
                     }
@@ -1876,12 +1888,13 @@
         }
     }
 
-    // ===== PLAIN TEXT CONVERSION =====
+    // ===== PLAIN TEXT CONVERSION (FIX 8) =====
     function convertToPlainText() {
         saveState();
         const plainText = editor.innerText;
         const lines = plainText.split('\n');
-        editor.innerHTML = lines.map(line => `<p>${line.replace(/\s/g, '&nbsp;') || '<br>'}</p>`).join('');
+        // Removed the &nbsp; replacement
+        editor.innerHTML = lines.map(line => `<p>${line || '<br>'}</p>`).join('');
         updateToolbarStates();
         scheduleHeightCheck();
     }
