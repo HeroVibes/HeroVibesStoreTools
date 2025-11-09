@@ -424,6 +424,12 @@
             background: var(--hover-color);
             transform: scale(1.1);
         }
+        
+        /* FIX 6: Emoji Keyboard Nav */
+        #emojiList button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.4);
+        }
 
         /* ===== DOWNLOAD MENU ===== */
         #downloadMenu {
@@ -493,7 +499,7 @@
             border-radius: var(--radius);
             padding: 24px;
             width: 90%;
-            max-width: 600px; /* FIX 1: Wider */
+            max-width: 600px;
             max-height: 80vh;
             overflow-y: auto;
         }
@@ -529,7 +535,6 @@
             right: 16px;
         }
         
-        /* FIX 1: Help Modal Dropdowns */
         #helpModalContent details {
             border-bottom: 1px solid var(--outline-color);
         }
@@ -559,7 +564,6 @@
             padding-bottom: 16px;
         }
         
-        /* Specific modal content */
         #linkUrlInput {
             width: 100%;
             background: var(--primary-bg);
@@ -969,7 +973,7 @@
 
     <div id="emojiPopup" class="hidden">
         <input type="text" id="emojiSearch" placeholder="Search emojis..." />
-        <div id="emojiList"></div>
+        <div id="emojiList" tabindex="-1"></div>
     </div>
     
     <div id="helpModal" class="modal hidden">
@@ -985,13 +989,15 @@
                 <div class="help-details-content">
                     <p>Type a slash <strong>/</strong> in the editor to use commands. Press <strong>Enter</strong> to activate.</p>
                     <ul>
-                        <li><kbd>/h1</kbd>, <kbd>/h2</kbd>, <kbd>/h3</kbd>: Set block to Header 1, 2, or 3.</li>
+                        <li><kbd>/h1</kbd>, <kbd>/h2</kbd>, <kbd>/h3</kbd>, <kbd>/par</kbd>: Set block format.</li>
                         <li><kbd>/div</kbd>: Insert a horizontal line.</li>
                         <li><kbd>/bul</kbd>: Create a bullet list.</li>
                         <li><kbd>/num</kbd>: Create a numbered list.</li>
                         <li><kbd>/date</kbd>: Insert the current date.</li>
                         <li><kbd>/time</kbd>: Insert the current time.</li>
                         <li><kbd>/ai</kbd>: Toggle the AI artifact highlighter.</li>
+                        <li><kbd>/airep</kbd> or <kbd>/airem</kbd>: Remove all AI artifacts.</li>
+                        <li><kbd>/find</kbd> or <kbd>/search</kbd>: Jump to the "Find" input box.</li>
                         <li><kbd>/emoji</kbd>: Open the emoji picker.</li>
                         <li><kbd>/help</kbd>: Open this help menu.</li>
                     </ul>
@@ -1076,6 +1082,8 @@
     const blockFormatSelect = document.getElementById('blockFormat');
     const emojiButton = document.getElementById('emojiButton');
     const emojiPopup = document.getElementById('emojiPopup');
+    const emojiSearch = document.getElementById('emojiSearch');
+    const emojiListEl = document.getElementById('emojiList');
     const undoButton = document.getElementById('undoButton');
     const redoButton = document.getElementById('redoButton');
     const boldButton = document.getElementById('boldButton');
@@ -1114,6 +1122,7 @@
     let currentMatchIndex = -1;
     let currentLinkToEdit = null;
     let lastCursorPos = null;
+    let currentEmojiFocus = -1;
     
     // ===== EMOJI DATA =====
     const emojiList = [
@@ -1801,19 +1810,20 @@
 
     // ===== EMOJI PICKER =====
     function loadEmojis(list = emojiList) {
-        const emojiListEl = document.getElementById('emojiList');
         emojiListEl.innerHTML = '';
-        list.forEach(item => {
+        list.forEach((item, index) => {
             const button = document.createElement('button');
             button.textContent = item.e;
             button.onclick = () => insertEmoji(item.e);
             button.setAttribute('title', item.k[0]);
+            button.setAttribute('data-index', index);
             emojiListEl.appendChild(button);
         });
+        currentEmojiFocus = -1;
     }
 
     function searchEmoji() {
-        const search = document.getElementById('emojiSearch').value.toLowerCase();
+        const search = emojiSearch.value.toLowerCase();
         const filteredList = emojiList.filter(item => {
             return item.e.includes(search) || item.k.some(kw => kw.includes(search));
         });
@@ -1821,7 +1831,59 @@
     }
     
     emojiButton.addEventListener('click', toggleEmojiPopup);
-    document.getElementById('emojiSearch').addEventListener('input', searchEmoji);
+    emojiSearch.addEventListener('input', searchEmoji);
+    
+    // FIX 6: Emoji Keyboard Nav
+    emojiSearch.addEventListener('keydown', (e) => {
+        const buttons = emojiListEl.querySelectorAll('button');
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            currentEmojiFocus = 0;
+            buttons[0]?.focus();
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            buttons[0]?.click();
+        }
+    });
+    
+    emojiListEl.addEventListener('keydown', (e) => {
+        const buttons = Array.from(emojiListEl.querySelectorAll('button'));
+        if (buttons.length === 0) return;
+        
+        const cols = 8;
+        
+        switch (e.key) {
+            case 'ArrowRight':
+                e.preventDefault();
+                currentEmojiFocus = (currentEmojiFocus + 1) % buttons.length;
+                break;
+            case 'ArrowLeft':
+                e.preventDefault();
+                currentEmojiFocus = (currentEmojiFocus - 1 + buttons.length) % buttons.length;
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                currentEmojiFocus = Math.min(currentEmojiFocus + cols, buttons.length - 1);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                currentEmojiFocus = Math.max(currentEmojiFocus - cols, 0);
+                if (currentEmojiFocus < 0) emojiSearch.focus();
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (buttons[currentEmojiFocus]) buttons[currentEmojiFocus].click();
+                break;
+            case 'Tab':
+                e.preventDefault();
+                emojiSearch.focus();
+                break;
+            default:
+                return;
+        }
+        buttons[currentEmojiFocus]?.focus();
+    });
+
 
     function saveSelection() {
         const selection = window.getSelection();
@@ -1847,7 +1909,7 @@
         emojiPopup.classList.toggle('hidden');
         if (!emojiPopup.classList.contains('hidden')) {
             loadEmojis();
-            document.getElementById('emojiSearch').focus();
+            emojiSearch.focus();
         }
     }
     
@@ -2083,7 +2145,7 @@
     helpModalBackdrop.addEventListener('click', toggleHelpModal);
     closeHelpButton.addEventListener('click', toggleHelpModal);
     
-    // ===== SLASH COMMANDS (FIX 2) =====
+    // ===== SLASH COMMANDS =====
     function getCommandNode() {
         const selection = window.getSelection();
         if (!selection.rangeCount) return null;
@@ -2099,7 +2161,10 @@
     }
 
     function handleCommandHighlight() {
+        saveSelection();
         removeCommandHighlight();
+        restoreSelection();
+        
         const command = getCommandNode();
         
         if (command && command.match.length > 1) {
@@ -2111,7 +2176,7 @@
             mark.className = 'command-active';
             range.surroundContents(mark);
             
-            // FIX 2: Restore cursor position
+            // Restore cursor to end of mark
             const newRange = document.createRange();
             const sel = window.getSelection();
             
@@ -2121,13 +2186,18 @@
                 sel.removeAllRanges();
                 sel.addRange(newRange);
             }
+            editor.normalize();
         }
     }
 
     function removeCommandHighlight() {
         const marks = editor.querySelectorAll('mark.command-active');
         marks.forEach(mark => {
-            mark.outerHTML = mark.innerHTML;
+            const parent = mark.parentNode;
+            while (mark.firstChild) {
+                parent.insertBefore(mark.firstChild, mark);
+            }
+            parent.removeChild(mark);
         });
         editor.normalize();
     }
@@ -2137,44 +2207,14 @@
         if (!commandNode) return false;
         
         const command = commandNode.textContent.trim().toLowerCase();
-        const p = commandNode.parentNode;
-        if (!p) return false;
         
-        // This function will handle the replacement and cursor
-        const replaceCommand = (textToInsert = '') => {
-            const textNode = document.createTextNode(textToInsert);
-            p.replaceChild(textNode, commandNode);
-            
-            const range = document.createRange();
-            const sel = window.getSelection();
-            range.setStart(textNode, textNode.length);
-            range.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(range);
-        };
+        // Select the command mark
+        const sel = window.getSelection();
+        const range = document.createRange();
+        range.selectNode(commandNode);
+        sel.removeAllRanges();
+        sel.addRange(range);
         
-        // This function will just remove the command text and set cursor
-        const runBlockCommand = (cmd, val = null) => {
-            const textNode = document.createTextNode('');
-            p.replaceChild(textNode, commandNode);
-
-            const range = document.createRange();
-            const sel = window.getSelection();
-            range.setStart(textNode, 0);
-            range.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(range);
-            
-            if (cmd === 'formatBlock') changeBlockType(val);
-            if (cmd === 'formatText') formatText(val);
-            if (cmd === 'toggleHelp') toggleHelpModal();
-            if (cmd === 'toggleAI') togglePermanentAIHighlight();
-            if (cmd === 'toggleEmoji') {
-                toggleEmojiPopup(); 
-                setTimeout(() => document.getElementById('emojiSearch').focus(), 100);
-            }
-        };
-
         const formatDate = (type) => {
             const now = new Date();
             if (type === 'time') {
@@ -2184,23 +2224,42 @@
             }
         };
 
+        let executed = true;
         switch(command) {
-            case '/h1': runBlockCommand('formatBlock', 'h1'); break;
-            case '/h2': runBlockCommand('formatBlock', 'h2'); break;
-            case '/h3': runBlockCommand('formatBlock', 'h3'); break;
-            case '/div': runBlockCommand('formatText', 'insertHorizontalRule'); break;
-            case '/bul': runBlockCommand('formatText', 'insertUnorderedList'); break;
-            case '/num': runBlockCommand('formatText', 'insertOrderedList'); break;
-            case '/help': runBlockCommand('toggleHelp'); break;
-            case '/ai': runBlockCommand('toggleAI'); break;
-            case '/emoji': runBlockCommand('toggleEmoji'); break;
-            case '/time': replaceCommand(formatDate('time')); break;
-            case '/date': replaceCommand(formatDate('date')); break;
+            case '/case '/h1': changeBlockType('h1'); break;
+            case '/h2': changeBlockType('h2'); break;
+            case '/h3': changeBlockType('h3'); break;
+            case '/par': changeBlockType('p'); break; // FIX 3
+            case '/div': formatText('insertHorizontalRule'); break;
+            case '/bul': formatText('insertUnorderedList'); break;
+            case '/num': formatText('insertOrderedList'); break;
+            case '/help': toggleHelpModal(); break;
+            case '/ai': togglePermanentAIHighlight(); break;
+            case '/airep': // FIX 5
+            case '/airem': removeAIArtifacts(); break; // FIX 5
+            case '/find': // FIX 4
+            case '/search': // FIX 4
+                document.execCommand('insertText', false, ''); // Remove command text
+                findWordInput.focus(); 
+                break;
+            case '/time': document.execCommand('insertText', false, formatDate('time')); break;
+            case '/date': document.execCommand('insertText', false, formatDate('date')); break; // FIX 2
+            case '/emoji': 
+                document.execCommand('insertText', false, ''); // Remove command text
+                toggleEmojiPopup(); 
+                setTimeout(() => emojiSearch.focus(), 100);
+                break;
             default: 
+                executed = false;
                 removeCommandHighlight();
-                return false;
         }
-        return true;
+        
+        if (executed && !['/find', '/search', '/emoji', '/help', '/ai'].includes(command)) {
+            // If it wasn't a command that just opens something, clean up the text node
+            document.execCommand('insertText', false, '');
+        }
+        
+        return executed;
     }
     
     // ===== SCROLL NAV =====
