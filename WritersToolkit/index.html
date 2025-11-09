@@ -43,16 +43,28 @@
             margin: 0 auto;
         }
 
-        /* ===== TOOLBAR CONTAINER ===== */
+        /* ===== TOOLBAR CONTAINER (FIX 2: STICKY MENU) ===== */
         .toolbar-container {
             background: var(--secondary-bg);
             border: 1px solid var(--outline-color);
             border-radius: var(--radius);
             padding: 16px;
-            margin-bottom: 16px;
-            position: sticky;
+            /* Changed from sticky to fixed */
+            position: fixed;
             top: 16px;
             z-index: 100;
+            
+            /* Sizing to fit container */
+            width: calc(100% - 32px); /* 16px padding L/R */
+            max-width: 1200px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* Spacer to push content down */
+        #toolbar-spacer {
+            height: 150px; /* Fallback, JS will override */
+            margin-bottom: 16px;
         }
 
         .toolbar {
@@ -385,7 +397,6 @@
             width: 320px;
             max-height: 280px;
             overflow-y: auto;
-            /* FIX 5: Re-enabled horizontal scroll if needed */
         }
 
         #emojiSearch {
@@ -537,7 +548,6 @@
             filter: brightness(0.9);
         }
         
-        /* FIX 4: Remove Link Button */
         #removeLinkButton {
             background: var(--danger-color);
             color: #FFF;
@@ -587,9 +597,14 @@
                 max-width: 100%;
             }
 
+            /* Sticky menu mobile */
             .toolbar-container {
                 top: 8px;
                 padding: 12px;
+                width: calc(100% - 16px); /* 8px padding L/R */
+            }
+            #toolbar-spacer {
+                margin-bottom: 8px;
             }
 
             .toolbar {
@@ -892,6 +907,8 @@
             </div>
         </div>
     </div>
+    
+    <div id="toolbar-spacer"></div>
 
     <div class="editor-wrapper">
         <div class="editor" contenteditable="true" id="editor" spellcheck="true"><p><br></p></div>
@@ -951,7 +968,7 @@
             <p>Enter the URL you want to link to:</p>
             <input type="text" id="linkUrlInput" placeholder="https://www.herovibes.store" />
             <div class="modal-actions">
-                <button id="removeLinkButton">Remove</button>
+                <button id="removeLinkButton" class="hidden">Remove</button>
                 <button id="closeLinkButton">Cancel</button>
                 <button id="createLinkButton">Create</button>
             </div>
@@ -986,11 +1003,13 @@
     const linkModalBackdrop = document.getElementById('linkModalBackdrop');
     const closeLinkButton = document.getElementById('closeLinkButton');
     const createLinkButton = document.getElementById('createLinkButton');
-    const removeLinkButton = document.getElementById('removeLinkButton'); // FIX 4
+    const removeLinkButton = document.getElementById('removeLinkButton');
     const linkUrlInput = document.getElementById('linkUrlInput');
     const findWordInput = document.getElementById('findWord');
     const replaceWordInput = document.getElementById('replaceWord');
     const clearFindReplaceButton = document.getElementById('clearFindReplaceButton');
+    const toolbarContainer = document.querySelector('.toolbar-container'); // FIX 2
+    const toolbarSpacer = document.getElementById('toolbar-spacer'); // FIX 2
     
     // ===== STATE VARIABLES =====
     let permanentAIHighlightActive = false;
@@ -1000,7 +1019,7 @@
     let currentMatchIndex = -1;
     let currentLinkToEdit = null;
     
-    // ===== EMOJI DATA (FIX 5: Expanded) =====
+    // ===== EMOJI DATA (FIX 5) =====
     const emojiList = [
         { e: '😀', k: ['grinning', 'happy', 'smile'] }, { e: '😃', k: ['happy', 'joy'] }, { e: '😄', k: ['laugh', 'happy'] },
         { e: '😁', k: ['grin', 'smile'] }, { e: '😆', k: ['laugh', 'haha'] }, { e: '😅', k: ['sweat', 'relief'] },
@@ -1421,13 +1440,12 @@
 
     function removeAIArtifacts() {
         saveState();
-        // FIX 1: Removed homoglyphs
         const replacements = { 
             '[\u2013\u2014\u2015\u2212\u2012\u2010\u2011\u23AF\u2796\uFF0D]': '-', 
             '[\u201C\u201D\u201E\u201F\u00AB\u00BB]': '"', 
             '[\u2018\u2019\u201A\u201B\u0060\u00B4\u02B9\u02BB-\u02BD\u05F3\u02BA\u05F4\u2033\u2034\u2032\u2035-\u2037\u02EE]': "'", 
             '[\u2026\u2025\u22EE\u22EF]': '...', 
-            '[\uFF0E\uFE52\u2219\u00B7]': '.', // \u2024 removed
+            '[\uFF0E\uFE52\u2219\u00B7]': '.',
             '\uFF0C': ',',
             '[\u1680\u2000-\u200A\u202F\u205F\u3000\u200B\uFEFF\u00AD\u2060-\u2064]': ' ',
             '\uFF08': '(',
@@ -1606,7 +1624,6 @@
         replacement: (content) => '__' + content + '__'
     });
     
-    // FIX 2: Correct Link formatting
     turndownService.addRule('link', {
         filter: 'a',
         replacement: function (content, node) {
@@ -1767,9 +1784,18 @@
         currentLinkToEdit = null;
     }
     
+    // FIX 4
     function removeLink() {
         restoreSelection();
-        document.execCommand('unlink', false, null);
+        if (currentLinkToEdit) {
+            // Unlink the specific link element
+            const range = document.createRange();
+            range.selectNodeContents(currentLinkToEdit);
+            selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.execCommand('unlink', false, null);
+        }
         closeLinkModal();
         scheduleHeightCheck();
         updateToolbarStates();
@@ -1778,7 +1804,6 @@
     function createLink() {
         let url = linkUrlInput.value;
         
-        // FIX 4: Handle blank input as "remove link"
         if (url === '') {
             removeLink();
             return;
@@ -1950,6 +1975,13 @@
     helpModalBackdrop.addEventListener('click', toggleHelpModal);
     closeHelpButton.addEventListener('click', toggleHelpModal);
 
+    // ===== TOOLBAR SPACER (FIX 2) =====
+    function updateToolbarSpacer() {
+        if (toolbarContainer && toolbarSpacer) {
+            toolbarSpacer.style.height = toolbarContainer.offsetHeight + 'px';
+        }
+    }
+
     // ===== FOURTHWALL SCROLLBAR FIX =====
     let lastHeight = 0;
     let resizeTimer;
@@ -1968,10 +2000,14 @@
     }
 
     window.addEventListener('load', () => {
-        setTimeout(sendHeight, 100);
+        setTimeout(() => {
+            sendHeight();
+            updateToolbarSpacer(); // Update spacer on load
+        }, 100);
     });
     window.addEventListener('resize', () => {
         scheduleHeightCheck();
+        updateToolbarSpacer(); // Update spacer on resize
     });
     // ===== END OF SCROLLBAR FIX =====
 </script>
