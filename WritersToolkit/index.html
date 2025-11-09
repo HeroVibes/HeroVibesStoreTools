@@ -17,9 +17,9 @@
             --accent-color: #87A9FF;
             --primary-text: #D4D4D4;
             --secondary-text: #8C8C8C;
-            --danger-color: #E53E3E; /* Red */
-            --warning-color: #FFD700; /* Yellow */
-            --combo-color: #ED8936;   /* Orange */
+            --danger-color: #E53E3E;
+            --warning-color: #FFD700;
+            --combo-color: #ED8936;
             --radius: 8px;
         }
 
@@ -152,6 +152,21 @@
         input[type="text"]::placeholder {
             color: var(--secondary-text);
         }
+        
+        /* FIX 3: Clear Find Button */
+        #clearFindReplaceButton {
+            min-width: 36px;
+            padding: 8px;
+            background: var(--danger-color);
+            border-color: var(--danger-color);
+            color: #FFF;
+        }
+        #clearFindReplaceButton:hover {
+            filter: brightness(0.9);
+        }
+        #clearFindReplaceButton::before {
+            display: none;
+        }
 
         /* ===== ICON BUTTONS ===== */
         .icon-btn {
@@ -252,7 +267,6 @@
             border-color: var(--hover-color);
         }
         
-        /* FIX 9: Active State Outlines */
         .editor.find-active {
             border-color: var(--danger-color);
             box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.4), 0 4px 12px rgba(0,0,0,0.3);
@@ -360,7 +374,7 @@
             outline: 1px solid var(--accent-color);
         }
 
-        /* ===== EMOJI POPUP (FIX 6) ===== */
+        /* ===== EMOJI POPUP ===== */
         #emojiPopup {
             position: absolute;
             background: var(--secondary-bg);
@@ -369,7 +383,7 @@
             border-radius: var(--radius);
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             z-index: 1001;
-            width: 360px; /* Widened */
+            width: 360px;
             max-height: 280px;
             overflow-y: auto;
         }
@@ -381,7 +395,7 @@
 
         #emojiList {
             display: grid;
-            grid-template-columns: repeat(9, 1fr); /* More columns */
+            grid-template-columns: repeat(9, 1fr);
             gap: 4px;
         }
 
@@ -398,7 +412,7 @@
             transform: scale(1.1);
         }
 
-        /* ===== DOWNLOAD MENU (FIX 8) ===== */
+        /* ===== DOWNLOAD MENU ===== */
         #downloadMenu {
             position: absolute;
             background: var(--secondary-bg);
@@ -760,7 +774,7 @@
             </div>
             <div class="btn-wrapper">
                 <button class="icon-btn" onclick="formatText('indent')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 8 17 12 13 16"/><line x1="3" y1="12" x2="13" y2="12"/><line x1="3" y1="6" x2="13" y2="6"/><line x1="3" y1="18" x2="13" y2="18"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 8 17 12 13 16"/><line x1="3" y1="12" x2="17" y2="12"/><line x1="3" y1="6" x2="17" y2="6"/><line x1="3" y1="18" x2="17" y2="18"/></svg>
                 </button>
                 <span class="btn-tooltip">Indent</span>
             </div>
@@ -782,7 +796,7 @@
             </div>
             <div class="btn-wrapper">
                 <button onclick="removeAIArtifacts()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9v11a2 2 0 01-2 2H6a2 2 0 01-2-2V9"/><path d="M8 9V5a2 2 0 012-2h4a2 2 0 012 2v4"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                 </button>
                 <span class="btn-tooltip">Remove AI artifacts</span>
             </div>
@@ -790,8 +804,8 @@
         </div>
 
         <div class="toolbar bottom-toolbar">
-            <input type="text" id="findWord" placeholder="Find..." />
-            <input type="text" id="replaceWord" placeholder="Replace..." />
+            <input type="text" id="findWord" placeholder="Find..." autocomplete="off" />
+            <input type="text" id="replaceWord" placeholder="Replace..." autocomplete="off" />
             <div class="btn-wrapper">
                 <button onclick="replaceOne()">Replace</button>
                 <span class="btn-tooltip">Replace (Ctrl+Enter)</span>
@@ -799,6 +813,12 @@
             <div class="btn-wrapper">
                 <button onclick="replaceAll()">Replace All</button>
                 <span class="btn-tooltip">Replace all matches</span>
+            </div>
+            <div class="btn-wrapper">
+                <button id="clearFindReplaceButton" class="hidden" onclick="clearFindReplace()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                <span class="btn-tooltip">Clear Find/Replace</span>
             </div>
             <div class="toolbar-separator"></div>
             <div class="btn-wrapper">
@@ -849,7 +869,7 @@
             </div>
             <div class="btn-wrapper">
                 <button id="clearButton" onclick="clearEditor()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
                 <span class="btn-tooltip">Clear document</span>
             </div>
@@ -866,7 +886,7 @@
         <div class="editor" contenteditable="true" id="editor" spellcheck="true"><p><br></p></div>
     </div>
     <div id="stats-bar">
-        <span class="version">V.1.0.9</span>
+        <span class="version">V.1.1.0</span>
         <div>
             <span id="char-count">0</span> characters · 
             <span id="word-count">0</span> words ·
@@ -893,6 +913,7 @@
                 <li><kbd>Enter</kbd>: Jump to the <strong>next</strong> match.</li>
                 <li><kbd>Shift + Enter</kbd>: Jump to the <strong>previous</strong> match.</li>
                 <li><kbd>Ctrl + Enter</kbd>: <strong>Replace</strong> the current match and jump to the next one.</li>
+                <li>Click the <strong>Red (X)</strong> button to clear the inputs and exit Find mode.</li>
             </ul>
 
             <h4>Links</h4>
@@ -956,6 +977,7 @@
     const linkUrlInput = document.getElementById('linkUrlInput');
     const findWordInput = document.getElementById('findWord');
     const replaceWordInput = document.getElementById('replaceWord');
+    const clearFindReplaceButton = document.getElementById('clearFindReplaceButton'); // FIX 3
     
     // ===== STATE VARIABLES =====
     let permanentAIHighlightActive = false;
@@ -1327,7 +1349,7 @@
         editor.innerHTML = content;
         removeHighlight('ai-highlight');
         permanentAIHighlightActive = false;
-        editor.classList.remove('ai-active'); // FIX 9
+        editor.classList.remove('ai-active');
         updateToolbarStates();
         scheduleHeightCheck();
     }
@@ -1336,10 +1358,10 @@
         permanentAIHighlightActive = !permanentAIHighlightActive;
         if (permanentAIHighlightActive) {
             highlightInTextNodes(aiCharactersRegex, 'ai-highlight');
-            editor.classList.add('ai-active'); // FIX 9
+            editor.classList.add('ai-active');
         } else {
             removeHighlight('ai-highlight');
-            editor.classList.remove('ai-active'); // FIX 9
+            editor.classList.remove('ai-active');
         }
         scheduleHeightCheck();
     }
@@ -1353,8 +1375,10 @@
             const regex = new RegExp(`(${findValue.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
             highlightInTextNodes(regex, 'find-match');
             editor.classList.add('find-active');
+            clearFindReplaceButton.classList.remove('hidden'); // FIX 3
         } else {
             editor.classList.remove('find-active');
+            clearFindReplaceButton.classList.add('hidden'); // FIX 3
         }
         currentMatchIndex = -1;
     }
@@ -1368,15 +1392,22 @@
             if (isModKey) {
                 replaceOne();
             } else if (e.shiftKey) {
-                navigateMatch(-1); // FIX 4: Backwards
+                navigateMatch(-1);
             } else {
-                navigateMatch(1); // Forward
+                navigateMatch(1);
             }
         }
     }
     
     findWordInput.addEventListener('keydown', findReplaceKeydown);
     replaceWordInput.addEventListener('keydown', findReplaceKeydown);
+    
+    function clearFindReplace() { // FIX 3
+        findWordInput.value = '';
+        replaceWordInput.value = '';
+        highlightFindMatches();
+    }
+    clearFindReplaceButton.addEventListener('click', clearFindReplace);
     
     function replaceOne() {
         saveState();
@@ -1394,7 +1425,6 @@
             }
         }
         
-        // Re-highlight and set index to the next match
         highlightFindMatches();
         const newMatches = Array.from(editor.querySelectorAll('mark.find-match'));
         
@@ -1414,35 +1444,40 @@
         scheduleHeightCheck();
     }
 
-    // FIX 4: Rewritten replaceAll to be safer
+    // FIX 1: Corrected replaceAll
     function replaceAll() {
         saveState();
         const find = findWordInput.value;
         const replace = replaceWordInput.value;
         if (!find) return;
         
-        editor.querySelectorAll('mark.find-match').forEach(match => {
-            match.outerHTML = replace;
-        });
+        const regex = new RegExp(find.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+        editor.innerHTML = editor.innerHTML.replace(regex, replace);
         
-        highlightFindMatches(); // Clears the highlights and 'find-active' class
+        highlightFindMatches();
         updateToolbarStates();
         scheduleHeightCheck();
     }
 
+    // FIX 4: Corrected navigateMatch
     function navigateMatch(direction) {
         const matches = Array.from(editor.querySelectorAll('mark.find-match'));
         if (matches.length === 0) return;
         
         editor.querySelectorAll('mark.find-match.current').forEach(m => m.classList.remove('current'));
         
-        let newIndex = currentMatchIndex + direction; // FIX 4
+        let newIndex = currentMatchIndex;
         
-        if (newIndex < 0) {
-            newIndex = matches.length - 1;
-        }
-        if (newIndex >= matches.length) {
-            newIndex = 0;
+        if (direction === 1) { // Forward
+            newIndex++;
+            if (newIndex >= matches.length) {
+                newIndex = 0;
+            }
+        } else if (direction === -1) { // Backward
+            newIndex--;
+            if (newIndex < 0) {
+                newIndex = matches.length - 1;
+            }
         }
         
         currentMatchIndex = newIndex;
@@ -1462,7 +1497,7 @@
         strongDelimiter: '**'  // Bold: **text**
     });
 
-    // FIX 2: Strikethrough rule (handles <s> and <del>)
+    // FIX 2: Handle <s> and <del> for strikethrough
     turndownService.addRule('strikethrough', {
         filter: ['s', 'strike', 'del'],
         replacement: (content) => '~~' + content + '~~'
@@ -1482,11 +1517,11 @@
             if (['H1', 'H2', 'H3'].includes(node.nodeName)) {
                 let hLevel = node.nodeName.charAt(1);
                 let hPrefix = '#'.repeat(hLevel) + ' ';
-                return '\n' + hPrefix + content + alignComment + '\n\n';
+                return '\n' + hPrefix + content.trim() + alignComment + '\n\n';
             }
             
             if (content.trim() === '' && !node.querySelector('br') && !node.querySelector('img')) {
-                return ''; // Don't create extra newlines for empty paragraphs
+                return '';
             }
             
             return content + alignComment + '\n\n';
@@ -1628,26 +1663,33 @@
     
     function createLink() {
         let url = linkUrlInput.value;
-        if (url && !url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/')) {
-            url = 'https://' + url;
+        // FIX 4: Add www. and https://
+        if (url) {
+            let hasProtocol = url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/');
+            let hasWWW = url.startsWith('www.');
+            
+            if (!hasProtocol && !hasWWW && url.includes('.')) {
+                url = 'www.' + url;
+            }
+            if (!hasProtocol) {
+                url = 'https://' + url;
+            }
         }
         
         restoreSelection();
         
         if (currentLinkToEdit) {
             currentLinkToEdit.setAttribute('href', url);
-            currentLinkToEdit.setAttribute('title', url); // FIX 1
+            currentLinkToEdit.setAttribute('title', url);
         } else {
             document.execCommand('createLink', false, url);
             
-            // Re-find the link to set title and remove spaces
             const selection = window.getSelection();
             if (selection.rangeCount > 0) {
                 let parentLink = selection.getRangeAt(0).startContainer.parentElement.closest('a');
                 if (parentLink) {
-                    parentLink.setAttribute('title', url); // FIX 1
+                    parentLink.setAttribute('title', url);
                     
-                    // FIX 7: Remove unicode spaces
                     if (parentLink.previousSibling && parentLink.previousSibling.nodeType === 3 && parentLink.previousSibling.textContent === '\u00A0') {
                         parentLink.previousSibling.remove();
                     }
@@ -1674,7 +1716,7 @@
         }
     });
 
-    // ===== DOWNLOAD FUNCTIONS (FIX 8) =====
+    // ===== DOWNLOAD FUNCTIONS =====
     downloadButton.addEventListener('click', () => {
         downloadMenu.classList.toggle('hidden');
     });
@@ -1686,7 +1728,6 @@
     });
     
     function getEditorStyles() {
-        // Generates the CSS needed to make the HTML download look right
         return `
             body { 
                 font-family: system-ui, -apple-system, sans-serif; 
