@@ -369,6 +369,13 @@
             color: inherit;
             padding: 0;
         }
+        
+        /* Command highlighting */
+        mark.command-active {
+            background: var(--accent-color);
+            color: var(--primary-bg);
+            border-radius: 2px;
+        }
 
         mark.ai-highlight {
             background-color: rgba(255, 215, 0, 0.4);
@@ -581,6 +588,21 @@
             display: inline-block;
             vertical-align: -3px;
         }
+        
+        /* ===== SCROLL NAV (FIX 1) ===== */
+        #scrollNav {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 1000;
+        }
+        #scrollNav button {
+            width: 44px;
+            height: 44px;
+            padding: 8px;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
 
         /* ===== UTILITY CLASSES ===== */
         .hidden {
@@ -597,11 +619,10 @@
                 max-width: 100%;
             }
 
-            /* Sticky menu mobile */
             .toolbar-container {
                 top: 8px;
                 padding: 12px;
-                width: calc(100% - 16px); /* 8px padding L/R */
+                width: calc(100% - 16px);
             }
             #toolbar-spacer {
                 margin-bottom: 8px;
@@ -679,6 +700,15 @@
             select {
                 padding-right: 10px;
                 background-image: none;
+            }
+            
+            #scrollNav {
+                bottom: 16px;
+                right: 16px;
+            }
+            #scrollNav button {
+                width: 40px;
+                height: 40px;
             }
         }
 
@@ -815,7 +845,7 @@
             </div>
             <div class="toolbar-separator"></div>
             <div class="btn-wrapper">
-                <button class="ai-preview-button" onclick="togglePermanentAIHighlight()">
+                <button id="aiHighlightButton" class="ai-preview-button" onclick="togglePermanentAIHighlight()">
                     <span class="ai-square"></span>
                 </button>
                 <span class="btn-tooltip">Highlight AI artifacts</span>
@@ -935,6 +965,20 @@
             </button>
             <h3>How to Use This Tool</h3>
             
+            <h4>Commands</h4>
+            <p>Type a slash <strong>/</strong> in the editor to use commands. Press <strong>Enter</strong> to activate.</p>
+            <ul>
+                <li><kbd>/h1</kbd>, <kbd>/h2</kbd>, <kbd>/h3</kbd>: Set block to Header 1, 2, or 3.</li>
+                <li><kbd>/div</kbd>: Insert a horizontal line.</li>
+                <li><kbd>/bul</kbd>: Create a bullet list.</li>
+                <li><kbd>/num</kbd>: Create a numbered list.</li>
+                <li><kbd>/date</kbd>: Insert the current date.</li>
+                <li><kbd>/time</kbd>: Insert the current time.</li>
+                <li><kbd>/ai</kbd>: Toggle the AI artifact highlighter.</li>
+                <li><kbd>/emoji</kbd>: Open the emoji picker.</li>
+                <li><kbd>/help</kbd>: Open this help menu.</li>
+            </ul>
+            
             <h4>Find & Replace</h4>
             <p>Type into the "Find" box to highlight matching text. The editor will get a <strong>red outline</strong> to show this feature is active.</p>
             <ul>
@@ -974,6 +1018,15 @@
             </div>
         </div>
     </div>
+    
+    <div id="scrollNav">
+        <button id="scrollToTopButton" class="icon-btn hidden">
+             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+        </button>
+        <button id="scrollToContentButton" class="icon-btn hidden">
+             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H7.5L3 7.5V20a2 2 0 0 0 2 2h7Z"></path><polyline points="18 15-4-4"></polyline><path d="m15 5 4 4"></path></svg>
+        </button>
+    </div>
 </div>
 
 <script>
@@ -1008,8 +1061,11 @@
     const findWordInput = document.getElementById('findWord');
     const replaceWordInput = document.getElementById('replaceWord');
     const clearFindReplaceButton = document.getElementById('clearFindReplaceButton');
-    const toolbarContainer = document.querySelector('.toolbar-container'); // FIX 2
-    const toolbarSpacer = document.getElementById('toolbar-spacer'); // FIX 2
+    const toolbarContainer = document.querySelector('.toolbar-container');
+    const toolbarSpacer = document.getElementById('toolbar-spacer');
+    const scrollToTopButton = document.getElementById('scrollToTopButton');
+    const scrollToContentButton = document.getElementById('scrollToContentButton');
+    const aiHighlightButton = document.getElementById('aiHighlightButton');
     
     // ===== STATE VARIABLES =====
     let permanentAIHighlightActive = false;
@@ -1018,6 +1074,7 @@
     let historyIndex = -1;
     let currentMatchIndex = -1;
     let currentLinkToEdit = null;
+    let lastCursorPos = null;
     
     // ===== EMOJI DATA (FIX 5) =====
     const emojiList = [
@@ -1129,13 +1186,14 @@
     });
     
     // ===== EVENT LISTENERS =====
-    editor.addEventListener('input', () => {
+    editor.addEventListener('input', (e) => {
         saveState();
         ensureEditorStructure();
         highlightFindMatches();
         if (permanentAIHighlightActive) {
             setTimeout(() => highlightInTextNodes(aiCharactersRegex, 'ai-highlight'), 10);
         }
+        handleCommandHighlight(); // Command System
     });
 
     editor.addEventListener('paste', (e) => {
@@ -1160,15 +1218,23 @@
     undoButton.addEventListener('click', customUndo);
     redoButton.addEventListener('click', customRedo);
     
-    document.addEventListener('selectionchange', updateToolbarStates);
+    document.addEventListener('selectionchange', () => {
+        updateToolbarStates();
+        saveCursorPosition(); // For "Scroll to Content"
+    });
     editor.addEventListener('keyup', updateToolbarStates);
     editor.addEventListener('mouseup', updateToolbarStates);
     editor.addEventListener('click', updateToolbarStates);
     
     editor.addEventListener('keydown', (e) => {
         const isModKey = e.ctrlKey || e.metaKey;
-
+        
         if (e.key === 'Enter' && !isModKey && !e.shiftKey) {
+            if (handleCommandExecute()) { // Command System
+                e.preventDefault();
+                return;
+            }
+            
             const selection = window.getSelection();
             if (selection.rangeCount > 0) {
                 const range = selection.getRangeAt(0);
@@ -1210,6 +1276,8 @@
         } else if ((e.ctrlKey || e.shiftKey) && e.key === 'Enter') {
             e.preventDefault();
             document.execCommand('insertLineBreak');
+        } else if (e.key === ' ') {
+            removeCommandHighlight(); // Command System
         }
     });
     
@@ -1405,7 +1473,7 @@
         document.getElementById('reading-time').textContent = readingTime;
     }
 
-    // ===== AI ARTIFACT DETECTION & REMOVAL (FIX 1) =====
+    // ===== AI ARTIFACT DETECTION & REMOVAL =====
     const aiCharactersRegex = /[\u2013\u2014\u201C\u201D\u2018\u2019\u2026\u1680\u2000-\u200A\u202F\u205F\u3000\u25A0\u200B\uFEFF\u00AD\u2060-\u2064\u201A\u201B\u201E\u201F\u0060\u00B4\u02B9\u02BB-\u02BD\u05F3\u02BA\u05F4\u2033\u2034\u2032\u2035-\u2037\u02EE\u00AB\u00BB\uFF08\uFF09\u2015\u2212\u2012\u2010\u2011\u23AF\u2796\uFF0D\u2025\u22EE\u22EF\uFF0E\uFF0C\uFE52\u2219\u00B7]/g;
 
     function highlightInTextNodes(regex, className) {
@@ -1462,6 +1530,7 @@
         removeHighlight('ai-highlight');
         permanentAIHighlightActive = false;
         editor.classList.remove('ai-active');
+        aiHighlightButton.classList.remove('active');
         updateToolbarStates();
         scheduleHeightCheck();
     }
@@ -1471,9 +1540,11 @@
         if (permanentAIHighlightActive) {
             highlightInTextNodes(aiCharactersRegex, 'ai-highlight');
             editor.classList.add('ai-active');
+            aiHighlightButton.classList.add('active');
         } else {
             removeHighlight('ai-highlight');
             editor.classList.remove('ai-active');
+            aiHighlightButton.classList.remove('active');
         }
         scheduleHeightCheck();
     }
@@ -1784,11 +1855,9 @@
         currentLinkToEdit = null;
     }
     
-    // FIX 4
     function removeLink() {
         restoreSelection();
         if (currentLinkToEdit) {
-            // Unlink the specific link element
             const range = document.createRange();
             range.selectNodeContents(currentLinkToEdit);
             selection = window.getSelection();
@@ -1974,15 +2043,150 @@
     helpButton.addEventListener('click', toggleHelpModal);
     helpModalBackdrop.addEventListener('click', toggleHelpModal);
     closeHelpButton.addEventListener('click', toggleHelpModal);
+    
+    // ===== SLASH COMMANDS =====
+    function getCommandNode() {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return null;
+        
+        const node = selection.focusNode;
+        if (!node || node.nodeType !== Node.TEXT_NODE) return null;
+        
+        const match = node.nodeValue.slice(0, selection.focusOffset).match(/\/[a-z0-9]*$/);
+        if (match) {
+            return { node, match: match[0], range: [match.index, selection.focusOffset] };
+        }
+        return null;
+    }
 
-    // ===== TOOLBAR SPACER (FIX 2) =====
+    function handleCommandHighlight() {
+        removeCommandHighlight();
+        const command = getCommandNode();
+        
+        if (command && command.match.length > 1) {
+            const range = document.createRange();
+            range.setStart(command.node, command.range[0]);
+            range.setEnd(command.node, command.range[1]);
+            
+            const mark = document.createElement('mark');
+            mark.className = 'command-active';
+            range.surroundContents(mark);
+        }
+    }
+
+    function removeCommandHighlight() {
+        const marks = editor.querySelectorAll('mark.command-active');
+        marks.forEach(mark => {
+            mark.outerHTML = mark.innerHTML;
+        });
+        editor.normalize();
+    }
+    
+    function insertTimeDate(type) {
+        const now = new Date();
+        let text = '';
+        if (type === 'time') {
+            text = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        } else {
+            text = now.toLocaleDateString('en-US', { day: '2-digit', month: 'LONG', year: 'numeric' });
+        }
+        document.execCommand('insertText', false, text);
+    }
+    
+    function handleCommandExecute() {
+        const commandNode = editor.querySelector('mark.command-active');
+        if (!commandNode) return false;
+        
+        const command = commandNode.textContent.trim().toLowerCase();
+        
+        // Find the parent paragraph to remove the command
+        let p = commandNode.parentElement;
+        while(p.nodeName !== 'P' && p.id !== 'editor') {
+            p = p.parentElement;
+        }
+        if (!p) return false;
+        
+        const commandText = commandNode.textContent;
+        commandNode.remove();
+        p.textContent = p.textContent.replace(commandText, '');
+        
+        // Place cursor back
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.setStart(p, 0);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        
+        switch(command) {
+            case '/h1': changeBlockType('h1'); break;
+            case '/h2': changeBlockType('h2'); break;
+            case '/h3': changeBlockType('h3'); break;
+            case '/div': formatText('insertHorizontalRule'); break;
+            case '/bul': formatText('insertUnorderedList'); break;
+            case '/num': formatText('insertOrderedList'); break;
+            case '/help': toggleHelpModal(); break;
+            case '/ai': togglePermanentAIHighlight(); break;
+            case '/time': insertTimeDate('time'); break;
+            case '/date': insertTimeDate('date'); break;
+            case '/emoji': 
+                toggleEmojiPopup(); 
+                setTimeout(() => document.getElementById('emojiSearch').focus(), 100);
+                break;
+            default: return false;
+        }
+        return true;
+    }
+    
+    // ===== SCROLL NAV (FIX 2) =====
+    function setScrollNav(parentScrollTop) {
+        if (parentScrollTop > 150) { // Show "scroll to top"
+            scrollToTopButton.classList.remove('hidden');
+            scrollToContentButton.classList.add('hidden');
+        } else { // Show "scroll to content"
+            scrollToTopButton.classList.add('hidden');
+            if (lastCursorPos) {
+                scrollToContentButton.classList.remove('hidden');
+            }
+        }
+    }
+    
+    function saveCursorPosition() {
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+            lastCursorPos = sel.getRangeAt(0).cloneRange();
+        }
+    }
+    
+    scrollToTopButton.addEventListener('click', () => {
+        window.parent.postMessage({ scrollToTop: true }, '*');
+    });
+    
+    scrollToContentButton.addEventListener('click', () => {
+        // Send a message to parent to scroll to the content
+        if (lastCursorPos) {
+            // Create a temporary element to measure its position
+            const temp = document.createElement('span');
+            lastCursorPos.insertNode(temp);
+            const rect = temp.getBoundingClientRect();
+            temp.remove();
+            
+            // Get toolbar height to offset
+            const toolbarHeight = toolbarContainer.offsetHeight + 16;
+            
+            // Tell parent to scroll
+            window.parent.postMessage({ scrollToContent: rect.top - toolbarHeight }, '*');
+        }
+    });
+
+    // ===== TOOLBAR SPACER =====
     function updateToolbarSpacer() {
         if (toolbarContainer && toolbarSpacer) {
             toolbarSpacer.style.height = toolbarContainer.offsetHeight + 'px';
         }
     }
 
-    // ===== FOURTHWALL SCROLLBAR FIX =====
+    // ===== FOURTHWALL SCROLLBAR FIX & PARENT MESSAGING =====
     let lastHeight = 0;
     let resizeTimer;
 
@@ -2002,13 +2206,22 @@
     window.addEventListener('load', () => {
         setTimeout(() => {
             sendHeight();
-            updateToolbarSpacer(); // Update spacer on load
+            updateToolbarSpacer();
         }, 100);
     });
+    
     window.addEventListener('resize', () => {
         scheduleHeightCheck();
-        updateToolbarSpacer(); // Update spacer on resize
+        updateToolbarSpacer();
     });
+    
+    // Listen for messages FROM parent (e.g., scroll position)
+    window.addEventListener('message', (event) => {
+        if (event.data.parentScrollTop !== undefined) {
+            setScrollNav(event.data.parentScrollTop);
+        }
+    });
+    
     // ===== END OF SCROLLBAR FIX =====
 </script>
 
