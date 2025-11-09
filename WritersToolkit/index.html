@@ -36,7 +36,7 @@
             font-family: system-ui, -apple-system, sans-serif;
             background: var(--primary-bg);
             color: var(--primary-text);
-            padding: 16px;
+            padding: 32px 16px; /* Added more top/bottom padding for new page layout */
         }
 
         /* ===== CONTAINER ===== */
@@ -89,7 +89,6 @@
             overflow: hidden;
             font-size: 14px;
             font-family: inherit;
-            /* FIX 1: Specific transitions */
             transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
             display: inline-flex;
             align-items: center;
@@ -115,7 +114,7 @@
         }
 
         button:hover, select:hover, input[type="text"]:hover {
-            background-color: var(--hover-color); /* FIX 1: Use background-color */
+            background-color: var(--hover-color);
             border-color: rgba(255,255,255,0.1);
         }
 
@@ -211,39 +210,50 @@
             visibility: visible;
         }
         
-        /* FIX 5: Clear Button Danger State */
         #clearButton:hover {
             background-color: var(--danger-color);
             border-color: var(--danger-color);
             color: #FFF;
         }
         #clearButton:hover::before {
-            display: none; /* Hide shimmer on red hover */
+            display: none;
         }
 
-        /* ===== EDITOR ===== */
+        /* ===== EDITOR (FIX 4: A4 LAYOUT) ===== */
         .editor-wrapper {
-            background: var(--secondary-bg);
-            border: 1px solid var(--outline-color);
-            border-radius: var(--radius);
-            overflow: hidden;
+            background: transparent;
+            border: none;
+            overflow: visible;
         }
 
         .editor {
             background: var(--secondary-bg);
             color: var(--primary-text);
-            padding: 24px 16px;
-            min-height: 500px;
+            border: 1px solid var(--outline-color);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+
+            /* A4-like dimensions */
+            max-width: 794px; /* 210mm at 96dpi */
+            min-height: 1123px; /* 297mm at 96dpi */
+            margin: 0 auto;
+            
+            /* A4-like margins */
+            padding: 40px 60px;
+            
             outline: none;
             font-family: system-ui, sans-serif;
             font-size: 16px;
             line-height: 1.6;
-            overflow-y: auto;
-            scroll-behavior: smooth;
+            
+            /* Text wrap fix */
+            overflow-wrap: break-word;
+            word-wrap: break-word;
         }
 
         .editor:focus {
-            box-shadow: inset 0 0 0 2px rgba(135,169,255,0.15);
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.12), 0 4px 12px rgba(0,0,0,0.3);
+            border-color: var(--hover-color);
         }
 
         .editor p {
@@ -252,21 +262,21 @@
 
         .editor h1 {
             font-size: 32px;
-            font-weight: bold;
+            /* FIX 5: Removed font-weight: bold; */
             margin: 32px 0 16px 0;
             line-height: 1.2;
         }
 
         .editor h2 {
             font-size: 24px;
-            font-weight: bold;
+            /* FIX 5: Removed font-weight: bold; */
             margin: 24px 0 12px 0;
             line-height: 1.3;
         }
 
         .editor h3 {
             font-size: 20px;
-            font-weight: bold;
+            /* FIX 5: Removed font-weight: bold; */
             margin: 20px 0 10px 0;
             line-height: 1.3;
         }
@@ -295,8 +305,16 @@
             font-size: 12px;
             color: var(--secondary-text);
             text-align: right;
-            border-top: 1px solid var(--outline-color);
+            
+            /* A4 Layout: Attach to bottom of editor */
+            max-width: 794px;
+            margin: 0 auto;
+            border: 1px solid var(--outline-color);
+            border-top: none;
+            border-bottom-left-radius: var(--radius);
+            border-bottom-right-radius: var(--radius);
             background: var(--primary-bg);
+            
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -451,10 +469,33 @@
                 display: none;
             }
 
+            /* A4 layout reset for mobile */
             .editor {
-                padding: 16px 12px;
+                max-width: 100%;
                 min-height: 400px;
+                padding: 16px 12px;
                 font-size: 15px;
+                box-shadow: none;
+                margin: 0;
+            }
+
+            #stats-bar {
+                max-width: 100%;
+                margin: 0;
+                border-radius: 0;
+                border-bottom-left-radius: var(--radius);
+                border-bottom-right-radius: var(--radius);
+                flex-direction: column;
+                text-align: center;
+                gap: 4px;
+            }
+            
+            .editor-wrapper {
+                 /* Add back card styles for wrapper on mobile */
+                 background: var(--secondary-bg);
+                 border: 1px solid var(--outline-color);
+                 border-radius: var(--radius);
+                 overflow: hidden;
             }
 
             #emojiPopup {
@@ -465,12 +506,6 @@
 
             #emojiList {
                 grid-template-columns: repeat(7, 1fr);
-            }
-
-            #stats-bar {
-                flex-direction: column;
-                text-align: center;
-                gap: 4px;
             }
 
             .version {
@@ -700,13 +735,13 @@
 
     <div class="editor-wrapper">
         <div class="editor" contenteditable="true" id="editor" spellcheck="true"><p><br></p></div>
-        <div id="stats-bar">
-            <span class="version">V.1.0.4</span>
-            <div>
-                <span id="char-count">0</span> characters · 
-                <span id="word-count">0</span> words ·
-                <span id="reading-time">0</span> min read
-            </div>
+    </div>
+    <div id="stats-bar">
+        <span class="version">V.1.0.5</span>
+        <div>
+            <span id="char-count">0</span> characters · 
+            <span id="word-count">0</span> words ·
+            <span id="reading-time">0</span> min read
         </div>
     </div>
 
@@ -816,14 +851,12 @@
         }
     });
 
-    // FIX 4: PASTE EVENT LISTENER
     editor.addEventListener('paste', (e) => {
         e.preventDefault();
         let html = (e.originalEvent || e).clipboardData.getData('text/html');
         if (html) {
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
-            // Remove background styles from all pasted elements
             tempDiv.querySelectorAll('*').forEach(el => {
                 if (el.style.backgroundColor) el.style.backgroundColor = '';
                 if (el.style.background) el.style.background = '';
@@ -831,7 +864,6 @@
             });
             document.execCommand('insertHTML', false, tempDiv.innerHTML);
         } else {
-            // Fallback to plain text
             const text = (e.originalEvent || e).clipboardData.getData('text/plain');
             document.execCommand('insertText', false, text);
         }
@@ -844,21 +876,24 @@
     editor.addEventListener('mouseup', updateToolbarStates);
     editor.addEventListener('click', updateToolbarStates);
     
+    // FIX 7: ADDED e.metaKey FOR MAC OS KEYBOARD SHORTCUTS
     editor.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+        const isModKey = e.ctrlKey || e.metaKey; // Ctrl or Cmd
+
+        if (isModKey && e.key.toLowerCase() === 'z') {
             e.preventDefault();
             if (e.shiftKey) {
                 customRedo();
             } else {
                 customUndo();
             }
-        } else if (e.ctrlKey && e.key.toLowerCase() === 'b') {
+        } else if (isModKey && e.key.toLowerCase() === 'b') {
             e.preventDefault();
             formatText('bold');
-        } else if (e.ctrlKey && e.key.toLowerCase() === 'i') {
+        } else if (isModKey && e.key.toLowerCase() === 'i') {
             e.preventDefault();
             formatText('italic');
-        } else if (e.ctrlKey && e.key.toLowerCase() === 'u') {
+        } else if (isModKey && e.key.toLowerCase() === 'u') {
             e.preventDefault();
             formatText('underline');
         } else if ((e.ctrlKey || e.shiftKey) && e.key === 'Enter') {
@@ -1024,7 +1059,8 @@
         let node;
         const nodesToProcess = [];
         while (node = walker.nextNode()) {
-            if (node.nodeValue.trim() !== '' && regex.test(node.nodeValue)) {
+            // FIX 3: Removed .trim() to catch nodes with only spaces
+            if (node.nodeValue && regex.test(node.nodeValue)) {
                 nodesToProcess.push(node);
             }
         }
@@ -1170,29 +1206,29 @@
     prevMatch.addEventListener('click', () => navigateMatch(-1));
     nextMatch.addEventListener('click', () => navigateMatch(1));
     
-    // ===== MARKDOWN TOGGLE (FIX 2 & 3) =====
+    // ===== MARKDOWN TOGGLE (FIX 1: GITHUB STANDARD) =====
     
-    // Define Showdown extension for underline (++)
-    showdown.extension('underline', () => {
-        return [{ type: 'lang', regex: /\+\+(.*?)\+\+/g, replace: '<u>$1</u>' }];
-    });
-    
-    // Initialize converters
-    const turndownService = new TurndownService({ headingStyle: 'atx' });
-    const showdownConverter = new showdown.Converter({ 
-        strikethrough: true, 
-        extensions: ['underline'] 
+    // Initialize Turndown
+    const turndownService = new TurndownService({ 
+        headingStyle: 'atx',
+        emDelimiter: '*',      // Use * for italics
+        strongDelimiter: '**'  // Use ** for bold
     });
 
-    // Add Turndown rules for strikethrough (~~) and underline (++)
+    // Add Turndown rule for strikethrough (~~)
     turndownService.addRule('strikethrough', {
         filter: ['s', 'strike'],
         replacement: (content) => '~~' + content + '~~'
     });
-    turndownService.addRule('underline', {
-        filter: 'u',
-        replacement: (content) => '++' + content + '++'
+    // Note: No rule for underline (<u>), as it's not in the cheatsheet.
+    
+    // Initialize Showdown
+    const showdownConverter = new showdown.Converter({ 
+        strikethrough: true, // Enable ~~strikethrough~~
+        tasklists: true,
+        simpleLineBreaks: true
     });
+
 
     function toggleMarkdown() {
         saveState();
@@ -1200,13 +1236,15 @@
         const markdownButton = document.getElementById('markdownButton');
         
         if (isMarkdown) {
+            // Convert Markdown TO HTML
             editor.innerHTML = showdownConverter.makeHtml(editor.innerText);
             editor.setAttribute('data-mode', 'rich');
-            markdownButton.classList.remove('active'); // FIX 3
+            markdownButton.classList.remove('active');
         } else {
+            // Convert HTML TO Markdown
             editor.innerText = turndownService.turndown(editor.innerHTML);
             editor.setAttribute('data-mode', 'markdown');
-            markdownButton.classList.add('active'); // FIX 3
+            markdownButton.classList.add('active');
         }
         updateToolbarStates();
         scheduleHeightCheck();
@@ -1282,7 +1320,7 @@
         }
     });
     
-    // ===== DOWNLOAD FUNCTIONS =====
+    // ===== DOWNLOAD FUNCTIONS (FIX 6: REBUILT EXPORTERS) =====
     downloadButton.addEventListener('click', () => {
         downloadMenu.classList.toggle('hidden');
     });
@@ -1311,22 +1349,21 @@
             const pdf = new jsPDF('p', 'pt', 'a4');
             const tempDiv = document.createElement('div');
             
-            tempDiv.style.cssText = 'position: absolute; left: -9999px; width: 794px; padding: 40px; font-family: system-ui, sans-serif; color: #000; background: #fff; box-sizing: border-box;';
+            // Apply styles to match editor for html2canvas
+            tempDiv.style.cssText = 'position: absolute; left: -9999px; width: 794px; padding: 40px 60px; font-family: system-ui, sans-serif; color: #000; background: #fff; box-sizing: border-box;';
             tempDiv.innerHTML = content;
 
-            tempDiv.querySelectorAll('p').forEach(el => { el.style.cssText = 'margin: 0 0 16px 0; line-height: 1.6; font-size: 16px;'; });
-            tempDiv.querySelectorAll('h1').forEach(el => { el.style.cssText = 'font-size: 32px; font-weight: bold; margin: 32px 0 16px 0; line-height: 1.2;'; });
-            tempDiv.querySelectorAll('h2').forEach(el => { el.style.cssText = 'font-size: 24px; font-weight: bold; margin: 24px 0 12px 0; line-height: 1.3;'; });
-            tempDiv.querySelectorAll('h3').forEach(el => { el.style.cssText = 'font-size: 20px; font-weight: bold; margin: 20px 0 10px 0; line-height: 1.3;'; });
+            // FIX 6: Apply padding instead of margin for better canvas rendering
+            tempDiv.querySelectorAll('p').forEach(el => { el.style.cssText = 'padding: 0 0 16px 0; line-height: 1.6; font-size: 16px;'; });
+            tempDiv.querySelectorAll('h1').forEach(el => { el.style.cssText = `font-size: 32px; ${window.getComputedStyle(el).fontWeight}; padding-top: 32px; padding-bottom: 16px; line-height: 1.2;`; });
+            tempDiv.querySelectorAll('h2').forEach(el => { el.style.cssText = `font-size: 24px; ${window.getComputedStyle(el).fontWeight}; padding-top: 24px; padding-bottom: 12px; line-height: 1.3;`; });
+            tempDiv.querySelectorAll('h3').forEach(el => { el.style.cssText = `font-size: 20px; ${window.getComputedStyle(el).fontWeight}; padding-top: 20px; padding-bottom: 10px; line-height: 1.3;`; });
             tempDiv.querySelectorAll('hr').forEach(el => { el.style.cssText = 'margin: 24px 0; border: 0; border-top: 1px solid #555;'; });
             tempDiv.querySelectorAll('ul, ol').forEach(el => { el.style.cssText = 'margin: 0 0 16px 0; padding-left: 32px;'; });
             tempDiv.querySelectorAll('blockquote').forEach(el => { el.style.cssText = 'margin: 16px 0; padding-left: 16px; border-left: 3px solid #87A9FF; color: #333;'; });
             tempDiv.querySelectorAll('font').forEach(el => {
-                if (el.style.fontSize) {
-                    el.style.color = '#000';
-                } else {
-                    el.outerHTML = el.innerHTML;
-                }
+                if (el.style.fontSize) { el.style.color = '#000'; } 
+                else { el.outerHTML = el.innerHTML; }
             });
 
             document.body.appendChild(tempDiv);
@@ -1346,23 +1383,15 @@
                     config: [
                         {
                             reference: "default-numbering",
-                            levels: [
-                                {
-                                    level: 0,
-                                    format: docx.LevelFormat.DECIMAL,
-                                    text: "%1.",
-                                    start: 1,
-                                    alignment: docx.AlignmentType.LEFT,
-                                    run: { size: "10pt" },
-                                    paragraph: { indent: { left: 720, hanging: 360 } },
-                                },
-                            ],
+                            levels: [ { level: 0, format: docx.LevelFormat.DECIMAL, text: "%1.", start: 1, alignment: docx.AlignmentType.LEFT, paragraph: { indent: { left: 720, hanging: 360 } } } ],
                         },
+                        {
+                            reference: "default-bullet",
+                            levels: [ { level: 0, format: docx.LevelFormat.BULLET, text: "•", alignment: docx.AlignmentType.LEFT, paragraph: { indent: { left: 720, hanging: 360 } } } ],
+                        }
                     ],
                 },
-                sections: [{
-                    children: parseHtmlToDocx(content)
-                }]
+                sections: [{ children: parseHtmlToDocx(editor) }]
             });
             
             docx.Packer.toBlob(doc).then(blob => {
@@ -1372,7 +1401,7 @@
         } else if (type === 'rtf') {
             const rtf = new RTF.Document();
             const section = rtf.createSection();
-            parseHtmlToRtf(content, section);
+            parseHtmlToRtf(editor, section);
             const blob = new Blob([rtf.toString()], {type: 'application/rtf'});
             triggerDownload(blob, 'document.rtf');
             
@@ -1382,48 +1411,34 @@
         }
     }
 
-    function parseHtmlToDocx(html) {
-        const temp = document.createElement('div');
-        temp.innerHTML = html;
+    // FIX 6: REBUILT DOCX PARSER
+    function parseHtmlToDocx(parentNode) {
         const elements = [];
-
-        function extractTextRuns(parentNode) {
+        
+        function extractTextRuns(node, style = {}) {
             const runs = [];
-            parentNode.childNodes.forEach(child => {
-                if (child.nodeType === 3) {
-                    runs.push(new docx.TextRun(child.textContent));
-                } else if (child.nodeType === 1) {
-                    if (child.nodeName === 'BR') {
-                        runs.push(new docx.TextRun({ break: 1 }));
-                    } else if (child.nodeName === 'A') {
-                        runs.push(new docx.TextRun({
-                            text: child.textContent,
-                            style: "Hyperlink",
-                            underline: {},
-                            color: "0000EE"
-                        }));
-                    } else {
-                        const nestedRuns = extractTextRuns(child);
-                        nestedRuns.forEach(run => {
-                            run.options.bold = run.options.bold || ['B', 'STRONG'].includes(child.nodeName);
-                            run.options.italic = run.options.italic || ['I', 'EM'].includes(child.nodeName);
-                            run.options.underline = run.options.underline || (['U'].includes(child.nodeName) ? {} : undefined);
-                            run.options.strike = run.options.strike || ['S', 'STRIKE'].includes(child.nodeName);
-                            if (child.style.fontSize) {
-                                run.options.size = parseFloat(child.style.fontSize) * 2;
-                            }
-                            runs.push(run);
-                        });
-                    }
-                }
-            });
+            if (node.nodeType === 3) { // Text Node
+                runs.push(new docx.TextRun({ text: node.textContent, ...style }));
+            } else if (node.nodeType === 1) { // Element Node
+                const nodeName = node.nodeName.toUpperCase();
+                let newStyle = { ...style };
+                
+                if (['B', 'STRONG'].includes(nodeName)) newStyle.bold = true;
+                if (['I', 'EM'].includes(nodeName)) newStyle.italic = true;
+                if (nodeName === 'U') newStyle.underline = {};
+                if (['S', 'STRIKE'].includes(nodeName)) newStyle.strike = true;
+                if (nodeName === 'FONT' && node.style.fontSize) newStyle.size = parseFloat(node.style.fontSize) * 2;
+                if (nodeName === 'BR') runs.push(new docx.TextRun({ break: 1 }));
+
+                node.childNodes.forEach(child => runs.push(...extractTextRuns(child, newStyle)));
+            }
             return runs;
         }
 
-        temp.childNodes.forEach(node => {
+        parentNode.childNodes.forEach(node => {
             if (node.nodeType !== 1) return;
             const nodeName = node.nodeName.toUpperCase();
-            
+
             let alignment = docx.AlignmentType.LEFT;
             if (node.style.textAlign === 'center') alignment = docx.AlignmentType.CENTER;
             else if (node.style.textAlign === 'right') alignment = docx.AlignmentType.RIGHT;
@@ -1438,13 +1453,14 @@
                              nodeName === 'H3' ? docx.HeadingLevel.HEADING_3 : undefined,
                     style: nodeName === 'BLOCKQUOTE' ? "IntenseQuote" : undefined,
                     alignment: alignment,
+                    indent: nodeName === 'BLOCKQUOTE' ? { left: 720 } : undefined,
                     spacing: { after: 120, before: 120 }
                 }));
             } else if (nodeName === 'UL' || nodeName === 'OL') {
                 node.querySelectorAll('li').forEach(li => {
                     elements.push(new docx.Paragraph({
                         children: extractTextRuns(li),
-                        bullet: nodeName === 'UL' ? { level: 0 } : undefined,
+                        bullet: nodeName === 'UL' ? { level: 0, reference: "default-bullet" } : undefined,
                         numbering: nodeName === 'OL' ? { reference: "default-numbering", level: 0 } : undefined,
                         spacing: { after: 80 }
                     }));
@@ -1457,85 +1473,76 @@
                 }));
             }
         });
-        
-        if (elements.length === 0 && temp.textContent) {
-             elements.push(new docx.Paragraph({ children: [new docx.TextRun(temp.textContent)]}));
-        }
         return elements;
     }
 
     // FIX 6: REBUILT RTF PARSER
-    function processRtfChildren(parentNode, paragraph, styles = {}) {
-         parentNode.childNodes.forEach(child => {
-            if (child.nodeType === 3) { // Text node
-                const run = paragraph.addTextRun(child.textContent);
+    function parseHtmlToRtf(parentNode, section) {
+        
+        function processRtfChildren(node, paragraph, styles = {}) {
+            if (node.nodeType === 3) { // Text node
+                const run = paragraph.addTextRun(node.textContent);
                 if (styles.bold) run.bold();
                 if (styles.italic) run.italic();
                 if (styles.underline) run.underline();
                 if (styles.strike) run.strike();
                 if (styles.fontSize) run.fontSize(styles.fontSize);
-            } else if (child.nodeType === 1) { // Element node
-                if (child.nodeName === 'BR') {
+            } else if (node.nodeType === 1) { // Element node
+                const nodeName = node.nodeName.toUpperCase();
+                if (nodeName === 'BR') {
                     paragraph.addTextRun('\n');
                 } else {
-                    // Inherit styles and add new ones
                     const newStyles = { ...styles };
-                    if (['B', 'STRONG'].includes(child.nodeName)) newStyles.bold = true;
-                    if (['I', 'EM'].includes(child.nodeName)) newStyles.italic = true;
-                    if (['U'].includes(child.nodeName)) newStyles.underline = true;
-                    if (['S', 'STRIKE'].includes(child.nodeName)) newStyles.strike = true;
-                    if (child.style.fontSize) newStyles.fontSize = parseFloat(child.style.fontSize) * 2;
+                    if (['B', 'STRONG'].includes(nodeName)) newStyles.bold = true;
+                    if (['I', 'EM'].includes(nodeName)) newStyles.italic = true;
+                    if (nodeName === 'U') newStyles.underline = true;
+                    if (['S', 'STRIKE'].includes(nodeName)) newStyles.strike = true;
+                    if (nodeName === 'FONT' && node.style.fontSize) newStyles.fontSize = parseFloat(node.style.fontSize) * 2;
                     
-                    // Recurse
-                    processRtfChildren(child, paragraph, newStyles);
+                    node.childNodes.forEach(child => processRtfChildren(child, paragraph, newStyles));
                 }
             }
-        });
-    }
+        }
 
-    function parseHtmlToRtf(html, section) {
-        const temp = document.createElement('div');
-        temp.innerHTML = html;
-        
-        temp.childNodes.forEach(node => {
-            if (node.nodeType === 3 && node.textContent.trim()) {
-                processRtfChildren(node.parentNode, section.addParagraph());
-            } else if (node.nodeType === 1) {
-                const p = section.addParagraph();
-                
-                if (node.style.textAlign === 'center') p.center();
-                else if (node.style.textAlign === 'right') p.right();
-                else if (node.style.textAlign === 'justify') p.justify();
-                
-                if (['H1','H2','H3'].includes(node.nodeName)) {
-                    const size = node.nodeName === 'H1' ? 32 : (node.nodeName === 'H2' ? 24 : 20);
-                    processRtfChildren(node, p, { bold: true, fontSize: size });
-                    p.spacing({ after: 200, before: 200 });
-                } 
-                else if (node.nodeName === 'UL' || node.nodeName === 'OL') {
-                    node.querySelectorAll('li').forEach((li, index) => {
-                        const listP = section.addParagraph();
-                        const prefix = (node.nodeName === 'OL') ? `${index + 1}. ` : '• ';
-                        listP.addTextRun(prefix).bold();
-                        processRtfChildren(li, listP, {});
-                        listP.indent({ left: 720, hanging: 360 });
-                        listP.spacing({ after: 50 });
-                    });
-                    p.text = ''; // Clear the text of the main paragraph 'p'
-                }
-                else if (node.nodeName === 'HR') {
-                    p.border({ bottom: { value: 'single', size: 6 } }).spacing({ after: 200, before: 200 });
-                }
-                else if (node.nodeName === 'BLOCKQUOTE') {
-                     processRtfChildren(node, p, { italic: true });
-                     p.indent({ left: 720, right: 720 });
-                     p.border({ left: { value: 'single', size: 6, color: [135, 169, 255] } });
-                     p.spacing({ after: 150, before: 150 });
-                }
-                else if (node.nodeName === 'P') {
-                    processRtfChildren(node, p, {});
-                    p.spacing({ after: 200 });
-                }
+        parentNode.childNodes.forEach(node => {
+            if (node.nodeType !== 1) return;
+            const nodeName = node.nodeName.toUpperCase();
+            
+            const p = section.addParagraph();
+            
+            if (node.style.textAlign === 'center') p.center();
+            else if (node.style.textAlign === 'right') p.right();
+            else if (node.style.textAlign === 'justify') p.justify();
+            
+            if (['H1','H2','H3'].includes(nodeName)) {
+                const size = nodeName === 'H1' ? 32 : (nodeName === 'H2' ? 24 : 20);
+                const isBold = window.getComputedStyle(node).fontWeight === 'bold' || parseInt(window.getComputedStyle(node).fontWeight) >= 700;
+                processRtfChildren(node, p, { bold: isBold, fontSize: size });
+                p.spacing({ after: 200, before: 200 });
+            } 
+            else if (nodeName === 'UL' || nodeName === 'OL') {
+                node.querySelectorAll('li').forEach((li, index) => {
+                    const listP = section.addParagraph();
+                    const prefix = (nodeName === 'OL') ? `${index + 1}. ` : '• ';
+                    listP.addTextRun(prefix).bold();
+                    processRtfChildren(li, listP, {});
+                    listP.indent({ left: 720, hanging: 360 });
+                    listP.spacing({ after: 50 });
+                });
+                p.text = ''; // Clear the text of the main paragraph 'p'
+            }
+            else if (nodeName === 'HR') {
+                p.border({ bottom: { value: 'single', size: 6 } }).spacing({ after: 200, before: 200 });
+            }
+            else if (nodeName === 'BLOCKQUOTE') {
+                 processRtfChildren(node, p, { italic: true });
+                 p.indent({ left: 720, right: 720 });
+                 p.border({ left: { value: 'single', size: 6, color: [135, 169, 255] } });
+                 p.spacing({ after: 150, before: 150 });
+            }
+            else if (nodeName === 'P') {
+                processRtfChildren(node, p, {});
+                p.spacing({ after: 200 });
             }
         });
     }
