@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blurry Wallpaper Generator</title>
     <style>
-        /* ===== CSS VARIABLES ===== */
         :root {
             --bg: #191919;
             --card-bg: #1F1F1F;
@@ -18,7 +17,6 @@
             --blur-strength: 120px;
         }
 
-        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
@@ -32,7 +30,6 @@
             padding: 24px 16px;
         }
 
-        /* ===== MAIN CONTAINER ===== */
         #app-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -41,7 +38,6 @@
             flex-wrap: wrap;
         }
 
-        /* ===== WALLPAPER PREVIEW ===== */
         #preview-section {
             flex: 1;
             min-width: 300px;
@@ -60,14 +56,24 @@
             border-radius: var(--radius);
         }
 
+        #texture-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
         .color-blob {
             position: absolute;
             border-radius: 50%;
             filter: blur(var(--blur-strength));
             transition: all 0.3s ease;
+            z-index: 1;
         }
 
-        /* ===== CONTROLS SECTION ===== */
         #controls {
             flex: 1;
             min-width: 300px;
@@ -81,7 +87,6 @@
             gap: 24px;
         }
 
-        /* ===== CONTROL GROUP ===== */
         .control-group {
             display: flex;
             flex-direction: column;
@@ -100,7 +105,6 @@
             margin-top: -8px;
         }
 
-        /* ===== COLOR PICKERS ===== */
         #color-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -142,7 +146,6 @@
             border-radius: 6px;
         }
 
-        /* ===== SLIDERS ===== */
         .slider-wrapper {
             display: flex;
             flex-direction: column;
@@ -200,7 +203,6 @@
             transform: scale(1.2);
         }
 
-        /* ===== TEXTURE OPTIONS ===== */
         .texture-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -228,7 +230,6 @@
             border-color: var(--accent);
         }
 
-        /* ===== BUTTONS ===== */
         .button-group {
             display: flex;
             gap: 12px;
@@ -285,7 +286,6 @@
             box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             #app-container {
                 gap: 16px;
@@ -300,7 +300,7 @@
             }
 
             .texture-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
         }
     </style>
@@ -310,6 +310,7 @@
         
         <div id="preview-section">
             <div id="wallpaper-preview">
+                <div id="texture-overlay"></div>
                 <div class="color-blob" id="blob1"></div>
                 <div class="color-blob" id="blob2"></div>
                 <div class="color-blob" id="blob3"></div>
@@ -376,8 +377,8 @@
                 <div class="control-label">Texture Overlay</div>
                 <div class="texture-grid">
                     <div class="texture-option active" data-texture="none">None</div>
-                    <div class="texture-option" data-texture="grain">Grain</div>
-                    <div class="texture-option" data-texture="gradient">Gradient</div>
+                    <div class="texture-option" data-texture="noise">Noise</div>
+                    <div class="texture-option" data-texture="glass">Glass</div>
                 </div>
             </div>
 
@@ -390,10 +391,11 @@
     </div>
 
     <canvas id="render-canvas" style="display: none;"></canvas>
+    <canvas id="temp-canvas" style="display: none;"></canvas>
 
     <script>
-        // ===== DOM ELEMENTS =====
         const preview = document.getElementById('wallpaper-preview');
+        const textureOverlay = document.getElementById('texture-overlay');
         const blobs = document.querySelectorAll('.color-blob');
         const colorPickers = document.querySelectorAll('.color-picker');
         const blurSlider = document.getElementById('blur-slider');
@@ -407,20 +409,36 @@
         const downloadBtn = document.getElementById('download-btn');
         const canvas = document.getElementById('render-canvas');
         const ctx = canvas.getContext('2d');
+        const tempCanvas = document.getElementById('temp-canvas');
+        const tempCtx = tempCanvas.getContext('2d');
 
-        // ===== STATE =====
         const state = {
             blobs: [],
             sizeMultiplier: 1,
             brightness: 100,
-            texture: 'none'
+            texture: 'none',
+            backgroundColor: '#000000',
+            textureParams: {
+                noise: { opacity: 0.1 },
+                glass: { blur: 2, noise: 0.02 }
+            }
         };
 
-        // ===== HELPER FUNCTIONS =====
         const generateRandomColor = () => {
             const hue = Math.floor(Math.random() * 360);
             const saturation = Math.floor(Math.random() * 30) + 60;
             const lightness = Math.floor(Math.random() * 30) + 40;
+            return hslToHex(hue, saturation, lightness);
+        };
+
+        const generateRandomBackgroundColor = () => {
+            const roll = Math.random();
+            if (roll < 0.4) return '#000000'; // 40% chance black
+            if (roll < 0.8) return '#FFFFFF'; // 40% chance white
+            // 20% chance random dark/light color
+            const hue = Math.floor(Math.random() * 360);
+            const saturation = Math.floor(Math.random() * 20) + 10;
+            const lightness = Math.random() > 0.5 ? randomInt(0, 15) : randomInt(85, 100);
             return hslToHex(hue, saturation, lightness);
         };
 
@@ -437,7 +455,26 @@
 
         const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-        // ===== UPDATE PREVIEW =====
+        function randomizeNoiseParams() {
+            state.textureParams.noise.opacity = randomInt(8, 20) / 100; // 0.08 to 0.20
+        }
+
+        function randomizeGlassParams() {
+            state.textureParams.glass.blur = randomInt(1, 4);
+            state.textureParams.glass.noise = randomInt(1, 4) / 100; // 0.01 to 0.04
+        }
+
+        function randomizeTextureParams() {
+            switch (state.texture) {
+                case 'noise':
+                    randomizeNoiseParams();
+                    break;
+                case 'glass':
+                    randomizeGlassParams();
+                    break;
+            }
+        }
+
         function updatePreview() {
             document.documentElement.style.setProperty('--blur-strength', `${blurSlider.value}px`);
             blurValue.textContent = `${blurSlider.value}px`;
@@ -447,6 +484,7 @@
             state.sizeMultiplier = sizeSlider.value / 100;
             state.brightness = brightnessSlider.value;
 
+            preview.style.backgroundColor = state.backgroundColor;
             preview.style.filter = `brightness(${state.brightness}%)`;
 
             state.blobs.forEach((blobState, i) => {
@@ -461,37 +499,37 @@
 
                 colorPickers[i].value = blobState.color;
             });
-
-            // Apply texture overlay
             applyTexture();
         }
 
-        // ===== APPLY TEXTURE =====
         function applyTexture() {
-            preview.style.backgroundImage = 'none';
-            if (state.texture === 'grain') {
-                preview.style.backgroundImage = `
+            textureOverlay.style.backgroundImage = 'none';
+            textureOverlay.style.backdropFilter = 'none';
+
+            if (state.texture === 'noise') {
+                textureOverlay.style.backgroundImage = `
                     repeating-linear-gradient(
                         0deg,
                         transparent,
                         transparent 2px,
-                        rgba(255,255,255,0.03) 2px,
-                        rgba(255,255,255,0.03) 4px
+                        rgba(0,0,0,${state.textureParams.noise.opacity}) 2px,
+                        rgba(0,0,0,${state.textureParams.noise.opacity}) 4px
                     )
                 `;
-            } else if (state.texture === 'gradient') {
-                preview.style.backgroundImage = `
-                    linear-gradient(
-                        135deg,
-                        rgba(0,0,0,0.3) 0%,
-                        transparent 50%,
-                        rgba(255,255,255,0.1) 100%
+            } else if (state.texture === 'glass') {
+                textureOverlay.style.backdropFilter = `blur(${state.textureParams.glass.blur}px)`;
+                textureOverlay.style.backgroundImage = `
+                    repeating-linear-gradient(
+                        0deg,
+                        transparent,
+                        transparent 2px,
+                        rgba(0,0,0,${state.textureParams.glass.noise}) 2px,
+                        rgba(0,0,0,${state.textureParams.glass.noise}) 4px
                     )
                 `;
             }
         }
 
-        // ===== RANDOMIZE STATE =====
         function randomizeState() {
             state.blobs = [];
             blobs.forEach((blob, i) => {
@@ -503,33 +541,42 @@
                     baseSize: randomInt(200, 500)
                 });
             });
+
+            // Randomize texture
+            const textureTypes = ['none', 'noise', 'glass'];
+            state.texture = textureTypes[randomInt(0, textureTypes.length - 1)];
+            textureOptions.forEach(o => {
+                o.classList.toggle('active', o.dataset.texture === state.texture);
+            });
+            randomizeTextureParams();
+
+            // Randomize background color
+            state.backgroundColor = generateRandomBackgroundColor();
+
             updatePreview();
-            scheduleHeightCheck(); // This notifies the iframe scroll fix
+            scheduleHeightCheck();
         }
 
-        // ===== DOWNLOAD 4K IMAGE =====
         async function downloadImage() {
             const DOWNLOAD_WIDTH = 3840;
             const DOWNLOAD_HEIGHT = 2160;
             
             canvas.width = DOWNLOAD_WIDTH;
             canvas.height = DOWNLOAD_HEIGHT;
+            tempCanvas.width = DOWNLOAD_WIDTH;
+            tempCanvas.height = DOWNLOAD_HEIGHT;
 
-            // Fill background
-            ctx.fillStyle = '#000000';
+            ctx.fillStyle = state.backgroundColor;
             ctx.fillRect(0, 0, DOWNLOAD_WIDTH, DOWNLOAD_HEIGHT);
 
-            // Calculate scale
             const previewRect = preview.getBoundingClientRect();
             const scaleX = DOWNLOAD_WIDTH / previewRect.width;
             const scaleY = DOWNLOAD_HEIGHT / previewRect.height;
             const scaleFactor = (scaleX + scaleY) / 2;
 
-            // Apply blur filter
             const scaledBlur = parseInt(blurSlider.value, 10) * scaleFactor;
             ctx.filter = `blur(${scaledBlur}px) brightness(${state.brightness}%)`;
             
-            // Draw blobs
             state.blobs.forEach(blobState => {
                 ctx.fillStyle = blobState.color;
                 ctx.beginPath();
@@ -543,29 +590,38 @@
                 ctx.fill();
             });
 
-            // Reset filter for texture overlay
             ctx.filter = 'none';
 
             // Apply texture
-            if (state.texture === 'grain') {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
-                for (let i = 0; i < DOWNLOAD_WIDTH * DOWNLOAD_HEIGHT / 100; i++) {
+            if (state.texture === 'noise') {
+                ctx.fillStyle = `rgba(0, 0, 0, ${state.textureParams.noise.opacity})`;
+                for (let i = 0; i < DOWNLOAD_WIDTH * DOWNLOAD_HEIGHT / 25; i++) { // Increased strength
                     ctx.fillRect(
                         Math.random() * DOWNLOAD_WIDTH,
                         Math.random() * DOWNLOAD_HEIGHT,
                         1, 1
                     );
                 }
-            } else if (state.texture === 'gradient') {
-                const gradient = ctx.createLinearGradient(0, 0, DOWNLOAD_WIDTH, DOWNLOAD_HEIGHT);
-                gradient.addColorStop(0, 'rgba(0,0,0,0.3)');
-                gradient.addColorStop(0.5, 'transparent');
-                gradient.addColorStop(1, 'rgba(255,255,255,0.1)');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, DOWNLOAD_WIDTH, DOWNLOAD_HEIGHT);
+            } else if (state.texture === 'glass') {
+                // Apply blur
+                tempCtx.filter = `blur(${state.textureParams.glass.blur * scaleFactor}px)`;
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                // Draw blurred version back to main canvas
+                ctx.filter = 'none';
+                ctx.drawImage(tempCanvas, 0, 0);
+
+                // Apply subtle noise
+                ctx.fillStyle = `rgba(0, 0, 0, ${state.textureParams.glass.noise})`;
+                for (let i = 0; i < DOWNLOAD_WIDTH * DOWNLOAD_HEIGHT / 50; i++) {
+                    ctx.fillRect(
+                        Math.random() * DOWNLOAD_WIDTH,
+                        Math.random() * DOWNLOAD_HEIGHT,
+                        1, 1
+                    );
+                }
             }
 
-            // Trigger download
             const link = document.createElement('a');
             link.download = 'blurry-wallpaper-4k.png';
             link.href = canvas.toDataURL('image/png');
@@ -573,7 +629,6 @@
             link.remove();
         }
 
-        // ===== EVENT LISTENERS =====
         randomBtn.addEventListener('click', randomizeState);
         downloadBtn.addEventListener('click', downloadImage);
         
@@ -592,16 +647,28 @@
 
         colorPickers.forEach((picker, i) => {
             picker.addEventListener('input', (e) => {
-                state.blobs[i].color = e.target.value;
-                updatePreview();
+                if (state.blobs[i]) {
+                    state.blobs[i].color = e.target.value;
+                    updatePreview();
+                }
             });
         });
 
         textureOptions.forEach(option => {
             option.addEventListener('click', () => {
-                textureOptions.forEach(o => o.classList.remove('active'));
-                option.classList.add('active');
-                state.texture = option.dataset.texture;
+                const newTexture = option.dataset.texture;
+                
+                if (state.texture === newTexture && newTexture !== 'none') {
+                    // Clicked active button: re-randomize params
+                    randomizeTextureParams();
+                } else {
+                    // Clicked new button: switch texture
+                    textureOptions.forEach(o => o.classList.remove('active'));
+                    option.classList.add('active');
+                    state.texture = newTexture;
+                    randomizeTextureParams();
+                }
+                
                 updatePreview();
                 scheduleHeightCheck();
             });
@@ -611,43 +678,24 @@
         let lastHeight = 0;
         let resizeTimer;
 
-        /**
-         * Sends the current scrollHeight to the parent window if it has changed.
-         * This is the *only* function that should send a postMessage.
-         */
         function sendHeight() {
             const height = document.body.scrollHeight;
-            
-            // Only send message if height has *actually* changed
             if (height !== lastHeight) {
                 lastHeight = height;
                 window.parent.postMessage({ frameHeight: height }, '*');
             }
         }
 
-        /**
-         * A debounced version of sendHeight() to be called on content changes.
-         * This ensures we don't spam messages during rapid changes.
-         */
         function scheduleHeightCheck() {
-            // Clear any pending checks
             clearTimeout(resizeTimer);
-            // Schedule a new check
             resizeTimer = setTimeout(sendHeight, 150);
         }
 
-        // Send height on initial load
-        // This fixes the "Content Cut-Off" race condition.
         window.addEventListener('load', () => {
-            // We call randomizeState() here to ensure the DOM is
-            // fully rendered before the tool populates.
-            // randomizeState() already calls scheduleHeightCheck() internally.
             randomizeState();
         });
 
-        // Send height on window resize (debounced)
         window.addEventListener('resize', () => {
-            // Use scheduleHeightCheck for built-in debounce
             scheduleHeightCheck();
         });
         // ===== END OF SCROLLBAR FIX =====
