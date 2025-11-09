@@ -27,7 +27,7 @@
             margin: 0;
             padding: 0;
             height: auto;
-            min-height: 0;
+            min-height: 0; 
             overflow: visible;
             background: transparent;
         }
@@ -172,6 +172,22 @@
             cursor: pointer;
             transition: all 0.2s ease;
             background: transparent;
+            padding: 0;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 4px;
+        }
+        .color-picker::-moz-color-swatch {
+            border: none;
+            border-radius: 4px;
         }
 
         .color-picker:hover {
@@ -206,8 +222,11 @@
             outline: none;
             -webkit-appearance: none;
             appearance: none;
+            transition: all 0.2s ease;
         }
-
+        input[type="range"]:focus-visible {
+             box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+        }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -218,7 +237,9 @@
             border-radius: 50%;
             transition: all 0.2s ease;
         }
-
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
         input[type="range"]::-moz-range-thumb {
             width: 16px;
             height: 16px;
@@ -226,6 +247,9 @@
             cursor: pointer;
             border-radius: 50%;
             border: none;
+        }
+         input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.1);
         }
 
         .texture-grid, .theme-grid {
@@ -244,6 +268,7 @@
             font-size: 12px;
             text-align: center;
             transition: all 0.2s ease;
+            color: var(--text-primary);
         }
 
         .texture-option:hover, .theme-option:hover {
@@ -252,8 +277,15 @@
 
         .texture-option.active, .theme-option.active {
             background: var(--accent);
-            color: #000;
+            color: #191919;
             border-color: var(--accent);
+            font-weight: 600;
+        }
+        
+        .theme-option:focus-visible,
+        .texture-option:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
         }
 
         .button-group {
@@ -293,14 +325,19 @@
         .btn:hover::before {
             left: 125%;
         }
-
+        
         .btn:hover {
             background: var(--hover);
+        }
+        
+        .btn:focus-visible{
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
         }
 
         .btn-primary {
             background: var(--accent);
-            color: #000;
+            color: #191919;
             border-color: var(--accent);
         }
 
@@ -316,9 +353,26 @@
             color: var(--text-primary);
             font-size: 14px;
             width: 100%;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238C8C8C' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+        }
+        
+        #resolution-select:focus-visible {
+             outline: none;
+             border-color: var(--accent);
+             box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
         }
 
         @media (max-width: 768px) {
+            body {
+                 padding: 16px 8px;
+            }
+        
             #app-container {
                 gap: 16px;
                 flex-direction: column;
@@ -326,6 +380,11 @@
 
             #controls, #preview-section {
                 max-width: 100%;
+                padding: 16px;
+            }
+            
+            #controls {
+                gap: 20px;
             }
 
             #color-grid {
@@ -341,11 +400,17 @@
                 top: 6px;
                 right: 10px;
             }
+            
+            .button-group {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
+    
     <div id="app-container">
+        
         <div id="preview-section">
             <div id="wallpaper-preview">
                 <div id="grain-overlay"></div>
@@ -360,12 +425,12 @@
             <div class="control-group">
                 <div class="control-label">Themes</div>
                 <div class="theme-grid">
-                    <div class="theme-option" data-theme="random">Random</div>
-                    <div class="theme-option" data-theme="neon">Neon</div>
-                    <div class="theme-option" data-theme="pastel">Pastel</div>
-                    <div class="theme-option" data-theme="earth">Earth</div>
-                    <div class="theme-option" data-theme="fire">Fire</div>
-                    <div class="theme-option" data-theme="ocean">Ocean</div>
+                    <div class="theme-option" data-theme="random" tabindex="0">Random</div>
+                    <div class="theme-option" data-theme="neon" tabindex="0">Neon</div>
+                    <div class="theme-option" data-theme="pastel" tabindex="0">Pastel</div>
+                    <div class="theme-option" data-theme="earth" tabindex="0">Earth</div>
+                    <div class="theme-option" data-theme="fire" tabindex="0">Fire</div>
+                    <div class="theme-option" data-theme="ocean" tabindex="0">Ocean</div>
                 </div>
             </div>
 
@@ -389,75 +454,75 @@
             <div class="control-group">
                 <div class="slider-wrapper">
                     <div class="slider-header">
-                        <div class="control-label">Blur Strength</div>
+                        <label for="blur-slider" class="control-label">Blur Strength</label>
                         <div class="slider-value" id="blur-value">120px</div>
                     </div>
-                    <input type="range" id="blur-slider" min="30" max="300" value="120">
+                    <input type="range" id="blur-slider" min="30" max="300" value="120" aria-labelledby="blur-value">
                 </div>
             </div>
 
             <div class="control-group">
                 <div class="slider-wrapper">
                     <div class="slider-header">
-                        <div class="control-label">Blob Size</div>
+                        <label for="size-slider" class="control-label">Blob Size</label>
                         <div class="slider-value" id="size-value">100%</div>
                     </div>
-                    <input type="range" id="size-slider" min="50" max="200" value="100">
+                    <input type="range" id="size-slider" min="50" max="200" value="100" aria-labelledby="size-value">
                 </div>
             </div>
 
             <div class="control-group">
                 <div class="slider-wrapper">
                     <div class="slider-header">
-                        <div class="control-label">Brightness</div>
+                        <label for="brightness-slider" class="control-label">Brightness</label>
                         <div class="slider-value" id="brightness-value">100%</div>
                     </div>
-                    <input type="range" id="brightness-slider" min="50" max="150" value="100">
+                    <input type="range" id="brightness-slider" min="50" max="150" value="100" aria-labelledby="brightness-value">
                 </div>
             </div>
 
             <div class="control-group">
                 <div class="slider-wrapper">
                     <div class="slider-header">
-                        <div class="control-label">Saturation</div>
+                        <label for="saturation-slider" class="control-label">Saturation</label>
                         <div class="slider-value" id="saturation-value">100%</div>
                     </div>
-                    <input type="range" id="saturation-slider" min="0" max="200" value="100">
+                    <input type="range" id="saturation-slider" min="0" max="200" value="100" aria-labelledby="saturation-value">
                 </div>
             </div>
 
             <div class="control-group">
                 <div class="slider-wrapper">
                     <div class="slider-header">
-                        <div class="control-label">Vignette</div>
+                        <label for="vignette-slider" class="control-label">Vignette</label>
                         <div class="slider-value" id="vignette-value">0%</div>
                     </div>
-                    <input type="range" id="vignette-slider" min="0" max="100" value="0">
+                    <input type="range" id="vignette-slider" min="0" max="100" value="0" aria-labelledby="vignette-value">
                 </div>
             </div>
 
             <div class="control-group">
                 <div class="slider-wrapper">
                     <div class="slider-header">
-                        <div class="control-label">Grain</div>
+                        <label for="grain-slider" class="control-label">Grain</label>
                         <div class="slider-value" id="grain-value">10%</div>
                     </div>
-                    <input type="range" id="grain-slider" min="0" max="50" value="10">
+                    <input type="range" id="grain-slider" min="0" max="50" value="10" aria-labelledby="grain-value">
                 </div>
             </div>
 
             <div class="control-group">
                 <div class="control-label">Texture Overlay</div>
                 <div class="texture-grid">
-                    <div class="texture-option active" data-texture="none">None</div>
-                    <div class="texture-option" data-texture="noise">Noise</div>
-                    <div class="texture-option" data-texture="glass">Glass</div>
-                    <div class="texture-option" data-texture="paper">Paper</div>
+                    <div class="texture-option active" data-texture="none" tabindex="0">None</div>
+                    <div class="texture-option" data-texture="noise" tabindex="0">Noise</div>
+                    <div class="texture-option" data-texture="glass" tabindex="0">Glass</div>
+                    <div class="texture-option" data-texture="paper" tabindex="0">Paper</div>
                 </div>
             </div>
 
             <div class="control-group">
-                <div class="control-label">Resolution</div>
+                <label for="resolution-select" class="control-label">Resolution</label>
                 <select id="resolution-select">
                     <option value="3840x2160">4K Landscape (3840x2160)</option>
                     <option value="2160x3840">4K Portrait (2160x3840)</option>
@@ -478,6 +543,8 @@
     <canvas id="temp-canvas" style="display: none;"></canvas>
 
     <script>
+        // ===== APP LOGIC =====
+        
         // DOM Elements
         const preview = document.getElementById('wallpaper-preview');
         const textureOverlay = document.getElementById('texture-overlay');
@@ -509,7 +576,7 @@
         const tempCanvas = document.getElementById('temp-canvas');
         const tempCtx = tempCanvas.getContext('2d');
 
-        // State
+        // App State
         const state = {
             blobs: [],
             sizeMultiplier: 1,
@@ -528,7 +595,7 @@
             minBlobs: 1
         };
 
-        // Utility
+        // Utilities
         const hslToHex = (h, s, l) => {
             l /= 100;
             const a = s * Math.min(l, 1 - l) / 100;
@@ -609,7 +676,7 @@
             updatePreview();
         }
 
-        // Dragging
+        // Dragging logic
         function makeDraggable(el) {
             let dragging = false, startX, startY, initX, initY;
 
@@ -623,6 +690,7 @@
                 initX = parseFloat(el.style.left) || 0;
                 initY = parseFloat(el.style.top) || 0;
                 el.style.transition = 'none';
+                el.style.cursor = 'grabbing';
                 e.preventDefault();
             };
 
@@ -646,6 +714,7 @@
                 if (dragging) {
                     dragging = false;
                     el.style.transition = 'all 0.3s ease';
+                    el.style.cursor = 'move';
                     updatePreview();
                 }
             };
@@ -653,12 +722,9 @@
             el.addEventListener('pointerdown', down);
             document.addEventListener('pointermove', move);
             document.addEventListener('pointerup', up);
-            el.addEventListener('touchstart', down, { passive: false });
-            document.addEventListener('touchmove', move, { passive: false });
-            document.addEventListener('touchend', up);
         }
 
-        // Preview update
+        // Main preview update function
         function updatePreview() {
             document.documentElement.style.setProperty('--blur-strength', `${blurSlider.value}px`);
             blurValue.textContent = `${blurSlider.value}px`;
@@ -694,7 +760,10 @@
             });
 
             applyTexture();
-            scheduleHeightCheck();
+            
+            if (typeof scheduleHeightCheck === 'function') {
+                scheduleHeightCheck();
+            }
         }
 
         function applyTexture() {
@@ -716,7 +785,7 @@
             }
         }
 
-        // Themes
+        // Themes logic
         function applyTheme(theme) {
             let colors = [];
             switch (theme) {
@@ -753,7 +822,7 @@
             updatePreview();
         }
 
-        // Download
+        // Download logic
         async function downloadImage() {
             const [w, h] = resolutionSelect.value.split('x').map(Number);
             canvas.width = w; canvas.height = h;
@@ -763,48 +832,56 @@
             ctx.fillRect(0, 0, w, h);
 
             const rect = preview.getBoundingClientRect();
-            const scale = (w / rect.width + h / rect.height) / 2;
-            const blur = blurSlider.value * scale;
+            const scaleX = w / rect.width;
+            const scaleY = h / rect.height;
+            
+            const blur = blurSlider.value * Math.min(scaleX, scaleY);
             ctx.filter = `blur(${blur}px) brightness(${state.brightness}%) saturate(${state.saturation}%)`;
 
             state.blobs.forEach(b => {
                 ctx.fillStyle = b.color;
                 ctx.beginPath();
-                const size = b.baseSize * state.sizeMultiplier * scale;
-                const x = (b.x / 100) * w - size / 2;
-                const y = (b.y / 100) * h - size / 2;
-                ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+                const size = b.baseSize * state.sizeMultiplier * Math.min(scaleX, scaleY);
+                const x = (b.x / 100) * w;
+                const y = (b.y / 100) * h;
+                ctx.arc(x, y, size, 0, Math.PI * 2);
                 ctx.fill();
             });
 
             ctx.filter = 'none';
 
-            // Grain
-            ctx.fillStyle = `rgba(0,0,0,${state.grain})`;
-            for (let i = 0; i < w * h / 100; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
+            if(state.grain > 0) {
+                ctx.fillStyle = `rgba(0,0,0,${state.grain / 2})`;
+                for (let i = 0; i < (w * h) / 20; i++) {
+                    ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
+                }
+            }
 
-            // Texture
             if (state.texture === 'noise') {
                 ctx.fillStyle = `rgba(0,0,0,${state.textureParams.noise.opacity})`;
-                for (let i = 0; i < w * h / 25; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
+                for (let i = 0; i < (w * h) / 10; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
             } else if (state.texture === 'glass') {
-                tempCtx.filter = `blur(${state.textureParams.glass.blur * scale}px)`;
+                tempCtx.clearRect(0, 0, w, h);
+                tempCtx.filter = `blur(${state.textureParams.glass.blur * Math.min(scaleX, scaleY)}px)`;
                 tempCtx.drawImage(canvas, 0, 0);
                 ctx.drawImage(tempCanvas, 0, 0);
                 ctx.fillStyle = `rgba(0,0,0,${state.textureParams.glass.noise})`;
-                for (let i = 0; i < w * h / 50; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
+                for (let i = 0; i < (w * h) / 20; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
             } else if (state.texture === 'paper') {
+                ctx.globalAlpha = 0.5;
                 ctx.fillStyle = `rgba(255,255,255,${state.textureParams.paper.opacity})`;
                 for (let x = 0; x < w; x += 2) ctx.fillRect(x, 0, 1, h);
                 for (let y = 0; y < h; y += 2) ctx.fillRect(0, y, w, 1);
+                ctx.globalAlpha = 1.0;
             }
 
-            // Vignette
-            const grad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w, h)/2);
-            grad.addColorStop(0, 'rgba(0,0,0,0)');
-            grad.addColorStop(1, `rgba(0,0,0,${state.vignette * 0.8})`);
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, w, h);
+            if (state.vignette > 0) {
+                const grad = ctx.createRadialGradient(w/2, h/2, Math.max(w,h) * 0.3, w/2, h/2, Math.max(w, h) * 0.9);
+                grad.addColorStop(0, 'rgba(0,0,0,0)');
+                grad.addColorStop(1, `rgba(0,0,0,${state.vignette * 0.8})`);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+            }
 
             const a = document.createElement('a');
             a.download = `blurry-wallpaper-${resolutionSelect.value}.png`;
@@ -812,56 +889,102 @@
             a.click();
             a.remove();
         }
-
-        // Init
-        for (let i = 0; i < 5; i++) addBlob();
-        randomizeState();
-        bgColorPicker.value = state.backgroundColor;
-
-        // Events
-        addBlobBtn.onclick = addBlob;
-        removeBlobBtn.onclick = removeBlob;
-        randomBtn.onclick = () => randomizeState('random');
-        downloadBtn.onclick = downloadImage;
-        bgColorPicker.oninput = e => { state.backgroundColor = e.target.value; updatePreview(); };
-
-        [blurSlider, sizeSlider, brightnessSlider, saturationSlider, vignetteSlider, grainSlider].forEach(s => s.oninput = updatePreview);
-
-        textureOptions.forEach(o => o.onclick = () => {
-            textureOptions.forEach(t => t.classList.remove('active'));
-            o.classList.add('active');
-            state.texture = o.dataset.texture;
-            randomizeTextureParams();
-            updatePreview();
-        });
-
-        themeOptions.forEach(o => o.onclick = () => randomizeState(o.dataset.theme === 'random' ? 'random' : o.dataset.theme));
-
-        // ===== FOURTHWALL SCROLLBAR FIX =====
-        let lastHeight = 0;
-        let timer;
-
-        function sendHeight() {
-            const h = document.body.scrollHeight;
-            if (h !== lastHeight) {
-                lastHeight = h;
-                window.parent.postMessage({ frameHeight: h }, '*');
+        
+        // Accessibility for keyboard users
+        function handleGridKeyPress(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.target.click();
             }
         }
 
-        function schedule() {
-            clearTimeout(timer);
-            timer = setTimeout(sendHeight, 50);
+        // Initial setup
+        function init() {
+            for (let i = 0; i < 5; i++) addBlob();
+            randomizeState();
+            bgColorPicker.value = state.backgroundColor;
+
+            addBlobBtn.onclick = addBlob;
+            removeBlobBtn.onclick = removeBlob;
+            randomBtn.onclick = () => randomizeState('random');
+            downloadBtn.onclick = downloadImage;
+            bgColorPicker.oninput = e => { state.backgroundColor = e.target.value; updatePreview(); };
+
+            [blurSlider, sizeSlider, brightnessSlider, saturationSlider, vignetteSlider, grainSlider].forEach(s => s.oninput = updatePreview);
+
+            textureOptions.forEach(o => {
+                o.onclick = () => {
+                    textureOptions.forEach(t => t.classList.remove('active'));
+                    o.classList.add('active');
+                    state.texture = o.dataset.texture;
+                    randomizeTextureParams();
+                    updatePreview();
+                };
+                o.onkeydown = handleGridKeyPress;
+            });
+
+            themeOptions.forEach(o => {
+                 o.onclick = () => {
+                    themeOptions.forEach(t => t.classList.remove('active'));
+                    o.classList.add('active');
+                    randomizeState(o.dataset.theme);
+                 };
+                 o.onkeydown = handleGridKeyPress;
+            });
+            
+            themeOptions[0].classList.add('active');
         }
 
-        window.addEventListener('load', () => setTimeout(() => { sendHeight(); schedule(); }, 100));
-        window.addEventListener('resize', schedule);
+        init();
+        
+        // ===== END OF APP LOGIC =====
+    </script>
 
-        new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, attributes: true });
+    <script>
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
 
-        const origUpdate = updatePreview;
-        updatePreview = () => { origUpdate(); schedule(); };
-        // ===== END OF SCROLLBAR FIX =====
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
+    function sendHeight() {
+      // Use scrollHeight for content height
+      const height = document.body.scrollHeight;
+      
+      // Only send message if height has *actually* changed 
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
+    function scheduleHeightCheck() {
+        // Clear any pending checks
+        clearTimeout(resizeTimer);
+        // Schedule a new check after 150ms
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    // Send height on initial load (with a slight delay)
+    // This fixes the "Content Cut-Off" race condition.
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+        setTimeout(sendHeight, 300); 
+    });
+
+    // Send height on window resize (debounced)
+    window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
+        scheduleHeightCheck();
+    });
+    
+    // ===== END OF SCROLLBAR FIX =====
     </script>
 </body>
 </html>
