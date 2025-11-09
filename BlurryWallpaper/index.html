@@ -26,9 +26,9 @@
         }
 
         html, body {
-            height: auto;
-            min-height: 0;
-            overflow: visible;
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
         }
 
         body {
@@ -100,6 +100,7 @@
         }
 
         #controls {
+            position: relative;
             flex: 1;
             min-width: 300px;
             max-width: 450px;
@@ -110,6 +111,20 @@
             display: flex;
             flex-direction: column;
             gap: 24px;
+        }
+
+        #version-tag {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            background: rgba(50,50,50,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            pointer-events: none;
+            z-index: 10;
         }
 
         .control-group {
@@ -336,6 +351,12 @@
             .texture-grid, .theme-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            #version-tag {
+                font-size: 9px;
+                top: 6px;
+                right: 10px;
+            }
         }
     </style>
 </head>
@@ -350,6 +371,8 @@
         </div>
 
         <div id="controls">
+            <div id="version-tag">V1.0.0</div>
+
             <div class="control-group">
                 <div class="control-label">Themes</div>
                 <div class="theme-grid">
@@ -385,7 +408,7 @@
                         <div class="control-label">Blur Strength</div>
                         <div class="slider-value" id="blur-value">120px</div>
                     </div>
-                    <input type="range" id="blur-slider" min="30" max="300" value="120">
+                    <input typet="range" id="blur-slider" min="30" max="300" value="120">
                 </div>
             </div>
 
@@ -591,8 +614,9 @@
             if (state.blobs.length <= state.minBlobs) return;
             const removed = state.blobs.pop();
             const blobElement = document.getElementById(removed.id);
-            blobElement.remove();
-            colorGrid.lastChild.remove();
+            if (blobElement) blobElement.remove();
+            const lastPicker = colorGrid.lastElementChild;
+            if (lastPicker) lastPicker.remove();
             updatePreview();
             scheduleHeightCheck();
         }
@@ -603,9 +627,9 @@
 
             const onDown = (e) => {
                 isDragging = true;
-                const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-                const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-                if (!clientX || !clientY) return;
+                const clientX = e.clientX || (e.touches?.[0]?.clientX);
+                const clientY = e.clientY || (e.touches?.[0]?.clientY);
+                if (clientX === undefined || clientY === undefined) return;
                 startX = clientX;
                 startY = clientY;
                 initialLeft = parseFloat(element.style.left) || 0;
@@ -616,9 +640,9 @@
 
             const onMove = (e) => {
                 if (!isDragging) return;
-                const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-                const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-                if (!clientX || !clientY) return;
+                const clientX = e.clientX || (e.touches?.[0]?.clientX);
+                const clientY = e.clientY || (e.touches?.[0]?.clientY);
+                if (clientX === undefined || clientY === undefined) return;
                 const dx = (clientX - startX) / preview.clientWidth * 100;
                 const dy = (clientY - startY) / preview.clientHeight * 100;
                 const newX = initialLeft + dx;
@@ -634,6 +658,7 @@
             };
 
             const onUp = () => {
+                if (!isDragging) return;
                 isDragging = false;
                 element.style.transition = 'all 0.3s ease';
                 updatePreview();
@@ -670,6 +695,7 @@
 
             state.blobs.forEach(blobState => {
                 const blobElement = document.getElementById(blobState.id);
+                if (!blobElement) return;
                 const adjustedSize = blobState.baseSize * state.sizeMultiplier;
                 
                 blobElement.style.backgroundColor = blobState.color;
@@ -732,7 +758,6 @@
         }
 
         function applyTheme(theme) {
-            let baseHue = randomInt(0, 360);
             let colors = [];
             switch (theme) {
                 case 'neon':
@@ -784,7 +809,7 @@
                 blob.y = randomInt(-20, 80);
                 blob.baseSize = randomInt(200, 500);
             });
-            applyTheme(theme);
+           (applyTheme(theme));
 
             blurSlider.value = randomInt(80, 200);
             sizeSlider.value = randomInt(80, 120);
@@ -801,7 +826,6 @@
             randomizeTextureParams();
 
             updatePreview();
-            scheduleHeightCheck();
         }
 
         async function downloadImage() {
@@ -832,32 +856,25 @@
                 const adjustedSize = blobState.baseSize * state.sizeMultiplier;
                 const canvasX = (blobState.x / 100) * DOWNLOAD_WIDTH - (adjustedSize * scaleFactor / 2);
                 const canvasY = (blobState.y / 100) * DOWNLOAD_HEIGHT - (adjustedSize * scaleFactor / 2);
-                const canvasWidth = adjustedSize * scaleFactor;
-                const canvasHeight = canvasWidth;
+                const radius = (adjustedSize * scaleFactor) / 2;
 
-                ctx.arc(canvasX + canvasWidth / 2, canvasY + canvasHeight / 2, canvasWidth / 2, 0, 2 * Math.PI);
+                ctx.arc(canvasX + radius, canvasY + radius, radius, 0, 2 * Math.PI);
                 ctx.fill();
             });
 
             ctx.filter = 'none';
 
+            // Grain
             ctx.fillStyle = `rgba(0, 0, 0, ${state.grain})`;
             for (let i = 0; i < DOWNLOAD_WIDTH * DOWNLOAD_HEIGHT / 100; i++) {
-                ctx.fillRect(
-                    Math.random() * DOWNLOAD_WIDTH,
-                    Math.random() * DOWNLOAD_HEIGHT,
-                    1, 1
-                );
+                ctx.fillRect(Math.random() * DOWNLOAD_WIDTH, Math.random() * DOWNLOAD_HEIGHT, 1, 1);
             }
 
+            // Texture
             if (state.texture === 'noise') {
                 ctx.fillStyle = `rgba(0, 0, 0, ${state.textureParams.noise.opacity})`;
                 for (let i = 0; i < DOWNLOAD_WIDTH * DOWNLOAD_HEIGHT / 25; i++) {
-                    ctx.fillRect(
-                        Math.random() * DOWNLOAD_WIDTH,
-                        Math.random() * DOWNLOAD_HEIGHT,
-                        1, 1
-                    );
+                    ctx.fillRect(Math.random() * DOWNLOAD_WIDTH, Math.random() * DOWNLOAD_HEIGHT, 1, 1);
                 }
             } else if (state.texture === 'glass') {
                 tempCtx.filter = `blur(${state.textureParams.glass.blur * scaleFactor}px)`;
@@ -865,22 +882,15 @@
                 ctx.drawImage(tempCanvas, 0, 0);
                 ctx.fillStyle = `rgba(0, 0, 0, ${state.textureParams.glass.noise})`;
                 for (let i = 0; i < DOWNLOAD_WIDTH * DOWNLOAD_HEIGHT / 50; i++) {
-                    ctx.fillRect(
-                        Math.random() * DOWNLOAD_WIDTH,
-                        Math.random() * DOWNLOAD_HEIGHT,
-                        1, 1
-                    );
+                    ctx.fillRect(Math.random() * DOWNLOAD_WIDTH, Math.random() * DOWNLOAD_HEIGHT, 1, 1);
                 }
             } else if (state.texture === 'paper') {
                 ctx.fillStyle = `rgba(255, 255, 255, ${state.textureParams.paper.opacity})`;
-                for (let x = 0; x < DOWNLOAD_WIDTH; x += 2) {
-                    ctx.fillRect(x, 0, 1, DOWNLOAD_HEIGHT);
-                }
-                for (let y = 0; y < DOWNLOAD_HEIGHT; y += 2) {
-                    ctx.fillRect(0, y, DOWNLOAD_WIDTH, 1);
-                }
+                for (let x = 0; x < DOWNLOAD_WIDTH; x += 2) ctx.fillRect(x, 0, 1, DOWNLOAD_HEIGHT);
+                for (let y = 0; y < DOWNLOAD_HEIGHT; y += 2) ctx.fillRect(0, y, DOWNLOAD_WIDTH, 1);
             }
 
+            // Vignette
             const gradient = ctx.createRadialGradient(
                 DOWNLOAD_WIDTH / 2, DOWNLOAD_HEIGHT / 2, 0,
                 DOWNLOAD_WIDTH / 2, DOWNLOAD_HEIGHT / 2, Math.max(DOWNLOAD_WIDTH, DOWNLOAD_HEIGHT) / 2
@@ -897,9 +907,8 @@
             link.remove();
         }
 
-        for (let i = 1; i <= 5; i++) {
-            addBlob();
-        }
+        // Init
+        for (let i = 1; i <= 5; i++) addBlob();
 
         addBlobBtn.addEventListener('click', addBlob);
         removeBlobBtn.addEventListener('click', removeBlob);
@@ -931,11 +940,7 @@
         themeOptions.forEach(option => {
             option.addEventListener('click', () => {
                 const theme = option.dataset.theme;
-                if (theme === 'random') {
-                    randomizeState();
-                } else {
-                    randomizeState(theme);
-                }
+                randomizeState(theme === 'random' ? 'random' : theme);
             });
         });
 
@@ -956,27 +961,29 @@
 
         function scheduleHeightCheck() {
             clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(sendHeight, 150);
+            resizeTimer = setTimeout(sendHeight, 100);
         }
 
         window.addEventListener('load', () => {
-            setTimeout(sendHeight, 100);
+            setTimeout(() => {
+                sendHeight();
+                scheduleHeightCheck();
+            }, 150);
         });
 
-        window.addEventListener('resize', () => {
-            scheduleHeightCheck();
-        });
+        window.addEventListener('resize', scheduleHeightCheck);
 
         const observer = new MutationObserver(scheduleHeightCheck);
         observer.observe(document.body, { childList: true, subtree: true, attributes: true });
 
-        // Call scheduleHeightCheck on any state change
         const originalUpdatePreview = updatePreview;
         updatePreview = function() {
             originalUpdatePreview();
             scheduleHeightCheck();
         };
-        
+
+        // Force initial resize after everything settles
+        setTimeout(scheduleHeightCheck, 500);
         // ===== END OF SCROLLBAR FIX =====
     </script>
 </body>
