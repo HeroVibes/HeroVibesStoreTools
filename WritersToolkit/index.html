@@ -14,158 +14,157 @@
     <style>
         /* ===== CORE VARIABLES ===== */
         :root {
-            [cite_start]--primary-bg: #191919; [cite: 94]
-            [cite_start]--secondary-bg: #1F1F1F; [cite: 94]
-            [cite_start]--hover-color: #323232; [cite: 94]
-            [cite_start]--outline-color: #323232; [cite: 94]
-            [cite_start]--accent-color: #87A9FF; [cite: 94]
-            [cite_start]--primary-text: #D4D4D4; [cite: 94]
-            [cite_start]--secondary-text: #8C8C8C; [cite: 94]
-            [cite_start]--radius: 8px; [cite: 95]
+            --primary-bg: #191919;
+            --secondary-bg: #1F1F1F;
+            --hover-color: #323232;
+            --outline-color: #323232;
+            --accent-color: #87A9FF;
+            --primary-text: #D4D4D4;
+            --secondary-text: #8C8C8C;
+            --radius: 8px;
         }
 
         /* ===== RESET & BASE ===== */
         * {
-            [cite_start]margin: 0; [cite: 96]
-            [cite_start]padding: 0; [cite: 96]
-            [cite_start]box-sizing: border-box; [cite: 96]
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            [cite_start]background: var(--primary-bg); [cite: 97]
-            [cite_start]color: var(--primary-text); [cite: 97]
-            [cite_start]padding: 16px; [cite: 97]
+            background: var(--primary-bg);
+            color: var(--primary-text);
+            padding: 16px;
         }
 
         /* ===== CONTAINER ===== */
         .container {
             max-width: 1200px;
-            [cite_start]margin: 0 auto; [cite: 98]
+            margin: 0 auto;
         }
 
         /* ===== TOOLBAR CONTAINER ===== */
         .toolbar-container {
-            [cite_start]background: var(--secondary-bg); [cite: 99]
-            [cite_start]border: 1px solid var(--outline-color); [cite: 99]
-            [cite_start]border-radius: var(--radius); [cite: 99]
-            [cite_start]padding: 16px; [cite: 99]
-            [cite_start]margin-bottom: 16px; [cite: 99]
-            [cite_start]position: sticky; [cite: 99]
-            [cite_start]top: 16px; [cite: 99]
-            [cite_start]z-index: 100; [cite: 100]
+            background: var(--secondary-bg);
+            border: 1px solid var(--outline-color);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            position: sticky;
+            top: 16px;
+            z-index: 100;
         }
 
         .toolbar {
-            [cite_start]display: flex; [cite: 101]
-            [cite_start]flex-wrap: wrap; [cite: 101]
-            [cite_start]gap: 8px; [cite: 101]
-            [cite_start]align-items: center; [cite: 101]
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
         }
 
         .toolbar.bottom-toolbar {
-            [cite_start]margin-top: 12px; [cite: 102]
-            [cite_start]padding-top: 12px; [cite: 102]
-            [cite_start]border-top: 1px solid var(--outline-color); [cite: 102]
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--outline-color);
         }
 
         .toolbar-separator {
-            [cite_start]width: 1px; [cite: 103]
-            [cite_start]height: 24px; [cite: 103]
-            [cite_start]background: var(--outline-color); [cite: 103]
-            [cite_start]margin: 0 4px; [cite: 103]
+            width: 1px;
+            height: 24px;
+            background: var(--outline-color);
+            margin: 0 4px;
         }
 
         /* ===== BUTTONS & INPUTS ===== */
         button, select, input[type="text"] {
-            [cite_start]position: relative; [cite: 104]
-            [cite_start]padding: 10px 16px; [cite: 104]
-            [cite_start]border-radius: var(--radius); [cite: 104]
-            [cite_start]background: var(--secondary-bg); [cite: 104]
-            [cite_start]color: var(--primary-text); [cite: 104]
-            [cite_start]border: 1px solid rgba(255,255,255,0.06); [cite: 104]
-            [cite_start]cursor: pointer; [cite: 104]
-            [cite_start]overflow: hidden; [cite: 104]
-            [cite_start]font-size: 14px; [cite: 104]
-            [cite_start]font-family: inherit; [cite: 105]
-            [cite_start]transition: all 0.2s ease; [cite: 105]
-            [cite_start]display: inline-flex; [cite: 105]
-            [cite_start]align-items: center; [cite: 105]
-            [cite_start]justify-content: center; [cite: 105]
-            [cite_start]min-height: 36px; [cite: 105]
-            [cite_start]white-space: nowrap; [cite: 106]
+            position: relative;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            background: var(--secondary-bg);
+            color: var(--primary-text);
+            border: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+            white-space: nowrap;
         }
 
         button::before {
-            [cite_start]content: ''; [cite: 107]
-            [cite_start]position: absolute; [cite: 107]
-            [cite_start]top: 0; [cite: 107]
-            [cite_start]left: -100%; [cite: 107]
-            [cite_start]width: 75%; [cite: 107]
-            [cite_start]height: 100%; [cite: 107]
-            [cite_start]background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); [cite: 107]
-            [cite_start]transform: skewX(-25deg); [cite: 107]
-            [cite_start]transition: left 0.7s ease-in-out; [cite: 108]
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
         }
 
         button:hover::before {
-            [cite_start]left: 125%; [cite: 109]
+            left: 125%;
         }
 
         button:hover, select:hover, input[type="text"]:hover {
-            [cite_start]background: var(--hover-color); [cite: 110]
-            [cite_start]border-color: rgba(255,255,255,0.1); [cite: 110]
+            background: var(--hover-color);
+            border-color: rgba(255,255,255,0.1);
         }
 
         button:focus-visible, select:focus-visible, input[type="text"]:focus-visible {
-            [cite_start]outline: none; [cite: 111]
-            [cite_start]box-shadow: 0 0 0 3px rgba(135,169,255,0.12); [cite: 111]
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
         }
 
         button:disabled {
-            [cite_start]opacity: 0.3; [cite: 112]
-            [cite_start]cursor: not-allowed; [cite: 112]
+            opacity: 0.3;
+            cursor: not-allowed;
         }
 
         button:disabled::before {
-            [cite_start]display: none; [cite: 113]
+            display: none;
         }
 
         button.active {
-            [cite_start]background: var(--accent-color); [cite: 114]
-            [cite_start]color: var(--primary-bg); [cite: 114]
-            [cite_start]border-color: var(--accent-color); [cite: 114]
+            background: var(--accent-color);
+            color: var(--primary-bg);
+            border-color: var(--accent-color);
         }
 
         select {
-            [cite_start]padding-right: 32px; [cite: 115]
-            [cite_start]background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23D4D4D4' d='M6 9L1 4h10z'/%3E%3C/svg%3E"); [cite: 115]
-            [cite_start]background-repeat: no-repeat; [cite: 115]
-            [cite_start]background-position: right 10px center; [cite: 115]
-            [cite_start]appearance: none; [cite: 116]
+            padding-right: 32px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23D4D4D4' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            appearance: none;
         }
 
         input[type="text"] {
-            [cite_start]background: var(--primary-bg); [cite: 117]
-            [cite_start]width: 140px; [cite: 117]
+            background: var(--primary-bg);
+            width: 140px;
         }
 
         input[type="text"]::placeholder {
-            [cite_start]color: var(--secondary-text); [cite: 118]
+            color: var(--secondary-text);
         }
 
         /* ===== ICON BUTTONS ===== */
         .icon-btn {
-            [cite_start]min-width: 36px; [cite: 119]
-            [cite_start]padding: 8px; [cite: 119]
+            min-width: 36px;
+            padding: 8px;
         }
 
         .icon-btn svg {
-            [cite_start]width: 18px; [cite: 120]
-            [cite_start]height: 18px; [cite: 120]
+            width: 18px;
+            height: 18px;
         }
         
-        /* === AI HIGHLIGHT BUTTON (FIX 1) === */
         .ai-preview-button {
              min-width: 36px;
              padding: 8px;
@@ -182,318 +181,318 @@
 
         /* ===== BUTTON TOOLTIP ON HOVER ===== */
         .btn-wrapper {
-            [cite_start]position: relative; [cite: 121]
-            [cite_start]display: inline-flex; [cite: 121]
+            position: relative;
+            display: inline-flex;
         }
 
         .btn-tooltip {
-            [cite_start]position: absolute; [cite: 122]
-            [cite_start]bottom: 100%; [cite: 122]
-            [cite_start]left: 50%; [cite: 122]
-            [cite_start]transform: translateX(-50%); [cite: 122]
-            [cite_start]background: var(--hover-color); [cite: 122]
-            [cite_start]color: var(--primary-text); [cite: 122]
-            [cite_start]padding: 6px 10px; [cite: 122]
-            [cite_start]border-radius: 6px; [cite: 122]
-            [cite_start]font-size: 12px; [cite: 122]
-            [cite_start]white-space: nowrap; [cite: 122]
-            [cite_start]opacity: 0; [cite: 123]
-            [cite_start]visibility: hidden; [cite: 123]
-            [cite_start]transition: opacity 0.2s ease, visibility 0.2s ease; [cite: 123]
-            [cite_start]pointer-events: none; [cite: 123]
-            [cite_start]z-index: 101; [cite: 123]
-            [cite_start]margin-bottom: 6px; [cite: 124]
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--hover-color);
+            color: var(--primary-text);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            pointer-events: none;
+            z-index: 101;
+            margin-bottom: 6px;
         }
 
         .btn-wrapper:hover .btn-tooltip {
-            [cite_start]opacity: 1; [cite: 125]
-            [cite_start]visibility: visible; [cite: 125]
+            opacity: 1;
+            visibility: visible;
         }
 
         /* ===== EDITOR ===== */
         .editor-wrapper {
-            [cite_start]background: var(--secondary-bg); [cite: 126]
-            [cite_start]border: 1px solid var(--outline-color); [cite: 126]
-            [cite_start]border-radius: var(--radius); [cite: 126]
-            [cite_start]overflow: hidden; [cite: 126]
+            background: var(--secondary-bg);
+            border: 1px solid var(--outline-color);
+            border-radius: var(--radius);
+            overflow: hidden;
         }
 
         .editor {
-            [cite_start]background: var(--secondary-bg); [cite: 127]
-            [cite_start]color: var(--primary-text); [cite: 127]
-            [cite_start]padding: 24px 16px; [cite: 127]
-            [cite_start]min-height: 500px; [cite: 127]
-            [cite_start]outline: none; [cite: 127]
-            [cite_start]font-family: system-ui, sans-serif; [cite: 127]
-            [cite_start]font-size: 16px; [cite: 127]
-            [cite_start]line-height: 1.6; [cite: 127]
-            [cite_start]overflow-y: auto; [cite: 127]
-            [cite_start]scroll-behavior: smooth; [cite: 128]
+            background: var(--secondary-bg);
+            color: var(--primary-text);
+            padding: 24px 16px;
+            min-height: 500px;
+            outline: none;
+            font-family: system-ui, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            overflow-y: auto;
+            scroll-behavior: smooth;
         }
 
         .editor:focus {
-            [cite_start]box-shadow: inset 0 0 0 2px rgba(135,169,255,0.15); [cite: 129]
+            box-shadow: inset 0 0 0 2px rgba(135,169,255,0.15);
         }
 
         .editor p {
-            [cite_start]margin: 0 0 16px 0; [cite: 130]
+            margin: 0 0 16px 0;
         }
 
         .editor h1 {
-            [cite_start]font-size: 32px; [cite: 131]
-            [cite_start]font-weight: bold; [cite: 131]
-            [cite_start]margin: 32px 0 16px 0; [cite: 131]
-            [cite_start]line-height: 1.2; [cite: 131]
+            font-size: 32px;
+            font-weight: bold;
+            margin: 32px 0 16px 0;
+            line-height: 1.2;
         }
 
         .editor h2 {
-            [cite_start]font-size: 24px; [cite: 132]
-            [cite_start]font-weight: bold; [cite: 132]
-            [cite_start]margin: 24px 0 12px 0; [cite: 132]
-            [cite_start]line-height: 1.3; [cite: 132]
+            font-size: 24px;
+            font-weight: bold;
+            margin: 24px 0 12px 0;
+            line-height: 1.3;
         }
 
         .editor h3 {
-            [cite_start]font-size: 20px; [cite: 133]
-            [cite_start]font-weight: bold; [cite: 133]
-            [cite_start]margin: 20px 0 10px 0; [cite: 133]
-            [cite_start]line-height: 1.3; [cite: 133]
+            font-size: 20px;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            line-height: 1.3;
         }
 
         .editor hr {
-            [cite_start]margin: 24px 0; [cite: 134]
-            [cite_start]border: 0; [cite: 134]
-            [cite_start]border-top: 1px solid var(--outline-color); [cite: 134]
+            margin: 24px 0;
+            border: 0;
+            border-top: 1px solid var(--outline-color);
         }
 
         .editor ul, .editor ol {
-            [cite_start]margin: 0 0 16px 0; [cite: 135]
-            [cite_start]padding-left: 32px; [cite: 135]
+            margin: 0 0 16px 0;
+            padding-left: 32px;
         }
 
         .editor blockquote {
-            [cite_start]margin: 16px 0; [cite: 136]
-            [cite_start]padding-left: 16px; [cite: 136]
-            [cite_start]border-left: 3px solid var(--accent-color); [cite: 136]
-            [cite_start]color: var(--primary-text); [cite: 136]
+            margin: 16px 0;
+            padding-left: 16px;
+            border-left: 3px solid var(--accent-color);
+            color: var(--primary-text);
         }
 
         /* ===== STATS BAR ===== */
         #stats-bar {
-            [cite_start]padding: 12px 16px; [cite: 137]
-            [cite_start]font-size: 12px; [cite: 137]
-            [cite_start]color: var(--secondary-text); [cite: 137]
-            [cite_start]text-align: right; [cite: 137]
-            [cite_start]border-top: 1px solid var(--outline-color); [cite: 137]
-            [cite_start]background: var(--primary-bg); [cite: 137]
-            [cite_start]display: flex; [cite: 137]
-            [cite_start]justify-content: space-between; [cite: 137]
-            [cite_start]align-items: center; [cite: 138]
+            padding: 12px 16px;
+            font-size: 12px;
+            color: var(--secondary-text);
+            text-align: right;
+            border-top: 1px solid var(--outline-color);
+            background: var(--primary-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .version {
-            [cite_start]font-size: 11px; [cite: 139]
-            [cite_start]opacity: 0.7; [cite: 139]
+            font-size: 11px;
+            opacity: 0.7;
         }
 
         /* ===== HIGHLIGHTING ===== */
         mark {
-            [cite_start]background-color: transparent; [cite: 140]
-            [cite_start]color: inherit; [cite: 140]
-            [cite_start]padding: 0; [cite: 140]
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
         }
 
         mark.ai-highlight {
-            [cite_start]background-color: rgba(255, 215, 0, 0.4); [cite: 141]
-            [cite_start]border-radius: 2px; [cite: 141]
+            background-color: rgba(255, 215, 0, 0.4);
+            border-radius: 2px;
         }
 
         mark.find-match {
-            [cite_start]background-color: rgba(255, 100, 100, 0.4); [cite: 142]
-            [cite_start]border-radius: 2px; [cite: 142]
+            background-color: rgba(255, 100, 100, 0.4);
+            border-radius: 2px;
         }
 
         mark.find-match.current {
-            [cite_start]background-color: rgba(135, 169, 255, 0.6); [cite: 143]
-            [cite_start]outline: 1px solid var(--accent-color); [cite: 143]
+            background-color: rgba(135, 169, 255, 0.6);
+            outline: 1px solid var(--accent-color);
         }
 
         /* ===== EMOJI POPUP ===== */
         #emojiPopup {
-            [cite_start]position: absolute; [cite: 144]
-            [cite_start]background: var(--secondary-bg); [cite: 144]
-            [cite_start]border: 1px solid var(--outline-color); [cite: 144]
-            [cite_start]padding: 12px; [cite: 144]
-            [cite_start]border-radius: var(--radius); [cite: 144]
-            [cite_start]box-shadow: 0 8px 24px rgba(0,0,0,0.4); [cite: 144]
-            [cite_start]z-index: 1001; [cite: 144]
-            [cite_start]width: 320px; [cite: 144]
-            [cite_start]max-height: 280px; [cite: 145]
-            [cite_start]overflow-y: auto; [cite: 145]
+            position: absolute;
+            background: var(--secondary-bg);
+            border: 1px solid var(--outline-color);
+            padding: 12px;
+            border-radius: var(--radius);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            z-index: 1001;
+            width: 320px;
+            max-height: 280px;
+            overflow-y: auto;
         }
 
         #emojiSearch {
-            [cite_start]width: 100%; [cite: 146]
-            [cite_start]margin-bottom: 12px; [cite: 146]
+            width: 100%;
+            margin-bottom: 12px;
         }
 
         #emojiList {
-            [cite_start]display: grid; [cite: 147]
-            [cite_start]grid-template-columns: repeat(8, 1fr); [cite: 147]
-            [cite_start]gap: 4px; [cite: 147]
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
         }
 
         #emojiList button {
-            [cite_start]font-size: 24px; [cite: 148]
-            [cite_start]padding: 8px; [cite: 148]
-            [cite_start]min-width: 36px; [cite: 148]
-            [cite_start]min-height: 36px; [cite: 148]
-            [cite_start]background: var(--primary-bg); [cite: 148]
+            font-size: 24px;
+            padding: 8px;
+            min-width: 36px;
+            min-height: 36px;
+            background: var(--primary-bg);
         }
 
         #emojiList button:hover {
-            [cite_start]background: var(--hover-color); [cite: 149]
-            [cite_start]transform: scale(1.1); [cite: 149]
+            background: var(--hover-color);
+            transform: scale(1.1);
         }
 
         /* ===== DOWNLOAD MENU ===== */
         #downloadMenu {
-            [cite_start]position: absolute; [cite: 150]
-            [cite_start]background: var(--secondary-bg); [cite: 150]
-            [cite_start]border: 1px solid var(--outline-color); [cite: 150]
-            [cite_start]border-radius: var(--radius); [cite: 150]
-            [cite_start]padding: 12px; [cite: 150]
-            [cite_start]box-shadow: 0 8px 24px rgba(0,0,0,0.4); [cite: 150]
-            [cite_start]z-index: 1001; [cite: 150]
-            [cite_start]width: 300px; [cite: 151]
-            [cite_start]top: 100%; [cite: 151]
-            [cite_start]right: 0; [cite: 151]
-            [cite_start]margin-top: 8px; [cite: 151]
+            position: absolute;
+            background: var(--secondary-bg);
+            border: 1px solid var(--outline-color);
+            border-radius: var(--radius);
+            padding: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            z-index: 1001;
+            width: 300px;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
         }
 
         .download-option {
-            [cite_start]display: flex; [cite: 152]
-            [cite_start]align-items: flex-start; [cite: 152]
-            [cite_start]padding: 10px; [cite: 152]
-            [cite_start]border-radius: 6px; [cite: 152]
-            [cite_start]cursor: pointer; [cite: 152]
-            [cite_start]transition: background 0.2s; [cite: 153]
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
         }
 
         .download-option:hover {
-            [cite_start]background: var(--hover-color); [cite: 154]
+            background: var(--hover-color);
         }
 
         .download-option h4 {
-            [cite_start]margin: 0 0 4px 0; [cite: 155]
-            [cite_start]font-size: 14px; [cite: 155]
+            margin: 0 0 4px 0;
+            font-size: 14px;
         }
 
         .download-option p {
-            [cite_start]margin: 0; [cite: 156]
-            [cite_start]font-size: 12px; [cite: 156]
-            [cite_start]color: var(--secondary-text); [cite: 156]
-            [cite_start]line-height: 1.4; [cite: 156]
+            margin: 0;
+            font-size: 12px;
+            color: var(--secondary-text);
+            line-height: 1.4;
         }
 
         /* ===== UTILITY CLASSES ===== */
         .hidden {
-            [cite_start]display: none !important; [cite: 157]
+            display: none !important;
         }
 
         /* ===== MOBILE OPTIMIZATION ===== */
         @media (max-width: 768px) {
             body {
-                [cite_start]padding: 8px; [cite: 158]
+                padding: 8px;
             }
 
             .container {
-                [cite_start]max-width: 100%; [cite: 159]
+                max-width: 100%;
             }
 
             .toolbar-container {
-                [cite_start]top: 8px; [cite: 160]
-                [cite_start]padding: 12px; [cite: 160]
+                top: 8px;
+                padding: 12px;
             }
 
             .toolbar {
-                [cite_start]gap: 6px; [cite: 161]
-                justify-content: flex-start; /* === FIX 3: Align toolbars left === */
+                gap: 6px;
+                justify-content: flex-start;
             }
 
             button, select, input[type="text"] {
-                [cite_start]padding: 8px 10px; [cite: 162]
-                [cite_start]font-size: 13px; [cite: 162]
-                [cite_start]min-height: 32px; [cite: 162]
+                padding: 8px 10px;
+                font-size: 13px;
+                min-height: 32px;
             }
 
             .icon-btn {
-                [cite_start]min-width: 32px; [cite: 163]
-                [cite_start]padding: 6px; [cite: 163]
+                min-width: 32px;
+                padding: 6px;
             }
 
             input[type="text"] {
-                [cite_start]width: 90px; [cite: 164]
+                width: 90px;
             }
 
             .toolbar-separator {
-                [cite_start]display: none; [cite: 165]
+                display: none;
             }
 
             .editor {
-                [cite_start]padding: 16px 12px; [cite: 166]
-                [cite_start]min-height: 400px; [cite: 166]
-                [cite_start]font-size: 15px; [cite: 166]
+                padding: 16px 12px;
+                min-height: 400px;
+                font-size: 15px;
             }
 
             #emojiPopup {
-                [cite_start]width: 280px; [cite: 167]
-                [cite_start]left: 50% !important; [cite: 167]
-                [cite_start]transform: translateX(-50%); [cite: 167]
+                width: 280px;
+                left: 50% !important;
+                transform: translateX(-50%);
             }
 
             #emojiList {
-                [cite_start]grid-template-columns: repeat(7, 1fr); [cite: 168]
+                grid-template-columns: repeat(7, 1fr);
             }
 
             #stats-bar {
-                [cite_start]flex-direction: column; [cite: 169]
-                [cite_start]text-align: center; [cite: 169]
-                [cite_start]gap: 4px; [cite: 169]
+                flex-direction: column;
+                text-align: center;
+                gap: 4px;
             }
 
             .version {
-                [cite_start]order: -1; [cite: 170]
+                order: -1;
             }
         }
 
         @media (max-width: 480px) {
             select {
-                [cite_start]max-width: 90px; [cite: 171]
+                max-width: 90px;
             }
 
             #emojiList {
-                [cite_start]grid-template-columns: repeat(6, 1fr); [cite: 172]
+                grid-template-columns: repeat(6, 1fr);
             }
         }
 
         /* ===== SCROLLBAR STYLING ===== */
         ::-webkit-scrollbar {
-            [cite_start]width: 8px; [cite: 173]
-            [cite_start]height: 8px; [cite: 173]
+            width: 8px;
+            height: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            [cite_start]background: var(--primary-bg); [cite: 174]
+            background: var(--primary-bg);
         }
 
         ::-webkit-scrollbar-thumb {
-            [cite_start]background: var(--outline-color); [cite: 175]
-            [cite_start]border-radius: 4px; [cite: 175]
+            background: var(--outline-color);
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            [cite_start]background: var(--hover-color); [cite: 176]
+            background: var(--hover-color);
         }
     </style>
 </head>
@@ -504,47 +503,47 @@
         <div class="toolbar">
             <div class="btn-wrapper">
                 <button id="undoButton" class="icon-btn">
-                    [cite_start]<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg> [cite: 177]
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
                 </button>
                 <span class="btn-tooltip">Undo (Ctrl+Z)</span>
             </div>
             <div class="btn-wrapper">
                 <button id="redoButton" class="icon-btn">
-                    [cite_start]<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"/></svg> [cite: 178]
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"/></svg>
                 </button>
                 <span class="btn-tooltip">Redo (Ctrl+Shift+Z)</span>
             </div>
             <div class="toolbar-separator"></div>
             
-            [cite_start]<div class="btn-wrapper"> [cite: 179]
+            <div class="btn-wrapper">
                 <select id="blockFormat">
                     <option value="p">Paragraph</option>
                     <option value="h1">Header 1</option>
                     <option value="h2">Header 2</option>
-                    [cite_start]<option value="h3">Header 3</option> [cite: 180]
+                    <option value="h3">Header 3</option>
                 </select>
                 <span class="btn-tooltip">Block format</span>
             </div>
             <div class="btn-wrapper">
                 <select id="fontSizeSelect">
-                    [cite_start]<option value="12px">12</option> [cite: 181]
+                    <option value="12px">12</option>
                     <option value="14px">14</option>
                     <option value="16px">16</option>
                     <option value="18px">18</option>
                     <option value="20px">20</option>
-                    [cite_start]<option value="24px">24</option> [cite: 182]
+                    <option value="24px">24</option>
                     <option value="32px">32</option>
                 </select>
                 <span class="btn-tooltip">Font size</span>
             </div>
             <div class="toolbar-separator"></div>
-            [cite_start]<div class="btn-wrapper"> [cite: 183]
+            <div class="btn-wrapper">
                 <button id="boldButton"><b>B</b></button>
                 <span class="btn-tooltip">Bold (Ctrl+B)</span>
             </div>
             <div class="btn-wrapper">
                 <button id="italicButton"><i>I</i></button>
-                [cite_start]<span class="btn-tooltip">Italic (Ctrl+I)</span> [cite: 184]
+                <span class="btn-tooltip">Italic (Ctrl+I)</span>
             </div>
             <div class="btn-wrapper">
                 <button id="underlineButton"><u>U</u></button>
@@ -552,36 +551,36 @@
             </div>
             <div class="btn-wrapper">
                 <button id="strikeButton"><s>S</s></button>
-                [cite_start]<span class="btn-tooltip">Strikethrough</span> [cite: 185]
+                <span class="btn-tooltip">Strikethrough</span>
             </div>
             <div class="toolbar-separator"></div>
             <div class="btn-wrapper">
                 <button id="alignmentButton" class="icon-btn"></button>
-                [cite_start]<span class="btn-tooltip">Text alignment</span> [cite: 186]
+                <span class="btn-tooltip">Text alignment</span>
             </div>
             <div class="btn-wrapper">
                 <button class="icon-btn" onclick="formatText('insertUnorderedList')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>
                 </button>
-                [cite_start]<span class="btn-tooltip">Bullet list</span> [cite: 187]
+                <span class="btn-tooltip">Bullet list</span>
             </div>
             <div class="btn-wrapper">
                 <button class="icon-btn" onclick="formatText('insertOrderedList')">
-                    [cite_start]<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg> [cite: 188]
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
                 </button>
                 <span class="btn-tooltip">Numbered list</span>
             </div>
             <div class="btn-wrapper">
                 <button class="icon-btn" onclick="formatText('outdent')">
-                    [cite_start]<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 8 3 12 7 16"/><line x1="21" y1="12" x2="11" y2="12"/><line x1="21" y1="6" x2="11" y2="6"/><line x1="21" y1="18" x2="11" y2="18"/></svg> [cite: 189]
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 8 3 12 7 16"/><line x1="21" y1="12" x2="11" y2="12"/><line x1="21" y1="6" x2="11" y2="6"/><line x1="21" y1="18" x2="11" y2="18"/></svg>
                 </button>
                 <span class="btn-tooltip">Outdent</span>
             </div>
-            [cite_start]<div class="btn-wrapper"> [cite: 190]
+            <div class="btn-wrapper">
                 <button class="icon-btn" onclick="formatText('indent')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 8 17 12 13 16"/><line x1="3" y1="12" x2="13" y2="12"/><line x1="3" y1="6" x2="13" y2="6"/><line x1="3" y1="18" x2="13" y2="18"/></svg>
                 </button>
-                [cite_start]<span class="btn-tooltip">Indent</span> [cite: 191]
+                <span class="btn-tooltip">Indent</span>
             </div>
             <div class="btn-wrapper">
                 <button onclick="formatText('insertHorizontalRule')">—</button>
@@ -589,98 +588,100 @@
             </div>
             
             <div class="btn-wrapper">
-                [cite_start]<button id="emojiButton">😊</button> [cite: 194]
+                <button id="emojiButton">😊</button>
                 <span class="btn-tooltip">Insert emoji</span>
             </div>
             <div class="toolbar-separator"></div>
             <div class="btn-wrapper">
                 <button class="ai-preview-button" onclick="togglePermanentAIHighlight()">
-                    <span class="ai-square"></span> </button>
-                [cite_start]<span class="btn-tooltip">Highlight AI artifacts</span> [cite: 193]
+                    <span class="ai-square"></span>
+                </button>
+                <span class="btn-tooltip">Highlight AI artifacts</span>
             </div>
             <div class="btn-wrapper">
                 <button onclick="removeAIArtifacts()">
-                    [cite_start]<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9v11a2 2 0 01-2 2H6a2 2 0 01-2-2V9"/><path d="M8 9V5a2 2 0 012-2h4a2 2 0 012 2v4"/><line x1="3" y1="9" x2="21" y2="9"/></svg> [cite: 192]
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9v11a2 2 0 01-2 2H6a2 2 0 01-2-2V9"/><path d="M8 9V5a2 2 0 012-2h4a2 2 0 012 2v4"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
                 </button>
-                [cite_start]<span class="btn-tooltip">Remove AI artifacts</span> [cite: 193]
+                <span class="btn-tooltip">Remove AI artifacts</span>
             </div>
-            </div>
+            
+        </div>
 
         <div class="toolbar bottom-toolbar">
-            [cite_start]<input type="text" id="findWord" placeholder="Find..." /> [cite: 195]
-            [cite_start]<input type="text" id="replaceWord" placeholder="Replace..." /> [cite: 195]
+            <input type="text" id="findWord" placeholder="Find..." />
+            <input type="text" id="replaceWord" placeholder="Replace..." />
             <div class="btn-wrapper">
                 <button onclick="replaceOne()">Replace</button>
                 <span class="btn-tooltip">Replace first match</span>
             </div>
             <div class="btn-wrapper">
-                [cite_start]<button onclick="replaceAll()">Replace All</button> [cite: 196]
+                <button onclick="replaceAll()">Replace All</button>
                 <span class="btn-tooltip">Replace all matches</span>
             </div>
             <div class="toolbar-separator"></div>
             <div class="btn-wrapper">
                 <button id="prevMatch" class="icon-btn">
-                    [cite_start]<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg> [cite: 197]
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
                 </button>
                 <span class="btn-tooltip">Previous match</span>
             </div>
             <div class="btn-wrapper">
-                [cite_start]<button id="nextMatch" class="icon-btn"> [cite: 198]
+                <button id="nextMatch" class="icon-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12l7 7 7-7"/></svg>
                 </button>
                 <span class="btn-tooltip">Next match</span>
             </div>
-            [cite_start]<div class="toolbar-separator"> [cite: 199]
+            <div class="toolbar-separator">
             </div>
             <div class="btn-wrapper">
                 <button onclick="toggleMarkdown()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8v8a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2H4a2 2 0 00-2 2z"/><path d="M6 11v6l2-2 2 2v-6"/><line x1="14" y1="11" x2="14" y2="17"/><line x1="18" y1="11" x2="14" y2="14"/><line x1="14" y1="14" x2="18" y2="17"/></svg>
-                [cite_start]</button> [cite: 200]
+                </button>
                 <span class="btn-tooltip">Toggle Markdown</span>
             </div>
             <div class="btn-wrapper">
                 <button onclick="convertToPlainText()">
-                    [cite_start]<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> [cite: 201]
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
                 </button>
                 <span class="btn-tooltip">Plain text</span>
             </div>
             <div class="btn-wrapper" style="position: relative;">
-                [cite_start]<button id="downloadButton"> [cite: 202]
+                <button id="downloadButton">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 </button>
                 <span class="btn-tooltip">Download</span>
-                [cite_start]<div id="downloadMenu" class="hidden"> [cite: 203]
+                <div id="downloadMenu" class="hidden">
                     <div class="download-option" onclick="downloadFile('pdf')">
                         <div>
                             <h4>PDF</h4>
-                            <p>Universal format, preserves layout. [cite_start]Great for sharing.</p> [cite: 204]
+                            <p>Universal format, preserves layout. Great for sharing.</p>
                         </div>
                     </div>
                     <div class="download-option" onclick="downloadFile('docx')">
-                        [cite_start]<div> [cite: 205]
+                        <div>
                             <h4>DOCX</h4>
-                            <p>Microsoft Word format. [cite_start]Full formatting support.</p> [cite: 206]
+                            <p>Microsoft Word format. Full formatting support.</p>
                         </div>
                     </div>
                     <div class="download-option" onclick="downloadFile('rtf')">
                         <div>
-                            [cite_start]<h4>RTF</h4> [cite: 207]
-                            <p>Rich text format. [cite_start]Works in most word processors.</p> [cite: 208]
+                            <h4>RTF</h4>
+                            <p>Rich text format. Works in most word processors.</p>
                         </div>
                     </div>
                     <div class="download-option" onclick="downloadFile('txt')">
                         <div>
-                            [cite_start]<h4>TXT</h4> [cite: 209]
-                            <p>Plain text. [cite_start]No formatting, maximum compatibility.</p> [cite: 210]
+                            <h4>TXT</h4>
+                            <p>Plain text. No formatting, maximum compatibility.</p>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="btn-wrapper">
-                [cite_start]<button onclick="clearEditor()"> [cite: 211]
+                <button onclick="clearEditor()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                 </button>
-                [cite_start]<span class="btn-tooltip">Clear document</span> [cite: 212]
+                <span class="btn-tooltip">Clear document</span>
             </div>
         </div>
     </div>
@@ -688,9 +689,10 @@
     <div class="editor-wrapper">
         <div class="editor" contenteditable="true" id="editor" spellcheck="true"><p><br></p></div>
         <div id="stats-bar">
-            <span class="version">V.1.0.2</span> <div>
+            <span class="version">V.1.0.3</span>
+            <div>
                 <span id="char-count">0</span> characters · 
-                [cite_start]<span id="word-count">0</span> words · [cite: 213]
+                <span id="word-count">0</span> words ·
                 <span id="reading-time">0</span> min read
             </div>
         </div>
@@ -698,7 +700,7 @@
 
     <div id="emojiPopup" class="hidden">
         <input type="text" id="emojiSearch" placeholder="Search emojis..." />
-        [cite_start]<div id="emojiList"></div> [cite: 214]
+        <div id="emojiList"></div>
     </div>
 </div>
 
@@ -706,313 +708,315 @@
     // ===== ELEMENT REFERENCES =====
     const editor = document.getElementById('editor');
     const alignmentButton = document.getElementById('alignmentButton');
-    [cite_start]const fontSizeSelect = document.getElementById('fontSizeSelect'); [cite: 215]
-    [cite_start]const blockFormatSelect = document.getElementById('blockFormat'); [cite: 215]
-    [cite_start]const emojiButton = document.getElementById('emojiButton'); [cite: 215]
-    [cite_start]const emojiPopup = document.getElementById('emojiPopup'); [cite: 215]
-    [cite_start]const undoButton = document.getElementById('undoButton'); [cite: 215]
-    [cite_start]const redoButton = document.getElementById('redoButton'); [cite: 216]
-    [cite_start]const boldButton = document.getElementById('boldButton'); [cite: 216]
-    [cite_start]const italicButton = document.getElementById('italicButton'); [cite: 216]
-    [cite_start]const underlineButton = document.getElementById('underlineButton'); [cite: 216]
-    [cite_start]const strikeButton = document.getElementById('strikeButton'); [cite: 216]
-    [cite_start]const prevMatch = document.getElementById('prevMatch'); [cite: 217]
-    [cite_start]const nextMatch = document.getElementById('nextMatch'); [cite: 217]
-    [cite_start]const downloadButton = document.getElementById('downloadButton'); [cite: 217]
-    [cite_start]const downloadMenu = document.getElementById('downloadMenu'); [cite: 217]
+    const fontSizeSelect = document.getElementById('fontSizeSelect');
+    const blockFormatSelect = document.getElementById('blockFormat');
+    const emojiButton = document.getElementById('emojiButton');
+    const emojiPopup = document.getElementById('emojiPopup');
+    const undoButton = document.getElementById('undoButton');
+    const redoButton = document.getElementById('redoButton');
+    const boldButton = document.getElementById('boldButton');
+    const italicButton = document.getElementById('italicButton');
+    const underlineButton = document.getElementById('underlineButton');
+    const strikeButton = document.getElementById('strikeButton');
+    const prevMatch = document.getElementById('prevMatch');
+    const nextMatch = document.getElementById('nextMatch');
+    const downloadButton = document.getElementById('downloadButton');
+    const downloadMenu = document.getElementById('downloadMenu');
     
     // ===== STATE VARIABLES =====
-    [cite_start]let permanentAIHighlightActive = false; [cite: 218]
-    [cite_start]let savedRange = null; [cite: 218]
-    [cite_start]let historyStack = []; [cite: 218]
-    [cite_start]let historyIndex = -1; [cite: 219]
-    [cite_start]let currentMatchIndex = -1; [cite: 219]
+    let permanentAIHighlightActive = false;
+    let savedRange = null;
+    let historyStack = [];
+    let historyIndex = -1;
+    let currentMatchIndex = -1;
     
-    // ===== EMOJI DATA (Truncated for brevity) =====
+    // ===== EMOJI DATA (Truncated) =====
     const emojiData = {
-        [cite_start]'😀': ['grinning', 'happy', 'smile'], '😃': ['happy', 'joy'], '😄': ['laugh', 'happy'], '😁': ['grin', 'smile'], '😆': ['laugh', 'haha'], '😅': ['sweat', 'relief'], '🤣': ['rofl', 'laughing'], '😂': ['tears', 'joy', 'crying'], '🙂': ['smile', 'happy'], '🙃': ['upside', 'silly'], '😉': ['wink', 'flirt'], '😊': ['blush', 'happy'], '😇': ['angel', 'innocent'], '🥰': ['love', 'hearts'], '😍': ['love', 'heart eyes'], '🤩': ['star', 'excited'], '😘': ['kiss', 'love'], '😗': ['kiss'], '😚': ['kiss'], '😙': ['kiss'], '🥲': ['tear', 'happy'], '😋': ['yum', 'delicious'], '😛': ['tongue', 'silly'], '😜': ['wink', 'tongue'], '🤪': ['crazy', 'goofy'], '🤨': ['suspicious', 'raised eyebrow'], '🧐': ['monocle', 'thinking'], '🤓': ['nerd', 'geek'], '😎': ['cool', 'sunglasses'], '🥳': ['party', 'celebrate'], '😏': ['smirk'], '😒': ['unamused'], '😞': ['sad', 'disappointed'], '😔': ['sad', 'pensive'], '😟': ['worried'], '😕': ['confused'], '🙁': ['sad', 'frown'], '☹️': ['sad'], '😮': ['surprised'], '😯': ['shocked'], '😲': ['astonished'], '😳': ['flushed', 'embarrassed'], '🥺': ['pleading', 'puppy eyes'], '😦': ['frown', 'sad'], '😧': ['anguished'], '😨': ['fearful', 'scared'], '😰': ['anxious', 'sweat'], '😥': ['sad', 'relieved'], '😢': ['cry', 'tear'], '😭': ['crying', 'sob'], '😱': ['scream', 'shocked'], '😖': ['confounded'], '😣': ['persevering'], '😤': ['triumph', 'frustrated'], '😠': ['angry'], '😡': ['rage', 'angry'], '🤬': ['cursing', 'symbols'], '🤯': ['mind blown'], '🥵': ['hot', 'sweating'], '🥶': ['cold', 'freezing'], '😴': ['sleeping', 'zzz'], '😈': ['devil', 'horns'], '👿': ['devil', 'angry'], '💀': ['skull', 'dead'], '💩': ['poop'], '🤡': ['clown'], '👹': ['ogre', 'monster'], '👺': ['goblin'], '👻': ['ghost'], '👽': ['alien'], '👾': ['space invader'], '🤖': ['robot'], '👍': ['thumbs up', 'yes', 'like'], '👎': ['thumbs down', 'no'], '🙏': ['pray', 'thanks', 'please'], '👋': ['wave', 'hello', 'bye'], '❤️': ['heart', 'love'], '🔥': ['fire', 'hot', 'lit'], '✨': ['sparkles', 'magic'], '🎉': ['party', 'celebration'], '💯': ['hundred', 'perfect', '100'] [cite: 220, 221]
+        '😀': ['grinning', 'happy', 'smile'], '😃': ['happy', 'joy'], '😄': ['laugh', 'happy'], '😁': ['grin', 'smile'], '😆': ['laugh', 'haha'], '😅': ['sweat', 'relief'], '🤣': ['rofl', 'laughing'], '😂': ['tears', 'joy', 'crying'], '🙂': ['smile', 'happy'], '🙃': ['upside', 'silly'], '😉': ['wink', 'flirt'], '😊': ['blush', 'happy'], '😇': ['angel', 'innocent'], '🥰': ['love', 'hearts'], '😍': ['love', 'heart eyes'], '🤩': ['star', 'excited'], '😘': ['kiss', 'love'], '😗': ['kiss'], '😚': ['kiss'], '😙': ['kiss'], '🥲': ['tear', 'happy'], '😋': ['yum', 'delicious'], '😛': ['tongue', 'silly'], '😜': ['wink', 'tongue'], '🤪': ['crazy', 'goofy'], '🤨': ['suspicious', 'raised eyebrow'], '🧐': ['monocle', 'thinking'], '🤓': ['nerd', 'geek'], '😎': ['cool', 'sunglasses'], '🥳': ['party', 'celebrate'], '😏': ['smirk'], '😒': ['unamused'], '😞': ['sad', 'disappointed'], '😔': ['sad', 'pensive'], '😟': ['worried'], '😕': ['confused'], '🙁': ['sad', 'frown'], '☹️': ['sad'], '😮': ['surprised'], '😯': ['shocked'], '😲': ['astonished'], '😳': ['flushed', 'embarrassed'], '🥺': ['pleading', 'puppy eyes'], '😦': ['frown', 'sad'], '😧': ['anguished'], '😨': ['fearful', 'scared'], '😰': ['anxious', 'sweat'], '😥': ['sad', 'relieved'], '😢': ['cry', 'tear'], '😭': ['crying', 'sob'], '😱': ['scream', 'shocked'], '😖': ['confounded'], '😣': ['persevering'], '😤': ['triumph', 'frustrated'], '😠': ['angry'], '😡': ['rage', 'angry'], '🤬': ['cursing', 'symbols'], '🤯': ['mind blown'], '🥵': ['hot', 'sweating'], '🥶': ['cold', 'freezing'], '😴': ['sleeping', 'zzz'], '😈': ['devil', 'horns'], '👿': ['devil', 'angry'], '💀': ['skull', 'dead'], '💩': ['poop'], '🤡': ['clown'], '👹': ['ogre', 'monster'], '👺': ['goblin'], '👻': ['ghost'], '👽': ['alien'], '👾': ['space invader'], '🤖': ['robot'], '👍': ['thumbs up', 'yes', 'like'], '👎': ['thumbs down', 'no'], '🙏': ['pray', 'thanks', 'please'], '👋': ['wave', 'hello', 'bye'], '❤️': ['heart', 'love'], '🔥': ['fire', 'hot', 'lit'], '✨': ['sparkles', 'magic'], '🎉': ['party', 'celebration'], '💯': ['hundred', 'perfect', '100']
     };
 
     // ===== HISTORY MANAGEMENT =====
     function saveState() {
-        [cite_start]historyStack = historyStack.slice(0, historyIndex + 1); [cite: 222]
-        [cite_start]historyStack.push(editor.innerHTML); [cite: 223]
-        [cite_start]historyIndex++; [cite: 223]
+        historyStack = historyStack.slice(0, historyIndex + 1);
+        historyStack.push(editor.innerHTML);
+        historyIndex++;
         if (historyStack.length > 100) {
-            [cite_start]historyStack.shift(); [cite: 223]
-            [cite_start]historyIndex--; [cite: 223]
+            historyStack.shift();
+            historyIndex--;
         }
-        [cite_start]updateUndoRedoButtons(); [cite: 224]
-        [cite_start]scheduleHeightCheck(); [cite: 224]
+        updateUndoRedoButtons();
+        scheduleHeightCheck();
     }
 
     function customUndo() {
         if (historyIndex > 0) {
-            [cite_start]historyIndex--; [cite: 225]
-            [cite_start]editor.innerHTML = historyStack[historyIndex]; [cite: 226]
-            [cite_start]updateToolbarStates(); [cite: 226]
-            [cite_start]updateUndoRedoButtons(); [cite: 226]
+            historyIndex--;
+            editor.innerHTML = historyStack[historyIndex];
+            updateToolbarStates();
+            updateUndoRedoButtons();
+            scheduleHeightCheck(); // IFRAME FIX
         }
     }
 
     function customRedo() {
         if (historyIndex < historyStack.length - 1) {
-            [cite_start]historyIndex++; [cite: 227]
-            [cite_start]editor.innerHTML = historyStack[historyIndex]; [cite: 227]
-            [cite_start]updateToolbarStates(); [cite: 227]
-            [cite_start]updateUndoRedoButtons(); [cite: 227]
+            historyIndex++;
+            editor.innerHTML = historyStack[historyIndex];
+            updateToolbarStates();
+            updateUndoRedoButtons();
+            scheduleHeightCheck(); // IFRAME FIX
         }
     }
     
     function updateUndoRedoButtons() {
-        [cite_start]undoButton.disabled = historyIndex <= 0; [cite: 228]
-        [cite_start]redoButton.disabled = historyIndex >= historyStack.length - 1; [cite: 228]
+        undoButton.disabled = historyIndex <= 0;
+        redoButton.disabled = historyIndex >= historyStack.length - 1;
     }
 
     // ===== EDITOR INITIALIZATION =====
     function ensureEditorStructure() {
         if (!editor.firstChild || editor.innerHTML.trim() === '' || editor.innerHTML.trim() === '<br>') {
-            [cite_start]editor.innerHTML = '<p><br></p>'; [cite: 229]
-            [cite_start]const range = document.createRange(); [cite: 229]
-            [cite_start]const sel = window.getSelection(); [cite: 229]
-            [cite_start]range.setStart(editor.firstChild, 0); [cite: 229]
-            [cite_start]range.collapse(true); [cite: 229]
-            [cite_start]sel.removeAllRanges(); [cite: 229]
-            [cite_start]sel.addRange(range); [cite: 230]
+            editor.innerHTML = '<p><br></p>';
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.setStart(editor.firstChild, 0);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
         }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        [cite_start]document.execCommand("defaultParagraphSeparator", false, "p"); [cite: 230]
-        [cite_start]historyStack.push(editor.innerHTML); [cite: 230]
-        [cite_start]historyIndex = 0; [cite: 230]
-        [cite_start]updateToolbarStates(); [cite: 230]
-        [cite_start]updateUndoRedoButtons(); [cite: 230]
+        document.execCommand("defaultParagraphSeparator", false, "p");
+        historyStack.push(editor.innerHTML);
+        historyIndex = 0;
+        updateToolbarStates();
+        updateUndoRedoButtons();
     });
     
     // ===== EVENT LISTENERS =====
     editor.addEventListener('input', () => {
-        [cite_start]saveState(); [cite: 231]
-        [cite_start]ensureEditorStructure(); [cite: 231]
-        [cite_start]highlightFindMatches(); [cite: 231]
+        saveState();
+        ensureEditorStructure();
+        highlightFindMatches();
         if (permanentAIHighlightActive) {
-            [cite_start]setTimeout(() => highlightInTextNodes(aiCharactersRegex, 'ai-highlight'), 10); [cite: 231]
+            setTimeout(() => highlightInTextNodes(aiCharactersRegex, 'ai-highlight'), 10);
         }
-        [cite_start]scheduleHeightCheck(); [cite: 231]
+        scheduleHeightCheck(); // This is already here, but saveState() also calls it
     });
     
-    [cite_start]undoButton.addEventListener('click', customUndo); [cite: 232]
-    [cite_start]redoButton.addEventListener('click', customRedo); [cite: 232]
-    [cite_start]editor.addEventListener('keyup', updateToolbarStates); [cite: 232]
-    [cite_start]editor.addEventListener('mouseup', updateToolbarStates); [cite: 232]
-    [cite_start]editor.addEventListener('click', updateToolbarStates); [cite: 232]
+    undoButton.addEventListener('click', customUndo);
+    redoButton.addEventListener('click', customRedo);
+    editor.addEventListener('keyup', updateToolbarStates);
+    editor.addEventListener('mouseup', updateToolbarStates);
+    editor.addEventListener('click', updateToolbarStates);
     
-    [cite_start]editor.addEventListener('keydown', (e) => { [cite: 233]
+    editor.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key.toLowerCase() === 'z') {
-            [cite_start]e.preventDefault(); [cite: 233]
+            e.preventDefault();
             if (e.shiftKey) {
-                [cite_start]customRedo(); [cite: 233]
+                customRedo();
             } else {
-                [cite_start]customUndo(); [cite: 233]
+                customUndo();
             }
         } else if (e.ctrlKey && e.key.toLowerCase() === 'b') {
-            [cite_start]e.preventDefault(); [cite: 234]
-            [cite_start]formatText('bold'); [cite: 234]
+            e.preventDefault();
+            formatText('bold');
         } else if (e.ctrlKey && e.key.toLowerCase() === 'i') {
-            [cite_start]e.preventDefault(); [cite: 234]
-            [cite_start]formatText('italic'); [cite: 234]
+            e.preventDefault();
+            formatText('italic');
         } else if (e.ctrlKey && e.key.toLowerCase() === 'u') {
-            [cite_start]e.preventDefault(); [cite: 235]
-            [cite_start]formatText('underline'); [cite: 235]
+            e.preventDefault();
+            formatText('underline');
         } else if ((e.ctrlKey || e.shiftKey) && e.key === 'Enter') {
-            [cite_start]e.preventDefault(); [cite: 235]
-            [cite_start]document.execCommand('insertLineBreak'); [cite: 235]
+            e.preventDefault();
+            document.execCommand('insertLineBreak');
         }
     });
     
-    [cite_start]boldButton.addEventListener('click', () => formatText('bold')); [cite: 236]
-    [cite_start]italicButton.addEventListener('click', () => formatText('italic')); [cite: 236]
-    [cite_start]underlineButton.addEventListener('click', () => formatText('underline')); [cite: 236]
-    [cite_start]strikeButton.addEventListener('click', () => formatText('strikeThrough')); [cite: 236]
+    boldButton.addEventListener('click', () => formatText('bold'));
+    italicButton.addEventListener('click', () => formatText('italic'));
+    underlineButton.addEventListener('click', () => formatText('underline'));
+    strikeButton.addEventListener('click', () => formatText('strikeThrough'));
     
     // ===== TOOLBAR FUNCTIONS =====
     function updateToolbarStates() {
-        [cite_start]const { block, size, align } = getSelectionStyle(); [cite: 237]
-        [cite_start]updateBlockFormatDropdown(block); [cite: 238]
-        [cite_start]updateFontSizeDropdown(size); [cite: 238]
-        [cite_start]updateAlignmentButtonIcon(align); [cite: 238]
-        [cite_start]updateFormattingButtons(); [cite: 238]
-        [cite_start]updateStats(); [cite: 238]
+        const { block, size, align } = getSelectionStyle();
+        updateBlockFormatDropdown(block);
+        updateFontSizeDropdown(size);
+        updateAlignmentButtonIcon(align);
+        updateFormattingButtons();
+        updateStats();
     }
 
     function formatText(command, value = null) {
-        [cite_start]document.execCommand(command, false, value); [cite: 239]
-        [cite_start]editor.focus(); [cite: 239]
-        [cite_start]updateToolbarStates(); [cite: 239]
+        document.execCommand(command, false, value);
+        editor.focus();
+        updateToolbarStates();
     }
 
     function changeBlockType(blockType) {
-        [cite_start]document.execCommand('formatBlock', false, blockType); [cite: 240]
-        [cite_start]updateToolbarStates(); [cite: 240]
+        document.execCommand('formatBlock', false, blockType);
+        updateToolbarStates();
     }
 
     function changeFontSize(size) {
-        [cite_start]document.execCommand("fontSize", false, "7"); [cite: 241]
-        [cite_start]let fontElements = editor.getElementsByTagName("font"); [cite: 241]
+        document.execCommand("fontSize", false, "7");
+        let fontElements = editor.getElementsByTagName("font");
         for (let i = 0; i < fontElements.length; i++) {
-            [cite_start]if (fontElements[i].size == "7") { [cite: 241]
-                [cite_start]fontElements[i].removeAttribute("size"); [cite: 242]
-                [cite_start]fontElements[i].style.fontSize = size; [cite: 242]
+            if (fontElements[i].size == "7") {
+                fontElements[i].removeAttribute("size");
+                fontElements[i].style.fontSize = size;
             }
         }
-        [cite_start]updateToolbarStates(); [cite: 243]
+        updateToolbarStates();
     }
 
-    [cite_start]blockFormatSelect.addEventListener('change', (e) => changeBlockType(e.target.value)); [cite: 243]
-    [cite_start]fontSizeSelect.addEventListener('change', (e) => changeFontSize(e.target.value)); [cite: 243]
+    blockFormatSelect.addEventListener('change', (e) => changeBlockType(e.target.value));
+    fontSizeSelect.addEventListener('change', (e) => changeFontSize(e.target.value));
     
     function getParentBlock() {
         const selection = window.getSelection();
-        [cite_start]if (!selection.rangeCount) return null; [cite: 244]
-        [cite_start]let node = selection.getRangeAt(0).startContainer; [cite: 245]
+        if (!selection.rangeCount) return null;
+        let node = selection.getRangeAt(0).startContainer;
         while (node) {
             if (node.nodeType === 1 && node.parentNode && node.parentNode.id === 'editor') {
-                [cite_start]return node; [cite: 245]
+                return node;
             }
-            [cite_start]if (node.id === 'editor') { [cite: 246]
-                [cite_start]return null; [cite: 247]
+            if (node.id === 'editor') {
+                return null;
             }
-            [cite_start]node = node.parentNode; [cite: 248]
+            node = node.parentNode;
         }
-        [cite_start]return null; [cite: 249]
+        return null;
     }
 
     function cycleAlignment() {
-        [cite_start]const alignments = ['left', 'center', 'right', 'justify']; [cite: 249]
-        [cite_start]const parentBlock = getParentBlock(); [cite: 250]
-        [cite_start]if (!parentBlock) return; [cite: 250]
+        const alignments = ['left', 'center', 'right', 'justify'];
+        const parentBlock = getParentBlock();
+        if (!parentBlock) return;
 
-        const currentAlign = parentBlock.style.textAlign || [cite_start]'left'; [cite: 250]
-        [cite_start]let currentIndex = alignments.indexOf(currentAlign); [cite: 250]
-        [cite_start]if (currentIndex === -1) currentIndex = 0; [cite: 251]
+        const currentAlign = parentBlock.style.textAlign || 'left';
+        let currentIndex = alignments.indexOf(currentAlign);
+        if (currentIndex === -1) currentIndex = 0;
 
-        [cite_start]let nextIndex = (currentIndex + 1) % alignments.length; [cite: 251]
-        [cite_start]parentBlock.style.textAlign = alignments[nextIndex]; [cite: 251]
+        let nextIndex = (currentIndex + 1) % alignments.length;
+        parentBlock.style.textAlign = alignments[nextIndex];
 
-        [cite_start]updateToolbarStates(); [cite: 252]
+        updateToolbarStates();
     }
     
-    [cite_start]alignmentButton.addEventListener('click', cycleAlignment); [cite: 253]
+    alignmentButton.addEventListener('click', cycleAlignment);
     
     function getSelectionStyle() {
-        [cite_start]const selection = window.getSelection(); [cite: 254]
-        [cite_start]if (!selection.rangeCount) return { block: 'p', size: '16px', align: 'left' }; [cite: 254]
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return { block: 'p', size: '16px', align: 'left' };
 
-        [cite_start]let element = selection.getRangeAt(0).startContainer; [cite: 255]
-        [cite_start]let parent = element.nodeType === 3 ? element.parentNode : element; [cite: 255]
+        let element = selection.getRangeAt(0).startContainer;
+        let parent = element.nodeType === 3 ? element.parentNode : element;
         
-        [cite_start]let blockType = 'p'; [cite: 255]
-        [cite_start]let fontSize = '16px'; [cite: 255]
-        [cite_start]let textAlign = 'left'; [cite: 256]
+        let blockType = 'p';
+        let fontSize = '16px';
+        let textAlign = 'left';
 
         while (parent && parent.id !== 'editor') {
-            [cite_start]const nodeName = parent.nodeName.toLowerCase(); [cite: 256]
-            [cite_start]const styles = window.getComputedStyle(parent); [cite: 257]
+            const nodeName = parent.nodeName.toLowerCase();
+            const styles = window.getComputedStyle(parent);
 
             if (['p', 'h1', 'h2', 'h3', 'li', 'blockquote'].includes(nodeName)) {
                 blockType = ['h1', 'h2', 'h3'].includes(nodeName) ?
-                    [cite_start]nodeName : 'p'; [cite: 258]
-                [cite_start]fontSize = styles.fontSize; [cite: 258]
-                [cite_start]textAlign = styles.textAlign; [cite: 258]
-                [cite_start]break; [cite: 259]
+                    nodeName : 'p';
+                fontSize = styles.fontSize;
+                textAlign = styles.textAlign;
+                break;
             }
-            [cite_start]parent = parent.parentNode; [cite: 260]
+            parent = parent.parentNode;
         }
         
-        [cite_start]if (textAlign === 'start' || textAlign === 'end') textAlign = 'left'; [cite: 261]
-        [cite_start]if (textAlign.includes('justify')) textAlign = 'justify'; [cite: 261]
+        if (textAlign === 'start' || textAlign === 'end') textAlign = 'left';
+        if (textAlign.includes('justify')) textAlign = 'justify';
 
-        [cite_start]return { block: blockType, size: fontSize, align: textAlign }; [cite: 262]
+        return { block: blockType, size: fontSize, align: textAlign };
     }
     
     function updateBlockFormatDropdown(blockType) {
-        [cite_start]blockFormatSelect.value = blockType; [cite: 263]
+        blockFormatSelect.value = blockType;
     }
 
     function updateFontSizeDropdown(size) {
-        [cite_start]const matchedOption = [...fontSizeSelect.options].find(opt => opt.value === size); [cite: 264]
-        [cite_start]if (matchedOption) { [cite: 264]
-            [cite_start]fontSizeSelect.value = size; [cite: 265]
+        const matchedOption = [...fontSizeSelect.options].find(opt => opt.value === size);
+        if (matchedOption) {
+            fontSizeSelect.value = size;
         }
     }
     
     function updateFormattingButtons() {
-        [cite_start]boldButton.classList.toggle('active', document.queryCommandState('bold')); [cite: 266]
-        [cite_start]italicButton.classList.toggle('active', document.queryCommandState('italic')); [cite: 266]
-        [cite_start]underlineButton.classList.toggle('active', document.queryCommandState('underline')); [cite: 266]
-        [cite_start]strikeButton.classList.toggle('active', document.queryCommandState('strikeThrough')); [cite: 266]
+        boldButton.classList.toggle('active', document.queryCommandState('bold'));
+        italicButton.classList.toggle('active', document.queryCommandState('italic'));
+        underlineButton.classList.toggle('active', document.queryCommandState('underline'));
+        strikeButton.classList.toggle('active', document.queryCommandState('strikeThrough'));
     }
 
     function updateAlignmentButtonIcon(align) {
         const icons = {
-            [cite_start]left: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="17" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>', [cite: 267]
-            [cite_start]center: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="19" y1="14" x2="5" y2="14"/><line x1="19" y1="18" x2="5" y2="18"/></svg>', [cite: 267]
-            [cite_start]right: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="7" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>', [cite: 268]
-            [cite_start]justify: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>' [cite: 268]
+            left: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="17" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>',
+            center: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="19" y1="14" x2="5" y2="14"/><line x1="19" y1="18" x2="5" y2="18"/></svg>',
+            right: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="7" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>',
+            justify: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>'
         };
-        [cite_start]alignmentButton.innerHTML = icons[align] || icons['left']; [cite: 268]
-        [cite_start]alignmentButton.title = `Align ${align}`; [cite: 268]
+        alignmentButton.innerHTML = icons[align] || icons['left'];
+        alignmentButton.title = `Align ${align}`;
     }
 
     // ===== STATS TRACKING =====
     function updateStats() {
-        [cite_start]const text = editor.innerText; [cite: 269]
-        [cite_start]const charCountText = text.replace(/[\r\n]/g, ""); [cite: 269]
-        [cite_start]const charCount = charCountText.length; [cite: 269]
-        [cite_start]const words = text.trim().split(/\s+/).filter(Boolean); [cite: 269]
-        const wordCount = text.trim() === '' ? [cite_start]0 : words.length; [cite: 270]
-        [cite_start]const readingTime = Math.ceil(wordCount / 200); [cite: 270]
+        const text = editor.innerText;
+        const charCountText = text.replace(/[\r\n]/g, "");
+        const charCount = charCountText.length;
+        const words = text.trim().split(/\s+/).filter(Boolean);
+        const wordCount = text.trim() === '' ? 0 : words.length;
+        const readingTime = Math.ceil(wordCount / 200);
 
-        [cite_start]document.getElementById('char-count').textContent = charCount; [cite: 271]
-        [cite_start]document.getElementById('word-count').textContent = wordCount; [cite: 271]
-        [cite_start]document.getElementById('reading-time').textContent = readingTime; [cite: 271]
+        document.getElementById('char-count').textContent = charCount;
+        document.getElementById('word-count').textContent = wordCount;
+        document.getElementById('reading-time').textContent = readingTime;
     }
 
-    // ===== AI ARTIFACT DETECTION & REMOVAL (FIX 5) =====
-    const aiCharactersRegex = /[\u2013\u2014\u201C\u201D\u2018\u2019\u2026\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000\u25A0\u200B\uFEFF\u00AD\u2060-\u2064\u201A\u201B\u201E\u201F\u0060\u00B4\u02B9\u02BB-\u02BD\u05F3\u02BA\u05F4\u2033\u2034\u2032\u2035-\u2037\u02EE\u00AB\u00BB\uFF08\uFF09\u2015\u2212\u2012\u2010\u2011\u23AF\u2796\uFF0D\u2025\u22EE\u22EF\uFF0E\uFF0C\u2024\uFE52\u2219\u00B7\u0430\u0410\u0441\u0421\u0435\u0415\u0395\u0396\u0397\u0456\u0406\u0399\u0131\u0269\u0458\u0408\u039A\u039C\u039D\u043E\u041E\u039F\u03BF\u0030\u0440\u0420\u03A1\u03A4\u0445\u0425\u03A7\u0443\u0059\u03BD]/g;
+    // ===== AI ARTIFACT DETECTION & REMOVAL =====
+    const aiCharactersRegex = /[\u2013\u2014\u201C\u201D\u2018\u2019\u2026\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000\u25A0\u200B\uFEFF\u00AD\u2060-\u2064\u201A\u201B\u201E\u201F\u0060\u00B4\u02B9\u02BB-\u02BD\u05F3\u02BA\u05F4\u2033\u2034\u2032\u2035-\u2037\u02EE\u00AB\u00BB\uFF08\uFF09\u2015\u2212\u2012\u2010\u2011\u23AF\u2796\uFF0D\u2025\u22EE\u22EF\uFF0E\uFF0C\u2024\uFE52\u2219\u00B7\u0430\u0410\u0441\u0421\u0435\u0415\u0395\u0396\u0397\u0456\u0406\u0399\u0131\u0269\u0458\u0408\u039A\u039C\u039D\u043E\u041E\u039F\u03BF\u0030\u0440\u0420\u03A1\u03A4\u0445\u0425\u03A7\u0443\u005Y\u03BD]/g;
 
     function highlightInTextNodes(regex, className) {
-        [cite_start]removeHighlight(className); [cite: 272]
-        [cite_start]const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT); [cite: 272]
+        removeHighlight(className);
+        const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
         let node;
-        [cite_start]const nodesToProcess = []; [cite: 273]
+        const nodesToProcess = [];
         while (node = walker.nextNode()) {
-            [cite_start]if (node.nodeValue.trim() !== '' && regex.test(node.nodeValue)) { [cite: 273]
-                [cite_start]nodesToProcess.push(node); [cite: 274]
+            if (node.nodeValue.trim() !== '' && regex.test(node.nodeValue)) {
+                nodesToProcess.push(node);
             }
         }
         nodesToProcess.forEach(node => {
-            [cite_start]if (node.parentElement.closest('mark')) return; [cite: 274]
-            [cite_start]const newHtml = node.nodeValue.replace(regex, `<mark class="${className}">$&</mark>`); [cite: 274]
+            if (node.parentElement.closest('mark')) return;
+            const newHtml = node.nodeValue.replace(regex, `<mark class="${className}">$&</mark>`);
             if (newHtml !== node.nodeValue) {
-                [cite_start]const tempDiv = document.createElement('div'); [cite: 274]
-                [cite_start]tempDiv.innerHTML = newHtml; [cite: 275]
-                [cite_start]const parent = node.parentNode; [cite: 275]
-                [cite_start]while(tempDiv.firstChild) parent.insertBefore(tempDiv.firstChild, node); [cite: 275]
-                [cite_start]parent.removeChild(node); [cite: 275]
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = newHtml;
+                const parent = node.parentNode;
+                while(tempDiv.firstChild) parent.insertBefore(tempDiv.firstChild, node);
+                parent.removeChild(node);
             }
         });
     }
 
     function removeHighlight(className) {
         editor.querySelectorAll(`mark.${className}`).forEach(mark => {
-            [cite_start]mark.outerHTML = mark.innerHTML; [cite: 276]
+            mark.outerHTML = mark.innerHTML;
         });
-        [cite_start]editor.normalize(); [cite: 277]
+        editor.normalize();
     }
 
     function removeAIArtifacts() {
-        [cite_start]saveState(); [cite: 278]
+        saveState();
         const replacements = { 
             // Dashes
             '[\u2013\u2014\u2015\u2212\u2012\u2010\u2011\u23AF\u2796\uFF0D]': '-', 
@@ -1063,182 +1067,188 @@
             // Special characters
             '\u25A0': '[square]'
         };
-        [cite_start]let content = editor.innerHTML; [cite: 279]
+        let content = editor.innerHTML;
         for (const pattern in replacements) {
-            [cite_start]content = content.replace(new RegExp(pattern, 'g'), replacements[pattern]); [cite: 279]
+            content = content.replace(new RegExp(pattern, 'g'), replacements[pattern]);
         }
         editor.innerHTML = content;
-        [cite_start]removeHighlight('ai-highlight'); [cite: 280]
-        [cite_start]permanentAIHighlightActive = false; [cite: 280]
-        [cite_start]updateToolbarStates(); [cite: 280]
+        removeHighlight('ai-highlight');
+        permanentAIHighlightActive = false;
+        updateToolbarStates();
+        scheduleHeightCheck(); // IFRAME FIX
     }
 
     function togglePermanentAIHighlight() {
-        [cite_start]permanentAIHighlightActive = !permanentAIHighlightActive; [cite: 280]
-        [cite_start]if (permanentAIHighlightActive) highlightInTextNodes(aiCharactersRegex, 'ai-highlight'); [cite: 280]
-        [cite_start]else removeHighlight('ai-highlight'); [cite: 280]
+        permanentAIHighlightActive = !permanentAIHighlightActive;
+        if (permanentAIHighlightActive) highlightInTextNodes(aiCharactersRegex, 'ai-highlight');
+        else removeHighlight('ai-highlight');
+        scheduleHeightCheck(); // IFRAME FIX
     }
 
     // ===== FIND & REPLACE =====
     function highlightFindMatches() {
-        [cite_start]const findValue = document.getElementById('findWord').value; [cite: 281]
-        [cite_start]removeHighlight('find-match'); [cite: 281]
-        [cite_start]removeHighlight('current'); [cite: 281]
+        const findValue = document.getElementById('findWord').value;
+        removeHighlight('find-match');
+        removeHighlight('current');
         if (findValue) {
-            [cite_start]const regex = new RegExp(`(${findValue.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi'); [cite: 282]
-            [cite_start]highlightInTextNodes(regex, 'find-match'); [cite: 282]
+            const regex = new RegExp(`(${findValue.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
+            highlightInTextNodes(regex, 'find-match');
         }
-        [cite_start]currentMatchIndex = -1; [cite: 282]
+        currentMatchIndex = -1;
     }
 
-    [cite_start]document.getElementById('findWord').addEventListener('input', highlightFindMatches); [cite: 283]
+    document.getElementById('findWord').addEventListener('input', highlightFindMatches);
     
     function replaceOne() {
-        [cite_start]saveState(); [cite: 283]
-        [cite_start]const find = document.getElementById('findWord').value; [cite: 283]
-        [cite_start]const replace = document.getElementById('replaceWord').value; [cite: 283]
-        [cite_start]if (!find) return; [cite: 284]
-        [cite_start]const matches = editor.querySelectorAll('mark.find-match'); [cite: 284]
+        saveState();
+        const find = document.getElementById('findWord').value;
+        const replace = document.getElementById('replaceWord').value;
+        if (!find) return;
+        const matches = editor.querySelectorAll('mark.find-match');
         if (matches.length > 0) {
-            [cite_start]const current = matches[currentMatchIndex !== -1 ? currentMatchIndex : 0]; [cite: 285]
+            const current = matches[currentMatchIndex !== -1 ? currentMatchIndex : 0];
             if (current) {
-                [cite_start]current.outerHTML = replace; [cite: 286]
+                current.outerHTML = replace;
             }
         }
-        [cite_start]highlightFindMatches(); [cite: 287]
-        [cite_start]updateToolbarStates(); [cite: 287]
+        highlightFindMatches();
+        updateToolbarStates();
+        scheduleHeightCheck(); // IFRAME FIX
     }
 
     function replaceAll() {
-        [cite_start]saveState(); [cite: 288]
-        [cite_start]const find = document.getElementById('findWord').value; [cite: 288]
-        [cite_start]const replace = document.getElementById('replaceWord').value; [cite: 288]
-        [cite_start]if (!find) return; [cite: 288]
-        [cite_start]const regex = new RegExp(`(${find.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi'); [cite: 288]
-        [cite_start]removeHighlight('find-match'); [cite: 289]
-        [cite_start]editor.innerHTML = editor.innerHTML.replace(regex, replace); [cite: 289]
-        [cite_start]updateToolbarStates(); [cite: 289]
+        saveState();
+        const find = document.getElementById('findWord').value;
+        const replace = document.getElementById('replaceWord').value;
+        if (!find) return;
+        const regex = new RegExp(`(${find.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
+        removeHighlight('find-match');
+        editor.innerHTML = editor.innerHTML.replace(regex, replace);
+        updateToolbarStates();
+        scheduleHeightCheck(); // IFRAME FIX
     }
 
     function navigateMatch(direction) {
-        [cite_start]const matches = Array.from(editor.querySelectorAll('mark.find-match')); [cite: 290]
-        [cite_start]if (matches.length === 0) return; [cite: 290]
+        const matches = Array.from(editor.querySelectorAll('mark.find-match'));
+        if (matches.length === 0) return;
         
-        [cite_start]editor.querySelectorAll('mark.find-match.current').forEach(m => m.classList.remove('current')); [cite: 291]
-        [cite_start]currentMatchIndex += direction; [cite: 291]
-        [cite_start]if (currentMatchIndex < 0) currentMatchIndex = matches.length - 1; [cite: 291]
-        [cite_start]if (currentMatchIndex >= matches.length) currentMatchIndex = 0; [cite: 291]
+        editor.querySelectorAll('mark.find-match.current').forEach(m => m.classList.remove('current'));
+        currentMatchIndex += direction;
+        if (currentMatchIndex < 0) currentMatchIndex = matches.length - 1;
+        if (currentMatchIndex >= matches.length) currentMatchIndex = 0;
         
-        [cite_start]const match = matches[currentMatchIndex]; [cite: 292]
-        [cite_start]match.classList.add('current'); [cite: 292]
+        const match = matches[currentMatchIndex];
+        match.classList.add('current');
         
-        [cite_start]match.scrollIntoView({ behavior: 'smooth', block: 'center' }); [cite: 293]
+        match.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    [cite_start]prevMatch.addEventListener('click', () => navigateMatch(-1)); [cite: 294]
-    [cite_start]nextMatch.addEventListener('click', () => navigateMatch(1)); [cite: 294]
+    prevMatch.addEventListener('click', () => navigateMatch(-1));
+    nextMatch.addEventListener('click', () => navigateMatch(1));
     
     // ===== MARKDOWN TOGGLE =====
     function toggleMarkdown() {
-        [cite_start]saveState(); [cite: 295]
-        [cite_start]const isMarkdown = editor.getAttribute('data-mode') === 'markdown'; [cite: 295]
-        [cite_start]const turndownService = new TurndownService({ headingStyle: 'atx' }); [cite: 295]
-        [cite_start]const showdownConverter = new showdown.Converter(); [cite: 295]
+        saveState();
+        const isMarkdown = editor.getAttribute('data-mode') === 'markdown';
+        const turndownService = new TurndownService({ headingStyle: 'atx' });
+        const showdownConverter = new showdown.Converter();
         
         if (isMarkdown) {
-            [cite_start]editor.innerHTML = showdownConverter.makeHtml(editor.innerText); [cite: 296]
-            [cite_start]editor.setAttribute('data-mode', 'rich'); [cite: 296]
+            editor.innerHTML = showdownConverter.makeHtml(editor.innerText);
+            editor.setAttribute('data-mode', 'rich');
         } else {
-            [cite_start]editor.innerText = turndownService.turndown(editor.innerHTML); [cite: 297]
-            [cite_start]editor.setAttribute('data-mode', 'markdown'); [cite: 297]
+            editor.innerText = turndownService.turndown(editor.innerHTML);
+            editor.setAttribute('data-mode', 'markdown');
         }
-        [cite_start]updateToolbarStates(); [cite: 298]
+        updateToolbarStates();
+        scheduleHeightCheck(); // IFRAME FIX
     }
 
     // ===== EMOJI PICKER =====
     function saveSelection() {
-        [cite_start]const selection = window.getSelection(); [cite: 299]
-        [cite_start]if (selection.rangeCount > 0) { [cite: 299]
-            [cite_start]savedRange = selection.getRangeAt(0); [cite: 300]
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            savedRange = selection.getRangeAt(0);
         }
     }
     
     function restoreSelection() {
         if (savedRange) {
-            [cite_start]const selection = window.getSelection(); [cite: 301]
-            [cite_start]selection.removeAllRanges(); [cite: 301]
-            [cite_start]selection.addRange(savedRange); [cite: 301]
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(savedRange);
         }
     }
 
     function toggleEmojiPopup(event) {
-        [cite_start]saveSelection(); [cite: 302]
-        [cite_start]const rect = emojiButton.getBoundingClientRect(); [cite: 302]
-        [cite_start]emojiPopup.style.top = `${rect.bottom + window.scrollY + 5}px`; [cite: 302]
-        [cite_start]emojiPopup.style.left = `${rect.left + window.scrollX}px`; [cite: 302]
+        saveSelection();
+        const rect = emojiButton.getBoundingClientRect();
+        emojiPopup.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        emojiPopup.style.left = `${rect.left + window.scrollX}px`;
         
-        [cite_start]emojiPopup.classList.toggle('hidden'); [cite: 303]
+        emojiPopup.classList.toggle('hidden');
         if (!emojiPopup.classList.contains('hidden')) {
-            [cite_start]loadEmojis(); [cite: 303]
-            [cite_start]document.getElementById('emojiSearch').focus(); [cite: 304]
+            loadEmojis();
+            document.getElementById('emojiSearch').focus();
         }
     }
     
     emojiButton.addEventListener('click', toggleEmojiPopup);
 
     function loadEmojis() {
-        [cite_start]const emojiList = document.getElementById('emojiList'); [cite: 305]
-        [cite_start]emojiList.innerHTML = ''; [cite: 305]
+        const emojiList = document.getElementById('emojiList');
+        emojiList.innerHTML = '';
         Object.keys(emojiData).forEach(emoji => {
-            [cite_start]const button = document.createElement('button'); [cite: 305]
-            [cite_start]button.textContent = emoji; [cite: 305]
-            [cite_start]button.onclick = () => insertEmoji(emoji); [cite: 305]
-            [cite_start]button.setAttribute('title', emojiData[emoji][0]); [cite: 305]
-            [cite_start]emojiList.appendChild(button); [cite: 305]
+            const button = document.createElement('button');
+            button.textContent = emoji;
+            button.onclick = () => insertEmoji(emoji);
+            button.setAttribute('title', emojiData[emoji][0]);
+            emojiList.appendChild(button);
         });
     }
 
     function searchEmoji() {
-        [cite_start]const search = document.getElementById('emojiSearch').value.toLowerCase(); [cite: 306]
-        [cite_start]const buttons = document.querySelectorAll('#emojiList button'); [cite: 307]
+        const search = document.getElementById('emojiSearch').value.toLowerCase();
+        const buttons = document.querySelectorAll('#emojiList button');
         buttons.forEach(button => {
-            [cite_start]const emoji = button.textContent; [cite: 307]
-            const keywords = emojiData[emoji] || [cite_start][]; [cite: 307]
-            [cite_start]const isVisible = keywords.some(kw => kw.includes(search)) || emoji.includes(search); [cite: 307]
-            button.style.display = isVisible ? [cite_start]'' : 'none'; [cite: 307]
+            const emoji = button.textContent;
+            const keywords = emojiData[emoji] || [];
+            const isVisible = keywords.some(kw => kw.includes(search)) || emoji.includes(search);
+            button.style.display = isVisible ? '' : 'none';
         });
     }
 
-    [cite_start]document.getElementById('emojiSearch').addEventListener('input', searchEmoji); [cite: 308]
+    document.getElementById('emojiSearch').addEventListener('input', searchEmoji);
 
     function insertEmoji(emoji) {
-        [cite_start]editor.focus(); [cite: 309]
-        [cite_start]restoreSelection(); [cite: 309]
-        [cite_start]document.execCommand('insertText', false, emoji); [cite: 309]
-        [cite_start]emojiPopup.classList.add('hidden'); [cite: 309]
+        editor.focus();
+        restoreSelection();
+        document.execCommand('insertText', false, emoji);
+        emojiPopup.classList.add('hidden');
+        scheduleHeightCheck(); // IFRAME FIX
     }
 
     document.addEventListener('click', (e) => {
-        [cite_start]if (!emojiPopup.contains(e.target) && e.target !== emojiButton) { [cite: 309]
-            [cite_start]emojiPopup.classList.add('hidden'); [cite: 309]
+        if (!emojiPopup.contains(e.target) && e.target !== emojiButton) {
+            emojiPopup.classList.add('hidden');
         }
     });
     
-    // ===== DOWNLOAD FUNCTIONS (FIX 4) =====
+    // ===== DOWNLOAD FUNCTIONS =====
     downloadButton.addEventListener('click', () => {
-        [cite_start]downloadMenu.classList.toggle('hidden'); [cite: 310]
+        downloadMenu.classList.toggle('hidden');
     });
     
     document.addEventListener('click', (e) => {
-        [cite_start]if (!downloadButton.contains(e.target) && !downloadMenu.contains(e.target)) { [cite: 311]
-            [cite_start]downloadMenu.classList.add('hidden'); [cite: 311]
+        if (!downloadButton.contains(e.target) && !downloadMenu.contains(e.target)) {
+            downloadMenu.classList.add('hidden');
         }
     });
 
     async function downloadFile(type) {
-        [cite_start]downloadMenu.classList.add('hidden'); [cite: 312]
-        [cite_start]const content = editor.innerHTML; [cite: 312]
-        [cite_start]const plainText = editor.innerText; [cite: 312]
+        downloadMenu.classList.add('hidden');
+        const content = editor.innerHTML;
+        const plainText = editor.innerText;
         
         // Helper function to create a download link
         function triggerDownload(blob, filename) {
@@ -1250,12 +1260,12 @@
         }
 
         if (type === 'pdf') {
-            [cite_start]const { jsPDF } = window.jspdf; [cite: 313]
-            [cite_start]const pdf = new jsPDF('p', 'pt', 'a4'); [cite: 314]
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'pt', 'a4');
             const tempDiv = document.createElement('div');
             
             // Apply styles to match editor for html2canvas
-            [cite_start]tempDiv.style.cssText = 'position: absolute; left: -9999px; width: 794px; padding: 40px; font-family: system-ui, sans-serif; color: #000; background: #fff; box-sizing: border-box;'; [cite: 315]
+            tempDiv.style.cssText = 'position: absolute; left: -9999px; width: 794px; padding: 40px; font-family: system-ui, sans-serif; color: #000; background: #fff; box-sizing: border-box;';
             tempDiv.innerHTML = content;
 
             // Apply the editor's structural styles to the children
@@ -1274,15 +1284,15 @@
                 }
             });
 
-            [cite_start]document.body.appendChild(tempDiv); [cite: 315]
+            document.body.appendChild(tempDiv);
             
-            [cite_start]html2canvas(tempDiv, {scale: 2}).then(canvas => { [cite: 316]
-                [cite_start]const imgData = canvas.toDataURL('image/png'); [cite: 316]
-                [cite_start]const pdfWidth = pdf.internal.pageSize.getWidth(); [cite: 317]
-                [cite_start]const pdfHeight = (canvas.height * pdfWidth) / canvas.width; [cite: 317]
-                [cite_start]pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight); [cite: 317]
-                [cite_start]pdf.save('document.pdf'); [cite: 317]
-                [cite_start]document.body.removeChild(tempDiv); [cite: 317]
+            html2canvas(tempDiv, {scale: 2}).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save('document.pdf');
+                document.body.removeChild(tempDiv);
             });
             
         } else if (type === 'docx') {
@@ -1306,30 +1316,30 @@
                     ],
                 },
                 sections: [{
-                    [cite_start]children: parseHtmlToDocx(content) [cite: 318]
+                    children: parseHtmlToDocx(content)
                 }]
             });
             
-            [cite_start]docx.Packer.toBlob(doc).then(blob => { [cite: 319]
+            docx.Packer.toBlob(doc).then(blob => {
                 triggerDownload(blob, 'document.docx');
             });
             
         } else if (type === 'rtf') {
-            [cite_start]const rtf = new RTF.Document(); [cite: 320]
-            [cite_start]const section = rtf.createSection(); [cite: 321]
-            [cite_start]parseHtmlToRtf(content, section); [cite: 321]
-            [cite_start]const blob = new Blob([rtf.toString()], {type: 'application/rtf'}); [cite: 321]
-            [cite_start]triggerDownload(blob, 'document.rtf'); [cite: 322]
+            const rtf = new RTF.Document();
+            const section = rtf.createSection();
+            parseHtmlToRtf(content, section);
+            const blob = new Blob([rtf.toString()], {type: 'application/rtf'});
+            triggerDownload(blob, 'document.rtf');
             
         } else if (type === 'txt') {
-            [cite_start]const blob = new Blob([plainText], {type: 'text/plain'}); [cite: 322]
-            [cite_start]triggerDownload(blob, 'document.txt'); [cite: 323]
+            const blob = new Blob([plainText], {type: 'text/plain'});
+            triggerDownload(blob, 'document.txt');
         }
     }
 
     function parseHtmlToDocx(html) {
         const temp = document.createElement('div');
-        [cite_start]temp.innerHTML = html; [cite: 325]
+        temp.innerHTML = html;
         const elements = [];
 
         // Helper to recursively parse inline styles
@@ -1383,7 +1393,7 @@
                     children: textRuns.length > 0 ? textRuns : [new docx.TextRun("")], // Handle empty paragraphs
                     heading: nodeName === 'H1' ? docx.HeadingLevel.HEADING_1 :
                              nodeName === 'H2' ? docx.HeadingLevel.HEADING_2 :
-                             [cite_start]nodeName === 'H3' ? docx.HeadingLevel.HEADING_3 : undefined, [cite: 326]
+                             nodeName === 'H3' ? docx.HeadingLevel.HEADING_3 : undefined,
                     style: nodeName === 'BLOCKQUOTE' ? "IntenseQuote" : undefined,
                     alignment: alignment,
                     spacing: { after: 120, before: 120 }
@@ -1392,8 +1402,8 @@
                 node.querySelectorAll('li').forEach(li => {
                     elements.push(new docx.Paragraph({
                         children: extractTextRuns(li),
-                        [cite_start]bullet: nodeName === 'UL' ? { level: 0 } : undefined, [cite: 328]
-                        numbering: nodeName === 'OL' ? [cite_start]{ reference: "default-numbering", level: 0 } : undefined, [cite: 328]
+                        bullet: nodeName === 'UL' ? { level: 0 } : undefined,
+                        numbering: nodeName === 'OL' ? { reference: "default-numbering", level: 0 } : undefined,
                         spacing: { after: 80 }
                     }));
                 });
@@ -1414,7 +1424,7 @@
 
     function parseHtmlToRtf(html, section) {
         const temp = document.createElement('div');
-        [cite_start]temp.innerHTML = html; [cite: 331]
+        temp.innerHTML = html;
         
         function processRtfChildren(parentNode, paragraph) {
              parentNode.childNodes.forEach(child => {
@@ -1437,7 +1447,7 @@
 
         temp.childNodes.forEach(node => {
             if (node.nodeType === 3) {
-                [cite_start]section.addParagraph().addTextRun(node.textContent); [cite: 331]
+                section.addParagraph().addTextRun(node.textContent);
             } else if (node.nodeType === 1) {
                 const p = section.addParagraph();
                 if (node.style.textAlign === 'center') p.center();
@@ -1445,7 +1455,7 @@
                 else if (node.style.textAlign === 'justify') p.justify();
                 
                 if (['H1','H2','H3'].includes(node.nodeName)) {
-                    [cite_start]p.addTextRun(node.innerText).bold().fontSize(node.nodeName === 'H1' ? 32 : node.nodeName === 'H2' ? 24 : 20); [cite: 332]
+                    p.addTextRun(node.innerText).bold().fontSize(node.nodeName === 'H1' ? 32 : node.nodeName === 'H2' ? 24 : 20);
                     p.spacing({ after: 200, before: 200 });
                 } 
                 else if (node.nodeName === 'UL' || node.nodeName === 'OL') {
@@ -1478,44 +1488,46 @@
 
     // ===== PLAIN TEXT CONVERSION =====
     function convertToPlainText() {
-        [cite_start]saveState(); [cite: 334]
-        [cite_start]const plainText = editor.innerText; [cite: 334]
-        [cite_start]const lines = plainText.split('\n'); [cite: 334]
+        saveState();
+        const plainText = editor.innerText;
+        const lines = plainText.split('\n');
         editor.innerHTML = lines.map(line => `<p>${line.replace(/\s/g, '&nbsp;') || '<br>'}</p>`).join(''); // Preserve spaces
-        [cite_start]updateToolbarStates(); [cite: 335]
+        updateToolbarStates();
+        scheduleHeightCheck(); // IFRAME FIX
     }
 
     // ===== CLEAR EDITOR =====
     function clearEditor() {
-        [cite_start]if (confirm('Are you sure you want to clear the entire document?')) { [cite: 336]
-            [cite_start]saveState(); [cite: 336]
-            [cite_start]editor.innerHTML = '<p><br></p>'; [cite: 336]
-            [cite_start]updateToolbarStates(); [cite: 336]
+        if (confirm('Are you sure you want to clear the entire document?')) {
+            saveState();
+            editor.innerHTML = '<p><br></p>';
+            updateToolbarStates();
+            scheduleHeightCheck(); // IFRAME FIX
         }
     }
 
     // ===== FOURTHWALL SCROLLBAR FIX =====
-    [cite_start]let lastHeight = 0; [cite: 337]
-    [cite_start]let resizeTimer; [cite: 337]
+    let lastHeight = 0;
+    let resizeTimer;
 
     function sendHeight() {
-      [cite_start]const height = document.body.scrollHeight; [cite: 338]
-      [cite_start]if (height !== lastHeight) { [cite: 338]
-        [cite_start]lastHeight = height; [cite: 339]
-        [cite_start]window.parent.postMessage({ frameHeight: height }, '*'); [cite: 339]
+      const height = document.body.scrollHeight;
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
     function scheduleHeightCheck() {
-        [cite_start]clearTimeout(resizeTimer); [cite: 340]
-        [cite_start]resizeTimer = setTimeout(sendHeight, 150); [cite: 340]
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(sendHeight, 150);
     }
 
     window.addEventListener('load', () => {
-        [cite_start]setTimeout(sendHeight, 100); [cite: 341]
+        setTimeout(sendHeight, 100);
     });
     window.addEventListener('resize', () => {
-        [cite_start]scheduleHeightCheck(); [cite: 342]
+        scheduleHeightCheck();
     });
     // ===== END OF SCROLLBAR FIX =====
 </script>
