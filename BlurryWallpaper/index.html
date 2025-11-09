@@ -25,6 +25,12 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            height: auto;
+            min-height: 0;
+            overflow: visible;
+        }
+
         body {
             font-family: sans-serif;
             background: var(--bg);
@@ -597,17 +603,22 @@
 
             const onDown = (e) => {
                 isDragging = true;
-                startX = e.clientX || e.touches[0].clientX;
-                startY = e.clientY || e.touches[0].clientY;
+                const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                if (!clientX || !clientY) return;
+                startX = clientX;
+                startY = clientY;
                 initialLeft = parseFloat(element.style.left) || 0;
                 initialTop = parseFloat(element.style.top) || 0;
                 element.style.transition = 'none';
+                e.preventDefault();
             };
 
             const onMove = (e) => {
                 if (!isDragging) return;
-                const clientX = e.clientX || e.touches[0].clientX;
-                const clientY = e.clientY || e.touches[0].clientY;
+                const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                if (!clientX || !clientY) return;
                 const dx = (clientX - startX) / preview.clientWidth * 100;
                 const dy = (clientY - startY) / preview.clientHeight * 100;
                 const newX = initialLeft + dx;
@@ -619,6 +630,7 @@
                     blobState.x = newX;
                     blobState.y = newY;
                 }
+                e.preventDefault();
             };
 
             const onUp = () => {
@@ -743,7 +755,7 @@
                     colors = ['#00BFFF', '#20B2AA', '#4682B4', '#5F9EA0', '#87CEEB'];
                     state.backgroundColor = '#FFFFFF';
                     break;
-                default: // random
+                default:
                     for (let i = 0; i < state.blobs.length; i++) {
                         colors.push(generateRandomColor());
                     }
@@ -821,7 +833,7 @@
                 const canvasX = (blobState.x / 100) * DOWNLOAD_WIDTH - (adjustedSize * scaleFactor / 2);
                 const canvasY = (blobState.y / 100) * DOWNLOAD_HEIGHT - (adjustedSize * scaleFactor / 2);
                 const canvasWidth = adjustedSize * scaleFactor;
-                const canvasHeight = canvasWidth; // circle for now
+                const canvasHeight = canvasWidth;
 
                 ctx.arc(canvasX + canvasWidth / 2, canvasY + canvasHeight / 2, canvasWidth / 2, 0, 2 * Math.PI);
                 ctx.fill();
@@ -829,7 +841,6 @@
 
             ctx.filter = 'none';
 
-            // Apply grain
             ctx.fillStyle = `rgba(0, 0, 0, ${state.grain})`;
             for (let i = 0; i < DOWNLOAD_WIDTH * DOWNLOAD_HEIGHT / 100; i++) {
                 ctx.fillRect(
@@ -839,7 +850,6 @@
                 );
             }
 
-            // Apply texture
             if (state.texture === 'noise') {
                 ctx.fillStyle = `rgba(0, 0, 0, ${state.textureParams.noise.opacity})`;
                 for (let i = 0; i < DOWNLOAD_WIDTH * DOWNLOAD_HEIGHT / 25; i++) {
@@ -871,7 +881,6 @@
                 }
             }
 
-            // Apply vignette
             const gradient = ctx.createRadialGradient(
                 DOWNLOAD_WIDTH / 2, DOWNLOAD_HEIGHT / 2, 0,
                 DOWNLOAD_WIDTH / 2, DOWNLOAD_HEIGHT / 2, Math.max(DOWNLOAD_WIDTH, DOWNLOAD_HEIGHT) / 2
@@ -888,7 +897,6 @@
             link.remove();
         }
 
-        // Initialize blobs
         for (let i = 1; i <= 5; i++) {
             addBlob();
         }
@@ -931,37 +939,45 @@
             });
         });
 
-        // Initial setup
         randomizeState();
         bgColorPicker.value = state.backgroundColor;
 
-    // ===== FOURTHWALL SCROLLBAR FIX =====
-    let lastHeight = 0;
-    let resizeTimer;
+        // ===== FOURTHWALL SCROLLBAR FIX =====
+        let lastHeight = 0;
+        let resizeTimer;
 
-    function sendHeight() {
-      const height = document.body.scrollHeight;
-      
-      if (height !== lastHeight) {
-        lastHeight = height;
-        window.parent.postMessage({ frameHeight: height }, '*');
-      }
-    }
+        function sendHeight() {
+            const height = document.body.scrollHeight;
+            if (height !== lastHeight) {
+                lastHeight = height;
+                window.parent.postMessage({ frameHeight: height }, '*');
+            }
+        }
 
-    function scheduleHeightCheck() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(sendHeight, 150);
-    }
+        function scheduleHeightCheck() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(sendHeight, 150);
+        }
 
-    window.addEventListener('load', () => {
-        setTimeout(sendHeight, 100);
-    });
+        window.addEventListener('load', () => {
+            setTimeout(sendHeight, 100);
+        });
 
-    window.addEventListener('resize', () => {
-        scheduleHeightCheck();
-    });
-    
-    // ===== END OF SCROLLBAR FIX =====
+        window.addEventListener('resize', () => {
+            scheduleHeightCheck();
+        });
+
+        const observer = new MutationObserver(scheduleHeightCheck);
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+
+        // Call scheduleHeightCheck on any state change
+        const originalUpdatePreview = updatePreview;
+        updatePreview = function() {
+            originalUpdatePreview();
+            scheduleHeightCheck();
+        };
+        
+        // ===== END OF SCROLLBAR FIX =====
     </script>
 </body>
 </html>
