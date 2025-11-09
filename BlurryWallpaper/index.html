@@ -306,10 +306,8 @@
     </style>
 </head>
 <body>
-    <!-- ===== APP CONTAINER ===== -->
     <div id="app-container">
         
-        <!-- ===== PREVIEW SECTION ===== -->
         <div id="preview-section">
             <div id="wallpaper-preview">
                 <div class="color-blob" id="blob1"></div>
@@ -320,10 +318,8 @@
             </div>
         </div>
 
-        <!-- ===== CONTROLS SECTION ===== -->
         <div id="controls">
             
-            <!-- ===== COLOR PICKERS ===== -->
             <div class="control-group">
                 <div class="control-label">Colors</div>
                 <div class="control-sublabel">Click to change individual colors</div>
@@ -346,7 +342,6 @@
                 </div>
             </div>
 
-            <!-- ===== BLUR SLIDER ===== -->
             <div class="control-group">
                 <div class="slider-wrapper">
                     <div class="slider-header">
@@ -357,7 +352,6 @@
                 </div>
             </div>
 
-            <!-- ===== SIZE SLIDER ===== -->
             <div class="control-group">
                 <div class="slider-wrapper">
                     <div class="slider-header">
@@ -368,7 +362,6 @@
                 </div>
             </div>
 
-            <!-- ===== BRIGHTNESS SLIDER ===== -->
             <div class="control-group">
                 <div class="slider-wrapper">
                     <div class="slider-header">
@@ -379,7 +372,6 @@
                 </div>
             </div>
 
-            <!-- ===== TEXTURE OPTIONS ===== -->
             <div class="control-group">
                 <div class="control-label">Texture Overlay</div>
                 <div class="texture-grid">
@@ -389,7 +381,6 @@
                 </div>
             </div>
 
-            <!-- ===== ACTION BUTTONS ===== -->
             <div class="button-group">
                 <button class="btn" id="random-btn">Randomize</button>
                 <button class="btn btn-primary" id="download-btn">Download 4K</button>
@@ -398,7 +389,6 @@
         </div>
     </div>
 
-    <!-- ===== HIDDEN CANVAS ===== -->
     <canvas id="render-canvas" style="display: none;"></canvas>
 
     <script>
@@ -450,7 +440,6 @@
         // ===== UPDATE PREVIEW =====
         function updatePreview() {
             document.documentElement.style.setProperty('--blur-strength', `${blurSlider.value}px`);
-            
             blurValue.textContent = `${blurSlider.value}px`;
             sizeValue.textContent = `${sizeSlider.value}%`;
             brightnessValue.textContent = `${brightnessSlider.value}%`;
@@ -480,7 +469,6 @@
         // ===== APPLY TEXTURE =====
         function applyTexture() {
             preview.style.backgroundImage = 'none';
-            
             if (state.texture === 'grain') {
                 preview.style.backgroundImage = `
                     repeating-linear-gradient(
@@ -516,7 +504,7 @@
                 });
             });
             updatePreview();
-            scheduleHeightCheck();
+            scheduleHeightCheck(); // This notifies the iframe scroll fix
         }
 
         // ===== DOWNLOAD 4K IMAGE =====
@@ -593,12 +581,10 @@
             updatePreview();
             scheduleHeightCheck();
         });
-        
         sizeSlider.addEventListener('input', () => {
             updatePreview();
             scheduleHeightCheck();
         });
-        
         brightnessSlider.addEventListener('input', () => {
             updatePreview();
             scheduleHeightCheck();
@@ -621,32 +607,47 @@
             });
         });
 
-        // ===== INITIALIZE =====
-        randomizeState();
-
         // ===== FOURTHWALL SCROLLBAR FIX =====
         let lastHeight = 0;
         let resizeTimer;
 
+        /**
+         * Sends the current scrollHeight to the parent window if it has changed.
+         * This is the *only* function that should send a postMessage.
+         */
         function sendHeight() {
             const height = document.body.scrollHeight;
             
+            // Only send message if height has *actually* changed
             if (height !== lastHeight) {
                 lastHeight = height;
                 window.parent.postMessage({ frameHeight: height }, '*');
             }
         }
 
+        /**
+         * A debounced version of sendHeight() to be called on content changes.
+         * This ensures we don't spam messages during rapid changes.
+         */
         function scheduleHeightCheck() {
+            // Clear any pending checks
             clearTimeout(resizeTimer);
+            // Schedule a new check
             resizeTimer = setTimeout(sendHeight, 150);
         }
 
+        // Send height on initial load
+        // This fixes the "Content Cut-Off" race condition.
         window.addEventListener('load', () => {
-            setTimeout(sendHeight, 100);
+            // We call randomizeState() here to ensure the DOM is
+            // fully rendered before the tool populates.
+            // randomizeState() already calls scheduleHeightCheck() internally.
+            randomizeState();
         });
 
+        // Send height on window resize (debounced)
         window.addEventListener('resize', () => {
+            // Use scheduleHeightCheck for built-in debounce
             scheduleHeightCheck();
         });
         // ===== END OF SCROLLBAR FIX =====
