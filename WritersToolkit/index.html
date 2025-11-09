@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.min.js"></script>
     
     <style>
         /* ===== CORE VARIABLES ===== */
@@ -88,7 +87,7 @@
             overflow: hidden;
             font-size: 14px;
             font-family: inherit;
-            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -245,11 +244,18 @@
             line-height: 1.6;
             overflow-wrap: break-word;
             word-wrap: break-word;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
         }
 
         .editor:focus {
             box-shadow: 0 0 0 3px rgba(135,169,255,0.12), 0 4px 12px rgba(0,0,0,0.3);
             border-color: var(--hover-color);
+        }
+        
+        /* FIX 2: Find/Replace active outline */
+        .editor.find-active {
+            border-color: var(--danger-color);
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.4), 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .editor p {
@@ -450,7 +456,7 @@
             background: var(--secondary-bg);
             border: 1px solid var(--outline-color);
             border-radius: var(--radius);
-            padding: 24px 16px;
+            padding: 24px;
             width: 90%;
             max-width: 500px;
             max-height: 80vh;
@@ -469,10 +475,18 @@
         }
         .modal-content ul {
             padding-left: 20px;
+            margin-top: 12px;
         }
-        .modal-content strong {
+        .modal-content strong, .modal-content kbd {
             color: var(--accent-color);
             font-weight: normal;
+        }
+        .modal-content kbd {
+            background: var(--primary-bg);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
         }
         .modal-content .close-btn {
             position: absolute;
@@ -499,6 +513,16 @@
         #createLinkButton:hover {
             background: var(--accent-color);
             filter: brightness(0.9);
+        }
+        
+        #helpModalContent h4 {
+            color: var(--primary-text);
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+        #helpModalContent li {
+            margin-bottom: 8px;
         }
 
         /* ===== UTILITY CLASSES ===== */
@@ -570,6 +594,11 @@
                  border: 1px solid var(--outline-color);
                  border-radius: var(--radius);
                  overflow: hidden;
+            }
+            
+            .editor.find-active {
+                box-shadow: none;
+                border-color: var(--danger-color);
             }
 
             #emojiPopup {
@@ -681,7 +710,7 @@
             </div>
             <div class="btn-wrapper">
                 <button id="linkButton" class="icon-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.72m-5.02 5.02a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.72-1.72"></path><line x1="8" y1="16" x2="16" y2="8"></line></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.72-1.72"></path></svg>
                 </button>
                 <span class="btn-tooltip">Add link</span>
             </div>
@@ -744,7 +773,7 @@
             <input type="text" id="replaceWord" placeholder="Replace..." />
             <div class="btn-wrapper">
                 <button onclick="replaceOne()">Replace</button>
-                <span class="btn-tooltip">Replace first match</span>
+                <span class="btn-tooltip">Replace (Ctrl+Enter)</span>
             </div>
             <div class="btn-wrapper">
                 <button onclick="replaceAll()">Replace All</button>
@@ -755,13 +784,13 @@
                 <button id="prevMatch" class="icon-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
                 </button>
-                <span class="btn-tooltip">Previous match</span>
+                <span class="btn-tooltip">Previous (Shift+Enter)</span>
             </div>
             <div class="btn-wrapper">
                 <button id="nextMatch" class="icon-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12l7 7 7-7"/></svg>
                 </button>
-                <span class="btn-tooltip">Next match</span>
+                <span class="btn-tooltip">Next (Enter)</span>
             </div>
             <div class="toolbar-separator">
             </div>
@@ -787,12 +816,6 @@
                         <div>
                             <h4>PDF</h4>
                             <p>Universal format, preserves layout. Great for sharing.</p>
-                        </div>
-                    </div>
-                    <div class="download-option" onclick="downloadFile('docx')">
-                        <div>
-                            <h4>DOCX</h4>
-                            <p>Microsoft Word format. Full formatting support.</p>
                         </div>
                     </div>
                     <div class="download-option" onclick="downloadFile('txt')">
@@ -822,7 +845,7 @@
         <div class="editor" contenteditable="true" id="editor" spellcheck="true"><p><br></p></div>
     </div>
     <div id="stats-bar">
-        <span class="version">V.1.0.7</span>
+        <span class="version">V.1.0.8</span>
         <div>
             <span id="char-count">0</span> characters · 
             <span id="word-count">0</span> words ·
@@ -841,16 +864,29 @@
             <button id="closeHelpButton" class="icon-btn close-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
-            <h3>Quick Tips</h3>
+            <h3>How to Use This Tool</h3>
+            
+            <h4>Find & Replace</h4>
+            <p>Type into the "Find" box to highlight text. The editor will get a <strong>red outline</strong> to show it's active.</p>
             <ul>
-                <li><strong>Find/Replace:</strong> Use the <strong>Enter</strong> key in the "Find..." box to jump to the next match, and <strong>Shift + Enter</strong> to go to the previous one.</li>
-                <li><strong>Pasting:</strong> Pasting content (like from Gemini or websites) will automatically remove any background colors to keep your document clean.</li>
-                <li><strong>Known Bugs:</strong> These tools are new and still being refined!
-                    <ul>
-                        <li>Sometimes, using the <strong>Find/Replace</strong> or <strong>AI Highlight</strong> tools can interfere with typing. If your cursor seems stuck, just clear the "Find..." box or toggle the highlight button off.</li>
-                        <li><strong>Exports (PDF/DOCX):</strong> Document exporting is a new feature. We're working hard to make it perfect, but you might see some small spacing or formatting differences.</li>
-                    </ul>
-                </li>
+                <li><kbd>Enter</kbd>: Jump to the <strong>next</strong> match.</li>
+                <li><kbd>Shift + Enter</kbd>: Jump to the <strong>previous</strong> match.</li>
+                <li><kbd>Ctrl + Enter</kbd>: <strong>Replace</strong> the current match.</li>
+            </ul>
+
+            <h4>Links</h4>
+            <p>Highlight text and click the <strong>Link (<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px;"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.72-1.72"></path></svg>)</strong> button to add a URL. If you click on an existing link, the button will turn <strong>blue</strong>, allowing you to update or remove the link.</p>
+            
+            <h4>AI Artifacts</h4>
+            <p>Use the <strong>Yellow Square (<span class="ai-square" style="display:inline-block; vertical-align: -2px;"></span>)</strong> button to highlight invisible characters pasted from AI models. Use the <strong>Trash</strong> button to remove them.</p>
+
+            <h4>Markdown Mode</h4>
+            <p>Toggle Markdown mode (<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px;"><path d="M2 8v8a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2H4a2 2 0 00-2 2z"></path><path d="M6 11v6l2-2 2 2v-6"></path><line x1="14" y1="11" x2="14" y2="17"></line><line x1="18" y1="11" x2="14" y2="14"></line><line x1="14" y1="14" x2="18" y2="17"></line></svg>) to see your text as code. This tool supports <strong>**bold**</strong>, <strong>*italic*</strong>, <strong>__underline__</strong>, and <strong>~~strikethrough~~</strong>. Text alignment (center/right) is also preserved when toggling.</p>
+            
+            <h4>Tips & Known Issues</h4>
+            <ul>
+                <li><strong>Typing Lag:</strong> If your typing feels stuck, make sure the "Find" box is empty and the AI Highlight is off.</li>
+                <li><strong>Downloading:</strong> PDF and TXT downloads are supported. This feature is new, so you may see minor formatting differences in the final file.</li>
             </ul>
         </div>
     </div>
@@ -858,7 +894,7 @@
     <div id="linkModal" class="modal hidden">
         <div class="modal-backdrop" id="linkModalBackdrop"></div>
         <div class="modal-content" id="linkModalContent">
-            <h3>Add Link</h3>
+            <h3></h3>
             <p>Enter the URL you want to link to:</p>
             <input type="text" id="linkUrlInput" placeholder="https://www.herovibes.store" />
             <div class="modal-actions">
@@ -897,6 +933,8 @@
     const closeLinkButton = document.getElementById('closeLinkButton');
     const createLinkButton = document.getElementById('createLinkButton');
     const linkUrlInput = document.getElementById('linkUrlInput');
+    const findWordInput = document.getElementById('findWord');
+    const replaceWordInput = document.getElementById('replaceWord');
     
     // ===== STATE VARIABLES =====
     let permanentAIHighlightActive = false;
@@ -904,6 +942,7 @@
     let historyStack = [];
     let historyIndex = -1;
     let currentMatchIndex = -1;
+    let currentLinkToEdit = null;
     
     // ===== EMOJI DATA (Truncated) =====
     const emojiData = {
@@ -1000,6 +1039,9 @@
     
     undoButton.addEventListener('click', customUndo);
     redoButton.addEventListener('click', customRedo);
+    
+    // Update toolbar on selection change
+    document.addEventListener('selectionchange', updateToolbarStates);
     editor.addEventListener('keyup', updateToolbarStates);
     editor.addEventListener('mouseup', updateToolbarStates);
     editor.addEventListener('click', updateToolbarStates);
@@ -1036,12 +1078,16 @@
     
     // ===== TOOLBAR FUNCTIONS =====
     function updateToolbarStates() {
-        const { block, size, align } = getSelectionStyle();
+        const { block, size, align, link } = getSelectionStyle();
         updateBlockFormatDropdown(block);
         updateFontSizeDropdown(size);
         updateAlignmentButtonIcon(align);
         updateFormattingButtons();
         updateStats();
+        
+        // FIX 3: Update link button state
+        linkButton.classList.toggle('active', !!link);
+        currentLinkToEdit = link; // Store the link for editing
     }
 
     function formatText(command, value = null) {
@@ -1105,7 +1151,7 @@
     
     function getSelectionStyle() {
         const selection = window.getSelection();
-        if (!selection.rangeCount) return { block: 'p', size: '16px', align: 'left' };
+        if (!selection.rangeCount) return { block: 'p', size: '16px', align: 'left', link: null };
 
         let element = selection.getRangeAt(0).startContainer;
         let parent = element.nodeType === 3 ? element.parentNode : element;
@@ -1113,14 +1159,19 @@
         let blockType = 'p';
         let fontSize = '16px';
         let textAlign = 'left';
+        let parentLink = null;
 
         while (parent && parent.id !== 'editor') {
             const nodeName = parent.nodeName.toLowerCase();
             const styles = window.getComputedStyle(parent);
+            
+            // Check for link
+            if (nodeName === 'a') {
+                parentLink = parent;
+            }
 
             if (['p', 'h1', 'h2', 'h3', 'li', 'blockquote'].includes(nodeName)) {
-                blockType = ['h1', 'h2', 'h3'].includes(nodeName) ?
-                    nodeName : 'p';
+                blockType = ['h1', 'h2', 'h3'].includes(nodeName) ? nodeName : 'p';
                 fontSize = styles.fontSize;
                 textAlign = styles.textAlign;
                 break;
@@ -1131,7 +1182,7 @@
         if (textAlign === 'start' || textAlign === 'end') textAlign = 'left';
         if (textAlign.includes('justify')) textAlign = 'justify';
 
-        return { block: blockType, size: fontSize, align: textAlign };
+        return { block: blockType, size: fontSize, align: textAlign, link: parentLink };
     }
     
     function updateBlockFormatDropdown(blockType) {
@@ -1271,33 +1322,42 @@
 
     // ===== FIND & REPLACE =====
     function highlightFindMatches() {
-        const findValue = document.getElementById('findWord').value;
+        const findValue = findWordInput.value;
         removeHighlight('find-match');
         removeHighlight('current');
         if (findValue) {
             const regex = new RegExp(`(${findValue.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
             highlightInTextNodes(regex, 'find-match');
+            editor.classList.add('find-active'); // FIX 2
+        } else {
+            editor.classList.remove('find-active'); // FIX 2
         }
         currentMatchIndex = -1;
     }
 
-    document.getElementById('findWord').addEventListener('input', highlightFindMatches);
+    findWordInput.addEventListener('input', highlightFindMatches);
     
-    document.getElementById('findWord').addEventListener('keydown', (e) => {
+    function findReplaceKeydown(e) {
+        const isModKey = e.ctrlKey || e.metaKey;
         if (e.key === 'Enter') {
             e.preventDefault();
-            if (e.shiftKey) {
+            if (isModKey) {
+                replaceOne(); // FIX 2
+            } else if (e.shiftKey) {
                 navigateMatch(-1);
             } else {
                 navigateMatch(1);
             }
         }
-    });
+    }
+    
+    findWordInput.addEventListener('keydown', findReplaceKeydown);
+    replaceWordInput.addEventListener('keydown', findReplaceKeydown);
     
     function replaceOne() {
         saveState();
-        const find = document.getElementById('findWord').value;
-        const replace = document.getElementById('replaceWord').value;
+        const find = findWordInput.value;
+        const replace = replaceWordInput.value;
         if (!find) return;
         const matches = editor.querySelectorAll('mark.find-match');
         if (matches.length > 0) {
@@ -1313,8 +1373,8 @@
 
     function replaceAll() {
         saveState();
-        const find = document.getElementById('findWord').value;
-        const replace = document.getElementById('replaceWord').value;
+        const find = findWordInput.value;
+        const replace = replaceWordInput.value;
         if (!find) return;
         const regex = new RegExp(`(${find.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
         removeHighlight('find-match');
@@ -1341,7 +1401,7 @@
     prevMatch.addEventListener('click', () => navigateMatch(-1));
     nextMatch.addEventListener('click', () => navigateMatch(1));
     
-    // ===== MARKDOWN TOGGLE (GOAL 1) =====
+    // ===== MARKDOWN TOGGLE (FIX 1 & 4) =====
     
     const turndownService = new TurndownService({ 
         headingStyle: 'atx',
@@ -1349,17 +1409,39 @@
         strongDelimiter: '**'  // Bold: **text**
     });
 
-    // Strikethrough: ~~text~~
     turndownService.addRule('strikethrough', {
         filter: ['s', 'strike'],
         replacement: (content) => '~~' + content + '~~'
     });
     
-    // Underline: __text__
     turndownService.addRule('underline', {
         filter: 'u',
         replacement: (content) => '__' + content + '__'
     });
+    
+    // FIX 4: Preserve alignment
+    turndownService.addRule('alignment', {
+        filter: ['p', 'h1', 'h2', 'h3'],
+        replacement: (content, node) => {
+            let align = node.style.textAlign;
+            let alignComment = (align && align !== 'left' && align !== 'start') ? ` ` : '';
+            
+            // Handle Turndown's native header processing
+            if (['H1', 'H2', 'H3'].includes(node.nodeName)) {
+                let hLevel = node.nodeName.charAt(1);
+                let hPrefix = '#'.repeat(hLevel) + ' ';
+                return '\n' + hPrefix + content + alignComment + '\n\n';
+            }
+            
+            // Handle empty paragraphs
+            if (content.trim() === '' && !node.querySelector('br') && !node.querySelector('img')) {
+                return '\n\n';
+            }
+            
+            return content + alignComment + '\n\n';
+        }
+    });
+
     
     // Custom Showdown extension for __underline__
     showdown.extension('underline', () => {
@@ -1373,7 +1455,7 @@
     const showdownConverter = new showdown.Converter({ 
         strikethrough: true,
         simpleLineBreaks: true,
-        extensions: ['underline'] // Enable the custom extension
+        extensions: ['underline']
     });
 
 
@@ -1383,7 +1465,10 @@
         const markdownButton = document.getElementById('markdownButton');
         
         if (isMarkdown) {
-            editor.innerHTML = showdownConverter.makeHtml(editor.innerText);
+            let html = showdownConverter.makeHtml(editor.innerText);
+            // FIX 4: Re-apply alignment
+            html = html.replace(/<([ph][1-3]?)>(.*?)<\/(\1)>/g, '<$1 style="text-align:$3">$2</$4>');
+            editor.innerHTML = html;
             editor.setAttribute('data-mode', 'rich');
             markdownButton.classList.remove('active');
         } else {
@@ -1465,12 +1550,24 @@
         }
     });
     
-    // ===== LINK MODAL (GOAL 2) =====
+    // ===== LINK MODAL (FIX 3) =====
     function openLinkModal() {
-        saveSelection();
-        if (savedRange.collapsed) {
-            alert('Please highlight the text you want to turn into a link.');
-            return;
+        if (currentLinkToEdit) {
+            // Edit existing link
+            saveSelection(); // Save selection just in case
+            linkModal.querySelector('h3').textContent = 'Update Link';
+            createLinkButton.textContent = 'Update';
+            linkUrlInput.value = currentLinkToEdit.getAttribute('href');
+        } else {
+            // Create new link
+            saveSelection();
+            if (savedRange.collapsed) {
+                alert('Please highlight the text you want to turn into a link.');
+                return;
+            }
+            linkModal.querySelector('h3').textContent = 'Add Link';
+            createLinkButton.textContent = 'Create';
+            linkUrlInput.value = '';
         }
         linkModal.classList.remove('hidden');
         linkUrlInput.focus();
@@ -1479,17 +1576,37 @@
     function closeLinkModal() {
         linkModal.classList.add('hidden');
         linkUrlInput.value = '';
+        currentLinkToEdit = null; // Clear editing state
     }
     
     function createLink() {
-        restoreSelection();
         let url = linkUrlInput.value;
         if (url && !url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/')) {
             url = 'https://' + url;
         }
-        document.execCommand('createLink', false, url);
+        
+        restoreSelection();
+        
+        if (currentLinkToEdit) {
+            // Update existing link
+            currentLinkToEdit.setAttribute('href', url);
+            currentLinkToEdit.setAttribute('title', url);
+        } else {
+            // Create new link
+            document.execCommand('createLink', false, url);
+            // Add title for hover
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                let parentLink = selection.getRangeAt(0).startContainer.parentElement.closest('a');
+                if (parentLink) {
+                    parentLink.setAttribute('title', url);
+                }
+            }
+        }
+        
         closeLinkModal();
         scheduleHeightCheck();
+        updateToolbarStates();
     }
     
     linkButton.addEventListener('click', openLinkModal);
@@ -1503,7 +1620,7 @@
         }
     });
 
-    // ===== DOWNLOAD FUNCTIONS =====
+    // ===== DOWNLOAD FUNCTIONS (FIX 5) =====
     downloadButton.addEventListener('click', () => {
         downloadMenu.classList.toggle('hidden');
     });
@@ -1559,114 +1676,10 @@
                 document.body.removeChild(tempDiv);
             });
             
-        } else if (type === 'docx') {
-            const doc = new docx.Document({
-                numbering: {
-                    config: [
-                        {
-                            reference: "default-numbering",
-                            levels: [ { level: 0, format: docx.LevelFormat.DECIMAL, text: "%1.", start: 1, alignment: docx.AlignmentType.LEFT, paragraph: { indent: { left: 720, hanging: 360 } } } ],
-                        },
-                        {
-                            reference: "default-bullet",
-                            levels: [ { level: 0, format: docx.LevelFormat.BULLET, text: "•", alignment: docx.AlignmentType.LEFT, paragraph: { indent: { left: 720, hanging: 360 } } } ],
-                        }
-                    ],
-                },
-                sections: [{ children: parseHtmlToDocx(editor) }]
-            });
-            
-            docx.Packer.toBlob(doc).then(blob => {
-                triggerDownload(blob, 'document.docx');
-            });
-            
         } else if (type === 'txt') {
             const blob = new Blob([plainText], {type: 'text/plain'});
             triggerDownload(blob, 'document.txt');
         }
-    }
-
-    function parseHtmlToDocx(parentNode) {
-        const elements = [];
-        
-        function extractTextRuns(node, style = {}) {
-            const runs = [];
-            if (node.nodeType === 3) {
-                runs.push(new docx.TextRun({ text: node.textContent, ...style }));
-            } else if (node.nodeType === 1) {
-                const nodeName = node.nodeName.toUpperCase();
-                let newStyle = { ...style };
-                
-                const computedStyle = window.getComputedStyle(node);
-                if (computedStyle.fontWeight === 'bold' || parseInt(computedStyle.fontWeight) >= 700) newStyle.bold = true;
-                if (computedStyle.fontStyle === 'italic') newStyle.italic = true;
-
-                if (nodeName === 'U') newStyle.underline = {};
-                if (['S', 'STRIKE'].includes(nodeName)) newStyle.strike = true;
-                if (nodeName === 'FONT' && node.style.fontSize) newStyle.size = parseFloat(node.style.fontSize) * 2;
-                if (nodeName === 'BR') runs.push(new docx.TextRun({ break: 1 }));
-                
-                if (nodeName === 'A') {
-                    // Create a hyperlink
-                    runs.push(new docx.Hyperlink({
-                        child: new docx.TextRun({
-                            text: node.textContent,
-                            style: "Hyperlink",
-                        }),
-                        link: node.getAttribute('href') || ''
-                    }));
-                } else {
-                    // Recurse
-                    node.childNodes.forEach(child => runs.push(...extractTextRuns(child, newStyle)));
-                }
-            }
-            return runs;
-        }
-
-        parentNode.childNodes.forEach(node => {
-            if (node.nodeType !== 1) return;
-            const nodeName = node.nodeName.toUpperCase();
-
-            let alignment = docx.AlignmentType.LEFT;
-            if (node.style.textAlign === 'center') alignment = docx.AlignmentType.CENTER;
-            else if (node.style.textAlign === 'right') alignment = docx.AlignmentType.RIGHT;
-            else if (node.style.textAlign === 'justify') alignment = docx.AlignmentType.JUSTIFIED;
-
-            let spacing = { after: 240 };
-            if (nodeName === 'H1') spacing = { before: 480, after: 240 };
-            else if (nodeName === 'H2') spacing = { before: 360, after: 180 };
-            else if (nodeName === 'H3') spacing = { before: 300, after: 150 };
-
-            if (['P', 'H1', 'H2', 'H3', 'BLOCKQUOTE'].includes(nodeName)) {
-                const textRuns = extractTextRuns(node);
-                elements.push(new docx.Paragraph({
-                    children: textRuns.length > 0 ? textRuns : [new docx.TextRun("")],
-                    heading: nodeName === 'H1' ? docx.HeadingLevel.HEADING_1 :
-                             nodeName === 'H2' ? docx.HeadingLevel.HEADING_2 :
-                             nodeName === 'H3' ? docx.HeadingLevel.HEADING_3 : undefined,
-                    style: nodeName === 'BLOCKQUOTE' ? "IntenseQuote" : undefined,
-                    alignment: alignment,
-                    indent: nodeName === 'BLOCKQUOTE' ? { left: 720 } : undefined,
-                    spacing: spacing
-                }));
-            } else if (nodeName === 'UL' || nodeName === 'OL') {
-                node.querySelectorAll('li').forEach(li => {
-                    elements.push(new docx.Paragraph({
-                        children: extractTextRuns(li),
-                        bullet: nodeName === 'UL' ? { level: 0, reference: "default-bullet" } : undefined,
-                        numbering: nodeName === 'OL' ? { reference: "default-numbering", level: 0 } : undefined,
-                        spacing: { after: 80 }
-                    }));
-                });
-            } else if (nodeName === 'HR') {
-                elements.push(new docx.Paragraph({
-                    text: "",
-                    border: { bottom: { color: "auto", space: 1, value: "single", size: 6 } },
-                    spacing: { after: 200, before: 200 }
-                }));
-            }
-        });
-        return elements;
     }
 
     // ===== PLAIN TEXT CONVERSION =====
