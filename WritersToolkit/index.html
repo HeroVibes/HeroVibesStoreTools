@@ -43,25 +43,21 @@
             margin: 0 auto;
         }
 
-        /* ===== TOOLBAR CONTAINER (FIX 2: STICKY MENU) ===== */
+        /* ===== TOOLBAR CONTAINER ===== */
         .toolbar-container {
             background: var(--secondary-bg);
             border: 1px solid var(--outline-color);
             border-radius: var(--radius);
             padding: 16px;
-            /* Changed from sticky to fixed */
             position: fixed;
             top: 16px;
             z-index: 100;
-            
-            /* Sizing to fit container */
-            width: calc(100% - 32px); /* 16px padding L/R */
+            width: calc(100% - 32px);
             max-width: 1200px;
             left: 50%;
             transform: translateX(-50%);
         }
         
-        /* Spacer to push content down */
         #toolbar-spacer {
             height: 150px; /* Fallback, JS will override */
             margin-bottom: 16px;
@@ -370,7 +366,6 @@
             padding: 0;
         }
         
-        /* Command highlighting */
         mark.command-active {
             background: var(--accent-color);
             color: var(--primary-bg);
@@ -498,7 +493,7 @@
             border-radius: var(--radius);
             padding: 24px;
             width: 90%;
-            max-width: 500px;
+            max-width: 600px; /* FIX 1: Wider */
             max-height: 80vh;
             overflow-y: auto;
         }
@@ -534,6 +529,36 @@
             right: 16px;
         }
         
+        /* FIX 1: Help Modal Dropdowns */
+        #helpModalContent details {
+            border-bottom: 1px solid var(--outline-color);
+        }
+        #helpModalContent details:last-of-type {
+            border-bottom: none;
+        }
+        #helpModalContent summary {
+            cursor: pointer;
+            padding: 16px 0;
+            font-size: 16px;
+            color: var(--primary-text);
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #helpModalContent summary::after {
+            content: '+';
+            font-size: 24px;
+            color: var(--secondary-text);
+            transition: transform 0.2s ease;
+        }
+        #helpModalContent details[open] summary::after {
+            transform: rotate(45deg);
+        }
+        #helpModalContent .help-details-content {
+            padding-bottom: 16px;
+        }
+        
         /* Specific modal content */
         #linkUrlInput {
             width: 100%;
@@ -565,16 +590,6 @@
             filter: brightness(0.9);
         }
         
-        #helpModalContent h4 {
-            color: var(--primary-text);
-            font-size: 16px;
-            margin-top: 20px;
-            margin-bottom: 8px;
-        }
-        #helpModalContent li {
-            margin-bottom: 8px;
-        }
-        
         .ai-square-inline {
             display: inline-block;
             width: 12px;
@@ -589,7 +604,7 @@
             vertical-align: -3px;
         }
         
-        /* ===== SCROLL NAV (FIX 1) ===== */
+        /* ===== SCROLL NAV ===== */
         #scrollNav {
             position: fixed;
             bottom: 32px;
@@ -944,7 +959,7 @@
         <div class="editor" contenteditable="true" id="editor" spellcheck="true"><p><br></p></div>
     </div>
     <div id="stats-bar">
-        <span class="version">V.1.0.3</span>
+        <span class="version">V.1.0.4</span>
         <div>
             <span id="char-count">0</span> characters · 
             <span id="word-count">0</span> words ·
@@ -965,43 +980,67 @@
             </button>
             <h3>How to Use This Tool</h3>
             
-            <h4>Commands</h4>
-            <p>Type a slash <strong>/</strong> in the editor to use commands. Press <strong>Enter</strong> to activate.</p>
-            <ul>
-                <li><kbd>/h1</kbd>, <kbd>/h2</kbd>, <kbd>/h3</kbd>: Set block to Header 1, 2, or 3.</li>
-                <li><kbd>/div</kbd>: Insert a horizontal line.</li>
-                <li><kbd>/bul</kbd>: Create a bullet list.</li>
-                <li><kbd>/num</kbd>: Create a numbered list.</li>
-                <li><kbd>/date</kbd>: Insert the current date.</li>
-                <li><kbd>/time</kbd>: Insert the current time.</li>
-                <li><kbd>/ai</kbd>: Toggle the AI artifact highlighter.</li>
-                <li><kbd>/emoji</kbd>: Open the emoji picker.</li>
-                <li><kbd>/help</kbd>: Open this help menu.</li>
-            </ul>
-            
-            <h4>Find & Replace</h4>
-            <p>Type into the "Find" box to highlight matching text. The editor will get a <strong>red outline</strong> to show this feature is active.</p>
-            <ul>
-                <li><kbd>Enter</kbd>: Jump to the <strong>next</strong> match.</li>
-                <li><kbd>Shift + Enter</kbd>: Jump to the <strong>previous</strong> match.</li>
-                <li><kbd>Ctrl/Cmd + Enter</kbd>: <strong>Replace</strong> the current match and jump to the next one.</li>
-                <li>Click the <strong>Red (X)</strong> button to clear the inputs and exit Find mode.</li>
-            </ul>
+            <details>
+                <summary>Commands</summary>
+                <div class="help-details-content">
+                    <p>Type a slash <strong>/</strong> in the editor to use commands. Press <strong>Enter</strong> to activate.</p>
+                    <ul>
+                        <li><kbd>/h1</kbd>, <kbd>/h2</kbd>, <kbd>/h3</kbd>: Set block to Header 1, 2, or 3.</li>
+                        <li><kbd>/div</kbd>: Insert a horizontal line.</li>
+                        <li><kbd>/bul</kbd>: Create a bullet list.</li>
+                        <li><kbd>/num</kbd>: Create a numbered list.</li>
+                        <li><kbd>/date</kbd>: Insert the current date.</li>
+                        <li><kbd>/time</kbd>: Insert the current time.</li>
+                        <li><kbd>/ai</kbd>: Toggle the AI artifact highlighter.</li>
+                        <li><kbd>/emoji</kbd>: Open the emoji picker.</li>
+                        <li><kbd>/help</kbd>: Open this help menu.</li>
+                    </ul>
+                </div>
+            </details>
 
-            <h4>Links</h4>
-            <p>Highlight text and click the <strong>Link (<svg class="help-icon-inline" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.72-1.72"></path></svg>)</strong> button to add a URL. If you click on an existing link, the button will turn <strong>blue</strong>, allowing you to update or remove the link.</p>
-            
-            <h4>AI Artifacts</h4>
-            <p>Use the <strong>Yellow Square (<span class="ai-square-inline"></span>)</strong> button to highlight invisible AI characters. This adds a <strong>yellow outline</strong> to the editor. Use the <strong>Trash</strong> button to remove them. (If both Find and AI are active, the outline is <strong>orange</strong>).</p>
+            <details>
+                <summary>Find & Replace</summary>
+                <div class="help-details-content">
+                    <p>Type into the "Find" box to highlight matching text. The editor will get a <strong>red outline</strong> to show this feature is active.</p>
+                    <ul>
+                        <li><kbd>Enter</kbd>: Jump to the <strong>next</strong> match.</li>
+                        <li><kbd>Shift + Enter</kbd>: Jump to the <strong>previous</strong> match.</li>
+                        <li><kbd>Ctrl/Cmd + Enter</kbd>: <strong>Replace</strong> the current match and jump to the next one.</li>
+                        <li>Click the <strong>Red (X)</strong> button to clear the inputs and exit Find mode.</li>
+                    </ul>
+                </div>
+            </details>
 
-            <h4>Markdown Mode</h4>
-            <p>Toggle Markdown mode to see your text as code. This tool supports <strong>**bold**</strong>, <strong>*italic*</strong>, <strong>__underline__</strong>, and <strong>~~strikethrough~~</strong>. Text alignment (center/right) is also preserved when toggling.</p>
+            <details>
+                <summary>Links</summary>
+                <div class="help-details-content">
+                    <p>Highlight text and click the <strong>Link (<svg class="help-icon-inline" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.72-1.72"></path></svg>)</strong> button to add a URL. If you click on an existing link, the button will turn <strong>blue</strong>, allowing you to update or remove the link.</p>
+                </div>
+            </details>
             
-            <h4>Tips & Known Issues</h4>
-            <ul>
-                <li><strong>Typing Lag:</strong> If your typing feels stuck, make sure the "Find" box is empty and the AI Highlight is off (check for the colored outline).</li>
-                <li><strong>Downloading:</strong> You can save your work as a <strong>.html</strong> file (which preserves all formatting) or a <strong>.txt</strong> file (plain text).</li>
-            </ul>
+            <details>
+                <summary>AI Artifacts</summary>
+                <div class="help-details-content">
+                    <p>Use the <strong>Yellow Square (<span class="ai-square-inline"></span>)</strong> button to highlight invisible AI characters. This adds a <strong>yellow outline</strong> to the editor. Use the <strong>Trash</strong> button to remove them. (If both Find and AI are active, the outline is <strong>orange</strong>).</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Markdown Mode</summary>
+                <div class="help-details-content">
+                    <p>Toggle Markdown mode to see your text as code. This tool supports <strong>**bold**</strong>, <strong>*italic*</strong>, <strong>__underline__</strong>, and <strong>~~strikethrough~~</strong>. Text alignment (center/right) is also preserved when toggling.</p>
+                </div>
+            </details>
+            
+            <details>
+                <summary>Tips & Known Issues</summary>
+                <div class="help-details-content">
+                    <ul>
+                        <li><strong>Typing Lag:</strong> If your typing feels stuck, make sure the "Find" box is empty and the AI Highlight is off (check for the colored outline).</li>
+                        <li><strong>Downloading:</strong> You can save your work as a <strong>.html</strong> file (which preserves all formatting) or a <strong>.txt</strong> file (plain text).</li>
+                    </ul>
+                </div>
+            </details>
         </div>
     </div>
     
@@ -1076,7 +1115,7 @@
     let currentLinkToEdit = null;
     let lastCursorPos = null;
     
-    // ===== EMOJI DATA (FIX 5) =====
+    // ===== EMOJI DATA =====
     const emojiList = [
         { e: '😀', k: ['grinning', 'happy', 'smile'] }, { e: '😃', k: ['happy', 'joy'] }, { e: '😄', k: ['laugh', 'happy'] },
         { e: '😁', k: ['grin', 'smile'] }, { e: '😆', k: ['laugh', 'haha'] }, { e: '😅', k: ['sweat', 'relief'] },
@@ -1193,7 +1232,7 @@
         if (permanentAIHighlightActive) {
             setTimeout(() => highlightInTextNodes(aiCharactersRegex, 'ai-highlight'), 10);
         }
-        handleCommandHighlight(); // Command System
+        handleCommandHighlight();
     });
 
     editor.addEventListener('paste', (e) => {
@@ -1220,7 +1259,7 @@
     
     document.addEventListener('selectionchange', () => {
         updateToolbarStates();
-        saveCursorPosition(); // For "Scroll to Content"
+        saveCursorPosition();
     });
     editor.addEventListener('keyup', updateToolbarStates);
     editor.addEventListener('mouseup', updateToolbarStates);
@@ -1230,7 +1269,7 @@
         const isModKey = e.ctrlKey || e.metaKey;
         
         if (e.key === 'Enter' && !isModKey && !e.shiftKey) {
-            if (handleCommandExecute()) { // Command System
+            if (handleCommandExecute()) {
                 e.preventDefault();
                 return;
             }
@@ -1277,7 +1316,7 @@
             e.preventDefault();
             document.execCommand('insertLineBreak');
         } else if (e.key === ' ') {
-            removeCommandHighlight(); // Command System
+            removeCommandHighlight();
         }
     });
     
@@ -2044,7 +2083,7 @@
     helpModalBackdrop.addEventListener('click', toggleHelpModal);
     closeHelpButton.addEventListener('click', toggleHelpModal);
     
-    // ===== SLASH COMMANDS =====
+    // ===== SLASH COMMANDS (FIX 2) =====
     function getCommandNode() {
         const selection = window.getSelection();
         if (!selection.rangeCount) return null;
@@ -2071,6 +2110,17 @@
             const mark = document.createElement('mark');
             mark.className = 'command-active';
             range.surroundContents(mark);
+            
+            // FIX 2: Restore cursor position
+            const newRange = document.createRange();
+            const sel = window.getSelection();
+            
+            if (mark.firstChild) {
+                newRange.setStart(mark.firstChild, mark.firstChild.length); 
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+            }
         }
     }
 
@@ -2082,68 +2132,83 @@
         editor.normalize();
     }
     
-    function insertTimeDate(type) {
-        const now = new Date();
-        let text = '';
-        if (type === 'time') {
-            text = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-        } else {
-            text = now.toLocaleDateString('en-US', { day: '2-digit', month: 'LONG', year: 'numeric' });
-        }
-        document.execCommand('insertText', false, text);
-    }
-    
     function handleCommandExecute() {
         const commandNode = editor.querySelector('mark.command-active');
         if (!commandNode) return false;
         
         const command = commandNode.textContent.trim().toLowerCase();
-        
-        // Find the parent paragraph to remove the command
-        let p = commandNode.parentElement;
-        while(p.nodeName !== 'P' && p.id !== 'editor') {
-            p = p.parentElement;
-        }
+        const p = commandNode.parentNode;
         if (!p) return false;
         
-        const commandText = commandNode.textContent;
-        commandNode.remove();
-        p.textContent = p.textContent.replace(commandText, '');
+        // This function will handle the replacement and cursor
+        const replaceCommand = (textToInsert = '') => {
+            const textNode = document.createTextNode(textToInsert);
+            p.replaceChild(textNode, commandNode);
+            
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.setStart(textNode, textNode.length);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        };
         
-        // Place cursor back
-        const range = document.createRange();
-        const sel = window.getSelection();
-        range.setStart(p, 0);
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-        
-        switch(command) {
-            case '/h1': changeBlockType('h1'); break;
-            case '/h2': changeBlockType('h2'); break;
-            case '/h3': changeBlockType('h3'); break;
-            case '/div': formatText('insertHorizontalRule'); break;
-            case '/bul': formatText('insertUnorderedList'); break;
-            case '/num': formatText('insertOrderedList'); break;
-            case '/help': toggleHelpModal(); break;
-            case '/ai': togglePermanentAIHighlight(); break;
-            case '/time': insertTimeDate('time'); break;
-            case '/date': insertTimeDate('date'); break;
-            case '/emoji': 
+        // This function will just remove the command text and set cursor
+        const runBlockCommand = (cmd, val = null) => {
+            const textNode = document.createTextNode('');
+            p.replaceChild(textNode, commandNode);
+
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.setStart(textNode, 0);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            
+            if (cmd === 'formatBlock') changeBlockType(val);
+            if (cmd === 'formatText') formatText(val);
+            if (cmd === 'toggleHelp') toggleHelpModal();
+            if (cmd === 'toggleAI') togglePermanentAIHighlight();
+            if (cmd === 'toggleEmoji') {
                 toggleEmojiPopup(); 
                 setTimeout(() => document.getElementById('emojiSearch').focus(), 100);
-                break;
-            default: return false;
+            }
+        };
+
+        const formatDate = (type) => {
+            const now = new Date();
+            if (type === 'time') {
+                return now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            } else {
+                return now.toLocaleDateString('en-US', { day: '2-digit', month: 'LONG', year: 'numeric' });
+            }
+        };
+
+        switch(command) {
+            case '/h1': runBlockCommand('formatBlock', 'h1'); break;
+            case '/h2': runBlockCommand('formatBlock', 'h2'); break;
+            case '/h3': runBlockCommand('formatBlock', 'h3'); break;
+            case '/div': runBlockCommand('formatText', 'insertHorizontalRule'); break;
+            case '/bul': runBlockCommand('formatText', 'insertUnorderedList'); break;
+            case '/num': runBlockCommand('formatText', 'insertOrderedList'); break;
+            case '/help': runBlockCommand('toggleHelp'); break;
+            case '/ai': runBlockCommand('toggleAI'); break;
+            case '/emoji': runBlockCommand('toggleEmoji'); break;
+            case '/time': replaceCommand(formatDate('time')); break;
+            case '/date': replaceCommand(formatDate('date')); break;
+            default: 
+                removeCommandHighlight();
+                return false;
         }
         return true;
     }
     
-    // ===== SCROLL NAV (FIX 2) =====
+    // ===== SCROLL NAV =====
     function setScrollNav(parentScrollTop) {
-        if (parentScrollTop > 150) { // Show "scroll to top"
+        if (parentScrollTop > 150) {
             scrollToTopButton.classList.remove('hidden');
             scrollToContentButton.classList.add('hidden');
-        } else { // Show "scroll to content"
+        } else {
             scrollToTopButton.classList.add('hidden');
             if (lastCursorPos) {
                 scrollToContentButton.classList.remove('hidden');
@@ -2163,18 +2228,14 @@
     });
     
     scrollToContentButton.addEventListener('click', () => {
-        // Send a message to parent to scroll to the content
         if (lastCursorPos) {
-            // Create a temporary element to measure its position
             const temp = document.createElement('span');
             lastCursorPos.insertNode(temp);
             const rect = temp.getBoundingClientRect();
             temp.remove();
             
-            // Get toolbar height to offset
             const toolbarHeight = toolbarContainer.offsetHeight + 16;
             
-            // Tell parent to scroll
             window.parent.postMessage({ scrollToContent: rect.top - toolbarHeight }, '*');
         }
     });
@@ -2215,7 +2276,6 @@
         updateToolbarSpacer();
     });
     
-    // Listen for messages FROM parent (e.g., scroll position)
     window.addEventListener('message', (event) => {
         if (event.data.parentScrollTop !== undefined) {
             setScrollNav(event.data.parentScrollTop);
