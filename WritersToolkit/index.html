@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Writer's Toolbox</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
     
@@ -19,7 +17,9 @@
             --accent-color: #87A9FF;
             --primary-text: #D4D4D4;
             --secondary-text: #8C8C8C;
-            --danger-color: #E53E3E;
+            --danger-color: #E53E3E; /* Red */
+            --warning-color: #FFD700; /* Yellow */
+            --combo-color: #ED8936;   /* Orange */
             --radius: 8px;
         }
 
@@ -172,7 +172,7 @@
           display: inline-block;
           width: 14px;
           height: 14px;
-          background-color: #FFD700;
+          background-color: var(--warning-color);
           border: 1px solid rgba(255,255,255,0.2);
           border-radius: 2px;
           vertical-align: middle;
@@ -252,10 +252,18 @@
             border-color: var(--hover-color);
         }
         
-        /* FIX 2: Find/Replace active outline */
+        /* FIX 9: Active State Outlines */
         .editor.find-active {
             border-color: var(--danger-color);
             box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.4), 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .editor.ai-active {
+            border-color: var(--warning-color);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.4), 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .editor.find-active.ai-active {
+            border-color: var(--combo-color);
+            box-shadow: 0 0 0 3px rgba(237, 137, 54, 0.4), 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .editor p {
@@ -352,7 +360,7 @@
             outline: 1px solid var(--accent-color);
         }
 
-        /* ===== EMOJI POPUP ===== */
+        /* ===== EMOJI POPUP (FIX 6) ===== */
         #emojiPopup {
             position: absolute;
             background: var(--secondary-bg);
@@ -361,7 +369,7 @@
             border-radius: var(--radius);
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             z-index: 1001;
-            width: 320px;
+            width: 360px; /* Widened */
             max-height: 280px;
             overflow-y: auto;
         }
@@ -373,7 +381,7 @@
 
         #emojiList {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
+            grid-template-columns: repeat(9, 1fr); /* More columns */
             gap: 4px;
         }
 
@@ -390,7 +398,7 @@
             transform: scale(1.1);
         }
 
-        /* ===== DOWNLOAD MENU ===== */
+        /* ===== DOWNLOAD MENU (FIX 8) ===== */
         #downloadMenu {
             position: absolute;
             background: var(--secondary-bg);
@@ -524,6 +532,20 @@
         #helpModalContent li {
             margin-bottom: 8px;
         }
+        
+        .ai-square-inline {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-color: var(--warning-color);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 2px;
+            vertical-align: -1px;
+        }
+        .help-icon-inline {
+            display: inline-block;
+            vertical-align: -3px;
+        }
 
         /* ===== UTILITY CLASSES ===== */
         .hidden {
@@ -596,9 +618,8 @@
                  overflow: hidden;
             }
             
-            .editor.find-active {
+            .editor.find-active, .editor.ai-active, .editor.find-active.ai-active {
                 box-shadow: none;
-                border-color: var(--danger-color);
             }
 
             #emojiPopup {
@@ -658,13 +679,13 @@
         <div class="toolbar">
             <div class="btn-wrapper">
                 <button id="undoButton" class="icon-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
                 </button>
                 <span class="btn-tooltip">Undo (Ctrl+Z)</span>
             </div>
             <div class="btn-wrapper">
                 <button id="redoButton" class="icon-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"/></svg>
                 </button>
                 <span class="btn-tooltip">Redo (Ctrl+Shift+Z)</span>
             </div>
@@ -710,7 +731,7 @@
             </div>
             <div class="btn-wrapper">
                 <button id="linkButton" class="icon-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.72-1.72"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.72-1.72"></path></svg>
                 </button>
                 <span class="btn-tooltip">Add link</span>
             </div>
@@ -721,25 +742,25 @@
             </div>
             <div class="btn-wrapper">
                 <button class="icon-btn" onclick="formatText('insertUnorderedList')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                 </button>
                 <span class="btn-tooltip">Bullet list</span>
             </div>
             <div class="btn-wrapper">
                 <button class="icon-btn" onclick="formatText('insertOrderedList')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
                 </button>
                 <span class="btn-tooltip">Numbered list</span>
             </div>
             <div class="btn-wrapper">
                 <button class="icon-btn" onclick="formatText('outdent')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 8 3 12 7 16"/><line x1="21" y1="12" x2="11" y2="12"/><line x1="21" y1="6" x2="11" y2="6"/><line x1="21" y1="18" x2="11" y2="18"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 3 12 7 16"/><line x1="21" y1="12" x2="11" y2="12"/><line x1="21" y1="6" x2="11" y2="6"/><line x1="21" y1="18" x2="11" y2="18"/></svg>
                 </button>
                 <span class="btn-tooltip">Outdent</span>
             </div>
             <div class="btn-wrapper">
                 <button class="icon-btn" onclick="formatText('indent')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 8 17 12 13 16"/><line x1="3" y1="12" x2="13" y2="12"/><line x1="3" y1="6" x2="13" y2="6"/><line x1="3" y1="18" x2="13" y2="18"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 8 17 12 13 16"/><line x1="3" y1="12" x2="13" y2="12"/><line x1="3" y1="6" x2="13" y2="6"/><line x1="3" y1="18" x2="13" y2="18"/></svg>
                 </button>
                 <span class="btn-tooltip">Indent</span>
             </div>
@@ -761,7 +782,7 @@
             </div>
             <div class="btn-wrapper">
                 <button onclick="removeAIArtifacts()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9v11a2 2 0 01-2 2H6a2 2 0 01-2-2V9"/><path d="M8 9V5a2 2 0 012-2h4a2 2 0 012 2v4"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9v11a2 2 0 01-2 2H6a2 2 0 01-2-2V9"/><path d="M8 9V5a2 2 0 012-2h4a2 2 0 012 2v4"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
                 </button>
                 <span class="btn-tooltip">Remove AI artifacts</span>
             </div>
@@ -782,13 +803,13 @@
             <div class="toolbar-separator"></div>
             <div class="btn-wrapper">
                 <button id="prevMatch" class="icon-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
                 </button>
                 <span class="btn-tooltip">Previous (Shift+Enter)</span>
             </div>
             <div class="btn-wrapper">
                 <button id="nextMatch" class="icon-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12l7 7 7-7"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m5 12 7 7 7-7"/></svg>
                 </button>
                 <span class="btn-tooltip">Next (Enter)</span>
             </div>
@@ -796,26 +817,26 @@
             </div>
             <div class="btn-wrapper">
                 <button id="markdownButton" onclick="toggleMarkdown()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8v8a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2H4a2 2 0 00-2 2z"/><path d="M6 11v6l2-2 2 2v-6"/><line x1="14" y1="11" x2="14" y2="17"/><line x1="18" y1="11" x2="14" y2="14"/><line x1="14" y1="14" x2="18" y2="17"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8v8a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2H4a2 2 0 00-2 2z"/><path d="M6 11v6l2-2 2 2v-6"/><line x1="14" y1="11" x2="14" y2="17"/><line x1="18" y1="11" x2="14" y2="14"/><line x1="14" y1="14" x2="18" y2="17"/></svg>
                 </button>
                 <span class="btn-tooltip">Toggle Markdown</span>
             </div>
             <div class="btn-wrapper">
                 <button onclick="convertToPlainText()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
                 </button>
                 <span class="btn-tooltip">Plain text</span>
             </div>
             <div class="btn-wrapper" style="position: relative;">
                 <button id="downloadButton">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 </button>
                 <span class="btn-tooltip">Download</span>
                 <div id="downloadMenu" class="hidden">
-                    <div class="download-option" onclick="downloadFile('pdf')">
+                    <div class="download-option" onclick="downloadFile('html')">
                         <div>
-                            <h4>PDF</h4>
-                            <p>Universal format, preserves layout. Great for sharing.</p>
+                            <h4>HTML</h4>
+                            <p>Saves a .html file with all formatting preserved.</p>
                         </div>
                     </div>
                     <div class="download-option" onclick="downloadFile('txt')">
@@ -828,13 +849,13 @@
             </div>
             <div class="btn-wrapper">
                 <button id="clearButton" onclick="clearEditor()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                 </button>
                 <span class="btn-tooltip">Clear document</span>
             </div>
             <div class="btn-wrapper" id="helpButtonWrapper">
                 <button id="helpButton" class="icon-btn" style="margin-left: auto;">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                 </button>
                 <span class="btn-tooltip">Help & Info</span>
             </div>
@@ -845,7 +866,7 @@
         <div class="editor" contenteditable="true" id="editor" spellcheck="true"><p><br></p></div>
     </div>
     <div id="stats-bar">
-        <span class="version">V.1.0.8</span>
+        <span class="version">V.1.0.9</span>
         <div>
             <span id="char-count">0</span> characters · 
             <span id="word-count">0</span> words ·
@@ -867,26 +888,26 @@
             <h3>How to Use This Tool</h3>
             
             <h4>Find & Replace</h4>
-            <p>Type into the "Find" box to highlight text. The editor will get a <strong>red outline</strong> to show it's active.</p>
+            <p>Type into the "Find" box to highlight matching text. The editor will get a <strong>red outline</strong> to show this feature is active.</p>
             <ul>
                 <li><kbd>Enter</kbd>: Jump to the <strong>next</strong> match.</li>
                 <li><kbd>Shift + Enter</kbd>: Jump to the <strong>previous</strong> match.</li>
-                <li><kbd>Ctrl + Enter</kbd>: <strong>Replace</strong> the current match.</li>
+                <li><kbd>Ctrl + Enter</kbd>: <strong>Replace</strong> the current match and jump to the next one.</li>
             </ul>
 
             <h4>Links</h4>
-            <p>Highlight text and click the <strong>Link (<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px;"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.72-1.72"></path></svg>)</strong> button to add a URL. If you click on an existing link, the button will turn <strong>blue</strong>, allowing you to update or remove the link.</p>
+            <p>Highlight text and click the <strong>Link (<svg class="help-icon-inline" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.72-1.72"></path></svg>)</strong> button to add a URL. If you click on an existing link, the button will turn <strong>blue</strong>, allowing you to update or remove the link.</p>
             
             <h4>AI Artifacts</h4>
-            <p>Use the <strong>Yellow Square (<span class="ai-square" style="display:inline-block; vertical-align: -2px;"></span>)</strong> button to highlight invisible characters pasted from AI models. Use the <strong>Trash</strong> button to remove them.</p>
+            <p>Use the <strong>Yellow Square (<span class="ai-square-inline"></span>)</strong> button to highlight invisible AI characters. This adds a <strong>yellow outline</strong> to the editor. Use the <strong>Trash</strong> button to remove them. (If both Find and AI are active, the outline is <strong>orange</strong>).</p>
 
             <h4>Markdown Mode</h4>
-            <p>Toggle Markdown mode (<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px;"><path d="M2 8v8a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2H4a2 2 0 00-2 2z"></path><path d="M6 11v6l2-2 2 2v-6"></path><line x1="14" y1="11" x2="14" y2="17"></line><line x1="18" y1="11" x2="14" y2="14"></line><line x1="14" y1="14" x2="18" y2="17"></line></svg>) to see your text as code. This tool supports <strong>**bold**</strong>, <strong>*italic*</strong>, <strong>__underline__</strong>, and <strong>~~strikethrough~~</strong>. Text alignment (center/right) is also preserved when toggling.</p>
+            <p>Toggle Markdown mode to see your text as code. This tool supports <strong>**bold**</strong>, <strong>*italic*</strong>, <strong>__underline__</strong>, and <strong>~~strikethrough~~</strong>. Text alignment (center/right) is also preserved when toggling.</p>
             
             <h4>Tips & Known Issues</h4>
             <ul>
-                <li><strong>Typing Lag:</strong> If your typing feels stuck, make sure the "Find" box is empty and the AI Highlight is off.</li>
-                <li><strong>Downloading:</strong> PDF and TXT downloads are supported. This feature is new, so you may see minor formatting differences in the final file.</li>
+                <li><strong>Typing Lag:</strong> If your typing feels stuck, make sure the "Find" box is empty and the AI Highlight is off (check for the colored outline).</li>
+                <li><strong>Downloading:</strong> You can save your work as a <strong>.html</strong> file (which preserves all formatting) or a <strong>.txt</strong> file (plain text).</li>
             </ul>
         </div>
     </div>
@@ -1040,7 +1061,6 @@
     undoButton.addEventListener('click', customUndo);
     redoButton.addEventListener('click', customRedo);
     
-    // Update toolbar on selection change
     document.addEventListener('selectionchange', updateToolbarStates);
     editor.addEventListener('keyup', updateToolbarStates);
     editor.addEventListener('mouseup', updateToolbarStates);
@@ -1085,9 +1105,8 @@
         updateFormattingButtons();
         updateStats();
         
-        // FIX 3: Update link button state
         linkButton.classList.toggle('active', !!link);
-        currentLinkToEdit = link; // Store the link for editing
+        currentLinkToEdit = link;
     }
 
     function formatText(command, value = null) {
@@ -1165,7 +1184,6 @@
             const nodeName = parent.nodeName.toLowerCase();
             const styles = window.getComputedStyle(parent);
             
-            // Check for link
             if (nodeName === 'a') {
                 parentLink = parent;
             }
@@ -1205,10 +1223,10 @@
 
     function updateAlignmentButtonIcon(align) {
         const icons = {
-            left: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="17" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>',
-            center: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="19" y1="14" x2="5" y2="14"/><line x1="19" y1="18" x2="5" y2="18"/></svg>',
-            right: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="7" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>',
-            justify: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>'
+            left: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="17" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>',
+            center: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="19" y1="14" x2="5" y2="14"/><line x1="19" y1="18" x2="5" y2="18"/></svg>',
+            right: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="7" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>',
+            justify: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>'
         };
         alignmentButton.innerHTML = icons[align] || icons['left'];
         alignmentButton.title = `Align ${align}`;
@@ -1309,14 +1327,20 @@
         editor.innerHTML = content;
         removeHighlight('ai-highlight');
         permanentAIHighlightActive = false;
+        editor.classList.remove('ai-active'); // FIX 9
         updateToolbarStates();
         scheduleHeightCheck();
     }
 
     function togglePermanentAIHighlight() {
         permanentAIHighlightActive = !permanentAIHighlightActive;
-        if (permanentAIHighlightActive) highlightInTextNodes(aiCharactersRegex, 'ai-highlight');
-        else removeHighlight('ai-highlight');
+        if (permanentAIHighlightActive) {
+            highlightInTextNodes(aiCharactersRegex, 'ai-highlight');
+            editor.classList.add('ai-active'); // FIX 9
+        } else {
+            removeHighlight('ai-highlight');
+            editor.classList.remove('ai-active'); // FIX 9
+        }
         scheduleHeightCheck();
     }
 
@@ -1328,9 +1352,9 @@
         if (findValue) {
             const regex = new RegExp(`(${findValue.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
             highlightInTextNodes(regex, 'find-match');
-            editor.classList.add('find-active'); // FIX 2
+            editor.classList.add('find-active');
         } else {
-            editor.classList.remove('find-active'); // FIX 2
+            editor.classList.remove('find-active');
         }
         currentMatchIndex = -1;
     }
@@ -1342,11 +1366,11 @@
         if (e.key === 'Enter') {
             e.preventDefault();
             if (isModKey) {
-                replaceOne(); // FIX 2
+                replaceOne();
             } else if (e.shiftKey) {
-                navigateMatch(-1);
+                navigateMatch(-1); // FIX 4: Backwards
             } else {
-                navigateMatch(1);
+                navigateMatch(1); // Forward
             }
         }
     }
@@ -1359,26 +1383,49 @@
         const find = findWordInput.value;
         const replace = replaceWordInput.value;
         if (!find) return;
+        
+        let indexToReplace = (currentMatchIndex !== -1) ? currentMatchIndex : 0;
+        
         const matches = editor.querySelectorAll('mark.find-match');
         if (matches.length > 0) {
-            const current = matches[currentMatchIndex !== -1 ? currentMatchIndex : 0];
+            const current = matches[indexToReplace];
             if (current) {
                 current.outerHTML = replace;
             }
         }
+        
+        // Re-highlight and set index to the next match
         highlightFindMatches();
+        const newMatches = Array.from(editor.querySelectorAll('mark.find-match'));
+        
+        // FIX 5: Set index to the *next* available match
+        if (newMatches.length > 0) {
+            currentMatchIndex = (indexToReplace < newMatches.length) ? indexToReplace : newMatches.length - 1;
+            if(currentMatchIndex < 0) currentMatchIndex = 0;
+            
+            const nextMatchNode = newMatches[currentMatchIndex];
+            nextMatchNode.classList.add('current');
+            nextMatchNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            currentMatchIndex = -1;
+        }
+
         updateToolbarStates();
         scheduleHeightCheck();
     }
 
+    // FIX 4: Rewritten replaceAll to be safer
     function replaceAll() {
         saveState();
         const find = findWordInput.value;
         const replace = replaceWordInput.value;
         if (!find) return;
-        const regex = new RegExp(`(${find.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
-        removeHighlight('find-match');
-        editor.innerHTML = editor.innerHTML.replace(regex, replace);
+        
+        editor.querySelectorAll('mark.find-match').forEach(match => {
+            match.outerHTML = replace;
+        });
+        
+        highlightFindMatches(); // Clears the highlights and 'find-active' class
         updateToolbarStates();
         scheduleHeightCheck();
     }
@@ -1388,20 +1435,26 @@
         if (matches.length === 0) return;
         
         editor.querySelectorAll('mark.find-match.current').forEach(m => m.classList.remove('current'));
-        currentMatchIndex += direction;
-        if (currentMatchIndex < 0) currentMatchIndex = matches.length - 1;
-        if (currentMatchIndex >= matches.length) currentMatchIndex = 0;
         
+        let newIndex = currentMatchIndex + direction; // FIX 4
+        
+        if (newIndex < 0) {
+            newIndex = matches.length - 1;
+        }
+        if (newIndex >= matches.length) {
+            newIndex = 0;
+        }
+        
+        currentMatchIndex = newIndex;
         const match = matches[currentMatchIndex];
         match.classList.add('current');
-        
         match.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     prevMatch.addEventListener('click', () => navigateMatch(-1));
     nextMatch.addEventListener('click', () => navigateMatch(1));
     
-    // ===== MARKDOWN TOGGLE (FIX 1 & 4) =====
+    // ===== MARKDOWN TOGGLE =====
     
     const turndownService = new TurndownService({ 
         headingStyle: 'atx',
@@ -1409,8 +1462,9 @@
         strongDelimiter: '**'  // Bold: **text**
     });
 
+    // FIX 2: Strikethrough rule (handles <s> and <del>)
     turndownService.addRule('strikethrough', {
-        filter: ['s', 'strike'],
+        filter: ['s', 'strike', 'del'],
         replacement: (content) => '~~' + content + '~~'
     });
     
@@ -1419,23 +1473,20 @@
         replacement: (content) => '__' + content + '__'
     });
     
-    // FIX 4: Preserve alignment
     turndownService.addRule('alignment', {
         filter: ['p', 'h1', 'h2', 'h3'],
         replacement: (content, node) => {
             let align = node.style.textAlign;
             let alignComment = (align && align !== 'left' && align !== 'start') ? ` ` : '';
             
-            // Handle Turndown's native header processing
             if (['H1', 'H2', 'H3'].includes(node.nodeName)) {
                 let hLevel = node.nodeName.charAt(1);
                 let hPrefix = '#'.repeat(hLevel) + ' ';
                 return '\n' + hPrefix + content + alignComment + '\n\n';
             }
             
-            // Handle empty paragraphs
             if (content.trim() === '' && !node.querySelector('br') && !node.querySelector('img')) {
-                return '\n\n';
+                return ''; // Don't create extra newlines for empty paragraphs
             }
             
             return content + alignComment + '\n\n';
@@ -1443,7 +1494,6 @@
     });
 
     
-    // Custom Showdown extension for __underline__
     showdown.extension('underline', () => {
         return [{ 
             type: 'lang', 
@@ -1466,7 +1516,6 @@
         
         if (isMarkdown) {
             let html = showdownConverter.makeHtml(editor.innerText);
-            // FIX 4: Re-apply alignment
             html = html.replace(/<([ph][1-3]?)>(.*?)<\/(\1)>/g, '<$1 style="text-align:$3">$2</$4>');
             editor.innerHTML = html;
             editor.setAttribute('data-mode', 'rich');
@@ -1550,16 +1599,14 @@
         }
     });
     
-    // ===== LINK MODAL (FIX 3) =====
+    // ===== LINK MODAL =====
     function openLinkModal() {
         if (currentLinkToEdit) {
-            // Edit existing link
-            saveSelection(); // Save selection just in case
+            saveSelection();
             linkModal.querySelector('h3').textContent = 'Update Link';
             createLinkButton.textContent = 'Update';
             linkUrlInput.value = currentLinkToEdit.getAttribute('href');
         } else {
-            // Create new link
             saveSelection();
             if (savedRange.collapsed) {
                 alert('Please highlight the text you want to turn into a link.');
@@ -1576,7 +1623,7 @@
     function closeLinkModal() {
         linkModal.classList.add('hidden');
         linkUrlInput.value = '';
-        currentLinkToEdit = null; // Clear editing state
+        currentLinkToEdit = null;
     }
     
     function createLink() {
@@ -1588,18 +1635,25 @@
         restoreSelection();
         
         if (currentLinkToEdit) {
-            // Update existing link
             currentLinkToEdit.setAttribute('href', url);
-            currentLinkToEdit.setAttribute('title', url);
+            currentLinkToEdit.setAttribute('title', url); // FIX 1
         } else {
-            // Create new link
             document.execCommand('createLink', false, url);
-            // Add title for hover
+            
+            // Re-find the link to set title and remove spaces
             const selection = window.getSelection();
             if (selection.rangeCount > 0) {
                 let parentLink = selection.getRangeAt(0).startContainer.parentElement.closest('a');
                 if (parentLink) {
-                    parentLink.setAttribute('title', url);
+                    parentLink.setAttribute('title', url); // FIX 1
+                    
+                    // FIX 7: Remove unicode spaces
+                    if (parentLink.previousSibling && parentLink.previousSibling.nodeType === 3 && parentLink.previousSibling.textContent === '\u00A0') {
+                        parentLink.previousSibling.remove();
+                    }
+                    if (parentLink.nextSibling && parentLink.nextSibling.nodeType === 3 && parentLink.nextSibling.textContent === '\u00A0') {
+                        parentLink.nextSibling.remove();
+                    }
                 }
             }
         }
@@ -1620,7 +1674,7 @@
         }
     });
 
-    // ===== DOWNLOAD FUNCTIONS (FIX 5) =====
+    // ===== DOWNLOAD FUNCTIONS (FIX 8) =====
     downloadButton.addEventListener('click', () => {
         downloadMenu.classList.toggle('hidden');
     });
@@ -1630,6 +1684,40 @@
             downloadMenu.classList.add('hidden');
         }
     });
+    
+    function getEditorStyles() {
+        // Generates the CSS needed to make the HTML download look right
+        return `
+            body { 
+                font-family: system-ui, -apple-system, sans-serif; 
+                background: #191919; 
+                color: #D4D4D4; 
+                padding: 32px 16px; 
+            }
+            .editor {
+                background: #1F1F1F;
+                border: 1px solid #323232;
+                border-radius: 8px;
+                max-width: 794px;
+                min-height: 1123px;
+                margin: 0 auto;
+                padding: 40px 60px;
+                font-size: 16px;
+                line-height: 1.6;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+            }
+            .editor p { margin: 0 0 16px 0; }
+            .editor a { color: #87A9FF; text-decoration: underline; }
+            .editor h1, .editor h2, .editor h3 { font-weight: normal; }
+            .editor h1 { font-size: 32px; margin: 32px 0 16px 0; line-height: 1.2; }
+            .editor h2 { font-size: 24px; margin: 24px 0 12px 0; line-height: 1.3; }
+            .editor h3 { font-size: 20px; margin: 20px 0 10px 0; line-height: 1.3; }
+            .editor hr { margin: 24px 0; border: 0; border-top: 1px solid #323232; }
+            .editor ul, .editor ol { margin: 0 0 16px 0; padding-left: 32px; }
+            .editor blockquote { margin: 16px 0; padding-left: 16px; border-left: 3px solid #87A9FF; }
+        `;
+    }
 
     async function downloadFile(type) {
         downloadMenu.classList.add('hidden');
@@ -1644,37 +1732,24 @@
             URL.revokeObjectURL(a.href);
         }
 
-        if (type === 'pdf') {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'pt', 'a4');
-            const tempDiv = document.createElement('div');
-            
-            tempDiv.style.cssText = 'position: absolute; left: -9999px; width: 794px; padding: 40px 60px; font-family: system-ui, sans-serif; color: #000; background: #fff; box-sizing: border-box;';
-            tempDiv.innerHTML = content;
-
-            tempDiv.querySelectorAll('p').forEach(el => { el.style.paddingBottom = '16px'; el.style.lineHeight = '1.6'; el.style.fontSize = '16px'; });
-            tempDiv.querySelectorAll('h1').forEach(el => { el.style.cssText = `font-size: 32px; font-weight: ${window.getComputedStyle(el).fontWeight}; padding-top: 32px; padding-bottom: 16px; line-height: 1.2;`; });
-            tempDiv.querySelectorAll('h2').forEach(el => { el.style.cssText = `font-size: 24px; font-weight: ${window.getComputedStyle(el).fontWeight}; padding-top: 24px; padding-bottom: 12px; line-height: 1.3;`; });
-            tempDiv.querySelectorAll('h3').forEach(el => { el.style.cssText = `font-size: 20px; font-weight: ${window.getComputedStyle(el).fontWeight}; padding-top: 20px; padding-bottom: 10px; line-height: 1.3;`; });
-            tempDiv.querySelectorAll('hr').forEach(el => { el.style.cssText = 'margin: 24px 0; border: 0; border-top: 1px solid #555;'; });
-            tempDiv.querySelectorAll('ul, ol').forEach(el => { el.style.cssText = 'margin: 0 0 16px 0; padding-left: 32px;'; });
-            tempDiv.querySelectorAll('blockquote').forEach(el => { el.style.cssText = 'margin: 16px 0; padding-left: 16px; border-left: 3px solid #87A9FF; color: #333;'; });
-            tempDiv.querySelectorAll('a').forEach(el => { el.style.color = '#87A9FF'; });
-            tempDiv.querySelectorAll('font').forEach(el => {
-                if (el.style.fontSize) { el.style.color = '#000'; } 
-                else { el.outerHTML = el.innerHTML; }
-            });
-
-            document.body.appendChild(tempDiv);
-            
-            html2canvas(tempDiv, {scale: 2}).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-                pdf.save('document.pdf');
-                document.body.removeChild(tempDiv);
-            });
+        if (type === 'html') {
+            const styles = getEditorStyles();
+            const htmlString = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>${styles}</style>
+</head>
+<body>
+    <div class="editor">
+        ${content}
+    </div>
+</body>
+</html>`;
+            const blob = new Blob([htmlString], {type: 'text/html'});
+            triggerDownload(blob, 'document.html');
             
         } else if (type === 'txt') {
             const blob = new Blob([plainText], {type: 'text/plain'});
