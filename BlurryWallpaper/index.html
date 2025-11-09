@@ -15,6 +15,8 @@
             --text-secondary: #8C8C8C;
             --radius: 8px;
             --blur-strength: 120px;
+            --vignette-opacity: 0;
+            --grain-opacity: 0.1;
         }
 
         * {
@@ -28,10 +30,6 @@
             background: var(--bg);
             color: var(--text-primary);
             padding: 24px 16px;
-        }
-        
-        .hidden {
-            display: none !important;
         }
 
         #app-container {
@@ -51,7 +49,7 @@
             padding: 16px;
         }
 
-        #blob-preview-wrapper {
+        #wallpaper-preview {
             width: 100%;
             aspect-ratio: 16 / 9;
             position: relative;
@@ -60,14 +58,7 @@
             border-radius: var(--radius);
         }
 
-        #wavy-preview-canvas {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            border-radius: var(--radius);
-            background: #000;
-        }
-
-        #texture-overlay {
+        #texture-overlay, #vignette-overlay, #grain-overlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -77,12 +68,29 @@
             z-index: 2;
         }
 
+        #vignette-overlay {
+            background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.8) 100%);
+            opacity: var(--vignette-opacity);
+        }
+
+        #grain-overlay {
+            background-image: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 1px,
+                    rgba(0,0,0,var(--grain-opacity)) 1px,
+                    rgba(0,0,0,var(--grain-opacity)) 2px
+                );
+        }
+
         .color-blob {
             position: absolute;
             border-radius: 50%;
             filter: blur(var(--blur-strength));
             transition: all 0.3s ease;
             z-index: 1;
+            cursor: move;
         }
 
         #controls {
@@ -103,13 +111,6 @@
             flex-direction: column;
             gap: 12px;
         }
-        
-        .control-group-divider {
-            border: 0;
-            height: 1px;
-            background: var(--outline);
-            margin: 0;
-        }
 
         .control-label {
             font-size: 14px;
@@ -123,14 +124,10 @@
             margin-top: -8px;
         }
 
-        #color-grid, #wavy-color-grid {
+        #color-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 12px;
-        }
-        
-        #wavy-color-grid {
-            grid-template-columns: repeat(3, 1fr);
         }
 
         .color-picker-wrapper {
@@ -225,13 +222,13 @@
             transform: scale(1.2);
         }
 
-        .texture-grid {
+        .texture-grid, .theme-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
         }
 
-        .texture-option {
+        .texture-option, .theme-option {
             padding: 8px 12px;
             background: var(--bg);
             border: 1px solid var(--outline);
@@ -242,11 +239,11 @@
             transition: all 0.2s ease;
         }
 
-        .texture-option:hover {
+        .texture-option:hover, .theme-option:hover {
             background: var(--hover);
         }
 
-        .texture-option.active {
+        .texture-option.active, .theme-option.active {
             background: var(--accent);
             color: #000;
             border-color: var(--accent);
@@ -272,16 +269,6 @@
             font-weight: 600;
             transition: all 0.2s ease;
         }
-        
-        .btn:disabled {
-            background: var(--outline);
-            color: var(--text-secondary);
-            cursor: not-allowed;
-        }
-        
-        .btn:disabled::before {
-            display: none;
-        }
 
         .btn::before {
             content: '';
@@ -299,23 +286,32 @@
             left: 125%;
         }
 
-        .btn:hover:not(:disabled) {
+        .btn:hover {
             background: var(--hover);
         }
 
-        .btn-primary:not(:disabled) {
+        .btn-primary {
             background: var(--accent);
             color: #000;
             border-color: var(--accent);
         }
 
-        .btn-primary:hover:not(:disabled) {
+        .btn-primary:hover {
             background: #9BB8FF;
         }
 
         .btn:focus-visible {
             outline: none;
             box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+        }
+
+        #resolution-select {
+            padding: 12px;
+            background: var(--bg);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 14px;
         }
 
         @media (max-width: 768px) {
@@ -327,143 +323,139 @@
                 max-width: 100%;
             }
 
-            .texture-grid {
-                grid-template-columns: repeat(3, 1fr);
+            #color-grid {
+                grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            }
+
+            .texture-grid, .theme-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
 <body>
     <div id="app-container">
-        
         <div id="preview-section">
-            <div id="blob-preview-wrapper">
+            <div id="wallpaper-preview">
+                <div id="grain-overlay"></div>
                 <div id="texture-overlay"></div>
-                <div class="color-blob" id="blob1"></div>
-                <div class="color-blob" id="blob2"></div>
-                <div class="color-blob" id="blob3"></div>
-                <div class="color-blob" id="blob4"></div>
-                <div class="color-blob" id="blob5"></div>
+                <div id="vignette-overlay"></div>
             </div>
-            <canvas id="wavy-preview-canvas" class="hidden"></canvas>
         </div>
 
         <div id="controls">
+            <div class="control-group">
+                <div class="control-label">Themes</div>
+                <div class="theme-grid">
+                    <div class="theme-option" data-theme="random">Random</div>
+                    <div class="theme-option" data-theme="neon">Neon</div>
+                    <div class="theme-option" data-theme="pastel">Pastel</div>
+                    <div class="theme-option" data-theme="earth">Earth</div>
+                    <div class="theme-option" data-theme="fire">Fire</div>
+                    <div class="theme-option" data-theme="ocean">Ocean</div>
+                </div>
+            </div>
 
             <div class="control-group">
-                <div class="control-label">Generator Style</div>
-                <div class="texture-grid" id="style-selector-grid">
-                    <div class="texture-option active" data-style="blobs">Blobs</div>
-                    <div class="texture-option" data-style="wavy">Wavy</div>
+                <div class="control-label">Colors</div>
+                <div class="control-sublabel">Click to change, drag in preview to position</div>
+                <div id="color-grid"></div>
+                <div class="button-group">
+                    <button class="btn" id="add-blob-btn">Add Blob</button>
+                    <button class="btn" id="remove-blob-btn">Remove Blob</button>
                 </div>
             </div>
 
-            <hr class="control-group-divider">
-
-            <div id="blob-controls-wrapper">
-                <div class="control-group">
-                    <div class="control-label">Colors</div>
-                    <div class="control-sublabel">Click to change individual colors</div>
-                    <div id="color-grid">
-                        <div class="color-picker-wrapper">
-                            <input type="color" class="color-picker" id="color1">
-                        </div>
-                        <div class="color-picker-wrapper">
-                            <input type="color" class="color-picker" id="color2">
-                        </div>
-                        <div class="color-picker-wrapper">
-                            <input type="color" class="color-picker" id="color3">
-                        </div>
-                        <div class="color-picker-wrapper">
-                            <input type="color" class="color-picker" id="color4">
-                        </div>
-                        <div class="color-picker-wrapper">
-                            <input type="color" class="color-picker" id="color5">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <div class="slider-wrapper">
-                        <div class="slider-header">
-                            <div class="control-label">Blur Strength</div>
-                            <div class="slider-value" id="blur-value">120px</div>
-                        </div>
-                        <input type="range" id="blur-slider" min="30" max="300" value="120">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <div class="slider-wrapper">
-                        <div class="slider-header">
-                            <div class="control-label">Blob Size</div>
-                            <div class="slider-value" id="size-value">100%</div>
-                        </div>
-                        <input type="range" id="size-slider" min="50" max="200" value="100">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <div class="slider-wrapper">
-                        <div class="slider-header">
-                            <div class="control-label">Brightness</div>
-                            <div class="slider-value" id="brightness-value">100%</div>
-                        </div>
-                        <input type="range" id="brightness-slider" min="50" max="150" value="100">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <div class="control-label">Texture Overlay</div>
-                    <div class="texture-grid" id="blob-texture-grid">
-                        <div class="texture-option active" data-texture="none">None</div>
-                        <div class="texture-option" data-texture="noise">Noise</div>
-                        <div class="texture-option" data-texture="glass">Glass</div>
-                    </div>
+            <div class="control-group">
+                <div class="control-label">Background Color</div>
+                <div class="color-picker-wrapper" style="width: 60px;">
+                    <input type="color" class="color-picker" id="bg-color-picker">
                 </div>
             </div>
-            
-            <div id="wavy-controls-wrapper" class="hidden">
-                 <div class="control-group">
-                    <div class="control-label">Colors</div>
-                    <div class="control-sublabel">Select 3 colors for the gradient</div>
-                    <div id="wavy-color-grid">
-                        <div class="color-picker-wrapper">
-                            <input type="color" class="color-picker" id="wavy-color1" value="#FF0000">
-                        </div>
-                        <div class="color-picker-wrapper">
-                            <input type="color" class="color-picker" id="wavy-color2" value="#00FF00">
-                        </div>
-                        <div class="color-picker-wrapper">
-                            <input type="color" class="color-picker" id="wavy-color3" value="#0000FF">
-                        </div>
+
+            <div class="control-group">
+                <div class="slider-wrapper">
+                    <div class="slider-header">
+                        <div class="control-label">Blur Strength</div>
+                        <div class="slider-value" id="blur-value">120px</div>
                     </div>
+                    <input type="range" id="blur-slider" min="30" max="300" value="120">
                 </div>
-                
-                <div class="control-group">
-                    <div class="slider-wrapper">
-                        <div class="slider-header">
-                            <div class="control-label">Complexity</div>
-                            <div class="slider-value" id="complexity-value">5.0</div>
-                        </div>
-                        <input type="range" id="complexity-slider" min="1" max="20" value="5" step="0.1">
+            </div>
+
+            <div class="control-group">
+                <div class="slider-wrapper">
+                    <div class="slider-header">
+                        <div class="control-label">Blob Size</div>
+                        <div class="slider-value" id="size-value">100%</div>
                     </div>
+                    <input type="range" id="size-slider" min="50" max="200" value="100">
                 </div>
-                
-                <div class="control-group">
-                    <div class="slider-wrapper">
-                        <div class="slider-header">
-                            <div class="control-label">Speed</div>
-                            <div class="slider-value" id="speed-value">0.2</div>
-                        </div>
-                        <input type="range" id="speed-slider" min="0" max="1" value="0.2" step="0.05">
+            </div>
+
+            <div class="control-group">
+                <div class="slider-wrapper">
+                    <div class="slider-header">
+                        <div class="control-label">Brightness</div>
+                        <div class="slider-value" id="brightness-value">100%</div>
                     </div>
+                    <input type="range" id="brightness-slider" min="50" max="150" value="100">
                 </div>
+            </div>
+
+            <div class="control-group">
+                <div class="slider-wrapper">
+                    <div class="slider-header">
+                        <div class="control-label">Saturation</div>
+                        <div class="slider-value" id="saturation-value">100%</div>
+                    </div>
+                    <input type="range" id="saturation-slider" min="0" max="200" value="100">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="slider-wrapper">
+                    <div class="slider-header">
+                        <div class="control-label">Vignette</div>
+                        <div class="slider-value" id="vignette-value">0%</div>
+                    </div>
+                    <input type="range" id="vignette-slider" min="0" max="100" value="0">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="slider-wrapper">
+                    <div class="slider-header">
+                        <div class="control-label">Grain</div>
+                        <div class="slider-value" id="grain-value">10%</div>
+                    </div>
+                    <input type="range" id="grain-slider" min="0" max="50" value="10">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">Texture Overlay</div>
+                <div class="texture-grid">
+                    <div class="texture-option active" data-texture="none">None</div>
+                    <div class="texture-option" data-texture="noise">Noise</div>
+                    <div class="texture-option" data-texture="glass">Glass</div>
+                    <div class="texture-option" data-texture="paper">Paper</div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">Resolution</div>
+                <select id="resolution-select">
+                    <option value="3840x2160">4K Landscape (3840x2160)</option>
+                    <option value="2160x3840">4K Portrait (2160x3840)</option>
+                    <option value="1920x1080">Full HD (1920x1080)</option>
+                    <option value="1080x1920">Mobile (1080x1920)</option>
+                </select>
             </div>
 
             <div class="button-group">
                 <button class="btn" id="random-btn">Randomize</button>
-                <button class="btn btn-primary" id="download-btn">Download 4K</button>
+                <button class="btn btn-primary" id="download-btn">Download</button>
             </div>
 
         </div>
@@ -473,69 +465,54 @@
     <canvas id="temp-canvas" style="display: none;"></canvas>
 
     <script>
-        // DOM ELEMENTS (SHARED)
+        const preview = document.getElementById('wallpaper-preview');
+        const textureOverlay = document.getElementById('texture-overlay');
+        const vignetteOverlay = document.getElementById('vignette-overlay');
+        const grainOverlay = document.getElementById('grain-overlay');
+        const colorGrid = document.getElementById('color-grid');
+        const bgColorPicker = document.getElementById('bg-color-picker');
+        const blurSlider = document.getElementById('blur-slider');
+        const sizeSlider = document.getElementById('size-slider');
+        const brightnessSlider = document.getElementById('brightness-slider');
+        const saturationSlider = document.getElementById('saturation-slider');
+        const vignetteSlider = document.getElementById('vignette-slider');
+        const grainSlider = document.getElementById('grain-slider');
+        const blurValue = document.getElementById('blur-value');
+        const sizeValue = document.getElementById('size-value');
+        const brightnessValue = document.getElementById('brightness-value');
+        const saturationValue = document.getElementById('saturation-value');
+        const vignetteValue = document.getElementById('vignette-value');
+        const grainValue = document.getElementById('grain-value');
+        const textureOptions = document.querySelectorAll('.texture-option');
+        const themeOptions = document.querySelectorAll('.theme-option');
+        const addBlobBtn = document.getElementById('add-blob-btn');
+        const removeBlobBtn = document.getElementById('remove-blob-btn');
         const randomBtn = document.getElementById('random-btn');
         const downloadBtn = document.getElementById('download-btn');
-        const styleSelectors = document.querySelectorAll('#style-selector-grid .texture-option');
+        const resolutionSelect = document.getElementById('resolution-select');
         const canvas = document.getElementById('render-canvas');
         const ctx = canvas.getContext('2d');
         const tempCanvas = document.getElementById('temp-canvas');
         const tempCtx = tempCanvas.getContext('2d');
 
-        // DOM ELEMENTS (PREVIEWS)
-        const blobPreviewWrapper = document.getElementById('blob-preview-wrapper');
-        const wavyPreviewCanvas = document.getElementById('wavy-preview-canvas');
-        const wavyPreviewCtx = wavyPreviewCanvas.getContext('2d');
-
-        // DOM ELEMENTS (BLOBS)
-        const blobControlsWrapper = document.getElementById('blob-controls-wrapper');
-        const preview = document.getElementById('blob-preview-wrapper');
-        const textureOverlay = document.getElementById('texture-overlay');
-        const blobs = document.querySelectorAll('.color-blob');
-        const colorPickers = document.querySelectorAll('#color-grid .color-picker');
-        const blurSlider = document.getElementById('blur-slider');
-        const sizeSlider = document.getElementById('size-slider');
-        const brightnessSlider = document.getElementById('brightness-slider');
-        const blurValue = document.getElementById('blur-value');
-        const sizeValue = document.getElementById('size-value');
-        const brightnessValue = document.getElementById('brightness-value');
-        const textureOptions = document.querySelectorAll('#blob-texture-grid .texture-option');
-        
-        // DOM ELEMENTS (WAVY)
-        const wavyControlsWrapper = document.getElementById('wavy-controls-wrapper');
-        const wavyColorPickers = document.querySelectorAll('#wavy-color-grid .color-picker');
-        const complexitySlider = document.getElementById('complexity-slider');
-        const complexityValue = document.getElementById('complexity-value');
-        const speedSlider = document.getElementById('speed-slider');
-        const speedValue = document.getElementById('speed-value');
-
-        // STATE
         const state = {
-            mode: 'blobs', // 'blobs' or 'wavy'
-            animationFrameId: null,
-            wavyLastTimestamp: 0,
-            wavyTime: 0,
-            
-            blob: {
-                blobs: [],
-                sizeMultiplier: 1,
-                brightness: 100,
-                texture: 'none',
-                backgroundColor: '#000000',
-                textureParams: {
-                    noise: { opacity: 0.1 },
-                    glass: { blur: 2, noise: 0.02 }
-                }
+            blobs: [],
+            sizeMultiplier: 1,
+            brightness: 100,
+            saturation: 100,
+            vignette: 0,
+            grain: 0.1,
+            texture: 'none',
+            backgroundColor: '#000000',
+            textureParams: {
+                noise: { opacity: 0.1 },
+                glass: { blur: 2, noise: 0.02 },
+                paper: { opacity: 0.05 }
             },
-            
-            wavy: {
-                colors: ['#87A9FF', '#FF87A9', '#A9FF87'],
-                complexity: 5,
-                speed: 0.2
-            }
+            maxBlobs: 10,
+            minBlobs: 1
         };
 
-        // SHARED HELPER FUNCTIONS
         const generateRandomColor = () => {
             const hue = Math.floor(Math.random() * 360);
             const saturation = Math.floor(Math.random() * 30) + 60;
@@ -555,148 +532,133 @@
         };
 
         const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-        
-        const hexToRgb = (hex) => {
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            return [r, g, b];
-        };
 
-        const lerp = (a, b, t) => a + (b - a) * t;
+        function randomizeTextureParams() {
+            state.textureParams.noise.opacity = randomInt(8, 20) / 100;
+            state.textureParams.glass.blur = randomInt(1, 4);
+            state.textureParams.glass.noise = randomInt(1, 4) / 100;
+            state.textureParams.paper.opacity = randomInt(3, 8) / 100;
+        }
 
-        const lerpColor = (color1, color2, t) => {
-            const [r1, g1, b1] = color1;
-            const [r2, g2, b2] = color2;
-            const r = lerp(r1, r2, t);
-            const g = lerp(g1, g2, t);
-            const b = lerp(b1, b2, t);
-            return [r, g, b];
-        };
+        function createBlob(id) {
+            const blobElement = document.createElement('div');
+            blobElement.classList.add('color-blob');
+            blobElement.id = id;
+            preview.appendChild(blobElement);
 
-        // PERLIN NOISE IMPLEMENTATION
-        // (This is a standard, self-contained 3D Perlin noise implementation)
-        const perlin = new (function() {
-            this.p = new Uint8Array(512);
-            this.perm = new Uint8Array(512);
-            this.permMod12 = new Uint8Array(512);
-            this.grad3 = [
-                [1,1,0], [-1,1,0], [1,-1,0], [-1,-1,0],
-                [1,0,1], [-1,0,1], [1,0,-1], [-1,0,-1],
-                [0,1,1], [0,-1,1], [0,1,-1], [0,-1,-1]
-            ];
-            this.init = () => {
-                for (let i = 0; i < 256; i++) {
-                    this.p[i] = Math.floor(Math.random() * 256);
-                }
-                for (let i = 0; i < 512; i++) {
-                    this.perm[i] = this.p[i & 255];
-                    this.permMod12[i] = this.perm[i] % 12;
+            const pickerWrapper = document.createElement('div');
+            pickerWrapper.classList.add('color-picker-wrapper');
+            const colorPicker = document.createElement('input');
+            colorPicker.type = 'color';
+            colorPicker.classList.add('color-picker');
+            colorPicker.id = `${id}-color`;
+            pickerWrapper.appendChild(colorPicker);
+            colorGrid.appendChild(pickerWrapper);
+
+            makeDraggable(blobElement);
+
+            return { element: blobElement, picker: colorPicker };
+        }
+
+        function addBlob() {
+            if (state.blobs.length >= state.maxBlobs) return;
+            const id = `blob${state.blobs.length + 1}`;
+            const { element, picker } = createBlob(id);
+            const blobState = {
+                id,
+                color: generateRandomColor(),
+                x: randomInt(-20, 80),
+                y: randomInt(-20, 80),
+                baseSize: randomInt(200, 500)
+            };
+            state.blobs.push(blobState);
+            picker.value = blobState.color;
+            picker.addEventListener('input', (e) => {
+                blobState.color = e.target.value;
+                updatePreview();
+            });
+            updatePreview();
+            scheduleHeightCheck();
+        }
+
+        function removeBlob() {
+            if (state.blobs.length <= state.minBlobs) return;
+            const removed = state.blobs.pop();
+            const blobElement = document.getElementById(removed.id);
+            blobElement.remove();
+            colorGrid.lastChild.remove();
+            updatePreview();
+            scheduleHeightCheck();
+        }
+
+        function makeDraggable(element) {
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+
+            const onDown = (e) => {
+                isDragging = true;
+                startX = e.clientX || e.touches[0].clientX;
+                startY = e.clientY || e.touches[0].clientY;
+                initialLeft = parseFloat(element.style.left) || 0;
+                initialTop = parseFloat(element.style.top) || 0;
+                element.style.transition = 'none';
+            };
+
+            const onMove = (e) => {
+                if (!isDragging) return;
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                const dx = (clientX - startX) / preview.clientWidth * 100;
+                const dy = (clientY - startY) / preview.clientHeight * 100;
+                const newX = initialLeft + dx;
+                const newY = initialTop + dy;
+                element.style.left = `${newX}%`;
+                element.style.top = `${newY}%`;
+                const blobState = state.blobs.find(b => b.id === element.id);
+                if (blobState) {
+                    blobState.x = newX;
+                    blobState.y = newY;
                 }
             };
-            this.noise = (x, y, z) => {
-                let n0, n1, n2; 
-                const F3 = 1.0 / 3.0;
-                const s = (x + y + z) * F3;
-                const i = Math.floor(x + s);
-                const j = Math.floor(y + s);
-                const k = Math.floor(z + s);
-                const G3 = 1.0 / 6.0;
-                const t = (i + j + k) * G3;
-                const X0 = i - t;
-                const Y0 = j - t;
-                const Z0 = k - t;
-                const x0 = x - X0;
-                const y0 = y - Y0;
-                const z0 = z - Z0;
-                let i1, j1, k1;
-                let i2, j2, k2;
-                if (x0 >= y0) {
-                    if (y0 >= z0) { i1=1; j1=0; k1=0; i2=1; j2=1; k2=0; }
-                    else if (x0 >= z0) { i1=1; j1=0; k1=0; i2=1; j2=0; k2=1; }
-                    else { i1=0; j1=0; k1=1; i2=1; j2=0; k2=1; }
-                } else {
-                    if (y0 < z0) { i1=0; j1=0; k1=1; i2=0; j2=1; k2=1; }
-                    else if (x0 < z0) { i1=0; j1=1; k1=0; i2=0; j2=1; k2=1; }
-                    else { i1=0; j1=1; k1=0; i2=1; j2=1; k2=0; }
-                }
-                const x1 = x0 - i1 + G3;
-                const y1 = y0 - j1 + G3;
-                const z1 = z0 - k1 + G3;
-                const x2 = x0 - i2 + 2.0 * G3;
-                const y2 = y0 - j2 + 2.0 * G3;
-                const z2 = z0 - k2 + 2.0 * G3;
-                const x3 = x0 - 1.0 + 3.0 * G3;
-                const y3 = y0 - 1.0 + 3.0 * G3;
-                const z3 = z0 - 1.0 + 3.0 * G3;
-                const ii = i & 255;
-                const jj = j & 255;
-                const kk = k & 255;
-                const gi0 = this.permMod12[ii + this.perm[jj + this.perm[kk]]];
-                const gi1 = this.permMod12[ii + i1 + this.perm[jj + j1 + this.perm[kk + k1]]];
-                const gi2 = this.permMod12[ii + i2 + this.perm[jj + j2 + this.perm[kk + k2]]];
-                const gi3 = this.permMod12[ii + 1 + this.perm[jj + 1 + this.perm[kk + 1]]];
-                let t0 = 0.5 - x0 * x0 - y0 * y0 - z0 * z0;
-                if (t0 < 0) n0 = 0.0;
-                else {
-                    t0 *= t0;
-                    n0 = t0 * t0 * (this.grad3[gi0][0] * x0 + this.grad3[gi0][1] * y0 + this.grad3[gi0][2] * z0);
-                }
-                let t1 = 0.5 - x1 * x1 - y1 * y1 - z1 * z1;
-                if (t1 < 0) n1 = 0.0;
-                else {
-                    t1 *= t1;
-                    n1 = t1 * t1 * (this.grad3[gi1][0] * x1 + this.grad3[gi1][1] * y1 + this.grad3[gi1][2] * z1);
-                }
-                let t2 = 0.5 - x2 * x2 - y2 * y2 - z2 * z2;
-                if (t2 < 0) n2 = 0.0;
-                else {
-                    t2 *= t2;
-                    n2 = t2 * t2 * (this.grad3[gi2][0] * x2 + this.grad3[gi2][1] * y2 + this.grad3[gi2][2] * z2);
-                }
-                let t3 = 0.5 - x3 * x3 - y3 * y3 - z3 * z3;
-                if (t3 < 0) n3 = 0.0;
-                else {
-                    t3 *= t3;
-                    n3 = t3 * t3 * (this.grad3[gi3][0] * x3 + this.grad3[gi3][1] * y3 + this.grad3[gi3][2] * z3);
-                }
-                return 32.0 * (n0 + n1 + n2 + n3);
+
+            const onUp = () => {
+                isDragging = false;
+                element.style.transition = 'all 0.3s ease';
+                updatePreview();
             };
-            this.init();
-        })();
 
-        // BLOB MODE FUNCTIONS
-        function randomizeNoiseParams() {
-            state.blob.textureParams.noise.opacity = randomInt(8, 20) / 100;
+            element.addEventListener('pointerdown', onDown);
+            document.addEventListener('pointermove', onMove);
+            document.addEventListener('pointerup', onUp);
+            element.addEventListener('touchstart', onDown, { passive: false });
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend', onUp);
         }
 
-        function randomizeGlassParams() {
-            state.blob.textureParams.glass.blur = randomInt(1, 4);
-            state.blob.textureParams.glass.noise = randomInt(1, 4) / 100;
-        }
-
-        function randomizeBlobTextureParams() {
-            switch (state.blob.texture) {
-                case 'noise': randomizeNoiseParams(); break;
-                case 'glass': randomizeGlassParams(); break;
-            }
-        }
-
-        function updateBlobPreview() {
+        function updatePreview() {
             document.documentElement.style.setProperty('--blur-strength', `${blurSlider.value}px`);
             blurValue.textContent = `${blurSlider.value}px`;
             sizeValue.textContent = `${sizeSlider.value}%`;
             brightnessValue.textContent = `${brightnessSlider.value}%`;
-            
-            state.blob.sizeMultiplier = sizeSlider.value / 100;
-            state.blob.brightness = brightnessSlider.value;
+            saturationValue.textContent = `${saturationSlider.value}%`;
+            vignetteValue.textContent = `${vignetteSlider.value}%`;
+            grainValue.textContent = `${grainSlider.value}%`;
 
-            preview.style.backgroundColor = state.blob.backgroundColor;
-            preview.style.filter = `brightness(${state.blob.brightness}%)`;
+            state.sizeMultiplier = sizeSlider.value / 100;
+            state.brightness = brightnessSlider.value;
+            state.saturation = saturationSlider.value;
+            state.vignette = vignetteSlider.value / 100;
+            state.grain = grainSlider.value / 100;
 
-            state.blob.blobs.forEach((blobState, i) => {
+            document.documentElement.style.setProperty('--vignette-opacity', state.vignette);
+            document.documentElement.style.setProperty('--grain-opacity', state.grain);
+
+            preview.style.backgroundColor = state.backgroundColor;
+            preview.style.filter = `brightness(${state.brightness}%) saturate(${state.saturation}%)`;
+
+            state.blobs.forEach(blobState => {
                 const blobElement = document.getElementById(blobState.id);
-                const adjustedSize = blobState.baseSize * state.blob.sizeMultiplier;
+                const adjustedSize = blobState.baseSize * state.sizeMultiplier;
                 
                 blobElement.style.backgroundColor = blobState.color;
                 blobElement.style.left = `${blobState.x}%`;
@@ -704,78 +666,143 @@
                 blobElement.style.width = `${adjustedSize}px`;
                 blobElement.style.height = `${adjustedSize}px`;
 
-                colorPickers[i].value = blobState.color;
+                const picker = document.getElementById(`${blobState.id}-color`);
+                if (picker) picker.value = blobState.color;
             });
-            applyBlobTexture();
+            applyTexture();
         }
 
-        function applyBlobTexture() {
+        function applyTexture() {
             textureOverlay.style.backgroundImage = 'none';
             textureOverlay.style.backdropFilter = 'none';
+            textureOverlay.style.opacity = 1;
 
-            if (state.blob.texture === 'noise') {
+            if (state.texture === 'noise') {
                 textureOverlay.style.backgroundImage = `
                     repeating-linear-gradient(
                         0deg,
                         transparent,
                         transparent 2px,
-                        rgba(0,0,0,${state.blob.textureParams.noise.opacity}) 2px,
-                        rgba(0,0,0,${state.blob.textureParams.noise.opacity}) 4px
-                    )`;
-            } else if (state.blob.texture === 'glass') {
-                textureOverlay.style.backdropFilter = `blur(${state.blob.textureParams.glass.blur}px)`;
+                        rgba(0,0,0,${state.textureParams.noise.opacity}) 2px,
+                        rgba(0,0,0,${state.textureParams.noise.opacity}) 4px
+                    )
+                `;
+            } else if (state.texture === 'glass') {
+                textureOverlay.style.backdropFilter = `blur(${state.textureParams.glass.blur}px)`;
                 textureOverlay.style.backgroundImage = `
                     repeating-linear-gradient(
                         0deg,
                         transparent,
                         transparent 2px,
-                        rgba(0,0,0,${state.blob.textureParams.glass.noise}) 2px,
-                        rgba(0,0,0,${state.blob.textureParams.glass.noise}) 4px
-                    )`;
+                        rgba(0,0,0,${state.textureParams.glass.noise}) 2px,
+                        rgba(0,0,0,${state.textureParams.glass.noise}) 4px
+                    )
+                `;
+            } else if (state.texture === 'paper') {
+                textureOverlay.style.backgroundImage = `
+                    repeating-linear-gradient(
+                        0deg,
+                        transparent,
+                        transparent 1px,
+                        rgba(255,255,255,${state.textureParams.paper.opacity}) 1px,
+                        rgba(255,255,255,${state.textureParams.paper.opacity}) 2px
+                    ),
+                    repeating-linear-gradient(
+                        90deg,
+                        transparent,
+                        transparent 1px,
+                        rgba(255,255,255,${state.textureParams.paper.opacity}) 1px,
+                        rgba(255,255,255,${state.textureParams.paper.opacity}) 2px
+                    )
+                `;
+                textureOverlay.style.opacity = 0.5;
             }
         }
 
-        function randomizeBlobState() {
-            state.blob.blobs = [];
-            blobs.forEach((blob, i) => {
-                state.blob.blobs.push({
-                    id: `blob${i + 1}`,
-                    color: generateRandomColor(),
-                    x: randomInt(-20, 80),
-                    y: randomInt(-20, 80),
-                    baseSize: randomInt(200, 500)
-                });
+        function applyTheme(theme) {
+            let baseHue = randomInt(0, 360);
+            let colors = [];
+            switch (theme) {
+                case 'neon':
+                    colors = ['#FF00FF', '#00FFFF', '#FFFF00', '#FF0000', '#00FF00'];
+                    state.backgroundColor = '#000000';
+                    break;
+                case 'pastel':
+                    colors = ['#FFD3E0', '#D3FFEB', '#D3E0FF', '#FFEBD3', '#E0D3FF'];
+                    state.backgroundColor = '#FFFFFF';
+                    break;
+                case 'earth':
+                    colors = ['#4E7D3E', '#8B4513', '#228B22', '#556B2F', '#A0522D'];
+                    state.backgroundColor = '#F5F5DC';
+                    break;
+                case 'fire':
+                    colors = ['#FF4500', '#FF8C00', '#FFD700', '#FF0000', '#FFA500'];
+                    state.backgroundColor = '#000000';
+                    break;
+                case 'ocean':
+                    colors = ['#00BFFF', '#20B2AA', '#4682B4', '#5F9EA0', '#87CEEB'];
+                    state.backgroundColor = '#FFFFFF';
+                    break;
+                default: // random
+                    for (let i = 0; i < state.blobs.length; i++) {
+                        colors.push(generateRandomColor());
+                    }
+                    state.backgroundColor = generateRandomBackgroundColor();
+            }
+            state.blobs.forEach((blob, i) => {
+                blob.color = colors[i % colors.length];
             });
+            bgColorPicker.value = state.backgroundColor;
+            updatePreview();
+        }
 
-            const textureTypes = ['none', 'noise', 'glass'];
-            state.blob.texture = textureTypes[randomInt(0, textureTypes.length - 1)];
-            textureOptions.forEach(o => {
-                o.classList.toggle('active', o.dataset.texture === state.blob.texture);
-            });
-            randomizeBlobTextureParams();
-
+        const generateRandomBackgroundColor = () => {
             const roll = Math.random();
-            if (roll < 0.4) state.blob.backgroundColor = '#000000';
-            else if (roll < 0.8) state.blob.backgroundColor = '#FFFFFF';
-            else {
-                const hue = Math.floor(Math.random() * 360);
-                const lightness = Math.random() > 0.5 ? randomInt(0, 15) : randomInt(85, 100);
-                state.blob.backgroundColor = hslToHex(hue, 15, lightness);
-            }
+            if (roll < 0.4) return '#000000';
+            if (roll < 0.8) return '#FFFFFF';
+            const hue = Math.floor(Math.random() * 360);
+            const saturation = Math.floor(Math.random() * 20) + 10;
+            const lightness = Math.random() > 0.5 ? randomInt(0, 15) : randomInt(85, 100);
+            return hslToHex(hue, saturation, lightness);
+        };
 
-            updateBlobPreview();
+        function randomizeState(theme = 'random') {
+            state.blobs.forEach(blob => {
+                blob.x = randomInt(-20, 80);
+                blob.y = randomInt(-20, 80);
+                blob.baseSize = randomInt(200, 500);
+            });
+            applyTheme(theme);
+
+            blurSlider.value = randomInt(80, 200);
+            sizeSlider.value = randomInt(80, 120);
+            brightnessSlider.value = randomInt(90, 110);
+            saturationSlider.value = randomInt(80, 120);
+            vignetteSlider.value = randomInt(0, 50);
+            grainSlider.value = randomInt(0, 20);
+
+            const textureTypes = ['none', 'noise', 'glass', 'paper'];
+            state.texture = textureTypes[randomInt(0, textureTypes.length - 1)];
+            textureOptions.forEach(o => {
+                o.classList.toggle('active', o.dataset.texture === state.texture);
+            });
+            randomizeTextureParams();
+
+            updatePreview();
+            scheduleHeightCheck();
         }
 
-        async function downloadBlobImage() {
-            const DOWNLOAD_WIDTH = 3840;
-            const DOWNLOAD_HEIGHT = 2160;
-            
+        async function downloadImage() {
+            const res = resolutionSelect.value.split('x');
+            const DOWNLOAD_WIDTH = parseInt(res[0]);
+            const DOWNLOAD_HEIGHT = parseInt(res[1]);
+
             canvas.width = DOWNLOAD_WIDTH;
             canvas.height = DOWNLOAD_HEIGHT;
             tempCanvas.width = DOWNLOAD_WIDTH;
             tempCanvas.height = DOWNLOAD_HEIGHT;
 
-            ctx.fillStyle = state.blob.backgroundColor;
+            ctx.fillStyle = state.backgroundColor;
             ctx.fillRect(0, 0, DOWNLOAD_WIDTH, DOWNLOAD_HEIGHT);
 
             const previewRect = preview.getBoundingClientRect();
@@ -784,315 +811,157 @@
             const scaleFactor = (scaleX + scaleY) / 2;
 
             const scaledBlur = parseInt(blurSlider.value, 10) * scaleFactor;
-            ctx.filter = `blur(${scaledBlur}px) brightness(${state.blob.brightness}%)`;
-            
-            state.blob.blobs.forEach(blobState => {
+            ctx.filter = `blur(${scaledBlur}px) brightness(${state.brightness}%) saturate(${state.saturation}%)`;
+
+            state.blobs.forEach(blobState => {
                 ctx.fillStyle = blobState.color;
                 ctx.beginPath();
                 
-                const adjustedSize = blobState.baseSize * state.blob.sizeMultiplier;
-                const canvasX = (blobState.x / 100) * DOWNLOAD_WIDTH + (adjustedSize * scaleFactor / 2);
-                const canvasY = (blobState.y / 100) * DOWNLOAD_HEIGHT + (adjustedSize * scaleFactor / 2);
-                const canvasRadius = (adjustedSize / 2) * scaleFactor;
-                
-                ctx.arc(canvasX, canvasY, canvasRadius, 0, 2 * Math.PI);
+                const adjustedSize = blobState.baseSize * state.sizeMultiplier;
+                const canvasX = (blobState.x / 100) * DOWNLOAD_WIDTH - (adjustedSize * scaleFactor / 2);
+                const canvasY = (blobState.y / 100) * DOWNLOAD_HEIGHT - (adjustedSize * scaleFactor / 2);
+                const canvasWidth = adjustedSize * scaleFactor;
+                const canvasHeight = canvasWidth; // circle for now
+
+                ctx.arc(canvasX + canvasWidth / 2, canvasY + canvasHeight / 2, canvasWidth / 2, 0, 2 * Math.PI);
                 ctx.fill();
             });
 
             ctx.filter = 'none';
 
-            if (state.blob.texture === 'noise') {
-                ctx.fillStyle = `rgba(0, 0, 0, ${state.blob.textureParams.noise.opacity})`;
+            // Apply grain
+            ctx.fillStyle = `rgba(0, 0, 0, ${state.grain})`;
+            for (let i = 0; i < DOWNLOAD_WIDTH * DOWNLOAD_HEIGHT / 100; i++) {
+                ctx.fillRect(
+                    Math.random() * DOWNLOAD_WIDTH,
+                    Math.random() * DOWNLOAD_HEIGHT,
+                    1, 1
+                );
+            }
+
+            // Apply texture
+            if (state.texture === 'noise') {
+                ctx.fillStyle = `rgba(0, 0, 0, ${state.textureParams.noise.opacity})`;
                 for (let i = 0; i < DOWNLOAD_WIDTH * DOWNLOAD_HEIGHT / 25; i++) {
-                    ctx.fillRect(Math.random() * DOWNLOAD_WIDTH, Math.random() * DOWNLOAD_HEIGHT, 1, 1);
+                    ctx.fillRect(
+                        Math.random() * DOWNLOAD_WIDTH,
+                        Math.random() * DOWNLOAD_HEIGHT,
+                        1, 1
+                    );
                 }
-            } else if (state.blob.texture === 'glass') {
-                tempCtx.filter = `blur(${state.blob.textureParams.glass.blur * scaleFactor}px)`;
+            } else if (state.texture === 'glass') {
+                tempCtx.filter = `blur(${state.textureParams.glass.blur * scaleFactor}px)`;
                 tempCtx.drawImage(canvas, 0, 0);
                 ctx.drawImage(tempCanvas, 0, 0);
-
-                ctx.fillStyle = `rgba(0, 0, 0, ${state.blob.textureParams.glass.noise})`;
+                ctx.fillStyle = `rgba(0, 0, 0, ${state.textureParams.glass.noise})`;
                 for (let i = 0; i < DOWNLOAD_WIDTH * DOWNLOAD_HEIGHT / 50; i++) {
-                    ctx.fillRect(Math.random() * DOWNLOAD_WIDTH, Math.random() * DOWNLOAD_HEIGHT, 1, 1);
+                    ctx.fillRect(
+                        Math.random() * DOWNLOAD_WIDTH,
+                        Math.random() * DOWNLOAD_HEIGHT,
+                        1, 1
+                    );
+                }
+            } else if (state.texture === 'paper') {
+                ctx.fillStyle = `rgba(255, 255, 255, ${state.textureParams.paper.opacity})`;
+                for (let x = 0; x < DOWNLOAD_WIDTH; x += 2) {
+                    ctx.fillRect(x, 0, 1, DOWNLOAD_HEIGHT);
+                }
+                for (let y = 0; y < DOWNLOAD_HEIGHT; y += 2) {
+                    ctx.fillRect(0, y, DOWNLOAD_WIDTH, 1);
                 }
             }
-            return canvas.toDataURL('image/png');
-        }
 
-        // WAVY MODE FUNCTIONS
-        function renderWavyPreview(timestamp) {
-            if (state.mode !== 'wavy') return;
+            // Apply vignette
+            const gradient = ctx.createRadialGradient(
+                DOWNLOAD_WIDTH / 2, DOWNLOAD_HEIGHT / 2, 0,
+                DOWNLOAD_WIDTH / 2, DOWNLOAD_HEIGHT / 2, Math.max(DOWNLOAD_WIDTH, DOWNLOAD_HEIGHT) / 2
+            );
+            gradient.addColorStop(0, 'rgba(0,0,0,0)');
+            gradient.addColorStop(1, `rgba(0,0,0,${state.vignette * 0.8})`);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, DOWNLOAD_WIDTH, DOWNLOAD_HEIGHT);
 
-            const dt = (timestamp - state.wavyLastTimestamp) / 1000;
-            state.wavyLastTimestamp = timestamp;
-            if (!isNaN(dt)) {
-                state.wavyTime += dt * state.wavy.speed;
-            }
-
-            const w = wavyPreviewCanvas.width = 320;
-            const h = wavyPreviewCanvas.height = 180;
-            wavyPreviewCtx.imageSmoothingEnabled = true;
-
-            const imageData = wavyPreviewCtx.createImageData(w, h);
-            const data = imageData.data;
-            
-            const complexity = state.wavy.complexity / 100;
-            const time = state.wavyTime;
-            
-            const c1 = hexToRgb(state.wavy.colors[0]);
-            const c2 = hexToRgb(state.wavy.colors[1]);
-            const c3 = hexToRgb(state.wavy.colors[2]);
-
-            for (let y = 0; y < h; y++) {
-                for (let x = 0; x < w; x++) {
-                    const i = (y * w + x) * 4;
-                    
-                    const noiseVal = (perlin.noise(x * complexity, y * complexity, time) + 1) / 2; // 0 to 1
-                    
-                    let color;
-                    if (noiseVal < 0.5) {
-                        color = lerpColor(c1, c2, noiseVal * 2);
-                    } else {
-                        color = lerpColor(c2, c3, (noiseVal - 0.5) * 2);
-                    }
-                    
-                    data[i] = color[0];
-                    data[i+1] = color[1];
-                    data[i+2] = color[2];
-                    data[i+3] = 255;
-                }
-            }
-            
-            wavyPreviewCtx.putImageData(imageData, 0, 0);
-            
-            state.animationFrameId = requestAnimationFrame(renderWavyPreview);
-        }
-
-        function startWavyAnimation() {
-            cancelAnimationFrame(state.animationFrameId);
-            state.wavyLastTimestamp = performance.now();
-            state.animationFrameId = requestAnimationFrame(renderWavyPreview);
-        }
-
-        function stopWavyAnimation() {
-            cancelAnimationFrame(state.animationFrameId);
-            state.animationFrameId = null;
-        }
-
-        function randomizeWavyState() {
-            state.wavy.colors = [generateRandomColor(), generateRandomColor(), generateRandomColor()];
-            wavyColorPickers[0].value = state.wavy.colors[0];
-            wavyColorPickers[1].value = state.wavy.colors[1];
-            wavyColorPickers[2].value = state.wavy.colors[2];
-            
-            state.wavy.complexity = randomInt(20, 100) / 10; // 2.0 to 10.0
-            complexitySlider.value = state.wavy.complexity;
-            complexityValue.textContent = state.wavy.complexity.toFixed(1);
-            
-            state.wavy.speed = randomInt(5, 40) / 100; // 0.05 to 0.4
-            speedSlider.value = state.wavy.speed;
-            speedValue.textContent = state.wavy.speed.toFixed(2);
-        }
-        
-        function updateWavyControls() {
-            complexityValue.textContent = parseFloat(complexitySlider.value).toFixed(1);
-            state.wavy.complexity = parseFloat(complexitySlider.value);
-            
-            speedValue.textContent = parseFloat(speedSlider.value).toFixed(2);
-            state.wavy.speed = parseFloat(speedSlider.value);
-            
-            wavyColorPickers.forEach((picker, i) => {
-                state.wavy.colors[i] = picker.value;
-            });
-        }
-        
-        async function downloadWavyImage() {
-            return new Promise((resolve) => {
-                const DOWNLOAD_WIDTH = 3840;
-                const DOWNLOAD_HEIGHT = 2160;
-                
-                canvas.width = DOWNLOAD_WIDTH;
-                canvas.height = DOWNLOAD_HEIGHT;
-                
-                const imageData = ctx.createImageData(DOWNLOAD_WIDTH, DOWNLOAD_HEIGHT);
-                const data = imageData.data;
-            
-                const complexity = state.wavy.complexity / 100;
-                const time = state.wavyTime;
-                
-                const c1 = hexToRgb(state.wavy.colors[0]);
-                const c2 = hexToRgb(state.wavy.colors[1]);
-                const c3 = hexToRgb(state.wavy.colors[2]);
-                
-                // This is a very heavy loop, so we run it in a timeout
-                // to let the "loading" state render first.
-                setTimeout(() => {
-                    for (let y = 0; y < DOWNLOAD_HEIGHT; y++) {
-                        for (let x = 0; x < DOWNLOAD_WIDTH; x++) {
-                            const i = (y * DOWNLOAD_WIDTH + x) * 4;
-                            const noiseVal = (perlin.noise(x * complexity, y * complexity, time) + 1) / 2;
-                            
-                            let color;
-                            if (noiseVal < 0.5) {
-                                color = lerpColor(c1, c2, noiseVal * 2);
-                            } else {
-                                color = lerpColor(c2, c3, (noiseVal - 0.5) * 2);
-                            }
-                            
-                            data[i] = color[0];
-                            data[i+1] = color[1];
-                            data[i+2] = color[2];
-                            data[i+3] = 255;
-                        }
-                    }
-                    ctx.putImageData(imageData, 0, 0);
-                    resolve(canvas.toDataURL('image/png'));
-                }, 0);
-            });
-        }
-
-        // MODE SWITCHING & MAIN INITIALIZATION
-        function setStyleMode(mode) {
-            state.mode = mode;
-            
-            const isBlobs = (mode === 'blobs');
-            
-            // Toggle previews
-            blobPreviewWrapper.classList.toggle('hidden', !isBlobs);
-            wavyPreviewCanvas.classList.toggle('hidden', isBlobs);
-            
-            // Toggle controls
-            blobControlsWrapper.classList.toggle('hidden', !isBlobs);
-            wavyControlsWrapper.classList.toggle('hidden', isBlobs);
-            
-            // Toggle "active" class on buttons
-            styleSelectors.forEach(opt => {
-                opt.classList.toggle('active', opt.dataset.style === mode);
-            });
-            
-            // Start/Stop animation
-            if (isBlobs) {
-                stopWavyAnimation();
-                updateBlobPreview(); // Ensure it's up-to-date
-            } else {
-                startWavyAnimation();
-            }
-            
-            scheduleHeightCheck();
-        }
-
-        async function downloadImage() {
-            downloadBtn.textContent = 'Rendering 4K...';
-            downloadBtn.disabled = true;
-            
-            let dataUrl;
-            if (state.mode === 'blobs') {
-                dataUrl = await downloadBlobImage();
-            } else {
-                dataUrl = await downloadWavyImage();
-            }
-            
             const link = document.createElement('a');
-            link.download = `herovibes-${state.mode}-wallpaper-4k.png`;
-            link.href = dataUrl;
+            link.download = `blurry-wallpaper-${resolutionSelect.value}.png`;
+            link.href = canvas.toDataURL('image/png');
             link.click();
             link.remove();
-            
-            downloadBtn.textContent = 'Download 4K';
-            downloadBtn.disabled = false;
         }
 
-        // EVENT LISTENERS (SHARED)
-        randomBtn.addEventListener('click', () => {
-            if (state.mode === 'blobs') {
-                randomizeBlobState();
-            } else {
-                randomizeWavyState();
-            }
-        });
-        
+        // Initialize blobs
+        for (let i = 1; i <= 5; i++) {
+            addBlob();
+        }
+
+        addBlobBtn.addEventListener('click', addBlob);
+        removeBlobBtn.addEventListener('click', removeBlob);
+        randomBtn.addEventListener('click', () => randomizeState('random'));
         downloadBtn.addEventListener('click', downloadImage);
-        
-        styleSelectors.forEach(option => {
-            option.addEventListener('click', () => {
-                setStyleMode(option.dataset.style);
-            });
-        });
 
-        // EVENT LISTENERS (BLOBS)
-        blurSlider.addEventListener('input', () => { updateBlobPreview(); scheduleHeightCheck(); });
-        sizeSlider.addEventListener('input', () => { updateBlobPreview(); scheduleHeightCheck(); });
-        brightnessSlider.addEventListener('input', () => { updateBlobPreview(); scheduleHeightCheck(); });
+        blurSlider.addEventListener('input', updatePreview);
+        sizeSlider.addEventListener('input', updatePreview);
+        brightnessSlider.addEventListener('input', updatePreview);
+        saturationSlider.addEventListener('input', updatePreview);
+        vignetteSlider.addEventListener('input', updatePreview);
+        grainSlider.addEventListener('input', updatePreview);
 
-        colorPickers.forEach((picker, i) => {
-            picker.addEventListener('input', (e) => {
-                if (state.blob.blobs[i]) {
-                    state.blob.blobs[i].color = e.target.value;
-                    updateBlobPreview();
-                }
-            });
+        bgColorPicker.addEventListener('input', (e) => {
+            state.backgroundColor = e.target.value;
+            updatePreview();
         });
 
         textureOptions.forEach(option => {
             option.addEventListener('click', () => {
-                const newTexture = option.dataset.texture;
-                if (state.blob.texture === newTexture && newTexture !== 'none') {
-                    randomizeBlobTextureParams();
-                } else {
-                    textureOptions.forEach(o => o.classList.remove('active'));
-                    option.classList.add('active');
-                    state.blob.texture = newTexture;
-                    randomizeBlobTextureParams();
-                }
-                updateBlobPreview();
-                scheduleHeightCheck();
+                textureOptions.forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+                state.texture = option.dataset.texture;
+                randomizeTextureParams();
+                updatePreview();
             });
         });
-        
-        // EVENT LISTENERS (WAVY)
-        complexitySlider.addEventListener('input', updateWavyControls);
-        speedSlider.addEventListener('input', updateWavyControls);
-        wavyColorPickers.forEach(picker => {
-            picker.addEventListener('input', updateWavyControls);
+
+        themeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const theme = option.dataset.theme;
+                if (theme === 'random') {
+                    randomizeState();
+                } else {
+                    randomizeState(theme);
+                }
+            });
         });
 
-        // ===== FOURTHWALL SCROLLBAR FIX =====
-        let lastHeight = 0;
-        let resizeTimer;
+        // Initial setup
+        randomizeState();
+        bgColorPicker.value = state.backgroundColor;
 
-        function sendHeight() {
-            const height = document.body.scrollHeight;
-            if (height !== lastHeight) {
-                lastHeight = height;
-                window.parent.postMessage({ frameHeight: height }, '*');
-            }
-        }
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
 
-        function scheduleHeightCheck() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(sendHeight, 150);
-        }
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
 
-        window.addEventListener('load', () => {
-            randomizeBlobState(); // Init blobs
-            randomizeWavyState(); // Init wavy
-            setStyleMode('blobs'); // Set default mode
-            
-            // Set initial wavy values in UI
-            wavyColorPickers[0].value = state.wavy.colors[0];
-            wavyColorPickers[1].value = state.wavy.colors[1];
-            wavyColorPickers[2].value = state.wavy.colors[2];
-            complexitySlider.value = state.wavy.complexity;
-            speedSlider.value = state.wavy.speed;
-            
-            // Initial height send
-            setTimeout(sendHeight, 100);
-        });
+    function scheduleHeightCheck() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
 
-        window.addEventListener('resize', () => {
-            scheduleHeightCheck();
-        });
-        // ===== END OF SCROLLBAR FIX =====
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+        scheduleHeightCheck();
+    });
+    
+    // ===== END OF SCROLLBAR FIX =====
     </script>
 </body>
 </html>
