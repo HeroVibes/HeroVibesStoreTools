@@ -9,7 +9,6 @@
     <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@jsr/rtf-js/dist/rtf.min.js"></script>
     
     <style>
         /* ===== CORE VARIABLES ===== */
@@ -21,7 +20,7 @@
             --accent-color: #87A9FF;
             --primary-text: #D4D4D4;
             --secondary-text: #8C8C8C;
-            --danger-color: #E53E3E; /* Red for clear button */
+            --danger-color: #E53E3E;
             --radius: 8px;
         }
 
@@ -36,7 +35,7 @@
             font-family: system-ui, -apple-system, sans-serif;
             background: var(--primary-bg);
             color: var(--primary-text);
-            padding: 32px 16px; /* Added more top/bottom padding for new page layout */
+            padding: 32px 16px;
         }
 
         /* ===== CONTAINER ===== */
@@ -218,8 +217,12 @@
         #clearButton:hover::before {
             display: none;
         }
+        
+        #helpButton {
+            margin-left: auto;
+        }
 
-        /* ===== EDITOR (FIX 4: A4 LAYOUT) ===== */
+        /* ===== EDITOR (A4 LAYOUT) ===== */
         .editor-wrapper {
             background: transparent;
             border: none;
@@ -232,21 +235,14 @@
             border: 1px solid var(--outline-color);
             border-radius: var(--radius);
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-
-            /* A4-like dimensions */
-            max-width: 794px; /* 210mm at 96dpi */
-            min-height: 1123px; /* 297mm at 96dpi */
+            max-width: 794px;
+            min-height: 1123px;
             margin: 0 auto;
-            
-            /* A4-like margins */
             padding: 40px 60px;
-            
             outline: none;
             font-family: system-ui, sans-serif;
             font-size: 16px;
             line-height: 1.6;
-            
-            /* Text wrap fix */
             overflow-wrap: break-word;
             word-wrap: break-word;
         }
@@ -259,24 +255,30 @@
         .editor p {
             margin: 0 0 16px 0;
         }
+        
+        .editor a {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
 
+        .editor h1, .editor h2, .editor h3 {
+            font-weight: normal;
+        }
+        
         .editor h1 {
             font-size: 32px;
-            /* FIX 5: Removed font-weight: bold; */
             margin: 32px 0 16px 0;
             line-height: 1.2;
         }
 
         .editor h2 {
             font-size: 24px;
-            /* FIX 5: Removed font-weight: bold; */
             margin: 24px 0 12px 0;
             line-height: 1.3;
         }
 
         .editor h3 {
             font-size: 20px;
-            /* FIX 5: Removed font-weight: bold; */
             margin: 20px 0 10px 0;
             line-height: 1.3;
         }
@@ -305,8 +307,6 @@
             font-size: 12px;
             color: var(--secondary-text);
             text-align: right;
-            
-            /* A4 Layout: Attach to bottom of editor */
             max-width: 794px;
             margin: 0 auto;
             border: 1px solid var(--outline-color);
@@ -314,7 +314,6 @@
             border-bottom-left-radius: var(--radius);
             border-bottom-right-radius: var(--radius);
             background: var(--primary-bg);
-            
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -424,6 +423,83 @@
             color: var(--secondary-text);
             line-height: 1.4;
         }
+        
+        /* ===== MODAL STYLES (Help & Link) ===== */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+        }
+        .modal-content {
+            position: relative;
+            z-index: 2001;
+            background: var(--secondary-bg);
+            border: 1px solid var(--outline-color);
+            border-radius: var(--radius);
+            padding: 24px 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-content h3 {
+            font-size: 20px;
+            color: var(--primary-text);
+            margin-bottom: 16px;
+        }
+        .modal-content p, .modal-content li {
+            font-size: 14px;
+            color: var(--primary-text);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        .modal-content ul {
+            padding-left: 20px;
+        }
+        .modal-content strong {
+            color: var(--accent-color);
+            font-weight: normal;
+        }
+        .modal-content .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+        }
+        
+        /* Specific modal content */
+        #linkUrlInput {
+            width: 100%;
+            background: var(--primary-bg);
+            margin-bottom: 12px;
+        }
+        #linkModalContent .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        #createLinkButton {
+            background: var(--accent-color);
+            color: var(--primary-bg);
+            border-color: var(--accent-color);
+        }
+        #createLinkButton:hover {
+            background: var(--accent-color);
+            filter: brightness(0.9);
+        }
 
         /* ===== UTILITY CLASSES ===== */
         .hidden {
@@ -469,7 +545,6 @@
                 display: none;
             }
 
-            /* A4 layout reset for mobile */
             .editor {
                 max-width: 100%;
                 min-height: 400px;
@@ -491,7 +566,6 @@
             }
             
             .editor-wrapper {
-                 /* Add back card styles for wrapper on mobile */
                  background: var(--secondary-bg);
                  border: 1px solid var(--outline-color);
                  border-radius: var(--radius);
@@ -510,6 +584,11 @@
 
             .version {
                 order: -1;
+            }
+            
+            select {
+                padding-right: 10px;
+                background-image: none;
             }
         }
 
@@ -599,6 +678,12 @@
             <div class="btn-wrapper">
                 <button id="strikeButton"><s>S</s></button>
                 <span class="btn-tooltip">Strikethrough</span>
+            </div>
+            <div class="btn-wrapper">
+                <button id="linkButton" class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.72m-5.02 5.02a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.72-1.72"></path><line x1="8" y1="16" x2="16" y2="8"></line></svg>
+                </button>
+                <span class="btn-tooltip">Add link</span>
             </div>
             <div class="toolbar-separator"></div>
             <div class="btn-wrapper">
@@ -710,12 +795,6 @@
                             <p>Microsoft Word format. Full formatting support.</p>
                         </div>
                     </div>
-                    <div class="download-option" onclick="downloadFile('rtf')">
-                        <div>
-                            <h4>RTF</h4>
-                            <p>Rich text format. Works in most word processors.</p>
-                        </div>
-                    </div>
                     <div class="download-option" onclick="downloadFile('txt')">
                         <div>
                             <h4>TXT</h4>
@@ -730,6 +809,12 @@
                 </button>
                 <span class="btn-tooltip">Clear document</span>
             </div>
+            <div class="btn-wrapper" id="helpButtonWrapper">
+                <button id="helpButton" class="icon-btn" style="margin-left: auto;">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </button>
+                <span class="btn-tooltip">Help & Info</span>
+            </div>
         </div>
     </div>
 
@@ -737,7 +822,7 @@
         <div class="editor" contenteditable="true" id="editor" spellcheck="true"><p><br></p></div>
     </div>
     <div id="stats-bar">
-        <span class="version">V.1.0.5</span>
+        <span class="version">V.1.0.7</span>
         <div>
             <span id="char-count">0</span> characters · 
             <span id="word-count">0</span> words ·
@@ -748,6 +833,39 @@
     <div id="emojiPopup" class="hidden">
         <input type="text" id="emojiSearch" placeholder="Search emojis..." />
         <div id="emojiList"></div>
+    </div>
+    
+    <div id="helpModal" class="modal hidden">
+        <div class="modal-backdrop" id="helpModalBackdrop"></div>
+        <div class="modal-content" id="helpModalContent">
+            <button id="closeHelpButton" class="icon-btn close-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h3>Quick Tips</h3>
+            <ul>
+                <li><strong>Find/Replace:</strong> Use the <strong>Enter</strong> key in the "Find..." box to jump to the next match, and <strong>Shift + Enter</strong> to go to the previous one.</li>
+                <li><strong>Pasting:</strong> Pasting content (like from Gemini or websites) will automatically remove any background colors to keep your document clean.</li>
+                <li><strong>Known Bugs:</strong> These tools are new and still being refined!
+                    <ul>
+                        <li>Sometimes, using the <strong>Find/Replace</strong> or <strong>AI Highlight</strong> tools can interfere with typing. If your cursor seems stuck, just clear the "Find..." box or toggle the highlight button off.</li>
+                        <li><strong>Exports (PDF/DOCX):</strong> Document exporting is a new feature. We're working hard to make it perfect, but you might see some small spacing or formatting differences.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <div id="linkModal" class="modal hidden">
+        <div class="modal-backdrop" id="linkModalBackdrop"></div>
+        <div class="modal-content" id="linkModalContent">
+            <h3>Add Link</h3>
+            <p>Enter the URL you want to link to:</p>
+            <input type="text" id="linkUrlInput" placeholder="https://www.herovibes.store" />
+            <div class="modal-actions">
+                <button id="closeLinkButton">Cancel</button>
+                <button id="createLinkButton">Create</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -769,6 +887,16 @@
     const nextMatch = document.getElementById('nextMatch');
     const downloadButton = document.getElementById('downloadButton');
     const downloadMenu = document.getElementById('downloadMenu');
+    const helpButton = document.getElementById('helpButton');
+    const helpModal = document.getElementById('helpModal');
+    const helpModalBackdrop = document.getElementById('helpModalBackdrop');
+    const closeHelpButton = document.getElementById('closeHelpButton');
+    const linkButton = document.getElementById('linkButton');
+    const linkModal = document.getElementById('linkModal');
+    const linkModalBackdrop = document.getElementById('linkModalBackdrop');
+    const closeLinkButton = document.getElementById('closeLinkButton');
+    const createLinkButton = document.getElementById('createLinkButton');
+    const linkUrlInput = document.getElementById('linkUrlInput');
     
     // ===== STATE VARIABLES =====
     let permanentAIHighlightActive = false;
@@ -876,9 +1004,8 @@
     editor.addEventListener('mouseup', updateToolbarStates);
     editor.addEventListener('click', updateToolbarStates);
     
-    // FIX 7: ADDED e.metaKey FOR MAC OS KEYBOARD SHORTCUTS
     editor.addEventListener('keydown', (e) => {
-        const isModKey = e.ctrlKey || e.metaKey; // Ctrl or Cmd
+        const isModKey = e.ctrlKey || e.metaKey;
 
         if (isModKey && e.key.toLowerCase() === 'z') {
             e.preventDefault();
@@ -1051,7 +1178,7 @@
     }
 
     // ===== AI ARTIFACT DETECTION & REMOVAL =====
-    const aiCharactersRegex = /[\u2013\u2014\u201C\u201D\u2018\u2019\u2026\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000\u25A0\u200B\uFEFF\u00AD\u2060-\u2064\u201A\u201B\u201E\u201F\u0060\u00B4\u02B9\u02BB-\u02BD\u05F3\u02BA\u05F4\u2033\u2034\u2032\u2035-\u2037\u02EE\u00AB\u00BB\uFF08\uFF09\u2015\u2212\u2012\u2010\u2011\u23AF\u2796\uFF0D\u2025\u22EE\u22EF\uFF0E\uFF0C\u2024\uFE52\u2219\u00B7\u0430\u0410\u0441\u0421\u0435\u0415\u0395\u0396\u0397\u0456\u0406\u0399\u0131\u0269\u0458\u0408\u039A\u039C\u039D\u043E\u041E\u039F\u03BF\u0030\u0440\u0420\u03A1\u03A4\u0445\u0425\u03A7\u0443\u005Y\u03BD]/g;
+    const aiCharactersRegex = /[\u2013\u2014\u201C\u201D\u2018\u2019\u2026\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000\u25A0\u200B\uFEFF\u00AD\u2060-\u2064\u201A\u201B\u201E\u201F\u0060\u00B4\u02B9\u02BB-\u02BD\u05F3\u02BA\u05F4\u2033\u2034\u2032\u2035-\u2037\u02EE\u00AB\u00BB\uFF08\uFF09\u2015\u2212\u2012\u2010\u2011\u23AF\u2796\uFF0D\u2025\u22EE\u22EF\uFF0E\uFF0C\u2024\uFE52\u2219\u00B7\u0430\u0410\u0441\u0421\u0435\u0415\u0395\u0396\u0397\u0456\u0406\u0399\u0131\u0269\u0458\u0408\u039A\u039C\u039D\u043E\u041E\u039F\u0440\u0420\u03A1\u03A4\u0445\u0425\u03A7\u03BD]/g;
 
     function highlightInTextNodes(regex, className) {
         removeHighlight(className);
@@ -1059,7 +1186,6 @@
         let node;
         const nodesToProcess = [];
         while (node = walker.nextNode()) {
-            // FIX 3: Removed .trim() to catch nodes with only spaces
             if (node.nodeValue && regex.test(node.nodeValue)) {
                 nodesToProcess.push(node);
             }
@@ -1116,14 +1242,12 @@
             '\u039C': 'M',
             '\u039D': 'N',
             '[\u043E\u03BF]': 'o',
-            '[\u041E\u039F\u0030]': 'O',
+            '[\u041E\u039F]': 'O',
             '[\u0440\u03A1]': 'p',
             '[\u0420]': 'P',
             '\u03A4': 'T',
             '[\u0445\u03A7]': 'x',
             '[\u0425]': 'X',
-            '[\u0443]': 'y',
-            '\u0059': 'Y',
             '\u03BD': 'v',
             '\u25A0': '[square]'
         };
@@ -1158,6 +1282,17 @@
     }
 
     document.getElementById('findWord').addEventListener('input', highlightFindMatches);
+    
+    document.getElementById('findWord').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (e.shiftKey) {
+                navigateMatch(-1);
+            } else {
+                navigateMatch(1);
+            }
+        }
+    });
     
     function replaceOne() {
         saveState();
@@ -1206,27 +1341,39 @@
     prevMatch.addEventListener('click', () => navigateMatch(-1));
     nextMatch.addEventListener('click', () => navigateMatch(1));
     
-    // ===== MARKDOWN TOGGLE (FIX 1: GITHUB STANDARD) =====
+    // ===== MARKDOWN TOGGLE (GOAL 1) =====
     
-    // Initialize Turndown
     const turndownService = new TurndownService({ 
         headingStyle: 'atx',
-        emDelimiter: '*',      // Use * for italics
-        strongDelimiter: '**'  // Use ** for bold
+        emDelimiter: '*',      // Italic: *text*
+        strongDelimiter: '**'  // Bold: **text**
     });
 
-    // Add Turndown rule for strikethrough (~~)
+    // Strikethrough: ~~text~~
     turndownService.addRule('strikethrough', {
         filter: ['s', 'strike'],
         replacement: (content) => '~~' + content + '~~'
     });
-    // Note: No rule for underline (<u>), as it's not in the cheatsheet.
     
-    // Initialize Showdown
+    // Underline: __text__
+    turndownService.addRule('underline', {
+        filter: 'u',
+        replacement: (content) => '__' + content + '__'
+    });
+    
+    // Custom Showdown extension for __underline__
+    showdown.extension('underline', () => {
+        return [{ 
+            type: 'lang', 
+            regex: /__(.*?)__/g, 
+            replace: '<u>$1</u>' 
+        }];
+    });
+    
     const showdownConverter = new showdown.Converter({ 
-        strikethrough: true, // Enable ~~strikethrough~~
-        tasklists: true,
-        simpleLineBreaks: true
+        strikethrough: true,
+        simpleLineBreaks: true,
+        extensions: ['underline'] // Enable the custom extension
     });
 
 
@@ -1236,12 +1383,10 @@
         const markdownButton = document.getElementById('markdownButton');
         
         if (isMarkdown) {
-            // Convert Markdown TO HTML
             editor.innerHTML = showdownConverter.makeHtml(editor.innerText);
             editor.setAttribute('data-mode', 'rich');
             markdownButton.classList.remove('active');
         } else {
-            // Convert HTML TO Markdown
             editor.innerText = turndownService.turndown(editor.innerHTML);
             editor.setAttribute('data-mode', 'markdown');
             markdownButton.classList.add('active');
@@ -1320,7 +1465,45 @@
         }
     });
     
-    // ===== DOWNLOAD FUNCTIONS (FIX 6: REBUILT EXPORTERS) =====
+    // ===== LINK MODAL (GOAL 2) =====
+    function openLinkModal() {
+        saveSelection();
+        if (savedRange.collapsed) {
+            alert('Please highlight the text you want to turn into a link.');
+            return;
+        }
+        linkModal.classList.remove('hidden');
+        linkUrlInput.focus();
+    }
+    
+    function closeLinkModal() {
+        linkModal.classList.add('hidden');
+        linkUrlInput.value = '';
+    }
+    
+    function createLink() {
+        restoreSelection();
+        let url = linkUrlInput.value;
+        if (url && !url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/')) {
+            url = 'https://' + url;
+        }
+        document.execCommand('createLink', false, url);
+        closeLinkModal();
+        scheduleHeightCheck();
+    }
+    
+    linkButton.addEventListener('click', openLinkModal);
+    linkModalBackdrop.addEventListener('click', closeLinkModal);
+    closeLinkButton.addEventListener('click', closeLinkModal);
+    createLinkButton.addEventListener('click', createLink);
+    linkUrlInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            createLink();
+        }
+    });
+
+    // ===== DOWNLOAD FUNCTIONS =====
     downloadButton.addEventListener('click', () => {
         downloadMenu.classList.toggle('hidden');
     });
@@ -1349,18 +1532,17 @@
             const pdf = new jsPDF('p', 'pt', 'a4');
             const tempDiv = document.createElement('div');
             
-            // Apply styles to match editor for html2canvas
             tempDiv.style.cssText = 'position: absolute; left: -9999px; width: 794px; padding: 40px 60px; font-family: system-ui, sans-serif; color: #000; background: #fff; box-sizing: border-box;';
             tempDiv.innerHTML = content;
 
-            // FIX 6: Apply padding instead of margin for better canvas rendering
-            tempDiv.querySelectorAll('p').forEach(el => { el.style.cssText = 'padding: 0 0 16px 0; line-height: 1.6; font-size: 16px;'; });
-            tempDiv.querySelectorAll('h1').forEach(el => { el.style.cssText = `font-size: 32px; ${window.getComputedStyle(el).fontWeight}; padding-top: 32px; padding-bottom: 16px; line-height: 1.2;`; });
-            tempDiv.querySelectorAll('h2').forEach(el => { el.style.cssText = `font-size: 24px; ${window.getComputedStyle(el).fontWeight}; padding-top: 24px; padding-bottom: 12px; line-height: 1.3;`; });
-            tempDiv.querySelectorAll('h3').forEach(el => { el.style.cssText = `font-size: 20px; ${window.getComputedStyle(el).fontWeight}; padding-top: 20px; padding-bottom: 10px; line-height: 1.3;`; });
+            tempDiv.querySelectorAll('p').forEach(el => { el.style.paddingBottom = '16px'; el.style.lineHeight = '1.6'; el.style.fontSize = '16px'; });
+            tempDiv.querySelectorAll('h1').forEach(el => { el.style.cssText = `font-size: 32px; font-weight: ${window.getComputedStyle(el).fontWeight}; padding-top: 32px; padding-bottom: 16px; line-height: 1.2;`; });
+            tempDiv.querySelectorAll('h2').forEach(el => { el.style.cssText = `font-size: 24px; font-weight: ${window.getComputedStyle(el).fontWeight}; padding-top: 24px; padding-bottom: 12px; line-height: 1.3;`; });
+            tempDiv.querySelectorAll('h3').forEach(el => { el.style.cssText = `font-size: 20px; font-weight: ${window.getComputedStyle(el).fontWeight}; padding-top: 20px; padding-bottom: 10px; line-height: 1.3;`; });
             tempDiv.querySelectorAll('hr').forEach(el => { el.style.cssText = 'margin: 24px 0; border: 0; border-top: 1px solid #555;'; });
             tempDiv.querySelectorAll('ul, ol').forEach(el => { el.style.cssText = 'margin: 0 0 16px 0; padding-left: 32px;'; });
             tempDiv.querySelectorAll('blockquote').forEach(el => { el.style.cssText = 'margin: 16px 0; padding-left: 16px; border-left: 3px solid #87A9FF; color: #333;'; });
+            tempDiv.querySelectorAll('a').forEach(el => { el.style.color = '#87A9FF'; });
             tempDiv.querySelectorAll('font').forEach(el => {
                 if (el.style.fontSize) { el.style.color = '#000'; } 
                 else { el.outerHTML = el.innerHTML; }
@@ -1398,39 +1580,45 @@
                 triggerDownload(blob, 'document.docx');
             });
             
-        } else if (type === 'rtf') {
-            const rtf = new RTF.Document();
-            const section = rtf.createSection();
-            parseHtmlToRtf(editor, section);
-            const blob = new Blob([rtf.toString()], {type: 'application/rtf'});
-            triggerDownload(blob, 'document.rtf');
-            
         } else if (type === 'txt') {
             const blob = new Blob([plainText], {type: 'text/plain'});
             triggerDownload(blob, 'document.txt');
         }
     }
 
-    // FIX 6: REBUILT DOCX PARSER
     function parseHtmlToDocx(parentNode) {
         const elements = [];
         
         function extractTextRuns(node, style = {}) {
             const runs = [];
-            if (node.nodeType === 3) { // Text Node
+            if (node.nodeType === 3) {
                 runs.push(new docx.TextRun({ text: node.textContent, ...style }));
-            } else if (node.nodeType === 1) { // Element Node
+            } else if (node.nodeType === 1) {
                 const nodeName = node.nodeName.toUpperCase();
                 let newStyle = { ...style };
                 
-                if (['B', 'STRONG'].includes(nodeName)) newStyle.bold = true;
-                if (['I', 'EM'].includes(nodeName)) newStyle.italic = true;
+                const computedStyle = window.getComputedStyle(node);
+                if (computedStyle.fontWeight === 'bold' || parseInt(computedStyle.fontWeight) >= 700) newStyle.bold = true;
+                if (computedStyle.fontStyle === 'italic') newStyle.italic = true;
+
                 if (nodeName === 'U') newStyle.underline = {};
                 if (['S', 'STRIKE'].includes(nodeName)) newStyle.strike = true;
                 if (nodeName === 'FONT' && node.style.fontSize) newStyle.size = parseFloat(node.style.fontSize) * 2;
                 if (nodeName === 'BR') runs.push(new docx.TextRun({ break: 1 }));
-
-                node.childNodes.forEach(child => runs.push(...extractTextRuns(child, newStyle)));
+                
+                if (nodeName === 'A') {
+                    // Create a hyperlink
+                    runs.push(new docx.Hyperlink({
+                        child: new docx.TextRun({
+                            text: node.textContent,
+                            style: "Hyperlink",
+                        }),
+                        link: node.getAttribute('href') || ''
+                    }));
+                } else {
+                    // Recurse
+                    node.childNodes.forEach(child => runs.push(...extractTextRuns(child, newStyle)));
+                }
             }
             return runs;
         }
@@ -1444,6 +1632,11 @@
             else if (node.style.textAlign === 'right') alignment = docx.AlignmentType.RIGHT;
             else if (node.style.textAlign === 'justify') alignment = docx.AlignmentType.JUSTIFIED;
 
+            let spacing = { after: 240 };
+            if (nodeName === 'H1') spacing = { before: 480, after: 240 };
+            else if (nodeName === 'H2') spacing = { before: 360, after: 180 };
+            else if (nodeName === 'H3') spacing = { before: 300, after: 150 };
+
             if (['P', 'H1', 'H2', 'H3', 'BLOCKQUOTE'].includes(nodeName)) {
                 const textRuns = extractTextRuns(node);
                 elements.push(new docx.Paragraph({
@@ -1454,7 +1647,7 @@
                     style: nodeName === 'BLOCKQUOTE' ? "IntenseQuote" : undefined,
                     alignment: alignment,
                     indent: nodeName === 'BLOCKQUOTE' ? { left: 720 } : undefined,
-                    spacing: { after: 120, before: 120 }
+                    spacing: spacing
                 }));
             } else if (nodeName === 'UL' || nodeName === 'OL') {
                 node.querySelectorAll('li').forEach(li => {
@@ -1476,77 +1669,6 @@
         return elements;
     }
 
-    // FIX 6: REBUILT RTF PARSER
-    function parseHtmlToRtf(parentNode, section) {
-        
-        function processRtfChildren(node, paragraph, styles = {}) {
-            if (node.nodeType === 3) { // Text node
-                const run = paragraph.addTextRun(node.textContent);
-                if (styles.bold) run.bold();
-                if (styles.italic) run.italic();
-                if (styles.underline) run.underline();
-                if (styles.strike) run.strike();
-                if (styles.fontSize) run.fontSize(styles.fontSize);
-            } else if (node.nodeType === 1) { // Element node
-                const nodeName = node.nodeName.toUpperCase();
-                if (nodeName === 'BR') {
-                    paragraph.addTextRun('\n');
-                } else {
-                    const newStyles = { ...styles };
-                    if (['B', 'STRONG'].includes(nodeName)) newStyles.bold = true;
-                    if (['I', 'EM'].includes(nodeName)) newStyles.italic = true;
-                    if (nodeName === 'U') newStyles.underline = true;
-                    if (['S', 'STRIKE'].includes(nodeName)) newStyles.strike = true;
-                    if (nodeName === 'FONT' && node.style.fontSize) newStyles.fontSize = parseFloat(node.style.fontSize) * 2;
-                    
-                    node.childNodes.forEach(child => processRtfChildren(child, paragraph, newStyles));
-                }
-            }
-        }
-
-        parentNode.childNodes.forEach(node => {
-            if (node.nodeType !== 1) return;
-            const nodeName = node.nodeName.toUpperCase();
-            
-            const p = section.addParagraph();
-            
-            if (node.style.textAlign === 'center') p.center();
-            else if (node.style.textAlign === 'right') p.right();
-            else if (node.style.textAlign === 'justify') p.justify();
-            
-            if (['H1','H2','H3'].includes(nodeName)) {
-                const size = nodeName === 'H1' ? 32 : (nodeName === 'H2' ? 24 : 20);
-                const isBold = window.getComputedStyle(node).fontWeight === 'bold' || parseInt(window.getComputedStyle(node).fontWeight) >= 700;
-                processRtfChildren(node, p, { bold: isBold, fontSize: size });
-                p.spacing({ after: 200, before: 200 });
-            } 
-            else if (nodeName === 'UL' || nodeName === 'OL') {
-                node.querySelectorAll('li').forEach((li, index) => {
-                    const listP = section.addParagraph();
-                    const prefix = (nodeName === 'OL') ? `${index + 1}. ` : '• ';
-                    listP.addTextRun(prefix).bold();
-                    processRtfChildren(li, listP, {});
-                    listP.indent({ left: 720, hanging: 360 });
-                    listP.spacing({ after: 50 });
-                });
-                p.text = ''; // Clear the text of the main paragraph 'p'
-            }
-            else if (nodeName === 'HR') {
-                p.border({ bottom: { value: 'single', size: 6 } }).spacing({ after: 200, before: 200 });
-            }
-            else if (nodeName === 'BLOCKQUOTE') {
-                 processRtfChildren(node, p, { italic: true });
-                 p.indent({ left: 720, right: 720 });
-                 p.border({ left: { value: 'single', size: 6, color: [135, 169, 255] } });
-                 p.spacing({ after: 150, before: 150 });
-            }
-            else if (nodeName === 'P') {
-                processRtfChildren(node, p, {});
-                p.spacing({ after: 200 });
-            }
-        });
-    }
-
     // ===== PLAIN TEXT CONVERSION =====
     function convertToPlainText() {
         saveState();
@@ -1566,6 +1688,17 @@
             scheduleHeightCheck();
         }
     }
+    
+    // ===== HELP MODAL =====
+    function toggleHelpModal() {
+        helpModal.classList.toggle('hidden');
+        if (!helpModal.classList.contains('hidden')) {
+            scheduleHeightCheck();
+        }
+    }
+    helpButton.addEventListener('click', toggleHelpModal);
+    helpModalBackdrop.addEventListener('click', toggleHelpModal);
+    closeHelpButton.addEventListener('click', toggleHelpModal);
 
     // ===== FOURTHWALL SCROLLBAR FIX =====
     let lastHeight = 0;
