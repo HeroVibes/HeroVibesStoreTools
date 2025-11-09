@@ -8,6 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jsr/rtf-js/dist/rtf.min.js"></script>
     <style>
         /* ===== CORE VARIABLES ===== */
         :root {
@@ -37,7 +39,7 @@
 
         /* ===== CONTAINER ===== */
         .container {
-            max-width: 950px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -90,6 +92,7 @@
             align-items: center;
             justify-content: center;
             min-height: 36px;
+            white-space: nowrap;
         }
 
         button::before {
@@ -161,6 +164,36 @@
             height: 18px;
         }
 
+        /* ===== BUTTON TOOLTIP ON HOVER ===== */
+        .btn-wrapper {
+            position: relative;
+            display: inline-flex;
+        }
+
+        .btn-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--hover-color);
+            color: var(--primary-text);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            pointer-events: none;
+            z-index: 101;
+            margin-bottom: 6px;
+        }
+
+        .btn-wrapper:hover .btn-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
         /* ===== EDITOR ===== */
         .editor-wrapper {
             background: var(--secondary-bg);
@@ -179,6 +212,7 @@
             font-size: 16px;
             line-height: 1.6;
             overflow-y: auto;
+            scroll-behavior: smooth;
         }
 
         .editor:focus {
@@ -236,6 +270,14 @@
             text-align: right;
             border-top: 1px solid var(--outline-color);
             background: var(--primary-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .version {
+            font-size: 11px;
+            opacity: 0.7;
         }
 
         /* ===== HIGHLIGHTING ===== */
@@ -253,6 +295,11 @@
         mark.find-match {
             background-color: rgba(255, 100, 100, 0.4);
             border-radius: 2px;
+        }
+
+        mark.find-match.current {
+            background-color: rgba(135, 169, 255, 0.6);
+            outline: 1px solid var(--accent-color);
         }
 
         /* ===== EMOJI POPUP ===== */
@@ -293,13 +340,44 @@
             transform: scale(1.1);
         }
 
-        /* ===== AI PREVIEW BUTTON ===== */
-        .ai-preview-button .ai-square {
-            width: 12px;
-            height: 12px;
-            background-color: gold;
-            display: inline-block;
-            border-radius: 2px;
+        /* ===== DOWNLOAD MENU ===== */
+        #downloadMenu {
+            position: absolute;
+            background: var(--secondary-bg);
+            border: 1px solid var(--outline-color);
+            border-radius: var(--radius);
+            padding: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            z-index: 1001;
+            width: 300px;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+        }
+
+        .download-option {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .download-option:hover {
+            background: var(--hover-color);
+        }
+
+        .download-option h4 {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+        }
+
+        .download-option p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--secondary-text);
+            line-height: 1.4;
         }
 
         /* ===== UTILITY CLASSES ===== */
@@ -307,35 +385,14 @@
             display: none !important;
         }
 
-        /* ===== WORD COUNT GOALS ===== */
-        .word-goal-container {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            background: var(--primary-bg);
-            border-radius: var(--radius);
-            font-size: 12px;
-        }
-
-        .word-goal-bar {
-            width: 80px;
-            height: 4px;
-            background: var(--outline-color);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .word-goal-progress {
-            height: 100%;
-            background: var(--accent-color);
-            transition: width 0.3s ease;
-        }
-
         /* ===== MOBILE OPTIMIZATION ===== */
         @media (max-width: 768px) {
             body {
                 padding: 8px;
+            }
+
+            .container {
+                max-width: 100%;
             }
 
             .toolbar-container {
@@ -345,10 +402,11 @@
 
             .toolbar {
                 gap: 6px;
+                justify-content: center;
             }
 
             button, select, input[type="text"] {
-                padding: 8px 12px;
+                padding: 8px 10px;
                 font-size: 13px;
                 min-height: 32px;
             }
@@ -359,7 +417,11 @@
             }
 
             input[type="text"] {
-                width: 100px;
+                width: 90px;
+            }
+
+            .toolbar-separator {
+                display: none;
             }
 
             .editor {
@@ -379,18 +441,19 @@
             }
 
             #stats-bar {
+                flex-direction: column;
                 text-align: center;
-                padding: 10px;
+                gap: 4px;
+            }
+
+            .version {
+                order: -1;
             }
         }
 
         @media (max-width: 480px) {
-            .toolbar-separator {
-                display: none;
-            }
-
             select {
-                max-width: 100px;
+                max-width: 90px;
             }
 
             #emojiList {
@@ -425,84 +488,185 @@
     <div class="toolbar-container">
         <!-- TOP TOOLBAR -->
         <div class="toolbar">
-            <button id="undoButton" class="icon-btn" title="Undo (Ctrl+Z)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
-            </button>
-            <button id="redoButton" class="icon-btn" title="Redo (Ctrl+Shift+Z)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"/></svg>
-            </button>
+            <div class="btn-wrapper">
+                <button id="undoButton" class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
+                </button>
+                <span class="btn-tooltip">Undo (Ctrl+Z)</span>
+            </div>
+            <div class="btn-wrapper">
+                <button id="redoButton" class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"/></svg>
+                </button>
+                <span class="btn-tooltip">Redo (Ctrl+Shift+Z)</span>
+            </div>
             <div class="toolbar-separator"></div>
-            <select id="blockFormat">
-                <option value="p">Paragraph</option>
-                <option value="h1">Header 1</option>
-                <option value="h2">Header 2</option>
-                <option value="h3">Header 3</option>
-            </select>
-            <select id="fontSizeSelect">
-                <option value="12px">12</option>
-                <option value="14px">14</option>
-                <option value="16px">16</option>
-                <option value="18px">18</option>
-                <option value="20px">20</option>
-                <option value="24px">24</option>
-                <option value="32px">32</option>
-            </select>
+            <div class="btn-wrapper">
+                <select id="blockFormat">
+                    <option value="p">Paragraph</option>
+                    <option value="h1">Header 1</option>
+                    <option value="h2">Header 2</option>
+                    <option value="h3">Header 3</option>
+                </select>
+                <span class="btn-tooltip">Block format</span>
+            </div>
+            <div class="btn-wrapper">
+                <select id="fontSizeSelect">
+                    <option value="12px">12</option>
+                    <option value="14px">14</option>
+                    <option value="16px">16</option>
+                    <option value="18px">18</option>
+                    <option value="20px">20</option>
+                    <option value="24px">24</option>
+                    <option value="32px">32</option>
+                </select>
+                <span class="btn-tooltip">Font size</span>
+            </div>
             <div class="toolbar-separator"></div>
-            <button id="boldButton" title="Bold (Ctrl+B)"><b>B</b></button>
-            <button id="italicButton" title="Italic (Ctrl+I)"><i>I</i></button>
-            <button id="underlineButton" title="Underline (Ctrl+U)"><u>U</u></button>
-            <button id="strikeButton" title="Strikethrough"><s>S</s></button>
+            <div class="btn-wrapper">
+                <button id="boldButton"><b>B</b></button>
+                <span class="btn-tooltip">Bold (Ctrl+B)</span>
+            </div>
+            <div class="btn-wrapper">
+                <button id="italicButton"><i>I</i></button>
+                <span class="btn-tooltip">Italic (Ctrl+I)</span>
+            </div>
+            <div class="btn-wrapper">
+                <button id="underlineButton"><u>U</u></button>
+                <span class="btn-tooltip">Underline (Ctrl+U)</span>
+            </div>
+            <div class="btn-wrapper">
+                <button id="strikeButton"><s>S</s></button>
+                <span class="btn-tooltip">Strikethrough</span>
+            </div>
             <div class="toolbar-separator"></div>
-            <button id="alignmentButton" class="icon-btn" title="Text Alignment"></button>
-            <button class="icon-btn" onclick="formatText('insertUnorderedList')" title="Bullet List">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>
-            </button>
-            <button class="icon-btn" onclick="formatText('insertOrderedList')" title="Numbered List">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
-            </button>
-            <button class="icon-btn" onclick="formatText('outdent')" title="Outdent">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 8 3 12 7 16"/><line x1="21" y1="12" x2="11" y2="12"/><line x1="21" y1="6" x2="11" y2="6"/><line x1="21" y1="18" x2="11" y2="18"/></svg>
-            </button>
-            <button class="icon-btn" onclick="formatText('indent')" title="Indent">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 8 17 12 13 16"/><line x1="3" y1="12" x2="13" y2="12"/><line x1="3" y1="6" x2="13" y2="6"/><line x1="3" y1="18" x2="13" y2="18"/></svg>
-            </button>
-            <button onclick="formatText('insertHorizontalRule')" title="Insert Line">—</button>
+            <div class="btn-wrapper">
+                <button id="alignmentButton" class="icon-btn"></button>
+                <span class="btn-tooltip">Text alignment</span>
+            </div>
+            <div class="btn-wrapper">
+                <button class="icon-btn" onclick="formatText('insertUnorderedList')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>
+                </button>
+                <span class="btn-tooltip">Bullet list</span>
+            </div>
+            <div class="btn-wrapper">
+                <button class="icon-btn" onclick="formatText('insertOrderedList')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+                </button>
+                <span class="btn-tooltip">Numbered list</span>
+            </div>
+            <div class="btn-wrapper">
+                <button class="icon-btn" onclick="formatText('outdent')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 8 3 12 7 16"/><line x1="21" y1="12" x2="11" y2="12"/><line x1="21" y1="6" x2="11" y2="6"/><line x1="21" y1="18" x2="11" y2="18"/></svg>
+                </button>
+                <span class="btn-tooltip">Outdent</span>
+            </div>
+            <div class="btn-wrapper">
+                <button class="icon-btn" onclick="formatText('indent')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 8 17 12 13 16"/><line x1="3" y1="12" x2="13" y2="12"/><line x1="3" y1="6" x2="13" y2="6"/><line x1="3" y1="18" x2="13" y2="18"/></svg>
+                </button>
+                <span class="btn-tooltip">Indent</span>
+            </div>
+            <div class="btn-wrapper">
+                <button onclick="formatText('insertHorizontalRule')">—</button>
+                <span class="btn-tooltip">Horizontal line</span>
+            </div>
             <div class="toolbar-separator"></div>
-            <button onclick="removeAIArtifacts()" title="Remove AI Characters">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9v11a2 2 0 01-2 2H6a2 2 0 01-2-2V9"/><path d="M8 9V5a2 2 0 012-2h4a2 2 0 012 2v4"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
-            </button>
-            <button class="ai-preview-button" onclick="togglePermanentAIHighlight()" title="Highlight AI Characters">
-                <span class="ai-square"></span>
-            </button>
-            <button id="emojiButton" onclick="toggleEmojiPopup(event)" title="Insert Emoji">😊</button>
+            <div class="btn-wrapper">
+                <button onclick="removeAIArtifacts()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9v11a2 2 0 01-2 2H6a2 2 0 01-2-2V9"/><path d="M8 9V5a2 2 0 012-2h4a2 2 0 012 2v4"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+                </button>
+                <span class="btn-tooltip">Remove AI artifacts</span>
+            </div>
+            <div class="btn-wrapper">
+                <button class="ai-preview-button" onclick="togglePermanentAIHighlight()">
+                    <span class="ai-square"></span>
+                </button>
+                <span class="btn-tooltip">Highlight AI artifacts</span>
+            </div>
+            <div class="btn-wrapper">
+                <button id="emojiButton">😊</button>
+                <span class="btn-tooltip">Insert emoji</span>
+            </div>
         </div>
 
         <!-- BOTTOM TOOLBAR -->
         <div class="toolbar bottom-toolbar">
             <input type="text" id="findWord" placeholder="Find..." />
             <input type="text" id="replaceWord" placeholder="Replace..." />
-            <button onclick="replaceOne()" title="Replace First">Replace</button>
-            <button onclick="replaceAll()" title="Replace All">Replace All</button>
+            <div class="btn-wrapper">
+                <button onclick="replaceOne()">Replace</button>
+                <span class="btn-tooltip">Replace first match</span>
+            </div>
+            <div class="btn-wrapper">
+                <button onclick="replaceAll()">Replace All</button>
+                <span class="btn-tooltip">Replace all matches</span>
+            </div>
             <div class="toolbar-separator"></div>
-            <button id="prevMatch" class="icon-btn" title="Previous Match">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
-            </button>
-            <button id="nextMatch" class="icon-btn" title="Next Match">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12l7 7 7-7"/></svg>
-            </button>
+            <div class="btn-wrapper">
+                <button id="prevMatch" class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+                </button>
+                <span class="btn-tooltip">Previous match</span>
+            </div>
+            <div class="btn-wrapper">
+                <button id="nextMatch" class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12l7 7 7-7"/></svg>
+                </button>
+                <span class="btn-tooltip">Next match</span>
+            </div>
             <div class="toolbar-separator"></div>
-            <button onclick="toggleMarkdown()" title="Toggle Markdown">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8v8a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2H4a2 2 0 00-2 2z"/><path d="M6 11v6l2-2 2 2v-6"/><line x1="14" y1="11" x2="14" y2="17"/><line x1="18" y1="11" x2="14" y2="14"/><line x1="14" y1="14" x2="18" y2="17"/></svg>
-            </button>
-            <button onclick="convertToPlainText()" title="Convert to Plain Text">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-            </button>
-            <button onclick="downloadAsDoc()" title="Download as DOC">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            </button>
-            <button onclick="clearEditor()" title="Clear Document">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-            </button>
+            <div class="btn-wrapper">
+                <button onclick="toggleMarkdown()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8v8a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2H4a2 2 0 00-2 2z"/><path d="M6 11v6l2-2 2 2v-6"/><line x1="14" y1="11" x2="14" y2="17"/><line x1="18" y1="11" x2="14" y2="14"/><line x1="14" y1="14" x2="18" y2="17"/></svg>
+                </button>
+                <span class="btn-tooltip">Toggle Markdown</span>
+            </div>
+            <div class="btn-wrapper">
+                <button onclick="convertToPlainText()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                </button>
+                <span class="btn-tooltip">Plain text</span>
+            </div>
+            <div class="btn-wrapper" style="position: relative;">
+                <button id="downloadButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </button>
+                <span class="btn-tooltip">Download</span>
+                <div id="downloadMenu" class="hidden">
+                    <div class="download-option" onclick="downloadFile('pdf')">
+                        <div>
+                            <h4>PDF</h4>
+                            <p>Universal format, preserves layout. Great for sharing.</p>
+                        </div>
+                    </div>
+                    <div class="download-option" onclick="downloadFile('docx')">
+                        <div>
+                            <h4>DOCX</h4>
+                            <p>Microsoft Word format. Full formatting support.</p>
+                        </div>
+                    </div>
+                    <div class="download-option" onclick="downloadFile('rtf')">
+                        <div>
+                            <h4>RTF</h4>
+                            <p>Rich text format. Works in most word processors.</p>
+                        </div>
+                    </div>
+                    <div class="download-option" onclick="downloadFile('txt')">
+                        <div>
+                            <h4>TXT</h4>
+                            <p>Plain text. No formatting, maximum compatibility.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-wrapper">
+                <button onclick="clearEditor()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                </button>
+                <span class="btn-tooltip">Clear document</span>
+            </div>
         </div>
     </div>
 
@@ -510,9 +674,12 @@
     <div class="editor-wrapper">
         <div class="editor" contenteditable="true" id="editor" spellcheck="true"><p><br></p></div>
         <div id="stats-bar">
-            <span id="char-count">0</span> characters · 
-            <span id="word-count">0</span> words · 
-            <span id="reading-time">0</span> min read
+            <span class="version">V.1.0.1</span>
+            <div>
+                <span id="char-count">0</span> characters · 
+                <span id="word-count">0</span> words · 
+                <span id="reading-time">0</span> min read
+            </div>
         </div>
     </div>
 
@@ -539,6 +706,8 @@
     const strikeButton = document.getElementById('strikeButton');
     const prevMatch = document.getElementById('prevMatch');
     const nextMatch = document.getElementById('nextMatch');
+    const downloadButton = document.getElementById('downloadButton');
+    const downloadMenu = document.getElementById('downloadMenu');
 
     // ===== STATE VARIABLES =====
     let permanentAIHighlightActive = false;
@@ -862,6 +1031,7 @@
     function highlightFindMatches() {
         const findValue = document.getElementById('findWord').value;
         removeHighlight('find-match');
+        removeHighlight('current');
         if (findValue) {
             const regex = new RegExp(`(${findValue.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
             highlightInTextNodes(regex, 'find-match');
@@ -876,9 +1046,12 @@
         const find = document.getElementById('findWord').value;
         const replace = document.getElementById('replaceWord').value;
         if (!find) return;
-        const markedContent = editor.querySelector('mark.find-match');
-        if (markedContent) {
-            markedContent.outerHTML = replace;
+        const matches = editor.querySelectorAll('mark.find-match');
+        if (matches.length > 0) {
+            const current = matches[currentMatchIndex !== -1 ? currentMatchIndex : 0];
+            if (current) {
+                current.outerHTML = replace;
+            }
         }
         highlightFindMatches();
         updateToolbarStates();
@@ -898,16 +1071,19 @@
     function navigateMatch(direction) {
         const matches = Array.from(editor.querySelectorAll('mark.find-match'));
         if (matches.length === 0) return;
+        
+        // Remove previous current highlight
+        editor.querySelectorAll('mark.find-match.current').forEach(m => m.classList.remove('current'));
+        
         currentMatchIndex += direction;
         if (currentMatchIndex < 0) currentMatchIndex = matches.length - 1;
         if (currentMatchIndex >= matches.length) currentMatchIndex = 0;
+        
         const match = matches[currentMatchIndex];
-        const range = document.createRange();
-        range.selectNodeContents(match);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-        match.scrollIntoView({behavior: 'smooth', block: 'center'});
+        match.classList.add('current');
+        
+        // Scroll editor only
+        match.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     prevMatch.addEventListener('click', () => navigateMatch(-1));
@@ -997,33 +1173,107 @@
         }
     });
 
-    // ===== DOC DOWNLOAD =====
-    function downloadAsDoc() {
-        const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <style>
-        body { font-family: system-ui, sans-serif; color: #D4D4D4; background: #1F1F1F; padding: 24px 16px; }
-        h1 { font-size: 32px; font-weight: bold; margin: 32px 0 16px 0; line-height: 1.2; }
-        h2 { font-size: 24px; font-weight: bold; margin: 24px 0 12px 0; line-height: 1.3; }
-        h3 { font-size: 20px; font-weight: bold; margin: 20px 0 10px 0; line-height: 1.3; }
-        p { margin: 0 0 16px 0; }
-        ul, ol { margin: 0 0 16px 0; padding-left: 32px; }
-        blockquote { margin: 16px 0; padding-left: 16px; border-left: 3px solid #87A9FF; color: #D4D4D4; }
-        hr { margin: 24px 0; border: 0; border-top: 1px solid #323232; }
-    </style>
-</head>
-<body>
-${editor.innerHTML}
-</body>
-</html>`;
-        const blob = new Blob([htmlContent], {type: 'application/msword'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'document.doc';
-        a.click();
+    // ===== DOWNLOAD FUNCTIONS =====
+    downloadButton.addEventListener('click', () => {
+        downloadMenu.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!downloadButton.contains(e.target) && !downloadMenu.contains(e.target)) {
+            downloadMenu.classList.add('hidden');
+        }
+    });
+
+    async function downloadFile(type) {
+        downloadMenu.classList.add('hidden');
+        const content = editor.innerHTML;
+        const plainText = editor.innerText;
+
+        if (type === 'pdf') {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'pt', 'a4');
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            tempDiv.style.cssText = 'position: absolute; left: -9999px; width: 794px; padding: 40px; font-family: system-ui, sans-serif; color: #000; background: #fff;';
+            document.body.appendChild(tempDiv);
+
+            html2canvas(tempDiv, {scale: 2}).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save('document.pdf');
+                document.body.removeChild(tempDiv);
+            });
+        } else if (type === 'docx') {
+            const doc = new docx.Document({
+                sections: [{
+                    children: parseHtmlToDocx(content)
+                }]
+            });
+            docx.Packer.toBlob(doc).then(blob => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'document.docx';
+                a.click();
+            });
+        } else if (type === 'rtf') {
+            const rtf = new RTF.Document();
+            const section = rtf.createSection();
+            parseHtmlToRtf(content, section);
+            const blob = new Blob([rtf.toString()], {type: 'application/rtf'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'document.rtf';
+            a.click();
+        } else if (type === 'txt') {
+            const blob = new Blob([plainText], {type: 'text/plain'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'document.txt';
+            a.click();
+        }
+    }
+
+    function parseHtmlToDocx(html) {
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const paragraphs = [];
+        temp.childNodes.forEach(node => {
+            if (node.nodeName === 'P' || node.nodeName === 'H1' || node.nodeName === 'H2' || node.nodeName === 'H3') {
+                paragraphs.push(new docx.Paragraph({
+                    children: [new docx.TextRun(node.innerText)],
+                    heading: node.nodeName === 'H1' ? docx.HeadingLevel.HEADING_1 : 
+                             node.nodeName === 'H2' ? docx.HeadingLevel.HEADING_2 :
+                             node.nodeName === 'H3' ? docx.HeadingLevel.HEADING_3 : undefined
+                }));
+            } else if (node.nodeName === 'UL' || node.nodeName === 'OL') {
+                node.querySelectorAll('li').forEach(li => {
+                    paragraphs.push(new docx.Paragraph({
+                        children: [new docx.TextRun(li.innerText)],
+                        bullet: node.nodeName === 'UL' ? { level: 0 } : undefined,
+                        numbering: node.nodeName === 'OL' ? { reference: "ol", level: 0 } : undefined
+                    }));
+                });
+            }
+        });
+        return paragraphs;
+    }
+
+    function parseHtmlToRtf(html, section) {
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        temp.childNodes.forEach(node => {
+            if (node.nodeType === 3) {
+                section.addParagraph().addTextRun(node.textContent);
+            } else if (node.nodeName === 'P') {
+                const p = section.addParagraph();
+                p.addTextRun(node.innerText);
+            } else if (['H1','H2','H3'].includes(node.nodeName)) {
+                const p = section.addParagraph();
+                p.addTextRun(node.innerText).bold().fontSize(node.nodeName === 'H1' ? 32 : node.nodeName === 'H2' ? 28 : 24);
+            }
+        });
     }
 
     // ===== PLAIN TEXT CONVERSION =====
@@ -1031,7 +1281,7 @@ ${editor.innerHTML}
         saveState();
         const plainText = editor.innerText;
         const lines = plainText.split('\n');
-        editor.innerHTML = '<p>' + lines.map(line => line || '<br>').join('<br>') + '</p>';
+        editor.innerHTML = lines.map(line => `<p>${line || '<br>'}</p>`).join('');
         updateToolbarStates();
     }
 
