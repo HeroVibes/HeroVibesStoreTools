@@ -902,9 +902,6 @@
             brightnessSlider.value = randomInt(90, 110);
             saturationSlider.value = randomInt(80, 120);
             
-            // vignetteSlider.value = randomInt(0, 50);
-            // grainSlider.value = randomInt(0, 20);
-            
             randomizeTextureParams();
             updatePreview();
         }
@@ -926,14 +923,27 @@
             const blur = blurSlider.value * Math.min(scaleX, scaleY);
             ctx.filter = `blur(${blur}px)`;
 
-            // 3. Draw blurred blobs
+            // 3. Draw blurred blobs (FIXED)
             state.blobs.forEach(b => {
                 ctx.fillStyle = b.color;
                 ctx.beginPath();
-                const size = b.baseSize * state.sizeMultiplier * Math.min(scaleX, scaleY);
-                const x = (b.x / 100) * w;
-                const y = (b.y / 100) * h;
-                ctx.arc(x, y, size, 0, Math.PI * 2);
+                
+                // === BUG FIX ===
+                // Calculate diameter and radius based on scaled size
+                const diameter = b.baseSize * state.sizeMultiplier * Math.min(scaleX, scaleY);
+                const radius = diameter / 2;
+                
+                // Calculate top-left corner in pixels
+                const x_percent = (b.x / 100) * w;
+                const y_percent = (b.y / 100) * h;
+                
+                // Calculate center for arc
+                const centerX = x_percent + radius;
+                const centerY = y_percent + radius;
+
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                // === END BUG FIX ===
+                
                 ctx.fill();
             });
 
