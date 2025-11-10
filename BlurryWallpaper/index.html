@@ -36,7 +36,7 @@
             height: auto;
             min-height: 0; 
             overflow: visible;
-            background: var(--bg); /* REQUEST 1: Set background color */
+            background: var(--bg);
         }
 
         body {
@@ -107,7 +107,6 @@
             cursor: move;
         }
         
-        /* REQUEST 4: Container for controls under preview */
         .preview-actions {
             margin-top: 16px;
         }
@@ -180,7 +179,6 @@
             align-items: center;
         }
 
-        /* REQUEST 5: Icon styling */
         .control-label svg {
             width: 14px;
             height: 14px;
@@ -324,7 +322,6 @@
             background: var(--hover);
         }
 
-        /* REQUEST 3 & 5: Active state for themes/textures */
         .texture-option.active, .theme-option.active {
             background: var(--accent);
             color: #191919;
@@ -337,7 +334,6 @@
             box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
         }
 
-        /* REQUEST 3: Less-intense animation for theme buttons */
         .theme-option:active, .texture-option:active {
             transform: scale(0.96);
             transition: transform 0.1s ease;
@@ -368,7 +364,6 @@
             justify-content: center;
         }
         
-        /* REQUEST 5: Icon styling in buttons */
         .btn svg {
             width: 16px;
             height: 16px;
@@ -411,7 +406,6 @@
             background: #9BB8FF;
         }
 
-        /* REQUEST 3: Randomize button styling */
         .btn-random {
             background: var(--accent);
             color: #191919;
@@ -422,7 +416,6 @@
         .btn-random:hover {
             background: #9BB8FF;
         }
-        /* REQUEST 3: Randomize button animation */
         .btn-random:active {
             animation: pulse-once 0.3s ease-out;
         }
@@ -443,7 +436,7 @@
             background-repeat: no-repeat;
             background-position: right 12px center;
             padding-right: 40px;
-            height: 47.6px; /* Match button height */
+            height: 47.6px;
         }
         
         #resolution-select:focus-visible {
@@ -471,13 +464,12 @@
                 gap: 20px;
             }
             
-            /* REQUEST 4: Stack resolution/download on mobile */
             .action-row {
                 flex-direction: column;
-                align-items: stretch; /* Make items full width */
+                align-items: stretch;
             }
             .preview-actions #download-btn {
-                flex-basis: auto; /* Reset basis */
+                flex-basis: auto;
             }
 
             .control-group-row {
@@ -534,7 +526,8 @@
                     </button>
                 </div>
             </div>
-            </div>
+
+        </div>
 
         <div id="controls">
             <div id="version-tag">V1.0.0</div>
@@ -875,7 +868,11 @@
                 const size = bs.baseSize * state.sizeMultiplier;
                 el.style.backgroundColor = bs.color;
                 el.style.left = `${bs.x}%`;
-                el.style.top = `${y}%`;
+                
+                // ===== THE FIX IS HERE =====
+                el.style.top = `${bs.y}%`; // Was `${y}%`
+                // ===========================
+                
                 el.style.width = `${size}px`;
                 el.style.height = `${size}px`;
                 const p = document.getElementById(`${bs.id}-color`);
@@ -927,6 +924,11 @@
                 b.y = randomInt(-20, 80);
                 b.baseSize = randomInt(200, 500);
             });
+            
+            themeOptions.forEach(t => t.classList.remove('active'));
+            const activeTheme = document.querySelector(`.theme-option[data-theme="${theme}"]`) || themeOptions[0];
+            activeTheme.classList.add('active');
+
             applyTheme(theme);
             blurSlider.value = randomInt(80, 200);
             sizeSlider.value = randomInt(80, 120);
@@ -1006,7 +1008,7 @@
         // Initial setup
         function init() {
             for (let i = 0; i < 5; i++) addBlob();
-            randomizeState();
+            randomizeState('random');
             bgColorPicker.value = state.backgroundColor;
 
             addBlobBtn.onclick = addBlob;
@@ -1023,9 +1025,8 @@
                     o.classList.add('active');
                     state.texture = o.dataset.texture;
                     
-                    // REQUEST 2: Set grain to max on "Noise" select
                     if (state.texture === 'noise') {
-                        grainSlider.value = 50; // Max value
+                        grainSlider.value = 50;
                     }
 
                     randomizeTextureParams();
@@ -1043,7 +1044,7 @@
                  o.onkeydown = handleGridKeyPress;
             });
             
-            themeOptions[0].classList.add('active'); // Set "Random" as active by default
+            themeOptions[0].classList.add('active');
         }
 
         init();
