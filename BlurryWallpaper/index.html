@@ -47,6 +47,7 @@
             gap: 24px;
             flex-wrap: wrap;
             width: 100%;
+            align-items: flex-start; /* Align tops of columns */
         }
 
         #preview-section {
@@ -84,14 +85,10 @@
         }
 
         #grain-overlay {
-            background-image: 
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 1px,
-                    rgba(0,0,0,var(--grain-opacity)) 1px,
-                    rgba(0,0,0,var(--grain-opacity)) 2px
-                );
+            background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuODUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIxIi8+PC9zdmc+");
+            background-size: 100px 100px;
+            opacity: var(--grain-opacity);
+            mix-blend-mode: overlay;
         }
 
         .color-blob {
@@ -101,6 +98,21 @@
             transition: all 0.3s ease;
             z-index: 1;
             cursor: move;
+        }
+        
+        /* Container for controls under preview */
+        .preview-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .preview-actions #download-btn {
+            width: 100%;
+        }
+        .preview-actions .control-group {
+            padding: 0; /* Remove padding for nested group */
+            gap: 8px; /* Tighten gap */
         }
 
         #controls {
@@ -138,6 +150,18 @@
             gap: 12px;
             width: 100%;
         }
+        
+        /* New row for condensing sliders */
+        .control-group-row {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+        }
+        .control-group-row > .control-group {
+            flex: 1;
+            min-width: 120px;
+            gap: 12px;
+        }
 
         .control-label {
             font-size: 14px;
@@ -153,8 +177,8 @@
 
         #color-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
+            grid-template-columns: repeat(8, 1fr); /* More columns for smaller squares */
+            gap: 8px; /* Tighter gap */
             width: 100%;
         }
 
@@ -257,6 +281,10 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
             width: 100%;
+        }
+        
+        .texture-grid {
+             grid-template-columns: repeat(2, 1fr); /* Only 2 textures now */
         }
 
         .texture-option, .theme-option {
@@ -387,8 +415,15 @@
                 gap: 20px;
             }
 
+            /* Stack slider rows on mobile */
+            .control-group-row {
+                flex-direction: column;
+                gap: 24px; 
+            }
+
             #color-grid {
                 grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+                gap: 12px;
             }
 
             .texture-grid, .theme-grid {
@@ -417,7 +452,20 @@
                 <div id="texture-overlay"></div>
                 <div id="vignette-overlay"></div>
             </div>
-        </div>
+            
+            <div class="preview-actions">
+                <div class="control-group">
+                    <label for="resolution-select" class="control-label">Resolution</label>
+                    <select id="resolution-select">
+                        <option value="3840x2160">4K Landscape (3840x2160)</option>
+                        <option value="2160x3840">4K Portrait (2160x3840)</option>
+                        <option value="1920x1080">Full HD (1920x1080)</option>
+                        <option value="1080x1920">Mobile (1080x1920)</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="download-btn">Download</button>
+            </div>
+            </div>
 
         <div id="controls">
             <div id="version-tag">V1.0.0</div>
@@ -450,90 +498,79 @@
                     <input type="color" class="color-picker" id="bg-color-picker">
                 </div>
             </div>
-
-            <div class="control-group">
-                <div class="slider-wrapper">
-                    <div class="slider-header">
-                        <label for="blur-slider" class="control-label">Blur Strength</label>
-                        <div class="slider-value" id="blur-value">120px</div>
+            
+            <div class="control-group-row">
+                <div class="control-group">
+                    <div class="slider-wrapper">
+                        <div class="slider-header">
+                            <label for="blur-slider" class="control-label">Blur</label>
+                            <div class="slider-value" id="blur-value">120px</div>
+                        </div>
+                        <input type="range" id="blur-slider" min="30" max="300" value="120" aria-labelledby="blur-value">
                     </div>
-                    <input type="range" id="blur-slider" min="30" max="300" value="120" aria-labelledby="blur-value">
+                </div>
+                <div class="control-group">
+                    <div class="slider-wrapper">
+                        <div class="slider-header">
+                            <label for="size-slider" class="control-label">Size</label>
+                            <div class="slider-value" id="size-value">100%</div>
+                        </div>
+                        <input type="range" id="size-slider" min="50" max="200" value="100" aria-labelledby="size-value">
+                    </div>
                 </div>
             </div>
 
-            <div class="control-group">
-                <div class="slider-wrapper">
-                    <div class="slider-header">
-                        <label for="size-slider" class="control-label">Blob Size</label>
-                        <div class="slider-value" id="size-value">100%</div>
+            <div class="control-group-row">
+                <div class="control-group">
+                    <div class="slider-wrapper">
+                        <div class="slider-header">
+                            <label for="brightness-slider" class="control-label">Brightness</label>
+                            <div class="slider-value" id="brightness-value">100%</div>
+                        </div>
+                        <input type="range" id="brightness-slider" min="50" max="150" value="100" aria-labelledby="brightness-value">
                     </div>
-                    <input type="range" id="size-slider" min="50" max="200" value="100" aria-labelledby="size-value">
+                </div>
+                <div class="control-group">
+                    <div class="slider-wrapper">
+                        <div class="slider-header">
+                            <label for="saturation-slider" class="control-label">Saturation</label>
+                            <div class="slider-value" id="saturation-value">100%</div>
+                        </div>
+                        <input type="range" id="saturation-slider" min="0" max="200" value="100" aria-labelledby="saturation-value">
+                    </div>
                 </div>
             </div>
 
-            <div class="control-group">
-                <div class="slider-wrapper">
-                    <div class="slider-header">
-                        <label for="brightness-slider" class="control-label">Brightness</label>
-                        <div class="slider-value" id="brightness-value">100%</div>
+             <div class="control-group-row">
+                <div class="control-group">
+                    <div class="slider-wrapper">
+                        <div class="slider-header">
+                            <label for="vignette-slider" class="control-label">Vignette</label>
+                            <div class="slider-value" id="vignette-value">0%</div>
+                        </div>
+                        <input type="range" id="vignette-slider" min="0" max="100" value="0" aria-labelledby="vignette-value">
                     </div>
-                    <input type="range" id="brightness-slider" min="50" max="150" value="100" aria-labelledby="brightness-value">
+                </div>
+                <div class="control-group">
+                    <div class="slider-wrapper">
+                        <div class="slider-header">
+                            <label for="grain-slider" class="control-label">Grain</label>
+                            <div class="slider-value" id="grain-value">10%</div>
+                        </div>
+                        <input type="range" id="grain-slider" min="0" max="50" value="10" aria-labelledby="grain-value">
+                    </div>
                 </div>
             </div>
-
-            <div class="control-group">
-                <div class="slider-wrapper">
-                    <div class="slider-header">
-                        <label for="saturation-slider" class="control-label">Saturation</label>
-                        <div class="slider-value" id="saturation-value">100%</div>
-                    </div>
-                    <input type="range" id="saturation-slider" min="0" max="200" value="100" aria-labelledby="saturation-value">
-                </div>
-            </div>
-
-            <div class="control-group">
-                <div class="slider-wrapper">
-                    <div class="slider-header">
-                        <label for="vignette-slider" class="control-label">Vignette</label>
-                        <div class="slider-value" id="vignette-value">0%</div>
-                    </div>
-                    <input type="range" id="vignette-slider" min="0" max="100" value="0" aria-labelledby="vignette-value">
-                </div>
-            </div>
-
-            <div class="control-group">
-                <div class="slider-wrapper">
-                    <div class="slider-header">
-                        <label for="grain-slider" class="control-label">Grain</label>
-                        <div class="slider-value" id="grain-value">10%</div>
-                    </div>
-                    <input type="range" id="grain-slider" min="0" max="50" value="10" aria-labelledby="grain-value">
-                </div>
-            </div>
-
             <div class="control-group">
                 <div class="control-label">Texture Overlay</div>
                 <div class="texture-grid">
                     <div class="texture-option active" data-texture="none" tabindex="0">None</div>
                     <div class="texture-option" data-texture="noise" tabindex="0">Noise</div>
-                    <div class="texture-option" data-texture="glass" tabindex="0">Glass</div>
-                    <div class="texture-option" data-texture="paper" tabindex="0">Paper</div>
                 </div>
-            </div>
-
-            <div class="control-group">
-                <label for="resolution-select" class="control-label">Resolution</label>
-                <select id="resolution-select">
-                    <option value="3840x2160">4K Landscape (3840x2160)</option>
-                    <option value="2160x3840">4K Portrait (2160x3840)</option>
-                    <option value="1920x1080">Full HD (1920x1080)</option>
-                    <option value="1080x1920">Mobile (1080x1920)</option>
-                </select>
             </div>
 
             <div class="button-group">
                 <button class="btn" id="random-btn">Randomize</button>
-                <button class="btn btn-primary" id="download-btn">Download</button>
             </div>
 
         </div>
@@ -587,9 +624,7 @@
             texture: 'none',
             backgroundColor: '#000000',
             textureParams: {
-                noise: { opacity: 0.1 },
-                glass: { blur: 2, noise: 0.02 },
-                paper: { opacity: 0.05 }
+                noise: { opacity: 0.1 }
             },
             maxBlobs: 10,
             minBlobs: 1
@@ -621,9 +656,6 @@
         // Texture randomization
         function randomizeTextureParams() {
             state.textureParams.noise.opacity = randomInt(8, 20) / 100;
-            state.textureParams.glass.blur = randomInt(1, 4);
-            state.textureParams.glass.noise = randomInt(1, 4) / 100;
-            state.textureParams.paper.opacity = randomInt(3, 8) / 100;
         }
 
         // Blob management
@@ -770,18 +802,13 @@
             textureOverlay.style.backgroundImage = 'none';
             textureOverlay.style.backdropFilter = 'none';
             textureOverlay.style.opacity = 1;
+            textureOverlay.style.mixBlendMode = 'normal';
 
             if (state.texture === 'noise') {
-                textureOverlay.style.backgroundImage = `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,${state.textureParams.noise.opacity}) 2px, rgba(0,0,0,${state.textureParams.noise.opacity}) 4px)`;
-            } else if (state.texture === 'glass') {
-                textureOverlay.style.backdropFilter = `blur(${state.textureParams.glass.blur}px)`;
-                textureOverlay.style.backgroundImage = `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,${state.textureParams.glass.noise}) 2px, rgba(0,0,0,${state.textureParams.glass.noise}) 4px)`;
-            } else if (state.texture === 'paper') {
-                textureOverlay.style.backgroundImage = `
-                    repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(255,255,255,${state.textureParams.paper.opacity}) 1px, rgba(255,255,255,${state.textureParams.paper.opacity}) 2px),
-                    repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(255,255,255,${state.textureParams.paper.opacity}) 1px, rgba(255,255,255,${state.textureParams.paper.opacity}) 2px)
-                `;
-                textureOverlay.style.opacity = 0.5;
+                 textureOverlay.style.backgroundImage = `url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuODUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIxIi8+PC9zdmc+")`;
+                textureOverlay.style.backgroundSize = '100px 100px';
+                textureOverlay.style.opacity = state.textureParams.noise.opacity;
+                textureOverlay.style.mixBlendMode = 'overlay';
             }
         }
 
@@ -816,7 +843,7 @@
             saturationSlider.value = randomInt(80, 120);
             vignetteSlider.value = randomInt(0, 50);
             grainSlider.value = randomInt(0, 20);
-            state.texture = ['none', 'noise', 'glass', 'paper'][randomInt(0, 3)];
+            state.texture = ['none', 'noise'][randomInt(0, 1)];
             textureOptions.forEach(o => o.classList.toggle('active', o.dataset.texture === state.texture));
             randomizeTextureParams();
             updatePreview();
@@ -860,19 +887,6 @@
             if (state.texture === 'noise') {
                 ctx.fillStyle = `rgba(0,0,0,${state.textureParams.noise.opacity})`;
                 for (let i = 0; i < (w * h) / 10; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
-            } else if (state.texture === 'glass') {
-                tempCtx.clearRect(0, 0, w, h);
-                tempCtx.filter = `blur(${state.textureParams.glass.blur * Math.min(scaleX, scaleY)}px)`;
-                tempCtx.drawImage(canvas, 0, 0);
-                ctx.drawImage(tempCanvas, 0, 0);
-                ctx.fillStyle = `rgba(0,0,0,${state.textureParams.glass.noise})`;
-                for (let i = 0; i < (w * h) / 20; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
-            } else if (state.texture === 'paper') {
-                ctx.globalAlpha = 0.5;
-                ctx.fillStyle = `rgba(255,255,255,${state.textureParams.paper.opacity})`;
-                for (let x = 0; x < w; x += 2) ctx.fillRect(x, 0, 1, h);
-                for (let y = 0; y < h; y += 2) ctx.fillRect(0, y, w, 1);
-                ctx.globalAlpha = 1.0;
             }
 
             if (state.vignette > 0) {
