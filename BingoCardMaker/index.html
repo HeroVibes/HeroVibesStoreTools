@@ -4,20 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo Card Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.value.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* ===== ROOT VARIABLES (DESIGN GUIDE) ===== */
         :root {
-            --bg: #191919; /* TOOL CONTAINER/CARD BACKGROUND (PRIMARY COLOUR) */
-            --card-bg: #1F1F1F; /* CARD / INNER CONTAINER BACKGROUND (SECONDARY COLOUR) */
-            --hover: #323232; /* HOVER / INTERACT COLOUR */
-            --outline: #323232; /* OUTLINE COLOUR */
-            --accent: #87A9FF; /* ICON / LINK / ACCENT COLOUR */
-            --text-primary: #D4D4D4; /* PRIMARY TEXT COLOUR */
-            --text-secondary: #8C8C8C; /* SECONDARY TEXT COLOUR */
-            --radius: 8px; /* From Button Template */
-
-            /* Bingo card theme colors (light mode default) */
+            --bg: #191919;
+            --card-bg: #1F1F1F;
+            --hover: #323232;
+            --outline: #323232;
+            --accent: #87A9FF;
+            --text-primary: #D4D4D4;
+            --text-secondary: #8C8C8C;
+            --radius: 8px;
             --bingo-bg: #FFFFFF;
             --bingo-border: #CCCCCC;
             --bingo-square-even: #F8F8F8;
@@ -45,12 +43,11 @@
             box-sizing: border-box;
         }
 
-        /* Fixes "Failure to Shrink" bug */
         body {
-            font-family: sans-serif; /* Per DESIGN GUIDE */
+            font-family: sans-serif;
             background: var(--bg);
             color: var(--text-primary);
-            padding: 24px 16px; /* DEFAULT PADDING */
+            padding: 24px 16px;
         }
 
         /* ===== MAIN CONTAINER ===== */
@@ -60,17 +57,48 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            position: relative;
         }
 
         /* ===== CONTROLS SECTION ===== */
         .controls {
             background: var(--card-bg);
-            border: 1px solid var(--outline); /* CARD OUTLINE: 1px */
+            border: 1px solid var(--outline);
             border-radius: var(--radius);
-            padding: 24px 16px; /* DEFAULT PADDING */
+            padding: 24px 16px;
             display: flex;
             flex-direction: column;
             gap: 16px;
+            position: relative;
+        }
+
+        /* ===== HELP BUTTON ===== */
+        #helpBtn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            background: var(--outline);
+            border: 1px solid var(--outline);
+            color: var(--text-secondary);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        #helpBtn:hover {
+            background: var(--hover);
+            color: var(--text-primary);
+        }
+
+        #helpBtn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
         }
 
         /* ===== INPUT STYLES ===== */
@@ -81,20 +109,19 @@
         }
 
         .input-label {
-            font-size: 12px; /* 12px Text */
+            font-size: 12px;
             color: var(--text-secondary);
             font-weight: 500;
         }
 
-        input[type="text"],
-        input[type="number"] {
+        input[type="text"] {
             width: 100%;
             padding: 10px 12px;
             background: var(--bg);
             border: 1px solid var(--outline);
             border-radius: var(--radius);
             color: var(--text-primary);
-            font-size: 14px; /* 14px Titles */
+            font-size: 14px;
             transition: border-color 0.2s ease;
         }
 
@@ -102,8 +129,7 @@
             color: var(--text-secondary);
         }
 
-        input[type="text"]:focus,
-        input[type="number"]:focus {
+        input[type="text"]:focus {
             outline: none;
             border-color: var(--accent);
         }
@@ -119,26 +145,84 @@
             flex: 1;
         }
 
-        .grid-size-controls input[type="number"] {
-            text-align: center;
+        /* ===== CUSTOM NUMBER INPUT ===== */
+        .custom-number-input {
+            display: flex;
+            align-items: center;
         }
 
-        /* ===== BUTTON STYLES (Based on DEFAULT BUTTON TEMPLATE) ===== */
+        .num-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--outline);
+            border: 1px solid var(--outline);
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .num-btn:hover {
+            background: var(--hover);
+        }
+
+        .num-btn-minus {
+            border-radius: var(--radius) 0 0 var(--radius);
+        }
+
+        .num-btn-plus {
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .custom-number-input input[type="number"] {
+            width: 100%;
+            height: 40px;
+            padding: 10px 0;
+            background: var(--bg);
+            border: 1px solid var(--outline);
+            border-left: none;
+            border-right: none;
+            border-radius: 0;
+            color: var(--text-primary);
+            font-size: 14px;
+            text-align: center;
+            transition: border-color 0.2s ease;
+            -moz-appearance: textfield; /* Firefox */
+        }
+
+        /* Hide default arrows */
+        .custom-number-input input[type=number]::-webkit-inner-spin-button,
+        .custom-number-input input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .custom-number-input input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            border-left-color: var(--outline);
+            border-right-color: var(--outline);
+        }
+
+
+        /* ===== BUTTON STYLES ===== */
         .btn {
             position: relative;
             padding: 10px 16px;
             border-radius: var(--radius);
-            background: var(--btn-bg, #1F1F1F); /* Fallback to secondary color */
-            color: var(--text, #D4D4D4); /* Fallback to primary text */
+            background: var(--btn-bg, #1F1F1F);
+            color: var(--text, #D4D4D4);
             border: 1px solid rgba(255,255,255,0.06);
             cursor: pointer;
             overflow: hidden;
-            font-size: 14px; /* 14px Titles */
+            font-size: 14px;
             font-weight: 500;
             transition: all 0.2s ease;
         }
 
-        /* shimmer effect */
         .btn::before {
             content: '';
             position: absolute;
@@ -163,7 +247,6 @@
             transform: scale(0.98);
         }
 
-        /* accessible focus */
         .btn:focus-visible {
             outline: none;
             box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
@@ -171,12 +254,16 @@
 
         .btn-primary {
             background: var(--accent);
-            color: #000000; /* High contrast for accent bg */
+            color: #000000;
             border-color: var(--accent);
         }
 
         .btn-primary:hover {
-            background: #6B8FE5; /* Slightly darker accent */
+            background: #6B8FE5;
+        }
+
+        #generateGridBtn {
+            height: 40px; /* Match custom number input height */
         }
 
         /* ===== THEME TOGGLE ===== */
@@ -190,7 +277,7 @@
         }
 
         .theme-toggle-label {
-            font-size: 12px; /* 12px Text */
+            font-size: 12px;
             color: var(--text-secondary);
             flex: 1;
         }
@@ -239,7 +326,7 @@
             background: var(--bingo-bg);
             border: 1px solid var(--bingo-border);
             border-radius: var(--radius);
-            padding: 24px 16px; /* DEFAULT PADDING */
+            padding: 24px 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -250,7 +337,7 @@
         /* ===== TITLE DISPLAY ===== */
         #bingoTitleDisplay {
             font-size: 48px;
-            font-weight: bold; /* 20px Headers (Bold) - applied style */
+            font-weight: bold;
             text-align: center;
             color: var(--bingo-title);
             width: 100%;
@@ -312,7 +399,6 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            word-break: break-word;
             padding: 8px;
             font-size: 16px;
             color: var(--bingo-text);
@@ -336,7 +422,114 @@
             margin: auto;
         }
 
-        /* ===== RESPONSIVE DESIGN (Mobile Optimisation) ===== */
+        /* ===== VERSION NUMBER ===== */
+        #versionNumber {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-align: right;
+            padding-top: 8px;
+            border-top: 1px solid var(--outline);
+            margin-top: 8px;
+        }
+
+        /* ===== HELP MODAL ===== */
+        #modalBackdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        #modalBackdrop.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #helpModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            width: 90%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #helpModal.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--outline);
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 16px;
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.5;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-body p {
+            margin-bottom: 12px;
+        }
+
+        .modal-body strong {
+            color: var(--accent);
+            font-weight: 500;
+        }
+        
+        .modal-body ul {
+            list-style-position: inside;
+            padding-left: 8px;
+            margin-bottom: 12px;
+        }
+
+        .modal-body li {
+            margin-bottom: 8px;
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
         @media (max-width: 768px) {
             body {
                 padding: 16px 12px;
@@ -358,9 +551,18 @@
             .controls {
                 padding: 20px 12px;
             }
+            
+            #helpBtn {
+                top: 12px;
+                right: 12px;
+            }
 
             .grid-size-controls {
                 flex-wrap: wrap;
+            }
+
+            .grid-size-controls .input-group {
+                min-width: 120px; /* Ensure inputs don't get too crushed */
             }
 
             .button-row {
@@ -379,7 +581,6 @@
             }
 
             input[type="text"],
-            input[type="number"],
             .btn {
                 font-size: 13px;
             }
@@ -390,10 +591,17 @@
             display: none !important;
         }
     </style>
-</head>
-<body>
+</head><body>
     <div id="bingoApp">
         <div class="controls">
+            <button id="helpBtn" type="button" aria-label="Show help">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9.09 9.00002C9.3251 8.33168 9.78915 7.76811 10.4 7.41692C11.0108 7.06573 11.7289 6.95008 12.4272 7.08652C13.1255 7.22295 13.7588 7.60499 14.2151 8.16912C14.6714 8.73325 14.9211 9.44826 14.92 10.18C14.92 11.2 14.11 11.89 13.42 12.43C12.9103 12.8123 12.4542 13.251 12.07 13.73C11.9793 13.864 11.91 14.015 11.86 14.17C11.81 14.33 11.79 14.5 11.79 14.67V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 19.01L12.01 18.999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+
             <div class="input-group">
                 <label class="input-label" for="bingoTitleInput">Bingo Card Title</label>
                 <input type="text" id="bingoTitleInput" placeholder="Enter your bingo card title" value="Bingo Card">
@@ -402,11 +610,19 @@
             <div class="grid-size-controls">
                 <div class="input-group">
                     <label class="input-label" for="rowsInput">Rows</label>
-                    <input type="number" id="rowsInput" value="5" min="1" max="10">
+                    <div class="custom-number-input">
+                        <button type="button" class="num-btn num-btn-minus" aria-label="Decrease rows" data-input-id="rowsInput">-</button>
+                        <input type="number" id="rowsInput" value="5" min="1" max="10">
+                        <button type="button" class="num-btn num-btn-plus" aria-label="Increase rows" data-input-id="rowsInput">+</button>
+                    </div>
                 </div>
                 <div class="input-group">
                     <label class="input-label" for="colsInput">Columns</label>
-                    <input type="number" id="colsInput" value="5" min="1" max="10">
+                    <div class="custom-number-input">
+                        <button type="button" class="num-btn num-btn-minus" aria-label="Decrease columns" data-input-id="colsInput">-</button>
+                        <input type="number" id="colsInput" value="5" min="1" max="10">
+                        <button type="button" class="num-btn num-btn-plus" aria-label="Increase columns" data-input-id="colsInput">+</button>
+                    </div>
                 </div>
                 <button class="btn btn-primary" id="generateGridBtn">Generate</button>
             </div>
@@ -423,6 +639,8 @@
                 <button class="btn" id="clearAllBtn">Clear All</button>
                 <button class="btn btn-primary" id="savePngBtn">Save as PNG</button>
             </div>
+
+            <div id="versionNumber">V1.0.1</div>
         </div>
 
         <div id="bingoCardContainer">
@@ -431,8 +649,28 @@
         </div>
     </div>
 
+    <div id="modalBackdrop"></div>
+    <div id="helpModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-header">
+            <h2 id="modalTitle" class="modal-title">Bingo Card Generator Help</h2>
+            <button class="modal-close-btn" id="closeModalBtn" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Welcome! Here's how to use the Bingo Card Generator:</p>
+            <ul>
+                <li><strong>Card Title:</strong> Type your title in the "Bingo Card Title" box. It will update on the card live.</li>
+                <li><strong>Grid Size:</strong> Use the <strong>+</strong> and <strong>-</strong> buttons to set the number of rows and columns (from 1 to 10). Click <strong>Generate</strong> to create your new grid.</li>
+                <li><strong>Adding Content:</strong> Click on any square to start typing. The text will automatically shrink to fit.</li>
+                <li><strong>Adding Images:</strong> You can drag-and-drop an image file from your computer directly onto a square. You can also paste an image from your clipboard.</li>
+                <li><strong>Card Theme:</strong> Use the "Card Theme" toggle to switch the bingo card between a light and dark design.</li>
+                <li><strong>Clear All:</strong> This button will clear all text and images from every square on the current grid.</li>
+                <li><strong>Save as PNG:</strong> This will capture your bingo card (including the title and all content) and save it as a high-quality PNG file to your computer.</li>
+            </ul>
+        </div>
+    </div>
+
     <script>
-        // ===== DOM ELEMENT REFERENCES (RULE 5) =====
+        // ===== DOM ELEMENT REFERENCES =====
         const bingoTitleInput = document.getElementById('bingoTitleInput');
         const bingoTitleDisplay = document.getElementById('bingoTitleDisplay');
         const rowsInput = document.getElementById('rowsInput');
@@ -444,9 +682,32 @@
         const bingoCardContainer = document.getElementById('bingoCardContainer');
         const themeToggle = document.getElementById('themeToggle');
         const themeLabel = document.getElementById('themeLabel');
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const modalBackdrop = document.getElementById('modalBackdrop');
+        const closeModalBtn = document.getElementById('closeModalBtn');
 
         // ===== STATE MANAGEMENT =====
         let isDarkMode = false;
+        
+        // Create measuring spans for text-fitting
+        const multiLineTempSpan = document.createElement('span');
+        multiLineTempSpan.style.visibility = 'hidden';
+        multiLineTempSpan.style.position = 'absolute';
+        multiLineTempSpan.style.left = '-9999px';
+        multiLineTempSpan.style.top = '-9999px';
+        multiLineTempSpan.style.whiteSpace = 'normal';
+        multiLineTempSpan.style.wordBreak = 'break-word';
+        multiLineTempSpan.style.display = 'block';
+
+        const singleLineTestSpan = document.createElement('span');
+        singleLineTestSpan.style.visibility = 'hidden';
+        singleLineTestSpan.style.position = 'absolute';
+        singleLineTestSpan.style.whiteSpace = 'nowrap';
+        
+        document.body.appendChild(multiLineTempSpan);
+        document.body.appendChild(singleLineTestSpan);
+
 
         // ===== TITLE UPDATE HANDLER =====
         bingoTitleInput.addEventListener('input', () => {
@@ -477,8 +738,48 @@
                 square.innerHTML = '';
                 square.style.fontSize = '';
             });
-            // Notify iframe of height change
             scheduleHeightCheck();
+        });
+        
+        // ===== CUSTOM NUMBER INPUT HANDLERS =====
+        document.querySelectorAll('.num-btn-minus').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const inputId = btn.dataset.inputId;
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.stepDown();
+                }
+            });
+        });
+
+        document.querySelectorAll('.num-btn-plus').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const inputId = btn.dataset.inputId;
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.stepUp();
+                }
+            });
+        });
+
+        // ===== HELP MODAL HANDLERS =====
+        function openModal() {
+            helpModal.classList.add('visible');
+            modalBackdrop.classList.add('visible');
+        }
+
+        function closeModal() {
+            helpModal.classList.remove('visible');
+            modalBackdrop.classList.remove('visible');
+        }
+        
+        helpBtn.addEventListener('click', openModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        modalBackdrop.addEventListener('click', closeModal);
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && helpModal.classList.contains('visible')) {
+                closeModal();
+            }
         });
 
         // ===== GRID GENERATION FUNCTION =====
@@ -508,16 +809,13 @@
 
                 square.appendChild(squareContent);
 
-                // Drag over handler
                 square.addEventListener('dragover', (e) => {
                     e.preventDefault();
                     square.classList.add('drag-over');
                 });
-                // Drag leave handler
                 square.addEventListener('dragleave', () => {
                     square.classList.remove('drag-over');
                 });
-                // Drop handler
                 square.addEventListener('drop', (e) => {
                     e.preventDefault();
                     square.classList.remove('drag-over');
@@ -537,7 +835,6 @@
                     scheduleHeightCheck();
                 });
 
-                // Paste handler
                 squareContent.addEventListener('paste', (e) => {
                     e.preventDefault();
                     const items = (e.clipboardData || e.originalEvent.clipboardData).items;
@@ -563,24 +860,24 @@
                             squareContent.innerHTML = `<img src="${text}" alt="Bingo image">`;
                             squareContent.style.fontSize = '';
                         } else {
-                            document.execCommand('insertText', false, text);
+                            // Paste text, but replace newlines with <br> to respect user's multi-line intent
+                            const sanitizedText = text.replace(/\n/g, '<br>');
+                            document.execCommand('insertHTML', false, sanitizedText);
                             fitTextInSquare(squareContent);
                         }
                     }
                     scheduleHeightCheck();
                 });
 
-                // Input handler
                 squareContent.addEventListener('input', () => {
                     squareContent.style.fontSize = '';
                     fitTextInSquare(squareContent);
                     scheduleHeightCheck();
                 });
 
-                // Focus handler
                 squareContent.addEventListener('focus', () => {
                     if (squareContent.textContent.trim() === '') {
-                        squareContent.offsetHeight; // Force reflow
+                        squareContent.offsetHeight;
                     }
                     fitTextInSquare(squareContent);
                 });
@@ -600,98 +897,59 @@
                 return;
             }
 
-            const tempSpan = document.createElement('span');
-            tempSpan.style.visibility = 'hidden';
-            tempSpan.style.position = 'absolute';
-            tempSpan.style.left = '-9999px';
-            tempSpan.style.top = '-9999px';
-            tempSpan.style.whiteSpace = 'normal';
-            tempSpan.style.wordBreak = 'break-word';
-            tempSpan.style.wordWrap = 'break-word';
-            tempSpan.style.display = 'block';
-
-            const singleLineTestSpan = document.createElement('span');
-            singleLineTestSpan.style.visibility = 'hidden';
-            singleLineTestSpan.style.position = 'absolute';
-            singleLineTestSpan.style.whiteSpace = 'nowrap';
-            
-            document.body.appendChild(tempSpan);
-            document.body.appendChild(singleLineTestSpan);
-
             const computedStyle = getComputedStyle(contentElement);
-            tempSpan.style.fontFamily = computedStyle.fontFamily;
-            tempSpan.style.fontWeight = computedStyle.fontWeight;
-            tempSpan.style.lineHeight = computedStyle.lineHeight;
-            tempSpan.style.padding = computedStyle.padding;
-            tempSpan.style.border = computedStyle.border;
-            tempSpan.style.boxSizing = computedStyle.boxSizing;
+            multiLineTempSpan.style.fontFamily = computedStyle.fontFamily;
+            multiLineTempSpan.style.fontWeight = computedStyle.fontWeight;
+            multiLineTempSpan.style.lineHeight = computedStyle.lineHeight;
+            multiLineTempSpan.style.padding = computedStyle.padding;
+            multiLineTempSpan.style.border = computedStyle.border;
+            multiLineTempSpan.style.boxSizing = computedStyle.boxSizing;
             
             singleLineTestSpan.style.fontFamily = computedStyle.fontFamily;
             singleLineTestSpan.style.fontWeight = computedStyle.fontWeight;
 
-            const maxGlobalFontSize = 30;
+            const preferredDefaultFontSize = 16;
             const minFontSize = 8;
-            const targetLinesBeforeShrink = 3;
-
-            const preferredDefaultFontSize = parseFloat(getComputedStyle(contentElement).getPropertyValue('font-size'));
-            let currentFontSize = preferredDefaultFontSize;
-
+            
             const parentSquare = contentElement.closest('.bingo-square');
             const parentComputedStyle = getComputedStyle(parentSquare);
-            const squareContentWidth = parentSquare.clientWidth - parseFloat(parentComputedStyle.paddingLeft) - parseFloat(parentComputedStyle.paddingRight) - (parseFloat(parentComputedStyle.borderLeftWidth) || 0) - (parseFloat(parentComputedStyle.borderRightWidth) || 0);
-            const squareContentHeight = parentSquare.clientHeight - parseFloat(parentComputedStyle.paddingTop) - parseFloat(parentComputedStyle.paddingBottom) - (parseFloat(parentComputedStyle.borderTopWidth) || 0) - (parseFloat(parentComputedStyle.borderBottomWidth) || 0);
+            const squareContentWidth = parentSquare.clientWidth - parseFloat(parentComputedStyle.paddingLeft) - parseFloat(parentComputedStyle.paddingRight);
+            const squareContentHeight = parentSquare.clientHeight - parseFloat(parentComputedStyle.paddingTop) - parseFloat(parentComputedStyle.paddingBottom);
 
-            tempSpan.textContent = contentElement.textContent;
-            tempSpan.style.width = `${squareContentWidth}px`;
-
-            let finalFontSize = currentFontSize;
+            // Split by rendered newlines
+            const lines = contentElement.innerText.split('\n');
+            let finalFontSize = preferredDefaultFontSize;
 
             while (finalFontSize >= minFontSize) {
-                tempSpan.style.fontSize = `${finalFontSize}px`;
+                multiLineTempSpan.style.fontSize = `${finalFontSize}px`;
                 singleLineTestSpan.style.fontSize = `${finalFontSize}px`;
-                singleLineTestSpan.textContent = 'M';
-                const singleLineHeight = singleLineTestSpan.offsetHeight;
-                const maxAllowedHeightForLines = targetLinesBeforeShrink * singleLineHeight;
-                const doesTextFitHorizontally = tempSpan.scrollWidth <= squareContentWidth;
-                const doesTextFitVertically = tempSpan.scrollHeight <= squareContentHeight;
-                const doesTextFitWithinLinesThreshold = tempSpan.scrollHeight <= maxAllowedHeightForLines;
-                
-                if (doesTextFitHorizontally && doesTextFitVertically && doesTextFitWithinLinesThreshold) {
-                    let growAttemptFontSize = finalFontSize;
-                    while (growAttemptFontSize < maxGlobalFontSize) {
-                        const nextSize = growAttemptFontSize + 0.5;
-                        if (nextSize > preferredDefaultFontSize && nextSize > maxGlobalFontSize) {
-                            break;
-                        }
 
-                        tempSpan.style.fontSize = `${nextSize}px`;
-                        singleLineTestSpan.style.fontSize = `${nextSize}px`;
-                        singleLineTestSpan.textContent = 'M';
-                        const nextSingleLineHeight = singleLineTestSpan.offsetHeight;
-                        const nextMaxAllowedHeightForLines = targetLinesBeforeShrink * nextSingleLineHeight;
-                        const nextDoesTextFitHorizontally = tempSpan.scrollWidth <= squareContentWidth;
-                        const nextDoesTextFitVertically = tempSpan.scrollHeight <= squareContentHeight;
-                        const nextDoesTextFitWithinLinesThreshold = tempSpan.scrollHeight <= nextMaxAllowedHeightForLines;
-                        
-                        if (nextDoesTextFitHorizontally && nextDoesTextFitVertically && nextDoesTextFitWithinLinesThreshold) {
-                            growAttemptFontSize = nextSize;
-                        } else {
-                            break;
-                        }
-                    }
-                    finalFontSize = growAttemptFontSize;
+                // 1. Check horizontal fit (longest line)
+                let maxLineWidth = 0;
+                lines.forEach(line => {
+                    singleLineTestSpan.textContent = line || 'M'; // Use 'M' for empty lines
+                    maxLineWidth = Math.max(maxLineWidth, singleLineTestSpan.scrollWidth);
+                });
+                const fitsHorizontally = maxLineWidth <= squareContentWidth;
+
+                // 2. Check vertical fit (total block)
+                multiLineTempSpan.innerHTML = contentElement.innerHTML;
+                multiLineTempSpan.style.width = `${squareContentWidth}px`;
+                const fitsVertically = multiLineTempSpan.scrollHeight <= squareContentHeight;
+
+                // 3. Check logic
+                if (fitsHorizontally && fitsVertically) {
+                    // It fits. We're done.
                     break;
                 } else {
-                    finalFontSize -= 0.5;
+                    finalFontSize -= 0.5; // Doesn't fit, shrink.
                 }
             }
-
+            
             finalFontSize = Math.max(finalFontSize, minFontSize);
             contentElement.style.fontSize = `${finalFontSize}px`;
 
-            document.body.removeChild(tempSpan);
-            document.body.removeChild(singleLineTestSpan);
-
+            // Final overflow check
             if (contentElement.scrollHeight > contentElement.clientHeight || contentElement.scrollWidth > contentElement.clientWidth) {
                 contentElement.style.overflow = 'hidden';
                 contentElement.style.textOverflow = 'ellipsis';
@@ -719,7 +977,6 @@
                 titleElement.style.fontSize = `${currentFontSize}px`;
             }
 
-            // If it still overflows at min font size, allow wrapping
             if (titleElement.scrollWidth > (containerWidth - padding) && currentFontSize === minFontSize) {
                 titleElement.style.whiteSpace = 'normal';
                 titleElement.style.overflow = '';
@@ -731,44 +988,38 @@
             }
         }
 
-        // ===== PNG SAVE FUNCTION (BUG FINDING) =====
+        // ===== PNG SAVE FUNCTION =====
         savePngBtn.addEventListener('click', () => {
             const originalControlsStyle = document.querySelector('.controls').style.cssText;
             const originalTitleStyle = bingoTitleDisplay.style.cssText;
             const originalSquareContentStyles = [];
 
-            // Hide controls for screenshot
             document.querySelector('.controls').style.display = 'none';
             
-            // Force title to wrap if it was truncated
             bingoTitleDisplay.style.whiteSpace = 'normal';
             bingoTitleDisplay.style.overflow = 'visible';
             bingoTitleDisplay.style.textOverflow = 'clip';
 
-            // Force squares to show all content
             document.querySelectorAll('.bingo-square-content').forEach(contentDiv => {
                 originalSquareContentStyles.push(contentDiv.style.cssText);
                 contentDiv.style.overflow = 'visible';
                 contentDiv.style.textOverflow = 'clip';
             });
 
-            // Notify iframe of height change
             scheduleHeightCheck();
 
             html2canvas(bingoCardContainer, {
-                scale: 2, // Higher res
+                scale: 2,
                 logging: false,
-                useCORS: true, // For images from URLs
+                useCORS: true,
                 backgroundColor: isDarkMode ? '#2A2A2A' : '#FFFFFF'
             }).then(canvas => {
-                // Restore original styles
                 document.querySelector('.controls').style.cssText = originalControlsStyle;
                 bingoTitleDisplay.style.cssText = originalTitleStyle;
                 document.querySelectorAll('.bingo-square-content').forEach((contentDiv, index) => {
                     contentDiv.style.cssText = originalSquareContentStyles[index];
                 });
                 
-                // Re-check height after restoring controls
                 scheduleHeightCheck();
 
                 const link = document.createElement('a');
@@ -780,11 +1031,9 @@
                 document.body.removeChild(link);
 
             }).catch(error => {
-                // BUG FINDING: Log error to console
                 console.error("WEB TOOL CODER: Error saving PNG:", error);
                 alert("Failed to save Bingo Card. Please try again.");
                 
-                // Restore original styles even on failure
                 document.querySelector('.controls').style.cssText = originalControlsStyle;
                 bingoTitleDisplay.style.cssText = originalTitleStyle;
                 document.querySelectorAll('.bingo-square-content').forEach((contentDiv, index) => {
@@ -798,7 +1047,6 @@
         generateGridBtn.addEventListener('click', generateGrid);
 
         window.addEventListener('resize', () => {
-            // Resize handler
             fitTitleText();
             document.querySelectorAll('.bingo-square-content').forEach(fitTextInSquare);
         });
@@ -806,49 +1054,30 @@
         // ===== INITIAL SETUP =====
         bingoTitleInput.value = 'Bingo Card';
         bingoTitleDisplay.textContent = bingoTitleInput.value;
-        // DO NOT call generateGrid() or fitTitleText() here
-
-        // ===== FOURTHWALL SCROLLBAR FIX (RULE 8) =====
+        
+        // ===== FOURTHWALL SCROLLBAR FIX =====
         let lastHeight = 0;
         let resizeTimer;
 
-        /**
-         * Sends the current scrollHeight to the parent window if it has changed.
-         * This is the *only* function that should send a postMessage.
-         */
         function sendHeight() {
             const height = document.body.scrollHeight;
-            // Only send message if height has *actually* changed
             if (height !== lastHeight) {
                 lastHeight = height;
                 window.parent.postMessage({ frameHeight: height }, '*');
             }
         }
 
-        /**
-         * A debounced version of sendHeight() to be called on content changes.
-         * This ensures we don't spam messages during rapid changes.
-         */
         function scheduleHeightCheck() {
-            // Clear any pending checks
             clearTimeout(resizeTimer);
-            // Schedule a new check
             resizeTimer = setTimeout(sendHeight, 150);
         }
 
-        // Send height on initial load (with a slight delay)
-        // This fixes the "Content Cut-Off" race condition.
         window.addEventListener('load', () => {
-            // Run initial setup functions *inside* the load event
             generateGrid();
-            
-            // Now send the height *after* content is built
             setTimeout(sendHeight, 100);
         });
 
-        // Send height on window resize (debounced)
         window.addEventListener('resize', () => {
-            // Use scheduleHeightCheck for built-in debounce
             scheduleHeightCheck();
         });
         // ===== END OF SCROLLBAR FIX =====
