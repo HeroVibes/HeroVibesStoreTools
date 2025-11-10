@@ -74,7 +74,12 @@
             overflow: hidden;
             background: #000;
             border-radius: var(--radius);
-            transition: aspect-ratio 0.3s ease; /* Smooth ratio change */
+        }
+
+        #wallpaper-preview.is-vertical {
+            max-width: 350px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         #texture-overlay, #vignette-overlay, #grain-overlay {
@@ -480,6 +485,10 @@
             
             .button-group {
                 flex-direction: column;
+            }
+            
+            #wallpaper-preview.is-vertical {
+                 max-width: 250px;
             }
         }
     </style>
@@ -892,11 +901,9 @@
             sizeSlider.value = randomInt(80, 120);
             brightnessSlider.value = randomInt(90, 110);
             saturationSlider.value = randomInt(80, 120);
-            vignetteSlider.value = randomInt(0, 50);
-            grainSlider.value = randomInt(0, 20);
             
-            // state.texture = ['none', 'noise'][randomInt(0, 1)];
-            // textureOptions.forEach(o => o.classList.toggle('active', o.dataset.texture === state.texture));
+            // vignetteSlider.value = randomInt(0, 50);
+            // grainSlider.value = randomInt(0, 20);
             
             randomizeTextureParams();
             updatePreview();
@@ -908,16 +915,18 @@
             canvas.width = w; canvas.height = h;
             tempCanvas.width = w; tempCanvas.height = h;
 
+            // 1. Fill background
             ctx.fillStyle = state.backgroundColor;
             ctx.fillRect(0, 0, w, h);
 
+            // 2. Prep scale and BLUR-ONLY filter
             const rect = preview.getBoundingClientRect();
             const scaleX = w / rect.width;
             const scaleY = h / rect.height;
-            
             const blur = blurSlider.value * Math.min(scaleX, scaleY);
-            ctx.filter = `blur(${blur}px) brightness(${state.brightness}%) saturate(${state.saturation}%)`;
+            ctx.filter = `blur(${blur}px)`;
 
+            // 3. Draw blurred blobs
             state.blobs.forEach(b => {
                 ctx.fillStyle = b.color;
                 ctx.beginPath();
@@ -928,8 +937,17 @@
                 ctx.fill();
             });
 
+            // 4. Reset filter
             ctx.filter = 'none';
 
+            // 5. Apply brightness/saturation to the *entire image*
+            tempCtx.drawImage(canvas, 0, 0);
+            ctx.clearRect(0, 0, w, h);
+            ctx.filter = `brightness(${state.brightness}%) saturate(${state.saturation}%)`;
+            ctx.drawImage(tempCanvas, 0, 0);
+            ctx.filter = 'none';
+
+            // 6. Draw Grain
             if(state.grain > 0) {
                 ctx.fillStyle = `rgba(0,0,0,${state.grain / 2})`;
                 for (let i = 0; i < (w * h) / 20; i++) {
@@ -937,11 +955,13 @@
                 }
             }
 
+            // 7. Draw Texture
             if (state.texture === 'noise') {
                 ctx.fillStyle = `rgba(0,0,0,${state.textureParams.noise.opacity})`;
                 for (let i = 0; i < (w * h) / 10; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
             }
 
+            // 8. Draw Vignette
             if (state.vignette > 0) {
                 const grad = ctx.createRadialGradient(w/2, h/2, Math.max(w,h) * 0.3, w/2, h/2, Math.max(w, h) * 0.9);
                 grad.addColorStop(0, 'rgba(0,0,0,0)');
@@ -950,6 +970,7 @@
                 ctx.fillRect(0, 0, w, h);
             }
 
+            // 9. Create JPG
             const a = document.createElement('a');
             a.download = `blurry-wallpaper-${resolutionSelect.value}.jpg`;
             a.href = canvas.toDataURL('image/jpeg', 0.95); // 95% quality
@@ -960,6 +981,13 @@
         function updateAspectRatio() {
             const [w, h] = resolutionSelect.value.split('x').map(Number);
             preview.style.aspectRatio = `${w} / ${h}`;
+            
+            if (w < h) {
+                preview.classList.add('is-vertical');
+            } else {
+                preview.classList.remove('is-vertical');
+            }
+
             if (typeof scheduleHeightCheck === 'function') {
                 scheduleHeightCheck();
             }
