@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo Card Generator</title>
-    <script src="https://cdnjs.value.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* ===== ROOT VARIABLES (DESIGN GUIDE) ===== */
         :root {
@@ -72,7 +72,7 @@
             position: relative;
         }
 
-        /* ===== HELP BUTTON ===== */
+        /* ===== HELP BUTTON (REQ 1 FIX) ===== */
         #helpBtn {
             position: absolute;
             top: 16px;
@@ -82,7 +82,7 @@
             background: var(--outline);
             border: 1px solid var(--outline);
             color: var(--text-secondary);
-            border-radius: 50%;
+            border-radius: var(--radius); /* FIX: Changed from 50% */
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -562,7 +562,7 @@
             }
 
             .grid-size-controls .input-group {
-                min-width: 120px; /* Ensure inputs don't get too crushed */
+                min-width: 120px;
             }
 
             .button-row {
@@ -637,10 +637,10 @@
 
             <div class="button-row">
                 <button class="btn" id="clearAllBtn">Clear All</button>
-                <button class="btn btn-primary" id="savePngBtn">Save as PNG</button>
+                <button class="btn" id="savePngBtn">Save as PNG</button>
             </div>
 
-            <div id="versionNumber">V1.0.1</div>
+            <div id="versionNumber">V1.0.2</div>
         </div>
 
         <div id="bingoCardContainer">
@@ -660,7 +660,7 @@
             <ul>
                 <li><strong>Card Title:</strong> Type your title in the "Bingo Card Title" box. It will update on the card live.</li>
                 <li><strong>Grid Size:</strong> Use the <strong>+</strong> and <strong>-</strong> buttons to set the number of rows and columns (from 1 to 10). Click <strong>Generate</strong> to create your new grid.</li>
-                <li><strong>Adding Content:</strong> Click on any square to start typing. The text will automatically shrink to fit.</li>
+                <li><strong>Adding Content:</strong> Click on any square to start typing. The text will automatically shrink to fit any long words and new lines.</li>
                 <li><strong>Adding Images:</strong> You can drag-and-drop an image file from your computer directly onto a square. You can also paste an image from your clipboard.</li>
                 <li><strong>Card Theme:</strong> Use the "Card Theme" toggle to switch the bingo card between a light and dark design.</li>
                 <li><strong>Clear All:</strong> This button will clear all text and images from every square on the current grid.</li>
@@ -691,21 +691,10 @@
         let isDarkMode = false;
         
         // Create measuring spans for text-fitting
-        const multiLineTempSpan = document.createElement('span');
-        multiLineTempSpan.style.visibility = 'hidden';
-        multiLineTempSpan.style.position = 'absolute';
-        multiLineTempSpan.style.left = '-9999px';
-        multiLineTempSpan.style.top = '-9999px';
-        multiLineTempSpan.style.whiteSpace = 'normal';
-        multiLineTempSpan.style.wordBreak = 'break-word';
-        multiLineTempSpan.style.display = 'block';
-
         const singleLineTestSpan = document.createElement('span');
         singleLineTestSpan.style.visibility = 'hidden';
         singleLineTestSpan.style.position = 'absolute';
         singleLineTestSpan.style.whiteSpace = 'nowrap';
-        
-        document.body.appendChild(multiLineTempSpan);
         document.body.appendChild(singleLineTestSpan);
 
 
@@ -860,7 +849,6 @@
                             squareContent.innerHTML = `<img src="${text}" alt="Bingo image">`;
                             squareContent.style.fontSize = '';
                         } else {
-                            // Paste text, but replace newlines with <br> to respect user's multi-line intent
                             const sanitizedText = text.replace(/\n/g, '<br>');
                             document.execCommand('insertHTML', false, sanitizedText);
                             fitTextInSquare(squareContent);
@@ -888,7 +876,7 @@
             scheduleHeightCheck();
         }
 
-        // ===== TEXT FITTING FUNCTIONS =====
+        // ===== TEXT FITTING FUNCTIONS (REQ 2 FIX) =====
         function fitTextInSquare(contentElement) {
             if (contentElement.querySelector('img')) {
                 contentElement.style.overflow = '';
@@ -898,33 +886,26 @@
             }
 
             const computedStyle = getComputedStyle(contentElement);
-            multiLineTempSpan.style.fontFamily = computedStyle.fontFamily;
-            multiLineTempSpan.style.fontWeight = computedStyle.fontWeight;
-            multiLineTempSpan.style.lineHeight = computedStyle.lineHeight;
-            multiLineTempSpan.style.padding = computedStyle.padding;
-            multiLineTempSpan.style.border = computedStyle.border;
-            multiLineTempSpan.style.boxSizing = computedStyle.boxSizing;
-            
             singleLineTestSpan.style.fontFamily = computedStyle.fontFamily;
             singleLineTestSpan.style.fontWeight = computedStyle.fontWeight;
+            singleLineTestSpan.style.lineHeight = computedStyle.lineHeight;
 
             const preferredDefaultFontSize = 16;
             const minFontSize = 8;
             
             const parentSquare = contentElement.closest('.bingo-square');
             const parentComputedStyle = getComputedStyle(parentSquare);
-            const squareContentWidth = parentSquare.clientWidth - parseFloat(parentComputedStyle.paddingLeft) - parseFloat(parentComputedStyle.paddingRight);
-            const squareContentHeight = parentSquare.clientHeight - parseFloat(parentComputedStyle.paddingTop) - parseFloat(parentComputedStyle.paddingBottom);
+            const squareContentWidth = parentSquare.clientWidth - (parseFloat(parentComputedStyle.paddingLeft) + parseFloat(parentComputedStyle.paddingRight));
+            const squareContentHeight = parentSquare.clientHeight - (parseFloat(parentComputedStyle.paddingTop) + parseFloat(parentComputedStyle.paddingBottom));
 
-            // Split by rendered newlines
             const lines = contentElement.innerText.split('\n');
+            const numLines = lines.length;
             let finalFontSize = preferredDefaultFontSize;
 
             while (finalFontSize >= minFontSize) {
-                multiLineTempSpan.style.fontSize = `${finalFontSize}px`;
                 singleLineTestSpan.style.fontSize = `${finalFontSize}px`;
 
-                // 1. Check horizontal fit (longest line)
+                // 1. Horizontal Check: Find the longest line
                 let maxLineWidth = 0;
                 lines.forEach(line => {
                     singleLineTestSpan.textContent = line || 'M'; // Use 'M' for empty lines
@@ -932,17 +913,17 @@
                 });
                 const fitsHorizontally = maxLineWidth <= squareContentWidth;
 
-                // 2. Check vertical fit (total block)
-                multiLineTempSpan.innerHTML = contentElement.innerHTML;
-                multiLineTempSpan.style.width = `${squareContentWidth}px`;
-                const fitsVertically = multiLineTempSpan.scrollHeight <= squareContentHeight;
+                // 2. Vertical Check: Check total block height
+                singleLineTestSpan.textContent = 'M'; // Get height of one line
+                const singleLineHeight = singleLineTestSpan.offsetHeight;
+                const totalBlockHeight = singleLineHeight * numLines;
+                const fitsVertically = totalBlockHeight <= squareContentHeight;
 
                 // 3. Check logic
                 if (fitsHorizontally && fitsVertically) {
-                    // It fits. We're done.
-                    break;
+                    break; // This font size fits
                 } else {
-                    finalFontSize -= 0.5; // Doesn't fit, shrink.
+                    finalFontSize -= 0.5; // Doesn't fit, shrink
                 }
             }
             
