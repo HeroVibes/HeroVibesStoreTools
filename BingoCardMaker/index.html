@@ -72,7 +72,7 @@
             position: relative;
         }
 
-        /* ===== HELP BUTTON (REQ 1 FIX) ===== */
+        /* ===== HELP BUTTON (REQ 2 FIX) ===== */
         #helpBtn {
             position: absolute;
             top: 16px;
@@ -82,7 +82,7 @@
             background: var(--outline);
             border: 1px solid var(--outline);
             color: var(--text-secondary);
-            border-radius: var(--radius); /* FIX: Changed from 50% */
+            border-radius: var(--radius) !important; /* Force override */
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -391,7 +391,7 @@
             box-shadow: 0 0 8px rgba(135, 169, 255, 0.5);
         }
 
-        /* ===== SQUARE CONTENT ===== */
+        /* ===== SQUARE CONTENT (REQ 1 FIX) ===== */
         .bingo-square-content {
             width: 100%;
             height: 100%;
@@ -400,7 +400,7 @@
             align-items: center;
             text-align: center;
             padding: 8px;
-            font-size: 16px;
+            font-size: 24px; /* Start larger */
             color: var(--bingo-text);
             line-height: 1.2;
             outline: none;
@@ -544,7 +544,7 @@
             }
 
             .bingo-square-content {
-                font-size: 14px;
+                font-size: 20px; /* Start larger on mobile too */
                 padding: 6px;
             }
 
@@ -576,7 +576,7 @@
             }
 
             .bingo-square-content {
-                font-size: 12px;
+                font-size: 16px; /* Start larger on small mobile */
                 padding: 4px;
             }
 
@@ -637,10 +637,10 @@
 
             <div class="button-row">
                 <button class="btn" id="clearAllBtn">Clear All</button>
-                <button class="btn" id="savePngBtn">Save as PNG</button>
+                <button class="btn btn-primary" id="savePngBtn">Save as PNG</button>
             </div>
 
-            <div id="versionNumber">V1.0.2</div>
+            <div id="versionNumber">V1.0.3</div>
         </div>
 
         <div id="bingoCardContainer">
@@ -750,6 +750,8 @@
                 }
             });
         });
+
+push
 
         // ===== HELP MODAL HANDLERS =====
         function openModal() {
@@ -863,6 +865,18 @@
                     scheduleHeightCheck();
                 });
 
+                // REQ 3 FIX: Handle 'Enter' key press
+                squareContent.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); // Stop default (e.g., new paragraph)
+                        document.execCommand('insertHTML', false, '<br>'); // Insert line break
+                        
+                        // Manually trigger updates
+                        fitTextInSquare(squareContent);
+                        scheduleHeightCheck();
+                    }
+                });
+
                 squareContent.addEventListener('focus', () => {
                     if (squareContent.textContent.trim() === '') {
                         squareContent.offsetHeight;
@@ -876,7 +890,7 @@
             scheduleHeightCheck();
         }
 
-        // ===== TEXT FITTING FUNCTIONS (REQ 2 FIX) =====
+        // ===== TEXT FITTING FUNCTIONS (REQ 1 FIX) =====
         function fitTextInSquare(contentElement) {
             if (contentElement.querySelector('img')) {
                 contentElement.style.overflow = '';
@@ -890,7 +904,7 @@
             singleLineTestSpan.style.fontWeight = computedStyle.fontWeight;
             singleLineTestSpan.style.lineHeight = computedStyle.lineHeight;
 
-            const preferredDefaultFontSize = 16;
+            const preferredDefaultFontSize = 24; // Start larger
             const minFontSize = 8;
             
             const parentSquare = contentElement.closest('.bingo-square');
@@ -968,6 +982,8 @@
                 titleElement.style.textOverflow = 'ellipsis';
             }
         }
+
+GWAN
 
         // ===== PNG SAVE FUNCTION =====
         savePngBtn.addEventListener('click', () => {
