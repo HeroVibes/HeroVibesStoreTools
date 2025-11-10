@@ -16,8 +16,10 @@
             --text-primary: #D4D4D4;
             --text-secondary: #8C8C8C;
             --radius: 8px;
-            
-            /* Bingo card theme colors (light mode default) */
+        }
+
+        /* Bingo card theme colors (light mode default) */
+        :root {
             --bingo-bg: #FFFFFF;
             --bingo-border: #CCCCCC;
             --bingo-square-even: #F8F8F8;
@@ -170,7 +172,7 @@
 
         .modal-body {
             color: var(--text-primary);
-            font-size: 14px;
+            font-size: 12px;
             line-height: 1.6;
         }
 
@@ -295,7 +297,7 @@
         /* ===== BUTTON STYLES ===== */
         .btn {
             position: relative;
-            padding: 12px 16px;
+            padding: 10px 16px;
             border-radius: var(--radius);
             background: var(--card-bg);
             color: var(--text-primary);
@@ -479,11 +481,11 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            word-break: keep-all;
-            word-wrap: normal;
+            word-break: normal; /* FIX: Was keep-all */
+            overflow-wrap: break-word; /* FIX: Added for better wrapping */
             white-space: pre-wrap;
             padding: 8px;
-            font-size: 16px;
+            font-size: 14px; /* FIX: Was 16px */
             color: var(--bingo-text);
             line-height: 1.2;
             outline: none;
@@ -519,7 +521,7 @@
             }
 
             .bingo-square-content {
-                font-size: 14px;
+                font-size: 12px; /* FIX: Was 14px */
                 padding: 6px;
             }
 
@@ -546,7 +548,7 @@
             }
 
             .bingo-square-content {
-                font-size: 12px;
+                font-size: 12px; /* FIX: Was 12px (unchanged, sets min) */
                 padding: 4px;
             }
 
@@ -563,13 +565,13 @@
     </style>
 </head>
 <body>
-    <!-- ===== HELP MODAL ===== -->
     <div class="modal-overlay" id="helpModal">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">How to Use the Bingo Card Generator</div>
                 <button class="modal-close" id="closeModalBtn">×</button>
             </div>
+      
             <div class="modal-body">
                 <div class="modal-section">
                     <div class="modal-section-title">📝 Adding Content</div>
@@ -602,28 +604,24 @@
 
                 <div class="modal-section">
                     <div class="modal-section-title">💡 Tips</div>
-                    <p>Text automatically shrinks when it reaches the sides of a square, ensuring words stay on one line. If you add a space that would exceed the line width, the next word moves to a new line at the current font size.</p>
+                    <p>Text automatically shrinks when it reaches the sides of a square.
+If you add a space that would exceed the line width, the next word moves to a new line at the current font size.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ===== MAIN APP CONTAINER ===== -->
     <div id="bingoApp">
-        <!-- ===== CONTROLS SECTION ===== -->
         <div class="controls">
-            <!-- Help Button -->
             <div class="controls-header">
                 <button class="help-btn" id="helpBtn">?</button>
             </div>
 
-            <!-- Title Input -->
             <div class="input-group">
                 <label class="input-label">Bingo Card Title</label>
                 <input type="text" id="bingoTitleInput" placeholder="Enter your bingo card title">
             </div>
 
-            <!-- Grid Size Controls -->
             <div class="grid-size-controls">
                 <div class="input-group">
                     <label class="input-label">Rows</label>
@@ -644,7 +642,6 @@
                 <button class="btn btn-primary" id="generateGridBtn">Generate</button>
             </div>
 
-            <!-- Theme Toggle -->
             <div class="theme-toggle-wrapper">
                 <span class="theme-toggle-label">Card Theme</span>
                 <div class="theme-toggle" id="themeToggle">
@@ -653,14 +650,12 @@
                 <span class="input-label" id="themeLabel">Light</span>
             </div>
 
-            <!-- Action Buttons -->
             <div class="button-row">
                 <button class="btn" id="clearAllBtn">Clear All</button>
                 <button class="btn btn-primary" id="savePngBtn">Save as PNG</button>
             </div>
         </div>
 
-        <!-- ===== BINGO CARD DISPLAY ===== -->
         <div id="bingoCardContainer">
             <h1 id="bingoTitleDisplay">Bingo Card</h1>
             <div id="bingoGrid"></div>
@@ -698,19 +693,16 @@
             helpModal.classList.add('active');
             scheduleHeightCheck();
         });
-
         closeModalBtn.addEventListener('click', () => {
             helpModal.classList.remove('active');
             scheduleHeightCheck();
         });
-
         helpModal.addEventListener('click', (e) => {
             if (e.target === helpModal) {
                 helpModal.classList.remove('active');
                 scheduleHeightCheck();
             }
         });
-
         // ===== NUMBER INPUT HANDLERS =====
         rowsDecBtn.addEventListener('click', () => {
             if (rowsValue > 1) {
@@ -718,34 +710,29 @@
                 rowsDisplay.textContent = rowsValue;
             }
         });
-
         rowsIncBtn.addEventListener('click', () => {
             if (rowsValue < 10) {
                 rowsValue++;
                 rowsDisplay.textContent = rowsValue;
             }
         });
-
         colsDecBtn.addEventListener('click', () => {
             if (colsValue > 1) {
                 colsValue--;
                 colsDisplay.textContent = colsValue;
             }
         });
-
         colsIncBtn.addEventListener('click', () => {
             if (colsValue < 10) {
                 colsValue++;
                 colsDisplay.textContent = colsValue;
             }
         });
-
         // ===== TITLE UPDATE HANDLER =====
         bingoTitleInput.addEventListener('input', () => {
             bingoTitleDisplay.textContent = bingoTitleInput.value || 'Bingo Card';
             fitTitleText();
         });
-
         // ===== THEME TOGGLE HANDLER =====
         themeToggle.addEventListener('click', () => {
             isDarkMode = !isDarkMode;
@@ -753,7 +740,6 @@
             bingoCardContainer.classList.toggle('dark-card', isDarkMode);
             themeLabel.textContent = isDarkMode ? 'Dark' : 'Light';
         });
-
         // ===== CLEAR ALL HANDLER =====
         clearAllBtn.addEventListener('click', () => {
             const squares = document.querySelectorAll('.bingo-square-content');
@@ -763,7 +749,6 @@
             });
             scheduleHeightCheck();
         });
-
         // ===== GRID GENERATION FUNCTION =====
         function generateGrid() {
             const rows = rowsValue;
@@ -772,7 +757,7 @@
             bingoGrid.innerHTML = '';
             bingoGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
             bingoGrid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-
+            
             for (let i = 0; i < rows * cols; i++) {
                 const square = document.createElement('div');
                 square.classList.add('bingo-square');
@@ -783,23 +768,24 @@
                 squareContent.setAttribute('contenteditable', 'true');
 
                 square.appendChild(squareContent);
-
+                
                 // Drag over handler
                 square.addEventListener('dragover', (e) => {
                     e.preventDefault();
                     square.classList.add('drag-over');
                 });
-
+                
                 // Drag leave handler
                 square.addEventListener('dragleave', () => {
                     square.classList.remove('drag-over');
                 });
-
+                
                 // Drop handler
                 square.addEventListener('drop', (e) => {
                     e.preventDefault();
                     square.classList.remove('drag-over');
                     const files = e.dataTransfer.files;
+                
                     if (files.length > 0 && files[0].type.startsWith('image/')) {
                         const reader = new FileReader();
                         reader.onload = (event) => {
@@ -852,17 +838,17 @@
                     fitTextInSquare(squareContent);
                     scheduleHeightCheck();
                 });
-
+                
                 // Focus handler
                 squareContent.addEventListener('focus', () => {
                     fitTextInSquare(squareContent);
                 });
-
+                
                 // Blur handler
                 squareContent.addEventListener('blur', () => {
                     fitTextInSquare(squareContent);
                 });
-
+                
                 bingoGrid.appendChild(square);
             }
             
@@ -890,15 +876,13 @@
 
             const parentStyle = getComputedStyle(parentSquare);
             const contentStyle = getComputedStyle(contentElement);
-            
             const availableWidth = parentSquare.clientWidth - 
                 parseFloat(contentStyle.paddingLeft) - 
                 parseFloat(contentStyle.paddingRight);
-            
             const availableHeight = parentSquare.clientHeight - 
                 parseFloat(contentStyle.paddingTop) - 
                 parseFloat(contentStyle.paddingBottom);
-
+            
             // Font size constraints
             const maxFontSize = 24;
             const minFontSize = 8;
@@ -916,21 +900,20 @@
                 font-weight: ${contentStyle.fontWeight};
                 line-height: ${contentStyle.lineHeight};
                 white-space: pre-wrap;
-                word-break: keep-all;
+                word-break: normal; /* FIX: Was keep-all */
                 overflow-wrap: break-word;
             `;
             document.body.appendChild(measureDiv);
 
-            // Binary search for optimal font size
+            // Linear search for optimal font size
             let bestFontSize = minFontSize;
-            
             while (currentFontSize >= minFontSize) {
                 measureDiv.style.fontSize = `${currentFontSize}px`;
                 measureDiv.textContent = text;
 
                 const fitsWidth = measureDiv.scrollWidth <= availableWidth;
                 const fitsHeight = measureDiv.scrollHeight <= availableHeight;
-
+                
                 if (fitsWidth && fitsHeight) {
                     bestFontSize = currentFontSize;
                     break;
@@ -957,7 +940,6 @@
             titleElement.style.fontSize = `${maxFontSize}px`;
 
             let currentFontSize = maxFontSize;
-
             while (titleElement.scrollWidth > (containerWidth - padding) && currentFontSize > minFontSize) {
                 currentFontSize -= 1;
                 titleElement.style.fontSize = `${currentFontSize}px`;
@@ -1028,7 +1010,7 @@
             fitTitleText();
             document.querySelectorAll('.bingo-square-content').forEach(fitTextInSquare);
         });
-
+        
         // ===== INITIAL SETUP =====
         bingoTitleInput.value = 'Bingo Card';
         bingoTitleDisplay.textContent = bingoTitleInput.value;
@@ -1038,29 +1020,38 @@
         // ===== FOURTHWALL SCROLLBAR FIX =====
         let lastHeight = 0;
         let resizeTimer;
-
+        
+        /**
+         * Sends the current scrollHeight to the parent window if it has changed.
+         * This is the *only* function that should send a postMessage.
+         */
         function sendHeight() {
             const height = document.body.scrollHeight;
-            
             if (height !== lastHeight) {
                 lastHeight = height;
                 window.parent.postMessage({ frameHeight: height }, '*');
             }
         }
 
+        /**
+         * A debounced version of sendHeight() to be called on content changes.
+         * This ensures we don't spam messages during rapid changes.
+         */
         function scheduleHeightCheck() {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(sendHeight, 150);
         }
 
+        // Send height on initial load (with a slight delay)
+        // This fixes the "Content Cut-Off" race condition.
         window.addEventListener('load', () => {
             setTimeout(sendHeight, 100);
         });
-
+        
+        // Send height on window resize (debounced)
         window.addEventListener('resize', () => {
             scheduleHeightCheck();
         });
-        
         // ===== END OF SCROLLBAR FIX =====
     </script>
 </body>
