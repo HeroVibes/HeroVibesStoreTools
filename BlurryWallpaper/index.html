@@ -69,11 +69,12 @@
 
         #wallpaper-preview {
             width: 100%;
-            aspect-ratio: 16 / 9;
+            aspect-ratio: 16 / 9; /* Default, will be changed by JS */
             position: relative;
             overflow: hidden;
             background: #000;
             border-radius: var(--radius);
+            transition: aspect-ratio 0.3s ease; /* Smooth ratio change */
         }
 
         #texture-overlay, #vignette-overlay, #grain-overlay {
@@ -177,14 +178,6 @@
             color: var(--text-primary);
             display: flex;
             align-items: center;
-        }
-
-        .control-label svg {
-            width: 14px;
-            height: 14px;
-            margin-right: 6px;
-            fill: var(--text-secondary);
-            margin-top: -1px;
         }
 
         .control-sublabel {
@@ -363,13 +356,6 @@
             align-items: center;
             justify-content: center;
         }
-        
-        .btn svg {
-            width: 16px;
-            height: 16px;
-            margin-right: 8px;
-            fill: currentColor;
-        }
 
         .btn::before {
             content: '';
@@ -520,10 +506,7 @@
                             <option value="1080x1920">Mobile (1080x1920)</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary" id="download-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 1a.75.75 0 0 1 .75.75v8.19l2.47-2.47a.75.75 0 1 1 1.06 1.06l-3.75 3.75a.75.75 0 0 1-1.06 0L3.72 9.53a.75.75 0 1 1 1.06-1.06l2.47 2.47V1.75A.75.75 0 0 1 8 1Zm-3.75 12.5a.75.75 0 0 1 0 1.5h7.5a.75.75 0 0 1 0-1.5h-7.5Z"/></svg>
-                        Download
-                    </button>
+                    <button class="btn btn-primary" id="download-btn">Download</button>
                 </div>
             </div>
 
@@ -533,10 +516,7 @@
             <div id="version-tag">V1.0.0</div>
 
             <div class="control-group">
-                <button class="btn btn-random" id="random-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10.854 3.146a.5.5 0 0 1 0 .708L9.707 5H12.5A2.5 2.5 0 0 1 15 7.5v0A2.5 2.5 0 0 1 12.5 10H10l2.854 2.854a.5.5 0 1 1-.708.708L9.293 10.707a.5.5 0 0 1 0-.707l2.853-2.853a.5.5 0 0 1 .708 0ZM3.5 5h2.793L5.146 3.854a.5.5 0 1 1 .708-.708L8.707 6.002a.5.5 0 0 1 0 .707L6.854 8.566a.5.5 0 1 1-.708-.708L7.293 7H3.5A2.5 2.5 0 0 1 1 4.5v0A2.5 2.5 0 0 1 3.5 2h9a.5.5 0 0 1 0 1h-9A1.5 1.5 0 0 0 3.5 5Z"/></svg>
-                    Randomize
-                </button>
+                <button class="btn btn-random" id="random-btn">Randomize</button>
             </div>
 
             <div class="control-group">
@@ -572,10 +552,7 @@
                 <div class="control-group">
                     <div class="slider-wrapper">
                         <div class="slider-header">
-                            <label for="blur-slider" class="control-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M5.901 11.23a4.75 4.75 0 1 1 5.43 2.02c.792-.31 1.54-.7 2.22-1.15l.004-.002c.08-.052.158-.106.234-.162l.006-.005a.75.75 0 0 0-.6-1.312l-.007.004a8.41 8.41 0 0 0-.25.17l-.003.002c-.66.49-1.38.9-2.15 1.18A4.73 4.73 0 0 1 8 12.75a4.73 4.73 0 0 1-2.098-1.52Z"/></svg>
-                                Blur
-                            </label>
+                            <label for="blur-slider" class="control-label">Blur</label>
                             <div class="slider-value" id="blur-value">120px</div>
                         </div>
                         <input type="range" id="blur-slider" min="30" max="300" value="120" aria-labelledby="blur-value">
@@ -584,10 +561,7 @@
                 <div class="control-group">
                     <div class="slider-wrapper">
                         <div class="slider-header">
-                            <label for="size-slider" class="control-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10.5 3.5a.75.75 0 0 0-1.06 0L6.7 6.25H3.75a.75.75 0 0 0 0 1.5h2.94l-2.75 2.75a.75.75 0 0 0 1.06 1.06L8 8.81v2.94a.75.75 0 0 0 1.5 0V8.81l2.75 2.75a.75.75 0 0 0 1.06-1.06L10.56 8H13.5a.75.75 0 0 0 0-1.5h-2.94l2.75-2.75a.75.75 0 0 0-1.06-1.06L9.5 6.25V3.25a.75.75 0 0 0-1.5 0v2.94L5.25 3.44a.75.75 0 0 0-1.06 1.06L6.94 7.25H3.25a.75.75 0 0 0 0 1.5h3.69l2.75 2.75a.75.75 0 0 0 1.06 0l2.75-2.75h3.69a.75.75 0 0 0 0-1.5H10.31L7.56 4.5a.75.75 0 0 0-1.06 0L3.75 7.25H1.5a.75.75 0 0 0 0 1.5h2.25L1.06 11.44a.75.75 0 0 0 1.06 1.06L4.87 9.75h3.69l-2.75 2.75a.75.75 0 0 0 1.06 1.06L9.62 10.81v2.94a.75.75 0 0 0 1.5 0v-2.94l2.75 2.75a.75.75 0 0 0 1.06-1.06L12.19 9.75h2.56a.75.75 0 0 0 0-1.5h-2.56l2.75-2.75a.75.75 0 0 0-1.06-1.06L11.12 7.25V3.5Z"/></svg>
-                                Size
-                            </label>
+                            <label for="size-slider" class="control-label">Size</label>
                             <div class="slider-value" id="size-value">100%</div>
                         </div>
                         <input type="range" id="size-slider" min="50" max="200" value="100" aria-labelledby="size-value">
@@ -599,10 +573,7 @@
                 <div class="control-group">
                     <div class="slider-wrapper">
                         <div class="slider-header">
-                            <label for="brightness-slider" class="control-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 1Zm0 12a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13Zm5-5a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5H13ZM1.75 8a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1 0-1.5H1.75Zm10.04-4.24a.75.75 0 0 0 1.06-1.06l-1.06-1.06a.75.75 0 0 0-1.06 1.06l1.06 1.06ZM3.22 11.78a.75.75 0 0 0 1.06 1.06l1.06-1.06a.75.75 0 0 0-1.06-1.06l-1.06 1.06ZM11.78 3.22a.75.75 0 0 0 1.06 1.06l1.06-1.06a.75.75 0 0 0-1.06-1.06l-1.06 1.06ZM3.22 4.28a.75.75 0 0 0-1.06-1.06L1.1 4.28a.75.75 0 0 0 1.06 1.06l1.06-1.06Zm7.5 3.72a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"/></svg>
-                                Brightness
-                            </label>
+                            <label for="brightness-slider" class="control-label">Brightness</label>
                             <div class="slider-value" id="brightness-value">100%</div>
                         </div>
                         <input type="range" id="brightness-slider" min="50" max="150" value="100" aria-labelledby="brightness-value">
@@ -611,10 +582,7 @@
                 <div class="control-group">
                     <div class="slider-wrapper">
                         <div class="slider-header">
-                            <label for="saturation-slider" class="control-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM2.68 11.23a6.5 6.5 0 0 0 8.35-8.35A6.5 6.5 0 0 0 2.68 11.23Z"/></svg>
-                                Saturation
-                            </label>
+                            <label for="saturation-slider" class="control-label">Saturation</label>
                             <div class="slider-value" id="saturation-value">100%</div>
                         </div>
                         <input type="range" id="saturation-slider" min="0" max="200" value="100" aria-labelledby="saturation-value">
@@ -626,10 +594,7 @@
                 <div class="control-group">
                     <div class="slider-wrapper">
                         <div class="slider-header">
-                            <label for="vignette-slider" class="control-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13ZM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Z"/></svg>
-                                Vignette
-                            </label>
+                            <label for="vignette-slider" class="control-label">Vignette</label>
                             <div class="slider-value" id="vignette-value">0%</div>
                         </div>
                         <input type="range" id="vignette-slider" min="0" max="100" value="0" aria-labelledby="vignette-value">
@@ -638,10 +603,7 @@
                 <div class="control-group">
                     <div class="slider-wrapper">
                         <div class="slider-header">
-                            <label for="grain-slider" class="control-label">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="2" cy="2" r="1"/><circle cx="6" cy="2" r="1"/><circle cx="10" cy="2" r="1"/><circle cx="14" cy="2" r="1"/><circle cx="2" cy="6" r="1"/><circle cx="6" cy="6" r="1"/><circle cx="10" cy="6" r="1"/><circle cx="14" cy="6" r="1"/><circle cx="2" cy="10" r="1"/><circle cx="6" cy="10" r="1"/><circle cx="10" cy="10" r="1"/><circle cx="14" cy="10" r="1"/><circle cx="2" cy="14" r="1"/><circle cx="6" cy="14" r="1"/><circle cx="10" cy="14" r="1"/><circle cx="14" cy="14" r="1"/></svg>
-                                Grain
-                            </label>
+                            <label for="grain-slider" class="control-label">Grain</label>
                             <div class="slider-value" id="grain-value">10%</div>
                         </div>
                         <input type="range" id="grain-slider" min="0" max="50" value="10" aria-labelledby="grain-value">
@@ -868,11 +830,7 @@
                 const size = bs.baseSize * state.sizeMultiplier;
                 el.style.backgroundColor = bs.color;
                 el.style.left = `${bs.x}%`;
-                
-                // ===== THE FIX IS HERE =====
-                el.style.top = `${bs.y}%`; // Was `${y}%`
-                // ===========================
-                
+                el.style.top = `${bs.y}%`;
                 el.style.width = `${size}px`;
                 el.style.height = `${size}px`;
                 const p = document.getElementById(`${bs.id}-color`);
@@ -936,8 +894,10 @@
             saturationSlider.value = randomInt(80, 120);
             vignetteSlider.value = randomInt(0, 50);
             grainSlider.value = randomInt(0, 20);
-            state.texture = ['none', 'noise'][randomInt(0, 1)];
-            textureOptions.forEach(o => o.classList.toggle('active', o.dataset.texture === state.texture));
+            
+            // state.texture = ['none', 'noise'][randomInt(0, 1)];
+            // textureOptions.forEach(o => o.classList.toggle('active', o.dataset.texture === state.texture));
+            
             randomizeTextureParams();
             updatePreview();
         }
@@ -991,10 +951,18 @@
             }
 
             const a = document.createElement('a');
-            a.download = `blurry-wallpaper-${resolutionSelect.value}.png`;
-            a.href = canvas.toDataURL();
+            a.download = `blurry-wallpaper-${resolutionSelect.value}.jpg`;
+            a.href = canvas.toDataURL('image/jpeg', 0.95); // 95% quality
             a.click();
             a.remove();
+        }
+        
+        function updateAspectRatio() {
+            const [w, h] = resolutionSelect.value.split('x').map(Number);
+            preview.style.aspectRatio = `${w} / ${h}`;
+            if (typeof scheduleHeightCheck === 'function') {
+                scheduleHeightCheck();
+            }
         }
         
         // Accessibility for keyboard users
@@ -1010,12 +978,14 @@
             for (let i = 0; i < 5; i++) addBlob();
             randomizeState('random');
             bgColorPicker.value = state.backgroundColor;
+            updateAspectRatio(); // Set initial aspect ratio
 
             addBlobBtn.onclick = addBlob;
             removeBlobBtn.onclick = removeBlob;
             randomBtn.onclick = () => randomizeState('random');
             downloadBtn.onclick = downloadImage;
             bgColorPicker.oninput = e => { state.backgroundColor = e.target.value; updatePreview(); };
+            resolutionSelect.onchange = updateAspectRatio; // Add listener
 
             [blurSlider, sizeSlider, brightnessSlider, saturationSlider, vignetteSlider, grainSlider].forEach(s => s.oninput = updatePreview);
 
