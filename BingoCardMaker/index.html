@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Card Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* ===== ROOT VARIABLES ===== */
+        :root {
+            --bg: #191919;
+            --card-bg: #1F1F1F;
+            --hover: #323232;
+            --outline: #323232;
+            --accent: #87A9FF;
+            --text-primary: #D4D4D4;
+            --text-secondary: #8C8C8C;
+            --radius: 8px;
+            
+            /* Bingo card theme colors (light mode default) */
+            --bingo-bg: #FFFFFF;
+            --bingo-border: #CCCCCC;
+            --bingo-square-even: #F8F8F8;
+            --bingo-square-odd: #EEEEEE;
+            --bingo-square-hover: #E6E6E6;
+            --bingo-text: #333333;
+            --bingo-title: #333333;
+        }
+
+        /* ===== DARK MODE FOR BINGO CARD ===== */
+        .dark-card {
+            --bingo-bg: #2A2A2A;
+            --bingo-border: #404040;
+            --bingo-square-even: #333333;
+            --bingo-square-odd: #3A3A3A;
+            --bingo-square-hover: #454545;
+            --bingo-text: #D4D4D4;
+            --bingo-title: #D4D4D4;
+        }
+
+        /* ===== BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            padding: 24px 16px;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        #bingoApp {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ===== CONTROLS SECTION ===== */
+        .controls {
+            background: var(--card-bg);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* ===== INPUT STYLES ===== */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--text-secondary);
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* ===== GRID SIZE CONTROLS ===== */
+        .grid-size-controls {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .grid-size-controls .input-group {
+            flex: 1;
+        }
+
+        .grid-size-controls input[type="number"] {
+            text-align: center;
+        }
+
+        /* ===== BUTTON STYLES ===== */
+        .btn {
+            position: relative;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
+        }
+
+        .btn:hover {
+            background: var(--hover);
+        }
+
+        .btn:hover::before {
+            left: 125%;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000000;
+            border-color: var(--accent);
+        }
+
+        .btn-primary:hover {
+            background: #6B8FE5;
+        }
+
+        /* ===== THEME TOGGLE ===== */
+        .theme-toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg);
+            border-radius: var(--radius);
+        }
+
+        .theme-toggle-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: var(--outline);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .theme-toggle.active {
+            background: var(--accent);
+        }
+
+        .theme-toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle.active .theme-toggle-slider {
+            transform: translateX(24px);
+        }
+
+        /* ===== BUTTON ROW ===== */
+        .button-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .button-row .btn {
+            flex: 1;
+        }
+
+        /* ===== BINGO CARD CONTAINER ===== */
+        #bingoCardContainer {
+            background: var(--bingo-bg);
+            border: 1px solid var(--bingo-border);
+            border-radius: var(--radius);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* ===== TITLE DISPLAY ===== */
+        #bingoTitleDisplay {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            color: var(--bingo-title);
+            width: 100%;
+            max-width: 100%;
+            padding: 0 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.3s ease;
+        }
+
+        /* ===== BINGO GRID ===== */
+        #bingoGrid {
+            display: grid;
+            width: 100%;
+            max-width: 600px;
+            gap: 4px;
+            padding: 4px;
+            background: var(--bingo-border);
+            border: 2px solid var(--bingo-border);
+            border-radius: var(--radius);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* ===== BINGO SQUARES ===== */
+        .bingo-square {
+            aspect-ratio: 1 / 1;
+            border: 1px solid var(--bingo-border);
+            border-radius: 4px;
+            position: relative;
+            cursor: text;
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .bingo-square-even {
+            background: var(--bingo-square-even);
+        }
+
+        .bingo-square-odd {
+            background: var(--bingo-square-odd);
+        }
+
+        .bingo-square:hover {
+            background: var(--bingo-square-hover);
+        }
+
+        .bingo-square.drag-over {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 8px rgba(135, 169, 255, 0.5);
+        }
+
+        /* ===== SQUARE CONTENT ===== */
+        .bingo-square-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            word-break: break-word;
+            padding: 8px;
+            font-size: 16px;
+            color: var(--bingo-text);
+            line-height: 1.2;
+            outline: none;
+            user-select: text;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.3s ease;
+        }
+
+        .bingo-square-content:focus {
+            background: rgba(135, 169, 255, 0.1);
+        }
+
+        .bingo-square-content img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+            margin: auto;
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 768px) {
+            body {
+                padding: 16px 12px;
+            }
+
+            #bingoTitleDisplay {
+                font-size: 32px;
+            }
+
+            #bingoGrid {
+                max-width: 100%;
+            }
+
+            .bingo-square-content {
+                font-size: 14px;
+                padding: 6px;
+            }
+
+            .controls {
+                padding: 20px 12px;
+            }
+
+            .grid-size-controls {
+                flex-wrap: wrap;
+            }
+
+            .button-row {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #bingoTitleDisplay {
+                font-size: 24px;
+            }
+
+            .bingo-square-content {
+                font-size: 12px;
+                padding: 4px;
+            }
+
+            input[type="text"],
+            input[type="number"],
+            .btn {
+                font-size: 13px;
+            }
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== MAIN APP CONTAINER ===== -->
+    <div id="bingoApp">
+        <!-- ===== CONTROLS SECTION ===== -->
+        <div class="controls">
+            <!-- Title Input -->
+            <div class="input-group">
+                <label class="input-label">Bingo Card Title</label>
+                <input type="text" id="bingoTitleInput" placeholder="Enter your bingo card title">
+            </div>
+
+            <!-- Grid Size Controls -->
+            <div class="grid-size-controls">
+                <div class="input-group">
+                    <label class="input-label">Rows</label>
+                    <input type="number" id="rowsInput" value="5" min="1" max="10">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Columns</label>
+                    <input type="number" id="colsInput" value="5" min="1" max="10">
+                </div>
+                <button class="btn btn-primary" id="generateGridBtn">Generate</button>
+            </div>
+
+            <!-- Theme Toggle -->
+            <div class="theme-toggle-wrapper">
+                <span class="theme-toggle-label">Card Theme</span>
+                <div class="theme-toggle" id="themeToggle">
+                    <div class="theme-toggle-slider"></div>
+                </div>
+                <span class="input-label" id="themeLabel">Light</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-row">
+                <button class="btn" id="clearAllBtn">Clear All</button>
+                <button class="btn btn-primary" id="savePngBtn">Save as PNG</button>
+            </div>
+        </div>
+
+        <!-- ===== BINGO CARD DISPLAY ===== -->
+        <div id="bingoCardContainer">
+            <h1 id="bingoTitleDisplay">Bingo Card</h1>
+            <div id="bingoGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== DOM ELEMENT REFERENCES =====
+        const bingoTitleInput = document.getElementById('bingoTitleInput');
+        const bingoTitleDisplay = document.getElementById('bingoTitleDisplay');
+        const rowsInput = document.getElementById('rowsInput');
+        const colsInput = document.getElementById('colsInput');
+        const generateGridBtn = document.getElementById('generateGridBtn');
+        const savePngBtn = document.getElementById('savePngBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const bingoGrid = document.getElementById('bingoGrid');
+        const bingoCardContainer = document.getElementById('bingoCardContainer');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeLabel = document.getElementById('themeLabel');
+
+        // ===== STATE MANAGEMENT =====
+        let isDarkMode = false;
+
+        // ===== TITLE UPDATE HANDLER =====
+        bingoTitleInput.addEventListener('input', () => {
+            bingoTitleDisplay.textContent = bingoTitleInput.value || 'Bingo Card';
+            fitTitleText();
+        });
+
+        // ===== THEME TOGGLE HANDLER =====
+        themeToggle.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            themeToggle.classList.toggle('active', isDarkMode);
+            bingoCardContainer.classList.toggle('dark-card', isDarkMode);
+            themeLabel.textContent = isDarkMode ? 'Dark' : 'Light';
+        });
+
+        // ===== CLEAR ALL HANDLER =====
+        clearAllBtn.addEventListener('click', () => {
+            const squares = document.querySelectorAll('.bingo-square-content');
+            squares.forEach(square => {
+                square.innerHTML = '';
+                square.style.fontSize = '';
+            });
+            scheduleHeightCheck();
+        });
+
+        // ===== GRID GENERATION FUNCTION =====
+        function generateGrid() {
+            const rows = parseInt(rowsInput.value);
+            const cols = parseInt(colsInput.value);
+
+            if (isNaN(rows) || isNaN(cols) || rows < 1 || cols < 1 || rows > 10 || cols > 10) {
+                alert('Please enter valid numbers between 1 and 10 for rows and columns.');
+                return;
+            }
+
+            bingoGrid.innerHTML = '';
+            bingoGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            bingoGrid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+            for (let i = 0; i < rows * cols; i++) {
+                const square = document.createElement('div');
+                square.classList.add('bingo-square');
+                square.classList.add(i % 2 === 0 ? 'bingo-square-even' : 'bingo-square-odd');
+                
+                const squareContent = document.createElement('div');
+                squareContent.classList.add('bingo-square-content');
+                squareContent.setAttribute('contenteditable', 'true');
+
+                square.appendChild(squareContent);
+
+                // Drag over handler
+                square.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    square.classList.add('drag-over');
+                });
+
+                // Drag leave handler
+                square.addEventListener('dragleave', () => {
+                    square.classList.remove('drag-over');
+                });
+
+                // Drop handler
+                square.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    square.classList.remove('drag-over');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0 && files[0].type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            squareContent.innerHTML = `<img src="${event.target.result}" alt="Bingo image">`;
+                            squareContent.style.fontSize = '';
+                        };
+                        reader.readAsDataURL(files[0]);
+                    } else {
+                        squareContent.textContent = e.dataTransfer.getData('text/plain');
+                        fitTextInSquare(squareContent);
+                    }
+                    scheduleHeightCheck();
+                });
+
+                // Paste handler
+                squareContent.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                    let handled = false;
+                    
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].type.indexOf('image') !== -1) {
+                            const blob = items[i].getAsFile();
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                                squareContent.innerHTML = `<img src="${event.target.result}" alt="Bingo image">`;
+                                squareContent.style.fontSize = '';
+                            };
+                            reader.readAsDataURL(blob);
+                            handled = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!handled) {
+                        const text = (e.clipboardData || e.originalEvent.clipboardData).getData('text/plain');
+                        if (text.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+                            squareContent.innerHTML = `<img src="${text}" alt="Bingo image">`;
+                            squareContent.style.fontSize = '';
+                        } else {
+                            document.execCommand('insertText', false, text);
+                            fitTextInSquare(squareContent);
+                        }
+                    }
+                    scheduleHeightCheck();
+                });
+
+                // Input handler
+                squareContent.addEventListener('input', () => {
+                    squareContent.style.fontSize = '';
+                    fitTextInSquare(squareContent);
+                    scheduleHeightCheck();
+                });
+
+                // Focus handler
+                squareContent.addEventListener('focus', () => {
+                    if (squareContent.textContent.trim() === '') {
+                        squareContent.offsetHeight;
+                    }
+                    fitTextInSquare(squareContent);
+                });
+
+                bingoGrid.appendChild(square);
+            }
+            
+            fitTitleText();
+            scheduleHeightCheck();
+        }
+
+        // ===== TEXT FITTING FUNCTIONS =====
+        function fitTextInSquare(contentElement) {
+            if (contentElement.querySelector('img')) {
+                contentElement.style.overflow = '';
+                contentElement.style.textOverflow = '';
+                contentElement.style.fontSize = '';
+                return;
+            }
+
+            const tempSpan = document.createElement('span');
+            tempSpan.style.visibility = 'hidden';
+            tempSpan.style.position = 'absolute';
+            tempSpan.style.left = '-9999px';
+            tempSpan.style.top = '-9999px';
+            tempSpan.style.whiteSpace = 'normal';
+            tempSpan.style.wordBreak = 'break-word';
+            tempSpan.style.wordWrap = 'break-word';
+            tempSpan.style.display = 'block';
+
+            const singleLineTestSpan = document.createElement('span');
+            singleLineTestSpan.style.visibility = 'hidden';
+            singleLineTestSpan.style.position = 'absolute';
+            singleLineTestSpan.style.whiteSpace = 'nowrap';
+            
+            document.body.appendChild(tempSpan);
+            document.body.appendChild(singleLineTestSpan);
+
+            const computedStyle = getComputedStyle(contentElement);
+            tempSpan.style.fontFamily = computedStyle.fontFamily;
+            tempSpan.style.fontWeight = computedStyle.fontWeight;
+            tempSpan.style.lineHeight = computedStyle.lineHeight;
+            tempSpan.style.padding = computedStyle.padding;
+            tempSpan.style.border = computedStyle.border;
+            tempSpan.style.boxSizing = computedStyle.boxSizing;
+            
+            singleLineTestSpan.style.fontFamily = computedStyle.fontFamily;
+            singleLineTestSpan.style.fontWeight = computedStyle.fontWeight;
+
+            const maxGlobalFontSize = 30;
+            const minFontSize = 8;
+            const targetLinesBeforeShrink = 3;
+
+            const preferredDefaultFontSize = parseFloat(getComputedStyle(contentElement).getPropertyValue('font-size'));
+            let currentFontSize = preferredDefaultFontSize;
+
+            const parentSquare = contentElement.closest('.bingo-square');
+            const parentComputedStyle = getComputedStyle(parentSquare);
+            const squareContentWidth = parentSquare.clientWidth - parseFloat(parentComputedStyle.paddingLeft) - parseFloat(parentComputedStyle.paddingRight) - (parseFloat(parentComputedStyle.borderLeftWidth) || 0) - (parseFloat(parentComputedStyle.borderRightWidth) || 0);
+            const squareContentHeight = parentSquare.clientHeight - parseFloat(parentComputedStyle.paddingTop) - parseFloat(parentComputedStyle.paddingBottom) - (parseFloat(parentComputedStyle.borderTopWidth) || 0) - (parseFloat(parentComputedStyle.borderBottomWidth) || 0);
+
+            tempSpan.textContent = contentElement.textContent;
+            tempSpan.style.width = `${squareContentWidth}px`;
+
+            let finalFontSize = currentFontSize;
+
+            while (finalFontSize >= minFontSize) {
+                tempSpan.style.fontSize = `${finalFontSize}px`;
+                singleLineTestSpan.style.fontSize = `${finalFontSize}px`;
+                singleLineTestSpan.textContent = 'M';
+                const singleLineHeight = singleLineTestSpan.offsetHeight;
+                const maxAllowedHeightForLines = targetLinesBeforeShrink * singleLineHeight;
+
+                const doesTextFitHorizontally = tempSpan.scrollWidth <= squareContentWidth;
+                const doesTextFitVertically = tempSpan.scrollHeight <= squareContentHeight;
+                const doesTextFitWithinLinesThreshold = tempSpan.scrollHeight <= maxAllowedHeightForLines;
+
+                if (doesTextFitHorizontally && doesTextFitVertically && doesTextFitWithinLinesThreshold) {
+                    let growAttemptFontSize = finalFontSize;
+                    while (growAttemptFontSize < maxGlobalFontSize) {
+                        const nextSize = growAttemptFontSize + 0.5;
+                        if (nextSize > preferredDefaultFontSize && nextSize > maxGlobalFontSize) {
+                            break;
+                        }
+
+                        tempSpan.style.fontSize = `${nextSize}px`;
+                        singleLineTestSpan.style.fontSize = `${nextSize}px`;
+                        singleLineTestSpan.textContent = 'M';
+                        const nextSingleLineHeight = singleLineTestSpan.offsetHeight;
+                        const nextMaxAllowedHeightForLines = targetLinesBeforeShrink * nextSingleLineHeight;
+
+                        const nextDoesTextFitHorizontally = tempSpan.scrollWidth <= squareContentWidth;
+                        const nextDoesTextFitVertically = tempSpan.scrollHeight <= squareContentHeight;
+                        const nextDoesTextFitWithinLinesThreshold = tempSpan.scrollHeight <= nextMaxAllowedHeightForLines;
+
+                        if (nextDoesTextFitHorizontally && nextDoesTextFitVertically && nextDoesTextFitWithinLinesThreshold) {
+                            growAttemptFontSize = nextSize;
+                        } else {
+                            break;
+                        }
+                    }
+                    finalFontSize = growAttemptFontSize;
+                    break;
+                } else {
+                    finalFontSize -= 0.5;
+                }
+            }
+
+            finalFontSize = Math.max(finalFontSize, minFontSize);
+            contentElement.style.fontSize = `${finalFontSize}px`;
+
+            document.body.removeChild(tempSpan);
+            document.body.removeChild(singleLineTestSpan);
+
+            if (contentElement.scrollHeight > contentElement.clientHeight || contentElement.scrollWidth > contentElement.clientWidth) {
+                contentElement.style.overflow = 'hidden';
+                contentElement.style.textOverflow = 'ellipsis';
+            } else {
+                contentElement.style.overflow = '';
+                contentElement.style.textOverflow = '';
+            }
+        }
+
+        function fitTitleText() {
+            const titleElement = bingoTitleDisplay;
+            const containerWidth = bingoCardContainer.clientWidth;
+            const maxFontSize = 48;
+            const minFontSize = 20;
+            const padding = 40;
+
+            titleElement.style.whiteSpace = 'nowrap';
+            titleElement.style.overflow = 'hidden';
+            titleElement.style.textOverflow = 'ellipsis';
+            titleElement.style.fontSize = `${maxFontSize}px`;
+
+            let currentFontSize = maxFontSize;
+
+            while (titleElement.scrollWidth > (containerWidth - padding) && currentFontSize > minFontSize) {
+                currentFontSize -= 1;
+                titleElement.style.fontSize = `${currentFontSize}px`;
+            }
+
+            if (titleElement.scrollWidth > (containerWidth - padding) && currentFontSize === minFontSize) {
+                titleElement.style.whiteSpace = 'normal';
+                titleElement.style.overflow = '';
+                titleElement.style.textOverflow = '';
+            } else {
+                titleElement.style.whiteSpace = 'nowrap';
+                titleElement.style.overflow = 'hidden';
+                titleElement.style.textOverflow = 'ellipsis';
+            }
+        }
+
+        // ===== PNG SAVE FUNCTION =====
+        savePngBtn.addEventListener('click', () => {
+            const originalControlsStyle = document.querySelector('.controls').style.cssText;
+            const originalTitleStyle = bingoTitleDisplay.style.cssText;
+            const originalSquareContentStyles = [];
+
+            document.querySelector('.controls').style.display = 'none';
+            
+            bingoTitleDisplay.style.whiteSpace = 'normal';
+            bingoTitleDisplay.style.overflow = 'visible';
+            bingoTitleDisplay.style.textOverflow = 'clip';
+
+            document.querySelectorAll('.bingo-square-content').forEach(contentDiv => {
+                originalSquareContentStyles.push(contentDiv.style.cssText);
+                contentDiv.style.overflow = 'visible';
+                contentDiv.style.textOverflow = 'clip';
+            });
+
+            html2canvas(bingoCardContainer, {
+                scale: 2,
+                logging: false,
+                useCORS: true,
+                backgroundColor: isDarkMode ? '#2A2A2A' : '#FFFFFF'
+            }).then(canvas => {
+                document.querySelector('.controls').style.cssText = originalControlsStyle;
+                bingoTitleDisplay.style.cssText = originalTitleStyle;
+                document.querySelectorAll('.bingo-square-content').forEach((contentDiv, index) => {
+                    contentDiv.style.cssText = originalSquareContentStyles[index];
+                });
+
+                const link = document.createElement('a');
+                const title = bingoTitleInput.value || 'bingo_card';
+                link.download = `${title.replace(/\s+/g, '_').toLowerCase()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }).catch(error => {
+                console.error("Error saving PNG:", error);
+                alert("Failed to save Bingo Card. Please try again.");
+                document.querySelector('.controls').style.cssText = originalControlsStyle;
+                bingoTitleDisplay.style.cssText = originalTitleStyle;
+                document.querySelectorAll('.bingo-square-content').forEach((contentDiv, index) => {
+                    contentDiv.style.cssText = originalSquareContentStyles[index];
+                });
+            });
+        });
+
+        // ===== EVENT LISTENERS =====
+        generateGridBtn.addEventListener('click', generateGrid);
+        
+        window.addEventListener('resize', () => {
+            fitTitleText();
+            document.querySelectorAll('.bingo-square-content').forEach(fitTextInSquare);
+        });
+
+        // ===== INITIAL SETUP =====
+        bingoTitleInput.value = 'Bingo Card';
+        bingoTitleDisplay.textContent = bingoTitleInput.value;
+        generateGrid();
+        fitTitleText();
+
+        // ===== FOURTHWALL SCROLLBAR FIX =====
+        let lastHeight = 0;
+        let resizeTimer;
+
+        function sendHeight() {
+            const height = document.body.scrollHeight;
+            
+            if (height !== lastHeight) {
+                lastHeight = height;
+                window.parent.postMessage({ frameHeight: height }, '*');
+            }
+        }
+
+        function scheduleHeightCheck() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(sendHeight, 150);
+        }
+
+        window.addEventListener('load', () => {
+            setTimeout(sendHeight, 100);
+        });
+
+        window.addEventListener('resize', () => {
+            scheduleHeightCheck();
+        });
+        
+        // ===== END OF SCROLLBAR FIX =====
+    </script>
+</body>
+</html>
