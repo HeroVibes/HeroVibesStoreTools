@@ -6,7 +6,7 @@
     <title>Bingo Card Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* ===== ROOT VARIABLES (DESIGN GUIDE) ===== */
+        /* ===== ROOT VARIABLES ===== */
         :root {
             --bg: #191919;
             --card-bg: #1F1F1F;
@@ -16,6 +16,8 @@
             --text-primary: #D4D4D4;
             --text-secondary: #8C8C8C;
             --radius: 8px;
+            
+            /* Bingo card theme colors (light mode default) */
             --bingo-bg: #FFFFFF;
             --bingo-border: #CCCCCC;
             --bingo-square-even: #F8F8F8;
@@ -44,7 +46,7 @@
         }
 
         body {
-            font-family: sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--bg);
             color: var(--text-primary);
             padding: 24px 16px;
@@ -57,7 +59,6 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            position: relative;
         }
 
         /* ===== CONTROLS SECTION ===== */
@@ -69,36 +70,137 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-            position: relative;
         }
 
-        /* ===== HELP BUTTON (REQ 2 FIX) ===== */
-        #helpBtn {
-            position: absolute;
-            top: 16px;
-            right: 16px;
+        /* ===== HEADER WITH HELP BUTTON ===== */
+        .controls-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: -8px;
+        }
+
+        .help-btn {
             width: 32px;
             height: 32px;
-            background: var(--outline);
+            border-radius: 50%;
+            background: var(--bg);
             border: 1px solid var(--outline);
             color: var(--text-secondary);
-            border-radius: var(--radius) !important; /* Force override */
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
             transition: all 0.2s ease;
         }
 
-        #helpBtn:hover {
+        .help-btn:hover {
+            background: var(--hover);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* ===== MODAL/DIALOG STYLES ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--outline);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 1px solid var(--outline);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            line-height: 1;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
             background: var(--hover);
             color: var(--text-primary);
         }
 
-        #helpBtn svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
+        .modal-body {
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .modal-section p {
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .modal-section ul {
+            margin-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        .modal-section li {
+            margin-bottom: 6px;
         }
 
         /* ===== INPUT STYLES ===== */
@@ -134,6 +236,51 @@
             border-color: var(--accent);
         }
 
+        /* ===== CUSTOM NUMBER INPUT ===== */
+        .number-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 4px;
+        }
+
+        .number-input-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .number-input-btn:hover {
+            background: var(--hover);
+            color: var(--accent);
+        }
+
+        .number-input-btn:active {
+            transform: scale(0.95);
+        }
+
+        .number-input-display {
+            flex: 1;
+            text-align: center;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            user-select: none;
+        }
+
         /* ===== GRID SIZE CONTROLS ===== */
         .grid-size-controls {
             display: flex;
@@ -145,76 +292,13 @@
             flex: 1;
         }
 
-        /* ===== CUSTOM NUMBER INPUT ===== */
-        .custom-number-input {
-            display: flex;
-            align-items: center;
-        }
-
-        .num-btn {
-            width: 40px;
-            height: 40px;
-            background: var(--outline);
-            border: 1px solid var(--outline);
-            color: var(--text-primary);
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            padding: 0;
-            line-height: 1;
-        }
-
-        .num-btn:hover {
-            background: var(--hover);
-        }
-
-        .num-btn-minus {
-            border-radius: var(--radius) 0 0 var(--radius);
-        }
-
-        .num-btn-plus {
-            border-radius: 0 var(--radius) var(--radius) 0;
-        }
-
-        .custom-number-input input[type="number"] {
-            width: 100%;
-            height: 40px;
-            padding: 10px 0;
-            background: var(--bg);
-            border: 1px solid var(--outline);
-            border-left: none;
-            border-right: none;
-            border-radius: 0;
-            color: var(--text-primary);
-            font-size: 14px;
-            text-align: center;
-            transition: border-color 0.2s ease;
-            -moz-appearance: textfield; /* Firefox */
-        }
-
-        /* Hide default arrows */
-        .custom-number-input input[type=number]::-webkit-inner-spin-button,
-        .custom-number-input input[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        .custom-number-input input[type="number"]:focus {
-            outline: none;
-            border-color: var(--accent);
-            border-left-color: var(--outline);
-            border-right-color: var(--outline);
-        }
-
-
         /* ===== BUTTON STYLES ===== */
         .btn {
             position: relative;
-            padding: 10px 16px;
+            padding: 12px 16px;
             border-radius: var(--radius);
-            background: var(--btn-bg, #1F1F1F);
-            color: var(--text, #D4D4D4);
+            background: var(--card-bg);
+            color: var(--text-primary);
             border: 1px solid rgba(255,255,255,0.06);
             cursor: pointer;
             overflow: hidden;
@@ -234,7 +318,7 @@
             transform: skewX(-25deg);
             transition: left 0.7s ease-in-out;
         }
-        
+
         .btn:hover {
             background: var(--hover);
         }
@@ -242,7 +326,7 @@
         .btn:hover::before {
             left: 125%;
         }
-        
+
         .btn:active {
             transform: scale(0.98);
         }
@@ -260,10 +344,6 @@
 
         .btn-primary:hover {
             background: #6B8FE5;
-        }
-
-        #generateGridBtn {
-            height: 40px; /* Match custom number input height */
         }
 
         /* ===== THEME TOGGLE ===== */
@@ -391,7 +471,7 @@
             box-shadow: 0 0 8px rgba(135, 169, 255, 0.5);
         }
 
-        /* ===== SQUARE CONTENT (REQ 1 FIX) ===== */
+        /* ===== SQUARE CONTENT ===== */
         .bingo-square-content {
             width: 100%;
             height: 100%;
@@ -399,14 +479,16 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            word-break: keep-all;
+            word-wrap: normal;
+            white-space: pre-wrap;
             padding: 8px;
-            font-size: 24px; /* Start larger */
+            font-size: 16px;
             color: var(--bingo-text);
             line-height: 1.2;
             outline: none;
             user-select: text;
             overflow: hidden;
-            text-overflow: ellipsis;
             transition: color 0.3s ease;
         }
 
@@ -420,113 +502,6 @@
             object-fit: contain;
             display: block;
             margin: auto;
-        }
-
-        /* ===== VERSION NUMBER ===== */
-        #versionNumber {
-            font-size: 10px;
-            color: var(--text-secondary);
-            text-align: right;
-            padding-top: 8px;
-            border-top: 1px solid var(--outline);
-            margin-top: 8px;
-        }
-
-        /* ===== HELP MODAL ===== */
-        #modalBackdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 998;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        #modalBackdrop.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        #helpModal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.95);
-            width: 90%;
-            max-width: 600px;
-            background: var(--card-bg);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            z-index: 999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        #helpModal.visible {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            border-bottom: 1px solid var(--outline);
-        }
-
-        .modal-header h2 {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--text-primary);
-        }
-
-        .modal-close-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-
-        .modal-close-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .modal-body {
-            padding: 16px;
-            color: var(--text-primary);
-            font-size: 14px;
-            line-height: 1.5;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .modal-body p {
-            margin-bottom: 12px;
-        }
-
-        .modal-body strong {
-            color: var(--accent);
-            font-weight: 500;
-        }
-        
-        .modal-body ul {
-            list-style-position: inside;
-            padding-left: 8px;
-            margin-bottom: 12px;
-        }
-
-        .modal-body li {
-            margin-bottom: 8px;
         }
 
         /* ===== RESPONSIVE DESIGN ===== */
@@ -544,29 +519,24 @@
             }
 
             .bingo-square-content {
-                font-size: 20px; /* Start larger on mobile too */
+                font-size: 14px;
                 padding: 6px;
             }
 
             .controls {
                 padding: 20px 12px;
             }
-            
-            #helpBtn {
-                top: 12px;
-                right: 12px;
-            }
 
             .grid-size-controls {
                 flex-wrap: wrap;
             }
 
-            .grid-size-controls .input-group {
-                min-width: 120px;
-            }
-
             .button-row {
                 flex-direction: column;
+            }
+
+            .modal-content {
+                padding: 20px;
             }
         }
 
@@ -576,7 +546,7 @@
             }
 
             .bingo-square-content {
-                font-size: 16px; /* Start larger on small mobile */
+                font-size: 12px;
                 padding: 4px;
             }
 
@@ -591,81 +561,109 @@
             display: none !important;
         }
     </style>
-</head><body>
-    <div id="bingoApp">
-        <div class="controls">
-            <button id="helpBtn" type="button" aria-label="Show help">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M9.09 9.00002C9.3251 8.33168 9.78915 7.76811 10.4 7.41692C11.0108 7.06573 11.7289 6.95008 12.4272 7.08652C13.1255 7.22295 13.7588 7.60499 14.2151 8.16912C14.6714 8.73325 14.9211 9.44826 14.92 10.18C14.92 11.2 14.11 11.89 13.42 12.43C12.9103 12.8123 12.4542 13.251 12.07 13.73C11.9793 13.864 11.91 14.015 11.86 14.17C11.81 14.33 11.79 14.5 11.79 14.67V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M12 19.01L12.01 18.999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </button>
+</head>
+<body>
+    <!-- ===== HELP MODAL ===== -->
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">How to Use the Bingo Card Generator</div>
+                <button class="modal-close" id="closeModalBtn">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <div class="modal-section-title">📝 Adding Content</div>
+                    <ul>
+                        <li>Click any square to type text directly</li>
+                        <li>Drag and drop images onto squares</li>
+                        <li>Paste images or text using Ctrl+V (Cmd+V on Mac)</li>
+                        <li>Text automatically resizes to fit the square</li>
+                    </ul>
+                </div>
 
-            <div class="input-group">
-                <label class="input-label" for="bingoTitleInput">Bingo Card Title</label>
-                <input type="text" id="bingoTitleInput" placeholder="Enter your bingo card title" value="Bingo Card">
+                <div class="modal-section">
+                    <div class="modal-section-title">🎨 Customizing Your Card</div>
+                    <ul>
+                        <li>Edit the title at the top of the controls</li>
+                        <li>Use +/- buttons to adjust rows and columns (1-10)</li>
+                        <li>Click "Generate" to create a new grid</li>
+                        <li>Toggle between light and dark card themes</li>
+                    </ul>
+                </div>
+
+                <div class="modal-section">
+                    <div class="modal-section-title">💾 Saving Your Work</div>
+                    <ul>
+                        <li>Click "Save as PNG" to download your card as an image</li>
+                        <li>The file will be named based on your card title</li>
+                        <li>Use "Clear All" to remove all content from squares</li>
+                    </ul>
+                </div>
+
+                <div class="modal-section">
+                    <div class="modal-section-title">💡 Tips</div>
+                    <p>Text automatically shrinks when it reaches the sides of a square, ensuring words stay on one line. If you add a space that would exceed the line width, the next word moves to a new line at the current font size.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MAIN APP CONTAINER ===== -->
+    <div id="bingoApp">
+        <!-- ===== CONTROLS SECTION ===== -->
+        <div class="controls">
+            <!-- Help Button -->
+            <div class="controls-header">
+                <button class="help-btn" id="helpBtn">?</button>
             </div>
 
+            <!-- Title Input -->
+            <div class="input-group">
+                <label class="input-label">Bingo Card Title</label>
+                <input type="text" id="bingoTitleInput" placeholder="Enter your bingo card title">
+            </div>
+
+            <!-- Grid Size Controls -->
             <div class="grid-size-controls">
                 <div class="input-group">
-                    <label class="input-label" for="rowsInput">Rows</label>
-                    <div class="custom-number-input">
-                        <button type="button" class="num-btn num-btn-minus" aria-label="Decrease rows" data-input-id="rowsInput">-</button>
-                        <input type="number" id="rowsInput" value="5" min="1" max="10">
-                        <button type="button" class="num-btn num-btn-plus" aria-label="Increase rows" data-input-id="rowsInput">+</button>
+                    <label class="input-label">Rows</label>
+                    <div class="number-input-wrapper">
+                        <button class="number-input-btn" id="rowsDecBtn">−</button>
+                        <div class="number-input-display" id="rowsDisplay">5</div>
+                        <button class="number-input-btn" id="rowsIncBtn">+</button>
                     </div>
                 </div>
                 <div class="input-group">
-                    <label class="input-label" for="colsInput">Columns</label>
-                    <div class="custom-number-input">
-                        <button type="button" class="num-btn num-btn-minus" aria-label="Decrease columns" data-input-id="colsInput">-</button>
-                        <input type="number" id="colsInput" value="5" min="1" max="10">
-                        <button type="button" class="num-btn num-btn-plus" aria-label="Increase columns" data-input-id="colsInput">+</button>
+                    <label class="input-label">Columns</label>
+                    <div class="number-input-wrapper">
+                        <button class="number-input-btn" id="colsDecBtn">−</button>
+                        <div class="number-input-display" id="colsDisplay">5</div>
+                        <button class="number-input-btn" id="colsIncBtn">+</button>
                     </div>
                 </div>
                 <button class="btn btn-primary" id="generateGridBtn">Generate</button>
             </div>
 
+            <!-- Theme Toggle -->
             <div class="theme-toggle-wrapper">
                 <span class="theme-toggle-label">Card Theme</span>
-                <div class="theme-toggle" id="themeToggle" role="switch" aria-checked="false" tabindex="0">
+                <div class="theme-toggle" id="themeToggle">
                     <div class="theme-toggle-slider"></div>
                 </div>
                 <span class="input-label" id="themeLabel">Light</span>
             </div>
 
+            <!-- Action Buttons -->
             <div class="button-row">
                 <button class="btn" id="clearAllBtn">Clear All</button>
                 <button class="btn btn-primary" id="savePngBtn">Save as PNG</button>
             </div>
-
-            <div id="versionNumber">V1.0.3</div>
         </div>
 
+        <!-- ===== BINGO CARD DISPLAY ===== -->
         <div id="bingoCardContainer">
             <h1 id="bingoTitleDisplay">Bingo Card</h1>
             <div id="bingoGrid"></div>
-        </div>
-    </div>
-
-    <div id="modalBackdrop"></div>
-    <div id="helpModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <div class="modal-header">
-            <h2 id="modalTitle" class="modal-title">Bingo Card Generator Help</h2>
-            <button class="modal-close-btn" id="closeModalBtn" aria-label="Close modal">&times;</button>
-        </div>
-        <div class="modal-body">
-            <p>Welcome! Here's how to use the Bingo Card Generator:</p>
-            <ul>
-                <li><strong>Card Title:</strong> Type your title in the "Bingo Card Title" box. It will update on the card live.</li>
-                <li><strong>Grid Size:</strong> Use the <strong>+</strong> and <strong>-</strong> buttons to set the number of rows and columns (from 1 to 10). Click <strong>Generate</strong> to create your new grid.</li>
-                <li><strong>Adding Content:</strong> Click on any square to start typing. The text will automatically shrink to fit any long words and new lines.</li>
-                <li><strong>Adding Images:</strong> You can drag-and-drop an image file from your computer directly onto a square. You can also paste an image from your clipboard.</li>
-                <li><strong>Card Theme:</strong> Use the "Card Theme" toggle to switch the bingo card between a light and dark design.</li>
-                <li><strong>Clear All:</strong> This button will clear all text and images from every square on the current grid.</li>
-                <li><strong>Save as PNG:</strong> This will capture your bingo card (including the title and all content) and save it as a high-quality PNG file to your computer.</li>
-            </ul>
         </div>
     </div>
 
@@ -673,8 +671,12 @@
         // ===== DOM ELEMENT REFERENCES =====
         const bingoTitleInput = document.getElementById('bingoTitleInput');
         const bingoTitleDisplay = document.getElementById('bingoTitleDisplay');
-        const rowsInput = document.getElementById('rowsInput');
-        const colsInput = document.getElementById('colsInput');
+        const rowsDisplay = document.getElementById('rowsDisplay');
+        const colsDisplay = document.getElementById('colsDisplay');
+        const rowsDecBtn = document.getElementById('rowsDecBtn');
+        const rowsIncBtn = document.getElementById('rowsIncBtn');
+        const colsDecBtn = document.getElementById('colsDecBtn');
+        const colsIncBtn = document.getElementById('colsIncBtn');
         const generateGridBtn = document.getElementById('generateGridBtn');
         const savePngBtn = document.getElementById('savePngBtn');
         const clearAllBtn = document.getElementById('clearAllBtn');
@@ -684,19 +686,59 @@
         const themeLabel = document.getElementById('themeLabel');
         const helpBtn = document.getElementById('helpBtn');
         const helpModal = document.getElementById('helpModal');
-        const modalBackdrop = document.getElementById('modalBackdrop');
         const closeModalBtn = document.getElementById('closeModalBtn');
 
         // ===== STATE MANAGEMENT =====
         let isDarkMode = false;
-        
-        // Create measuring spans for text-fitting
-        const singleLineTestSpan = document.createElement('span');
-        singleLineTestSpan.style.visibility = 'hidden';
-        singleLineTestSpan.style.position = 'absolute';
-        singleLineTestSpan.style.whiteSpace = 'nowrap';
-        document.body.appendChild(singleLineTestSpan);
+        let rowsValue = 5;
+        let colsValue = 5;
 
+        // ===== HELP MODAL HANDLERS =====
+        helpBtn.addEventListener('click', () => {
+            helpModal.classList.add('active');
+            scheduleHeightCheck();
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            helpModal.classList.remove('active');
+            scheduleHeightCheck();
+        });
+
+        helpModal.addEventListener('click', (e) => {
+            if (e.target === helpModal) {
+                helpModal.classList.remove('active');
+                scheduleHeightCheck();
+            }
+        });
+
+        // ===== NUMBER INPUT HANDLERS =====
+        rowsDecBtn.addEventListener('click', () => {
+            if (rowsValue > 1) {
+                rowsValue--;
+                rowsDisplay.textContent = rowsValue;
+            }
+        });
+
+        rowsIncBtn.addEventListener('click', () => {
+            if (rowsValue < 10) {
+                rowsValue++;
+                rowsDisplay.textContent = rowsValue;
+            }
+        });
+
+        colsDecBtn.addEventListener('click', () => {
+            if (colsValue > 1) {
+                colsValue--;
+                colsDisplay.textContent = colsValue;
+            }
+        });
+
+        colsIncBtn.addEventListener('click', () => {
+            if (colsValue < 10) {
+                colsValue++;
+                colsDisplay.textContent = colsValue;
+            }
+        });
 
         // ===== TITLE UPDATE HANDLER =====
         bingoTitleInput.addEventListener('input', () => {
@@ -705,19 +747,11 @@
         });
 
         // ===== THEME TOGGLE HANDLER =====
-        function toggleTheme() {
+        themeToggle.addEventListener('click', () => {
             isDarkMode = !isDarkMode;
             themeToggle.classList.toggle('active', isDarkMode);
-            themeToggle.setAttribute('aria-checked', isDarkMode);
             bingoCardContainer.classList.toggle('dark-card', isDarkMode);
             themeLabel.textContent = isDarkMode ? 'Dark' : 'Light';
-        }
-        themeToggle.addEventListener('click', toggleTheme);
-        themeToggle.addEventListener('keydown', (e) => {
-             if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                toggleTheme();
-            }
         });
 
         // ===== CLEAR ALL HANDLER =====
@@ -729,59 +763,11 @@
             });
             scheduleHeightCheck();
         });
-        
-        // ===== CUSTOM NUMBER INPUT HANDLERS =====
-        document.querySelectorAll('.num-btn-minus').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const inputId = btn.dataset.inputId;
-                const input = document.getElementById(inputId);
-                if (input) {
-                    input.stepDown();
-                }
-            });
-        });
-
-        document.querySelectorAll('.num-btn-plus').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const inputId = btn.dataset.inputId;
-                const input = document.getElementById(inputId);
-                if (input) {
-                    input.stepUp();
-                }
-            });
-        });
-
-push
-
-        // ===== HELP MODAL HANDLERS =====
-        function openModal() {
-            helpModal.classList.add('visible');
-            modalBackdrop.classList.add('visible');
-        }
-
-        function closeModal() {
-            helpModal.classList.remove('visible');
-            modalBackdrop.classList.remove('visible');
-        }
-        
-        helpBtn.addEventListener('click', openModal);
-        closeModalBtn.addEventListener('click', closeModal);
-        modalBackdrop.addEventListener('click', closeModal);
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && helpModal.classList.contains('visible')) {
-                closeModal();
-            }
-        });
 
         // ===== GRID GENERATION FUNCTION =====
         function generateGrid() {
-            const rows = parseInt(rowsInput.value);
-            const cols = parseInt(colsInput.value);
-
-            if (isNaN(rows) || isNaN(cols) || rows < 1 || cols < 1 || rows > 10 || cols > 10) {
-                alert('Please enter valid numbers between 1 and 10 for rows and columns.');
-                return;
-            }
+            const rows = rowsValue;
+            const cols = colsValue;
 
             bingoGrid.innerHTML = '';
             bingoGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
@@ -795,23 +781,25 @@ push
                 const squareContent = document.createElement('div');
                 squareContent.classList.add('bingo-square-content');
                 squareContent.setAttribute('contenteditable', 'true');
-                squareContent.setAttribute('role', 'textbox');
-                squareContent.setAttribute('aria-label', `Bingo square ${i + 1}`);
 
                 square.appendChild(squareContent);
 
+                // Drag over handler
                 square.addEventListener('dragover', (e) => {
                     e.preventDefault();
                     square.classList.add('drag-over');
                 });
+
+                // Drag leave handler
                 square.addEventListener('dragleave', () => {
                     square.classList.remove('drag-over');
                 });
+
+                // Drop handler
                 square.addEventListener('drop', (e) => {
                     e.preventDefault();
                     square.classList.remove('drag-over');
                     const files = e.dataTransfer.files;
-                
                     if (files.length > 0 && files[0].type.startsWith('image/')) {
                         const reader = new FileReader();
                         reader.onload = (event) => {
@@ -826,6 +814,7 @@ push
                     scheduleHeightCheck();
                 });
 
+                // Paste handler
                 squareContent.addEventListener('paste', (e) => {
                     e.preventDefault();
                     const items = (e.clipboardData || e.originalEvent.clipboardData).items;
@@ -851,38 +840,29 @@ push
                             squareContent.innerHTML = `<img src="${text}" alt="Bingo image">`;
                             squareContent.style.fontSize = '';
                         } else {
-                            const sanitizedText = text.replace(/\n/g, '<br>');
-                            document.execCommand('insertHTML', false, sanitizedText);
+                            document.execCommand('insertText', false, text);
                             fitTextInSquare(squareContent);
                         }
                     }
                     scheduleHeightCheck();
                 });
 
+                // Input handler
                 squareContent.addEventListener('input', () => {
-                    squareContent.style.fontSize = '';
                     fitTextInSquare(squareContent);
                     scheduleHeightCheck();
                 });
 
-                // REQ 3 FIX: Handle 'Enter' key press
-                squareContent.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault(); // Stop default (e.g., new paragraph)
-                        document.execCommand('insertHTML', false, '<br>'); // Insert line break
-                        
-                        // Manually trigger updates
-                        fitTextInSquare(squareContent);
-                        scheduleHeightCheck();
-                    }
-                });
-
+                // Focus handler
                 squareContent.addEventListener('focus', () => {
-                    if (squareContent.textContent.trim() === '') {
-                        squareContent.offsetHeight;
-                    }
                     fitTextInSquare(squareContent);
                 });
+
+                // Blur handler
+                squareContent.addEventListener('blur', () => {
+                    fitTextInSquare(squareContent);
+                });
+
                 bingoGrid.appendChild(square);
             }
             
@@ -890,76 +870,86 @@ push
             scheduleHeightCheck();
         }
 
-        // ===== TEXT FITTING FUNCTIONS (REQ 1 FIX) =====
+        // ===== IMPROVED TEXT FITTING FUNCTION =====
         function fitTextInSquare(contentElement) {
+            // Skip if contains an image
             if (contentElement.querySelector('img')) {
-                contentElement.style.overflow = '';
-                contentElement.style.textOverflow = '';
                 contentElement.style.fontSize = '';
                 return;
             }
 
-            const computedStyle = getComputedStyle(contentElement);
-            singleLineTestSpan.style.fontFamily = computedStyle.fontFamily;
-            singleLineTestSpan.style.fontWeight = computedStyle.fontWeight;
-            singleLineTestSpan.style.lineHeight = computedStyle.lineHeight;
+            const text = contentElement.textContent.trim();
+            if (!text) {
+                contentElement.style.fontSize = '';
+                return;
+            }
 
-            const preferredDefaultFontSize = 24; // Start larger
-            const minFontSize = 8;
-            
+            // Get parent square dimensions
             const parentSquare = contentElement.closest('.bingo-square');
-            const parentComputedStyle = getComputedStyle(parentSquare);
-            const squareContentWidth = parentSquare.clientWidth - (parseFloat(parentComputedStyle.paddingLeft) + parseFloat(parentComputedStyle.paddingRight));
-            const squareContentHeight = parentSquare.clientHeight - (parseFloat(parentComputedStyle.paddingTop) + parseFloat(parentComputedStyle.paddingBottom));
+            if (!parentSquare) return;
 
-            const lines = contentElement.innerText.split('\n');
-            const numLines = lines.length;
-            let finalFontSize = preferredDefaultFontSize;
-
-            while (finalFontSize >= minFontSize) {
-                singleLineTestSpan.style.fontSize = `${finalFontSize}px`;
-
-                // 1. Horizontal Check: Find the longest line
-                let maxLineWidth = 0;
-                lines.forEach(line => {
-                    singleLineTestSpan.textContent = line || 'M'; // Use 'M' for empty lines
-                    maxLineWidth = Math.max(maxLineWidth, singleLineTestSpan.scrollWidth);
-                });
-                const fitsHorizontally = maxLineWidth <= squareContentWidth;
-
-                // 2. Vertical Check: Check total block height
-                singleLineTestSpan.textContent = 'M'; // Get height of one line
-                const singleLineHeight = singleLineTestSpan.offsetHeight;
-                const totalBlockHeight = singleLineHeight * numLines;
-                const fitsVertically = totalBlockHeight <= squareContentHeight;
-
-                // 3. Check logic
-                if (fitsHorizontally && fitsVertically) {
-                    break; // This font size fits
-                } else {
-                    finalFontSize -= 0.5; // Doesn't fit, shrink
-                }
-            }
+            const parentStyle = getComputedStyle(parentSquare);
+            const contentStyle = getComputedStyle(contentElement);
             
-            finalFontSize = Math.max(finalFontSize, minFontSize);
-            contentElement.style.fontSize = `${finalFontSize}px`;
+            const availableWidth = parentSquare.clientWidth - 
+                parseFloat(contentStyle.paddingLeft) - 
+                parseFloat(contentStyle.paddingRight);
+            
+            const availableHeight = parentSquare.clientHeight - 
+                parseFloat(contentStyle.paddingTop) - 
+                parseFloat(contentStyle.paddingBottom);
 
-            // Final overflow check
-            if (contentElement.scrollHeight > contentElement.clientHeight || contentElement.scrollWidth > contentElement.clientWidth) {
-                contentElement.style.overflow = 'hidden';
-                contentElement.style.textOverflow = 'ellipsis';
-            } else {
-                contentElement.style.overflow = '';
-                contentElement.style.textOverflow = '';
+            // Font size constraints
+            const maxFontSize = 24;
+            const minFontSize = 8;
+            let currentFontSize = maxFontSize;
+
+            // Create measurement element
+            const measureDiv = document.createElement('div');
+            measureDiv.style.cssText = `
+                position: absolute;
+                visibility: hidden;
+                left: -9999px;
+                top: -9999px;
+                width: ${availableWidth}px;
+                font-family: ${contentStyle.fontFamily};
+                font-weight: ${contentStyle.fontWeight};
+                line-height: ${contentStyle.lineHeight};
+                white-space: pre-wrap;
+                word-break: keep-all;
+                overflow-wrap: break-word;
+            `;
+            document.body.appendChild(measureDiv);
+
+            // Binary search for optimal font size
+            let bestFontSize = minFontSize;
+            
+            while (currentFontSize >= minFontSize) {
+                measureDiv.style.fontSize = `${currentFontSize}px`;
+                measureDiv.textContent = text;
+
+                const fitsWidth = measureDiv.scrollWidth <= availableWidth;
+                const fitsHeight = measureDiv.scrollHeight <= availableHeight;
+
+                if (fitsWidth && fitsHeight) {
+                    bestFontSize = currentFontSize;
+                    break;
+                }
+
+                currentFontSize -= 0.5;
             }
+
+            document.body.removeChild(measureDiv);
+            contentElement.style.fontSize = `${bestFontSize}px`;
         }
 
+        // ===== TITLE TEXT FITTING =====
         function fitTitleText() {
             const titleElement = bingoTitleDisplay;
             const containerWidth = bingoCardContainer.clientWidth;
             const maxFontSize = 48;
             const minFontSize = 20;
-            const padding = 40; // 20px on each side
+            const padding = 40;
 
             titleElement.style.whiteSpace = 'nowrap';
             titleElement.style.overflow = 'hidden';
@@ -967,6 +957,7 @@ push
             titleElement.style.fontSize = `${maxFontSize}px`;
 
             let currentFontSize = maxFontSize;
+
             while (titleElement.scrollWidth > (containerWidth - padding) && currentFontSize > minFontSize) {
                 currentFontSize -= 1;
                 titleElement.style.fontSize = `${currentFontSize}px`;
@@ -983,8 +974,6 @@ push
             }
         }
 
-GWAN
-
         // ===== PNG SAVE FUNCTION =====
         savePngBtn.addEventListener('click', () => {
             const originalControlsStyle = document.querySelector('.controls').style.cssText;
@@ -1000,10 +989,7 @@ GWAN
             document.querySelectorAll('.bingo-square-content').forEach(contentDiv => {
                 originalSquareContentStyles.push(contentDiv.style.cssText);
                 contentDiv.style.overflow = 'visible';
-                contentDiv.style.textOverflow = 'clip';
             });
-
-            scheduleHeightCheck();
 
             html2canvas(bingoCardContainer, {
                 scale: 2,
@@ -1016,8 +1002,6 @@ GWAN
                 document.querySelectorAll('.bingo-square-content').forEach((contentDiv, index) => {
                     contentDiv.style.cssText = originalSquareContentStyles[index];
                 });
-                
-                scheduleHeightCheck();
 
                 const link = document.createElement('a');
                 const title = bingoTitleInput.value || 'bingo_card';
@@ -1026,23 +1010,20 @@ GWAN
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-
             }).catch(error => {
-                console.error("WEB TOOL CODER: Error saving PNG:", error);
+                console.error("Error saving PNG:", error);
                 alert("Failed to save Bingo Card. Please try again.");
-                
                 document.querySelector('.controls').style.cssText = originalControlsStyle;
                 bingoTitleDisplay.style.cssText = originalTitleStyle;
                 document.querySelectorAll('.bingo-square-content').forEach((contentDiv, index) => {
                     contentDiv.style.cssText = originalSquareContentStyles[index];
                 });
-                scheduleHeightCheck();
             });
         });
 
         // ===== EVENT LISTENERS =====
         generateGridBtn.addEventListener('click', generateGrid);
-
+        
         window.addEventListener('resize', () => {
             fitTitleText();
             document.querySelectorAll('.bingo-square-content').forEach(fitTextInSquare);
@@ -1051,13 +1032,16 @@ GWAN
         // ===== INITIAL SETUP =====
         bingoTitleInput.value = 'Bingo Card';
         bingoTitleDisplay.textContent = bingoTitleInput.value;
-        
+        generateGrid();
+        fitTitleText();
+
         // ===== FOURTHWALL SCROLLBAR FIX =====
         let lastHeight = 0;
         let resizeTimer;
 
         function sendHeight() {
             const height = document.body.scrollHeight;
+            
             if (height !== lastHeight) {
                 lastHeight = height;
                 window.parent.postMessage({ frameHeight: height }, '*');
@@ -1070,13 +1054,13 @@ GWAN
         }
 
         window.addEventListener('load', () => {
-            generateGrid();
             setTimeout(sendHeight, 100);
         });
 
         window.addEventListener('resize', () => {
             scheduleHeightCheck();
         });
+        
         // ===== END OF SCROLLBAR FIX =====
     </script>
 </body>
