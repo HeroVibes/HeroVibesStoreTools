@@ -473,25 +473,30 @@
             box-shadow: 0 0 8px rgba(135, 169, 255, 0.5);
         }
 
-        /* ===== SQUARE CONTENT ===== */
+        /* ===== SQUARE CONTENT (REVERTED TO WORKING VERSION) ===== */
         .bingo-square-content {
             width: 100%;
             height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
             text-align: center;
-            word-break: normal; /* FIX: Was keep-all */
-            overflow-wrap: break-word; /* FIX: Added for better wrapping */
+            word-break: normal;
+            overflow-wrap: break-word;
             white-space: pre-wrap;
             padding: 8px;
-            font-size: 14px; /* FIX: Was 16px */
+            font-size: 14px;
             color: var(--bingo-text);
             line-height: 1.2;
             outline: none;
             user-select: text;
-            overflow: hidden;
+            overflow: hidden; 
             transition: color 0.3s ease;
+        }
+
+        /* This rule centers the cursor vertically when the div is empty */
+        .bingo-square-content:empty::before {
+            content: "\00a0"; /* Non-breaking space */
         }
 
         .bingo-square-content:focus {
@@ -521,7 +526,7 @@
             }
 
             .bingo-square-content {
-                font-size: 12px; /* FIX: Was 14px */
+                font-size: 12px;
                 padding: 6px;
             }
 
@@ -548,7 +553,7 @@
             }
 
             .bingo-square-content {
-                font-size: 12px; /* FIX: Was 12px (unchanged, sets min) */
+                font-size: 12px;
                 padding: 4px;
             }
 
@@ -577,6 +582,7 @@
                     <div class="modal-section-title">📝 Adding Content</div>
                     <ul>
                         <li>Click any square to type text directly</li>
+                        <li>Press 'Enter' to add a line break</li>
                         <li>Drag and drop images onto squares</li>
                         <li>Paste images or text using Ctrl+V (Cmd+V on Mac)</li>
                         <li>Text automatically resizes to fit the square</li>
@@ -687,6 +693,31 @@ If you add a space that would exceed the line width, the next word moves to a ne
         let isDarkMode = false;
         let rowsValue = 5;
         let colsValue = 5;
+
+        // ===== FOURTHWALL SCROLLBAR FIX - VARIABLES & FUNCTIONS =====
+        let lastHeight = 0;
+        let resizeTimer;
+        
+        /**
+         * Sends the current scrollHeight to the parent window if it has changed.
+         * This is the *only* function that should send a postMessage.
+         */
+        function sendHeight() {
+            const height = document.body.scrollHeight;
+            if (height !== lastHeight) {
+                lastHeight = height;
+                window.parent.postMessage({ frameHeight: height }, '*');
+            }
+        }
+
+        /**
+         * A debounced version of sendHeight() to be called on content changes.
+         * This ensures we don't spam messages during rapid changes.
+         */
+        function scheduleHeightCheck() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(sendHeight, 150);
+        }
 
         // ===== HELP MODAL HANDLERS =====
         helpBtn.addEventListener('click', () => {
@@ -815,7 +846,7 @@ If you add a space that would exceed the line width, the next word moves to a ne
                                 squareContent.style.fontSize = '';
                             };
                             reader.readAsDataURL(blob);
-                            handled = true;
+                             handled = true;
                             break;
                         }
                     }
@@ -835,19 +866,98 @@ If you add a space that would exceed the line width, the next word moves to a ne
 
                 // Input handler
                 squareContent.addEventListener('input', () => {
+                    // Clean up zero-width spaces that might have been added for cursor positioning
+                    const content = squareContent.textContent;
+                    if (content && content.includes('\u200B')) {
+                        const selection = window.getSelection();
+                        const range = selection.rangeCount ? selection.getRangeAt(0) : null;
+                        let cursorOffset = range ? range.startOffset : 0;
+                        
+                        // Count zero-width spaces before cursor position
+                        const textBeforeCursor = content.substring(0, cursorOffset);
+                        const zwspBeforeCursor = (textBeforeCursor.match(/\u200B/g) || []).length;
+                        
+                        // Clean content and adjust cursor position
+                        const cleanContent = content.replace(/\u200B/g, '');
+                        const adjustedCursorOffset = Math.max(0, cursorOffset - zwspBeforeCursor);
+                        
+                        if (cleanContent !== content) {
+                            squareContent.textContent = cleanContent;
+                            
+                            // Restore cursor position, accounting for removed zero-width spaces
+                            if (squareContent.firstChild && cleanContent.length > 0) {
+                                const newRange = document.createRange();
+                                const targetOffset = Math.min(adjustedCursorOffset, cleanContent.length);
+                                newRange.setStart(squareContent.firstChild, targetOffset);
+                                newRange.collapse(true);
+                                selection.removeAllRanges();
+                                selection.addRange(newRange);
+                            }
+                        }
+                    }
+                    
                     fitTextInSquare(squareContent);
                     scheduleHeightCheck();
                 });
-                
-                // Focus handler
-                squareContent.addEventListener('focus', () => {
-                    fitTextInSquare(squareContent);
+
+                // Focus handler - move cursor to center/end of content (invisible during transition)
+                squareContent.addEventListener('focus', (e) => {
+                    // Hide cursor immediately to prevent visible jump
+                    squareContent.style.caretColor = 'transparent';
+                    
+                    // Use setTimeout to ensure this happens after the default focus behavior
+                    setTimeout(() => {
+                        const selection = window.getSelection();
+                        const range = document.createRange();
+                        
+                        if (squareContent.textContent) {
+                            // If there's existing content, move cursor to the end
+                            range.selectNodeContents(squareContent);
+                            range.collapse(false); // false = collapse to end
+                        } else {
+                            // If empty, insert a zero-width space to center the cursor
+                            const zwsp = document.createTextNode('\u200B'); // Zero-width space
+                            squareContent.appendChild(zwsp);
+                            range.setStart(zwsp, 1);
+                            range.collapse(true);
+                        }
+                        
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        
+                        // Show cursor again after positioning
+                        squareContent.style.caretColor = 'auto';
+                    }, 0);
                 });
-                
-                // Blur handler
-                squareContent.addEventListener('blur', () => {
-                    fitTextInSquare(squareContent);
+
+                // WINNING PROTOCOL: Double BR method for single Enter line breaks
+                squareContent.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const selection = window.getSelection();
+                        if (!selection.rangeCount) return;
+                        
+                        const range = selection.getRangeAt(0);
+                        range.deleteContents();
+                        
+                        // Insert two <br> elements for reliable line breaking
+                        const br1 = document.createElement('br');
+                        const br2 = document.createElement('br');
+                        
+                        range.insertNode(br1);
+                        range.setStartAfter(br1);
+                        range.insertNode(br2);
+                        range.setStartAfter(br2);
+                        range.collapse(true);
+                        
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        
+                        fitTextInSquare(squareContent);
+                        scheduleHeightCheck();
+                    }
                 });
+
                 
                 bingoGrid.appendChild(square);
             }
@@ -864,66 +974,38 @@ If you add a space that would exceed the line width, the next word moves to a ne
                 return;
             }
 
-            const text = contentElement.textContent.trim();
+            const text = contentElement.textContent;
+            // FIX: Removed trim() check. Now a newline '\n' is valid content.
             if (!text) {
                 contentElement.style.fontSize = '';
                 return;
             }
 
-            // Get parent square dimensions
-            const parentSquare = contentElement.closest('.bingo-square');
-            if (!parentSquare) return;
-
-            const parentStyle = getComputedStyle(parentSquare);
-            const contentStyle = getComputedStyle(contentElement);
-            const availableWidth = parentSquare.clientWidth - 
-                parseFloat(contentStyle.paddingLeft) - 
-                parseFloat(contentStyle.paddingRight);
-            const availableHeight = parentSquare.clientHeight - 
-                parseFloat(contentStyle.paddingTop) - 
-                parseFloat(contentStyle.paddingBottom);
-            
             // Font size constraints
-            const maxFontSize = 24;
+            const maxFontSize = 24; 
             const minFontSize = 8;
             let currentFontSize = maxFontSize;
 
-            // Create measurement element
-            const measureDiv = document.createElement('div');
-            measureDiv.style.cssText = `
-                position: absolute;
-                visibility: hidden;
-                left: -9999px;
-                top: -9999px;
-                width: ${availableWidth}px;
-                font-family: ${contentStyle.fontFamily};
-                font-weight: ${contentStyle.fontWeight};
-                line-height: ${contentStyle.lineHeight};
-                white-space: pre-wrap;
-                word-break: normal; /* FIX: Was keep-all */
-                overflow-wrap: break-word;
-            `;
-            document.body.appendChild(measureDiv);
+            // Start at max size
+            contentElement.style.fontSize = `${currentFontSize}px`;
 
-            // Linear search for optimal font size
-            let bestFontSize = minFontSize;
-            while (currentFontSize >= minFontSize) {
-                measureDiv.style.fontSize = `${currentFontSize}px`;
-                measureDiv.textContent = text;
+            // Loop downwards until it fits
+            while (currentFontSize > minFontSize) {
+                let isOverflowing = (contentElement.scrollHeight > contentElement.clientHeight) || 
+                                    (contentElement.scrollWidth > contentElement.clientWidth);
 
-                const fitsWidth = measureDiv.scrollWidth <= availableWidth;
-                const fitsHeight = measureDiv.scrollHeight <= availableHeight;
-                
-                if (fitsWidth && fitsHeight) {
-                    bestFontSize = currentFontSize;
+                if (!isOverflowing) {
                     break;
                 }
 
                 currentFontSize -= 0.5;
+                contentElement.style.fontSize = `${currentFontSize}px`;
             }
 
-            document.body.removeChild(measureDiv);
-            contentElement.style.fontSize = `${bestFontSize}px`;
+            // Final clamp to minFontSize
+            if (currentFontSize <= minFontSize) {
+                contentElement.style.fontSize = `${minFontSize}px`;
+            }
         }
 
         // ===== TITLE TEXT FITTING =====
@@ -1017,31 +1099,7 @@ If you add a space that would exceed the line width, the next word moves to a ne
         generateGrid();
         fitTitleText();
 
-        // ===== FOURTHWALL SCROLLBAR FIX =====
-        let lastHeight = 0;
-        let resizeTimer;
-        
-        /**
-         * Sends the current scrollHeight to the parent window if it has changed.
-         * This is the *only* function that should send a postMessage.
-         */
-        function sendHeight() {
-            const height = document.body.scrollHeight;
-            if (height !== lastHeight) {
-                lastHeight = height;
-                window.parent.postMessage({ frameHeight: height }, '*');
-            }
-        }
-
-        /**
-         * A debounced version of sendHeight() to be called on content changes.
-         * This ensures we don't spam messages during rapid changes.
-         */
-        function scheduleHeightCheck() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(sendHeight, 150);
-        }
-
+        // ===== FOURTHWALL SCROLLBAR FIX - EVENT LISTENERS =====
         // Send height on initial load (with a slight delay)
         // This fixes the "Content Cut-Off" race condition.
         window.addEventListener('load', () => {
