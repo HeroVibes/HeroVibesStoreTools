@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Dice Roller</title>
+    <style>
+        :root {
+            --bg: #191919;
+            --card-bg: #1F1F1F;
+            --hover: #323232;
+            --outline: #323232;
+            --accent: #87A9FF;
+            --text-primary: #D4D4D4;
+            --text-secondary: #8C8C8C;
+            --radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: sans-serif;
+            color: var(--text-primary);
+            padding: 24px 16px;
+            overflow-x: hidden;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ===== DICE DISPLAY AREA ===== */
+        .dice-display {
+            background: var(--card-bg);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 48px 16px;
+            margin-bottom: 16px;
+            perspective: 1200px;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #dice-container {
+            width: 140px;
+            height: 140px;
+            position: relative;
+        }
+
+        #dice {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            transform: rotateX(-20deg) rotateY(25deg);
+            transition: transform 0.3s ease;
+        }
+
+        #dice:hover {
+            transform: rotateX(-20deg) rotateY(25deg) scale(1.05);
+        }
+
+        #dice.rolling {
+            cursor: default;
+        }
+
+        #dice.rolling:hover {
+            transform: rotateX(0deg) rotateY(0deg) scale(1);
+        }
+
+        /* ===== DICE FACES ===== */
+        .face {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(145deg, #ffffff, #e8e8e8);
+            border-radius: 16px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 
+                inset 0 2px 4px rgba(255, 255, 255, 0.5),
+                0 4px 8px rgba(0, 0, 0, 0.3);
+            display: grid;
+            grid-template-areas:
+                "a b c"
+                "d e f"
+                "g h i";
+            grid-template-rows: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding: 12px;
+        }
+
+        .dot {
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #1a1a1a, #000);
+            border-radius: 50%;
+            align-self: center;
+            justify-self: center;
+            box-shadow: 
+                inset 0 1px 2px rgba(0, 0, 0, 0.5),
+                0 1px 2px rgba(255, 255, 255, 0.2);
+        }
+
+        .dot-top-left { grid-area: a; }
+        .dot-top-right { grid-area: c; }
+        .dot-mid-left { grid-area: d; }
+        .dot-center { grid-area: e; }
+        .dot-mid-right { grid-area: f; }
+        .dot-bot-left { grid-area: g; }
+        .dot-bot-right { grid-area: i; }
+
+        .front  { transform: translateZ(70px); }
+        .back   { transform: rotateX(180deg) translateZ(70px); }
+        .right  { transform: rotateY(90deg) translateZ(70px); }
+        .left   { transform: rotateY(-90deg) translateZ(70px); }
+        .top    { transform: rotateX(90deg) translateZ(70px); }
+        .bottom { transform: rotateX(-90deg) translateZ(70px); }
+
+        /* ===== RESULT DISPLAY ===== */
+        .result-display {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(135, 169, 255, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .result-display.show {
+            opacity: 1;
+        }
+
+        /* ===== CONTROLS SECTION ===== */
+        .controls {
+            background: var(--card-bg);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 24px 16px;
+            margin-bottom: 16px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            position: relative;
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-family: sans-serif;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--hover);
+            border-color: var(--accent);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
+        }
+
+        .btn:hover:not(:disabled)::before {
+            left: 125%;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #1F1F1F;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #99b7ff;
+            box-shadow: 0 0 20px rgba(135, 169, 255, 0.3);
+        }
+
+        /* ===== HISTORY SECTION ===== */
+        .history {
+            background: var(--card-bg);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 24px 16px;
+        }
+
+        .history-header {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .clear-history {
+            font-size: 12px;
+            color: var(--accent);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .clear-history:hover {
+            background: rgba(135, 169, 255, 0.1);
+        }
+
+        .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .history-item {
+            background: rgba(135, 169, 255, 0.1);
+            color: var(--accent);
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: bold;
+            border: 1px solid var(--accent);
+            animation: slideIn 0.3s ease;
+        }
+
+        .history-empty {
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-align: center;
+            padding: 12px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== INSTRUCTIONS ===== */
+        .instructions {
+            background: var(--card-bg);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-top: 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .instructions strong {
+            color: var(--accent);
+        }
+
+        /* ===== MOBILE OPTIMIZATION ===== */
+        @media (max-width: 480px) {
+            body {
+                padding: 16px 12px;
+            }
+
+            .dice-display {
+                padding: 32px 16px;
+                min-height: 240px;
+            }
+
+            #dice-container {
+                width: 120px;
+                height: 120px;
+            }
+
+            .face {
+                width: 120px;
+                height: 120px;
+                border-radius: 12px;
+            }
+
+            .dot {
+                width: 16px;
+                height: 16px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 360px) {
+            #dice-container {
+                width: 100px;
+                height: 100px;
+            }
+
+            .face {
+                width: 100px;
+                height: 100px;
+            }
+
+            .dot {
+                width: 14px;
+                height: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ===== DICE DISPLAY AREA ===== -->
+        <div class="dice-display">
+            <div class="result-display" id="result-display">Result: -</div>
+            <div id="dice-container">
+                <div id="dice">
+                    <div class="face front">
+                        <div class="dot dot-center"></div>
+                    </div>
+                    <div class="face back">
+                        <div class="dot dot-top-left"></div>
+                        <div class="dot dot-top-right"></div>
+                        <div class="dot dot-mid-left"></div>
+                        <div class="dot dot-mid-right"></div>
+                        <div class="dot dot-bot-left"></div>
+                        <div class="dot dot-bot-right"></div>
+                    </div>
+                    <div class="face right">
+                        <div class="dot dot-top-left"></div>
+                        <div class="dot dot-center"></div>
+                        <div class="dot dot-bot-right"></div>
+                    </div>
+                    <div class="face left">
+                        <div class="dot dot-top-left"></div>
+                        <div class="dot dot-top-right"></div>
+                        <div class="dot dot-bot-left"></div>
+                        <div class="dot dot-bot-right"></div>
+                    </div>
+                    <div class="face top">
+                        <div class="dot dot-top-left"></div>
+                        <div class="dot dot-top-right"></div>
+                        <div class="dot dot-center"></div>
+                        <div class="dot dot-bot-left"></div>
+                        <div class="dot dot-bot-right"></div>
+                    </div>
+                    <div class="face bottom">
+                        <div class="dot dot-top-left"></div>
+                        <div class="dot dot-bot-right"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== CONTROLS SECTION ===== -->
+        <div class="controls">
+            <div class="button-group">
+                <button class="btn btn-primary" id="roll-btn">Roll Dice</button>
+                <button class="btn" id="lucky-btn">Lucky 6</button>
+            </div>
+        </div>
+
+        <!-- ===== ROLL HISTORY ===== -->
+        <div class="history">
+            <div class="history-header">
+                <span>Roll History</span>
+                <button class="clear-history" id="clear-history">Clear</button>
+            </div>
+            <div class="history-list" id="history-list">
+                <div class="history-empty">No rolls yet. Click the dice or press R to roll!</div>
+            </div>
+        </div>
+
+        <!-- ===== INSTRUCTIONS ===== -->
+        <div class="instructions">
+            <strong>How to use:</strong> Click the dice, press <strong>R</strong>, or use the buttons below. Press <strong>Ctrl+Alt+R</strong> or click "Lucky 6" to always roll a 6!
+        </div>
+    </div>
+
+    <audio id="dice-sound" src="https://contactherovibes.wordpress.com/wp-content/uploads/2025/07/rpg-dice-rolling-95182.mp3" preload="auto"></audio>
+
+    <script>
+        // ===== DICE ROLLER LOGIC =====
+        const dice = document.getElementById('dice');
+        const sound = document.getElementById('dice-sound');
+        const rollBtn = document.getElementById('roll-btn');
+        const luckyBtn = document.getElementById('lucky-btn');
+        const resultDisplay = document.getElementById('result-display');
+        const historyList = document.getElementById('history-list');
+        const clearHistoryBtn = document.getElementById('clear-history');
+        
+        let isRolling = false;
+        let rollHistory = [];
+
+        const resultRotations = {
+            1: 'rotateX(0deg) rotateY(0deg)',
+            2: 'rotateX(-90deg) rotateY(0deg)',
+            3: 'rotateX(0deg) rotateY(90deg)',
+            4: 'rotateX(0deg) rotateY(-90deg)',
+            5: 'rotateX(90deg) rotateY(0deg)',
+            6: 'rotateX(180deg) rotateY(0deg)'
+        };
+
+        function updateHistory(result) {
+            rollHistory.unshift(result);
+            if (rollHistory.length > 10) {
+                rollHistory.pop();
+            }
+            
+            if (rollHistory.length > 0) {
+                historyList.innerHTML = rollHistory.map(num => 
+                    `<div class="history-item">${num}</div>`
+                ).join('');
+            } else {
+                historyList.innerHTML = '<div class="history-empty">No rolls yet. Click the dice or press R to roll!</div>';
+            }
+            
+            scheduleHeightCheck();
+        }
+
+        function showResult(result) {
+            resultDisplay.textContent = `Result: ${result}`;
+            resultDisplay.classList.add('show');
+            setTimeout(() => {
+                resultDisplay.classList.remove('show');
+            }, 3000);
+        }
+
+        function rollDice(forceResult = null) {
+            if (isRolling) return;
+            
+            isRolling = true;
+            dice.classList.add('rolling');
+            rollBtn.disabled = true;
+            luckyBtn.disabled = true;
+
+            sound.currentTime = 0;
+            sound.play().catch(() => {});
+
+            const result = forceResult || Math.floor(Math.random() * 6) + 1;
+            const randomSpinsX = (Math.floor(Math.random() * 4) + 3) * 360;
+            const randomSpinsY = (Math.floor(Math.random() * 4) + 3) * 360;
+
+            dice.style.transition = 'transform 2s cubic-bezier(0.46, -0.01, 0.55, 1.01)';
+            dice.style.transform = `rotateX(${randomSpinsX}deg) rotateY(${randomSpinsY}deg)`;
+
+            setTimeout(() => {
+                dice.style.transition = 'transform 1s ease-out';
+                dice.style.transform = resultRotations[result];
+            }, 1800);
+
+            setTimeout(() => {
+                isRolling = false;
+                dice.classList.remove('rolling');
+                rollBtn.disabled = false;
+                luckyBtn.disabled = false;
+                showResult(result);
+                updateHistory(result);
+            }, 3000);
+        }
+
+        // ===== EVENT LISTENERS =====
+        rollBtn.addEventListener('click', () => rollDice());
+        luckyBtn.addEventListener('click', () => rollDice(6));
+        dice.addEventListener('click', (e) => {
+            const force6 = e.ctrlKey && e.altKey;
+            rollDice(force6 ? 6 : null);
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'r') {
+                e.preventDefault();
+                const force6 = e.ctrlKey && e.altKey;
+                rollDice(force6 ? 6 : null);
+            }
+        });
+
+        clearHistoryBtn.addEventListener('click', () => {
+            rollHistory = [];
+            updateHistory();
+        });
+
+        // ===== FOURTHWALL SCROLLBAR FIX =====
+        let lastHeight = 0;
+        let resizeTimer;
+
+        function sendHeight() {
+            const height = document.body.scrollHeight;
+            
+            if (height !== lastHeight) {
+                lastHeight = height;
+                window.parent.postMessage({ frameHeight: height }, '*');
+            }
+        }
+
+        function scheduleHeightCheck() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(sendHeight, 150);
+        }
+
+        window.addEventListener('load', () => {
+            setTimeout(sendHeight, 100);
+        });
+
+        window.addEventListener('resize', () => {
+            scheduleHeightCheck();
+        });
+        // ===== END OF SCROLLBAR FIX =====
+    </script>
+</body>
+</html>
