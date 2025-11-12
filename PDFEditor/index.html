@@ -22,20 +22,26 @@
       padding: 0;
     }
 
-    /* --- MODIFIED: Reverted padding to body for height fix --- */
+    /* --- MODIFIED: iFrame Height Fix --- */
+    html {
+      height: auto;
+      overflow-y: auto;
+    }
+
+    /* --- MODIFIED: iFrame Height Fix & Design Spec --- */
     body {
       background: var(--bg);
       font-family: sans-serif;
       color: var(--text-primary);
       padding: 24px 16px;
+      height: auto;
+      overflow-y: auto;
     }
 
     /* --- MAIN CONTAINER --- */
-    /* --- MODIFIED: Added position:relative for version number --- */
     .editor-container {
       position: relative;
       max-width: 1200px;
-      /* --- MODIFIED: Reverted margin for height fix --- */
       margin: 0 auto;
       background: var(--card-bg);
       border-radius: var(--radius);
@@ -43,7 +49,7 @@
       overflow: hidden;
     }
 
-    /* --- NEW: Version Number Display --- */
+    /* --- Version Number Display --- */
     .version-display {
       position: absolute;
       top: 8px;
@@ -381,7 +387,6 @@
 
     /* --- RESPONSIVE --- */
     @media (max-width: 768px) {
-      /* --- MODIFIED: Reverted padding for height fix --- */
       body {
         padding: 16px 8px;
       }
@@ -443,7 +448,7 @@
 </head>
 <body>
   <div class="editor-container">
-    <span class="version-display">V1.0.0</span>
+    <span class="version-display">V1.0.1</span>
 
     <div class="toolbar">
       <div class="toolbar-section">
@@ -658,12 +663,11 @@
       loading.classList.add('active');
       pdfViewer.classList.remove('active');
       
-      // Manually notify script that height is changing
       scheduleHeightCheck();
 
       try {
         const arrayBuffer = await file.arrayBuffer();
-        originalPdfBytes = arrayBuffer; // Store for pdf-lib
+        originalPdfBytes = arrayBuffer; 
         pdfDoc = await pdfjsLib.getDocument({
           data: arrayBuffer
         }).promise;
@@ -673,7 +677,6 @@
         loading.classList.remove('active');
         pdfViewer.classList.add('active');
 
-        // Enable toolbar buttons
         downloadBtn.disabled = false;
         printBtn.disabled = false;
         addTextBtn.disabled = false;
@@ -689,7 +692,6 @@
         alert('Error loading PDF. Please try again.');
       }
       
-      // Manually notify script that height has changed
       scheduleHeightCheck();
     }
 
@@ -704,7 +706,7 @@
         });
         const unscaledViewport = page.getViewport({
           scale: 1.0
-        }); // For pdf-lib
+        }); 
 
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -735,7 +737,6 @@
         pdfPages.appendChild(pageContainer);
       }
       
-      // Manually notify script that height has changed
       scheduleHeightCheck();
     }
 
@@ -756,7 +757,6 @@
 
     async function updateZoom() {
       zoomDisplay.textContent = `${Math.round(currentZoom * 100)}%`;
-      // Store current elements
       const allElements = [];
       document.querySelectorAll('.editable-layer').forEach(layer => {
         const pageNum = layer.dataset.pageNum;
@@ -774,7 +774,6 @@
 
       await renderAllPages();
 
-      // Restore elements
       allElements.forEach(data => {
         const layer = document.querySelector(`.editable-layer[data-page-num="${data.pageNum}"]`);
         if (layer) {
@@ -786,7 +785,6 @@
         }
       });
       
-      // Manually notify script that height has changed
       scheduleHeightCheck();
     }
 
@@ -837,11 +835,9 @@
 
       attachElementHandlers(textEl);
 
-      // Open format modal
       selectedElement = textEl;
       textFormatModal.classList.add('active');
       
-      // Manually notify script that height has changed
       scheduleHeightCheck();
     }
 
@@ -862,7 +858,6 @@
       signatureCtx.lineCap = 'round';
       signatureCtx.lineJoin = 'round';
       
-      // Manually notify script that height has changed
       scheduleHeightCheck();
     });
 
@@ -915,7 +910,6 @@
       const signatureData = signaturePad.toDataURL();
       signatureModal.classList.remove('active');
 
-      // Add to first page center
       const firstLayer = document.querySelector('.editable-layer');
       if (firstLayer) {
         addSignatureElement(firstLayer, 100, 100, signatureData);
@@ -940,7 +934,7 @@
       img.style.display = 'block';
       img.style.maxWidth = '200px';
       img.style.height = 'auto';
-      img.style.pointerEvents = 'none'; // Make image non-draggable
+      img.style.pointerEvents = 'none'; 
 
       const deleteBtn = document.createElement('div');
       deleteBtn.className = 'delete-btn';
@@ -971,7 +965,7 @@
 
         document.querySelectorAll('.text-element, .signature-element, .drawing-element').forEach(el => {
           el.classList.remove('selected');
-});
+        });
         element.classList.add('selected');
 
         const rect = element.getBoundingClientRect();
@@ -985,7 +979,6 @@
           textFormatModal.classList.add('active');
           scheduleHeightCheck();
 
-          // Load current values
           fontFamilySelect.value = element.style.fontFamily.replace(/['"]/g, '') || 'Arial';
           fontSizeSelect.value = parseInt(element.style.fontSize) || 16;
           textColorInput.value = rgbToHex(element.style.color) || '#000000';
@@ -1001,7 +994,6 @@
       let x = e.clientX - parentRect.left - dragOffset.x;
       let y = e.clientY - parentRect.top - dragOffset.y;
 
-      // Keep within bounds
       x = Math.max(0, Math.min(x, parentRect.width - selectedElement.offsetWidth));
       y = Math.max(0, Math.min(y, parentRect.height - selectedElement.offsetHeight));
 
@@ -1086,4 +1078,176 @@
         case 'Georgia':
           return isBold ? StandardFonts.TimesRomanBold : StandardFonts.TimesRoman;
         case 'Courier New':
-          return isCouri...
+          return isBold ? StandardFonts.CourierBold : StandardFonts.Courier;
+        case 'Arial':
+        case 'Helvetica':
+        case 'Verdana':
+        case 'Comic Sans MS':
+        default:
+          return isBold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+      }
+    }
+
+    function downloadFile(bytes, fileName, mimeType) {
+      const blob = new Blob([bytes], {
+        type: mimeType
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    }
+
+    /* --- DOWNLOAD --- */
+    downloadBtn.addEventListener('click', async () => {
+      if (!pdfDoc || !originalPdfBytes) return;
+
+      downloadBtn.textContent = 'Processing...';
+      downloadBtn.disabled = true;
+
+      try {
+        const pdfLibDoc = await PDFDocument.load(originalPdfBytes);
+        const pages = pdfLibDoc.getPages();
+
+        const allLayers = document.querySelectorAll('.editable-layer');
+
+        for (const layer of allLayers) {
+          const pageNum = parseInt(layer.dataset.pageNum);
+          const page = pages[pageNum - 1];
+          const pageContainer = layer.closest('.pdf-page');
+          const originalWidth = parseFloat(pageContainer.dataset.originalWidth);
+          const originalHeight = parseFloat(pageContainer.dataset.originalHeight);
+          const renderedWidth = layer.offsetWidth;
+          const scale = renderedWidth / originalWidth;
+
+          const elements = layer.querySelectorAll('.text-element, .signature-element');
+
+          for (const el of elements) {
+            const elLeft = parseFloat(el.style.left);
+            const elTop = parseFloat(el.style.top);
+            const elWidth = el.offsetWidth;
+            const elHeight = el.offsetHeight;
+
+            const pdfLib_x = elLeft / scale;
+            
+            if (el.classList.contains('text-element')) {
+              const text = el.textContent.replace('×', ''); 
+              const fontSize = parseFloat(el.style.fontSize) / scale;
+              const color = hexToRgb(el.style.color || '#000000');
+              const font = await pdfLibDoc.embedFont(getPdfLibFont(el.style.fontFamily, el.style.fontWeight));
+              
+              const pdfLib_y = originalHeight - (elTop / scale) - fontSize;
+
+              page.drawText(text, {
+                x: pdfLib_x + (parseFloat(getComputedStyle(el).paddingLeft) / scale),
+                y: pdfLib_y,
+                size: fontSize,
+                font: font,
+                color: rgb(color.r, color.g, color.b),
+              });
+
+            } else if (el.classList.contains('signature-element')) {
+              const imgEl = el.querySelector('img');
+              const imgData = imgEl.src;
+              const imgBytes = await fetch(imgData).then(res => res.arrayBuffer());
+              const signatureImage = await pdfLibDoc.embedPng(imgBytes);
+
+              const imgWidth = imgEl.offsetWidth / scale;
+              const imgHeight = imgEl.offsetHeight / scale;
+              
+              const pdfLib_y = originalHeight - (elTop / scale) - elHeight + (parseFloat(getComputedStyle(el).paddingBottom) / scale);
+
+              page.drawImage(signatureImage, {
+                x: pdfLib_x + (parseFloat(getComputedStyle(el).paddingLeft) / scale),
+                y: pdfLib_y,
+                width: imgWidth,
+                height: imgHeight,
+              });
+            }
+          }
+        }
+
+        const pdfBytes = await pdfLibDoc.save();
+        downloadFile(pdfBytes, "edited-document.pdf", "application/pdf");
+
+      } catch (error) {
+        console.error('Error saving PDF:', error);
+        alert('An error occurred while saving the PDF. Please try again.');
+      }
+
+      downloadBtn.textContent = '💾 Download';
+      downloadBtn.disabled = false;
+    });
+
+
+    /* --- PRINT --- */
+    printBtn.addEventListener('click', () => {
+      window.print();
+    });
+
+    /* --- CLOSE MODALS ON OUTSIDE CLICK --- */
+    signatureModal.addEventListener('click', (e) => {
+      if (e.target === signatureModal) {
+        signatureModal.classList.remove('active');
+        scheduleHeightCheck();
+      }
+    });
+
+    textFormatModal.addEventListener('click', (e) => {
+      if (e.target === textFormatModal) {
+        textFormatModal.classList.remove('active');
+        scheduleHeightCheck();
+      }
+    });
+
+    /* --- FOURTHWALL SCROLLBAR FIX --- */
+    let lastHeight = 0;
+    let resizeTimer;
+
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
+    function sendHeight() {
+      // Use scrollHeight for content height
+      const height = document.body.scrollHeight;
+
+      // Only send message if height has *actually* changed 
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({
+          frameHeight: height
+        }, '*');
+      }
+    }
+
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
+    function scheduleHeightCheck() {
+      // Clear any pending checks
+      clearTimeout(resizeTimer);
+      // Schedule a new check after 150ms
+      resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    // Send height on initial load (with a slight delay)
+    // This fixes the "Content Cut-Off" race condition.
+    window.addEventListener('load', () => {
+        // --- MODIFIED: Increased delay for render buffer ---
+        setTimeout(sendHeight, 250);
+    });
+
+    // Send height on window resize (debounced)
+    window.addEventListener('resize', () => {
+      // Use scheduleHeightCheck for built-in debounce
+      scheduleHeightCheck();
+    });
+    /* --- END OF SCROLLBAR FIX --- */
+  </script>
+</body>
+</html>
