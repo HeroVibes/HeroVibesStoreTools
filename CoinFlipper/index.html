@@ -33,7 +33,7 @@
             color: var(--text-primary);
             padding: 24px 16px;
             overflow-x: hidden;
-            /* No min-height: 100vh; [cite: 60] */
+            [cite_start]/* No min-height: 100vh; [cite: 60] */
         }
 
         /* ===== MAIN CONTAINER ===== */
@@ -346,7 +346,7 @@
                     <div class="rim-segment"></div>
                     <div class="rim-segment"></div>
                     <div class="rim-segment"></div>
-                    <div class="rim-segment"></div>
+                    <div classs="rim-segment"></div>
                     <div class="rim-segment"></div>
                     <div class="rim-segment"></div>
                     <div class="rim-segment"></div>
@@ -404,7 +404,7 @@
             // Hide previous result
             if (result.classList.contains('show')) {
                 result.classList.remove('show');
-                scheduleHeightCheck(); // Call height check on hide 
+                scheduleHeightCheck(); // Call height check on hide
             }
             
             // Play sound
@@ -448,7 +448,7 @@
                 resultValue.textContent = finalResult;
                 result.classList.add('show');
                 
-                // Notify parent of height change (for result box) 
+                // Notify parent of height change (for result box)
                 scheduleHeightCheck();
             }, 2000);
         }
@@ -473,53 +473,53 @@
         let resizeTimer;
 
         /**
-         * Sends the current scrollHeight to the parent window if it has changed. [cite: 80]
-         * This is the *only* function that should send a postMessage. [cite: 81]
+         * Sends the current scrollHeight to the parent window if it has changed.
+         * [cite_start]This is the *only* function that should send a postMessage. [cite: 81]
          */
         function sendHeight() {
-          const height = document.body.scrollHeight; // [cite: 82]
+          const height = document.body.scrollHeight; [cite_start]// [cite: 82]
           
-          // Only send message if height has *actually* changed [cite: 83]
+          [cite_start]// Only send message if height has *actually* changed [cite: 83]
           if (height !== lastHeight) {
             lastHeight = height;
-            window.parent.postMessage({ frameHeight: height }, '*'); // [cite: 84]
+            window.parent.postMessage({ frameHeight: height }, '*'); [cite_start]// [cite: 84]
           }
         }
 
         /**
-         * A debounced version of sendHeight() to be called on content changes. [cite: 85]
+         * [cite_start]A debounced version of sendHeight() to be called on content changes. [cite: 85]
          */
         function scheduleHeightCheck() {
             // Clear any pending checks
-            clearTimeout(resizeTimer);
-            // Schedule a new check [cite: 87]
-            resizeTimer = setTimeout(sendHeight, 150);
+            clearTimeout(resizeTimer); [cite_start]// [cite: 87]
+            // Schedule a new check
+            resizeTimer = setTimeout(sendHeight, 150); [cite_start]// [cite: 87]
         }
 
-        // Send height on initial load (with a slight delay) [cite: 89]
-        // This fixes the "Content Cut-Off" race condition. [cite: 89]
+        // Send height on initial load (with a slight delay)
+        [cite_start]// This fixes the "Content Cut-Off" race condition. [cite: 70, 71]
         window.addEventListener('load', () => {
-            setTimeout(sendHeight, 100);
+            [cite_start]setTimeout(sendHeight, 100); // [cite: 89]
             
-            // --- NEW POPUP LOGIC ---
-            // Animate popup in
+            // --- UPDATED POPUP LOGIC ---
+            // Animate popup in after 500ms
             setTimeout(() => {
                 keyPopup.classList.add('show');
-                scheduleHeightCheck(); // Popup is growing 
-            }, 500);
+                scheduleHeightCheck(); // Popup is growing
 
-            // Animate popup out
-            setTimeout(() => {
-                keyPopup.classList.remove('show');
-                scheduleHeightCheck(); // Popup is shrinking 
-            }, 3000);
-            // --- END OF NEW LOGIC ---
+                // Animate popup out 2.5 seconds LATER
+                setTimeout(() => {
+                    keyPopup.classList.remove('show');
+                    scheduleHeightCheck(); // Popup is shrinking
+                }, 2500); // 2.5 seconds *after* it appears
+            }, 500); // 0.5 seconds after load
+            // --- END OF UPDATED LOGIC ---
         });
 
-        // Send height on window resize (debounced) [cite: 90]
+        [cite_start]// Send height on window resize (debounced) [cite: 90]
         window.addEventListener('resize', () => {
             // Use scheduleHeightCheck for built-in debounce
-            scheduleHeightCheck();
+            [cite_start]scheduleHeightCheck(); // [cite: 90]
         });
         
         // ===== END OF SCROLLBAR FIX =====
