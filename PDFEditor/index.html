@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF Editor</title>
   <style>
     :root {
       --bg: #191919;
@@ -26,6 +25,7 @@
       background: var(--bg);
       font-family: sans-serif;
       color: var(--text-primary);
+      /* DEFAULT PADDING per DESIGN GUIDE */
       padding: 24px 16px;
     }
 
@@ -36,6 +36,7 @@
       margin: 0 auto;
       background: var(--card-bg);
       border-radius: var(--radius);
+      /* CARD OUTLINE per DESIGN GUIDE */
       border: 1px solid var(--outline);
       overflow: hidden;
     }
@@ -76,7 +77,7 @@
       margin: 0 4px;
     }
 
-    /* ===== BUTTONS ===== */
+    /* ===== BUTTONS (per DEFAULT BUTTON TEMPLATE) ===== */
     .btn {
       position: relative;
       padding: 10px 16px;
@@ -91,6 +92,7 @@
       transition: background 0.2s;
     }
 
+    /* shimmer effect */
     .btn::before {
       content: '';
       position: absolute;
@@ -111,6 +113,7 @@
       background: var(--hover);
     }
 
+    /* accessible focus */
     .btn:focus-visible {
       outline: none;
       box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
@@ -134,9 +137,10 @@
       justify-content: center;
     }
 
-    .btn-active {
+    .btn.btn-active {
       background: var(--accent);
-      color: #000;
+      color: #191919;
+      font-weight: bold;
     }
 
     /* ===== FILE UPLOAD AREA ===== */
@@ -199,15 +203,32 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       border-radius: 4px;
       max-width: 100%;
+      /* Prevents user from selecting image */
+      user-select: none;
     }
 
     .pdf-page img {
       display: block;
       width: 100%;
       height: auto;
+      pointer-events: none;
     }
 
-    /* ===== EDITABLE ELEMENTS ===== */
+    /* ===== EDITABLE LAYERS ===== */
+    .drawing-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    
+    .drawing-canvas.mode-draw {
+      pointer-events: all;
+      cursor: crosshair;
+    }
+
     .editable-layer {
       position: absolute;
       top: 0;
@@ -216,39 +237,48 @@
       height: 100%;
       pointer-events: none;
     }
+    
+    .editable-layer.mode-text {
+      pointer-events: all;
+      cursor: text;
+    }
 
     .text-element,
-    .signature-element,
-    .drawing-element {
+    .signature-element {
       position: absolute;
       pointer-events: all;
       cursor: move;
-      border: 2px solid transparent;
+      border: 2px dashed transparent;
       padding: 4px;
-      min-width: 100px;
-      min-height: 30px;
+      min-width: 50px;
+      min-height: 20px;
+      user-select: none;
+      transition: border-color 0.2s;
     }
 
     .text-element:hover,
-    .signature-element:hover,
-    .drawing-element:hover {
+    .signature-element:hover {
       border-color: var(--accent);
     }
 
     .text-element.selected,
-    .signature-element.selected,
-    .drawing-element.selected {
-      border-color: var(--accent);
+    .signature-element.selected {
+      border-color: var(--accent) !important;
+      border-style: solid;
       box-shadow: 0 0 0 1px var(--accent);
     }
 
     .text-element {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.0); /* Transparent background */
       border-radius: 2px;
+      color: #000000; /* Default color */
     }
 
     .text-element[contenteditable="true"] {
       outline: none;
+      cursor: text;
+      user-select: text;
+      background: rgba(135, 169, 255, 0.15); /* Light bg when editing */
     }
 
     .delete-btn {
@@ -267,21 +297,20 @@
       justify-content: center;
       font-size: 14px;
       font-weight: bold;
+      z-index: 10;
     }
 
     .text-element:hover .delete-btn,
     .signature-element:hover .delete-btn,
-    .drawing-element:hover .delete-btn,
     .text-element.selected .delete-btn,
-    .signature-element.selected .delete-btn,
-    .drawing-element.selected .delete-btn {
+    .signature-element.selected .delete-btn {
       display: flex;
     }
 
-    /* ===== MODAL ===== */
+    /* ===== MODAL (Using position: fixed per TROUBLESHOOTING) ===== */
     .modal {
       display: none;
-      position: fixed;
+      position: fixed; /* Changed from absolute */
       top: 0;
       left: 0;
       width: 100%;
@@ -291,10 +320,12 @@
       align-items: center;
       justify-content: center;
       padding: 16px;
+      pointer-events: none; /* Disable pointer events on overlay */
     }
 
     .modal.active {
       display: flex;
+      pointer-events: auto; /* Enable pointer events when active */
     }
 
     .modal-content {
@@ -306,6 +337,7 @@
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
+      pointer-events: auto; /* Ensure content is always clickable */
     }
 
     .modal-header {
@@ -432,13 +464,46 @@
       min-width: 60px;
       text-align: center;
     }
+    
+    /* ===== PRINT STYLES (FIX for Bug 4) ===== */
+    @media print {
+      /* Hide everything */
+      body * {
+        visibility: hidden;
+      }
+      
+      /* Show only the PDF viewer and its contents */
+      .pdf-viewer, .pdf-viewer * {
+        visibility: visible;
+      }
+      
+      /* Reset positioning for printing */
+      .pdf-viewer {
+        position: absolute;
+        left: 0;
+        top: 0;
+        padding: 0;
+        margin: 0;
+      }
+      
+      .pdf-page {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+        border-radius: 0;
+      }
+      
+      .delete-btn {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="editor-container">
-    <span class="version-display">V1.0.3</span>
+    <span class="version-display">V1.1.0</span>
 
-    <!-- ===== TOOLBAR ===== -->
     <div class="toolbar">
       <div class="toolbar-section">
         <button class="btn btn-small" id="upload-btn">
@@ -479,7 +544,6 @@
       </div>
     </div>
 
-    <!-- ===== UPLOAD AREA ===== -->
     <div class="upload-area" id="upload-area">
       <div class="upload-icon">📄</div>
       <div class="upload-text">
@@ -489,19 +553,16 @@
       <input type="file" id="file-input" accept=".pdf">
     </div>
 
-    <!-- ===== LOADING ===== -->
     <div class="loading" id="loading">
       <div class="spinner"></div>
       <div>Loading PDF...</div>
     </div>
 
-    <!-- ===== PDF VIEWER ===== -->
     <div class="pdf-viewer" id="pdf-viewer">
       <div class="pdf-pages" id="pdf-pages"></div>
     </div>
   </div>
 
-  <!-- ===== SIGNATURE MODAL ===== -->
   <div class="modal" id="signature-modal">
     <div class="modal-content">
       <div class="modal-header">Create Signature</div>
@@ -516,7 +577,6 @@
     </div>
   </div>
 
-  <!-- ===== TEXT FORMAT MODAL ===== -->
   <div class="modal" id="text-format-modal">
     <div class="modal-content">
       <div class="modal-header">Text Formatting</div>
@@ -578,15 +638,19 @@
 
     // ===== GLOBAL STATE =====
     let pdfDoc = null;
-    let originalPdfBytes = null; 
+    let originalPdfBytes = null;
     let currentZoom = 1.0;
-    let currentMode = 'select'; 
+    let currentMode = 'select'; // 'select', 'text', 'draw'
     let selectedElement = null;
     let isDragging = false;
     let dragOffset = { x: 0, y: 0 };
+    
+    // Drawing state
     let isDrawing = false;
     let drawingContext = null;
-    let drawingStartPos = null;
+    let lastDrawPos = null;
+    let drawColor = '#000000'; // Default draw color
+    let drawLineWidth = 2; // Default line width
 
     // ===== DOM ELEMENTS =====
     const uploadArea = document.getElementById('upload-area');
@@ -649,10 +713,11 @@
       uploadArea.style.display = 'none';
       loading.classList.add('active');
       pdfViewer.classList.remove('active');
+      pdfPages.innerHTML = ''; // Clear previous PDF
 
       try {
         const arrayBuffer = await file.arrayBuffer();
-        originalPdfBytes = arrayBuffer; 
+        originalPdfBytes = arrayBuffer;
         pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
         await renderAllPages();
@@ -660,18 +725,15 @@
         loading.classList.remove('active');
         pdfViewer.classList.add('active');
 
-        downloadBtn.disabled = false;
-        printBtn.disabled = false;
-        addTextBtn.disabled = false;
-        addSignatureBtn.disabled = false;
-        drawBtn.disabled = false;
-        zoomInBtn.disabled = false;
-        zoomOutBtn.disabled = false;
+        // Enable toolbar buttons
+        [downloadBtn, printBtn, addTextBtn, addSignatureBtn, drawBtn, zoomInBtn, zoomOutBtn].forEach(btn => {
+          btn.disabled = false;
+        });
+
+        setMode('select'); // Default to select mode
 
         // Force height recalculation after everything is rendered
-        setTimeout(() => scheduleHeightCheck(), 100);
-        setTimeout(() => scheduleHeightCheck(), 500);
-        setTimeout(() => scheduleHeightCheck(), 1000);
+        scheduleHeightCheck();
 
       } catch (error) {
         console.error('Error loading PDF:', error);
@@ -682,14 +744,14 @@
     }
 
     // ===== RENDER PAGES =====
-    async function renderAllPages() {
+    async function renderAllPages(existingEdits = null) {
       pdfPages.innerHTML = '';
       
       for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
         const page = await pdfDoc.getPage(pageNum);
         const scale = 1.5 * currentZoom;
         const viewport = page.getViewport({ scale });
-        const unscaledViewport = page.getViewport({ scale: 1.0 }); 
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
 
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -707,24 +769,82 @@
         pageContainer.dataset.originalWidth = unscaledViewport.width;
         pageContainer.dataset.originalHeight = unscaledViewport.height;
 
+        // Base PDF image
         const img = document.createElement('img');
         img.src = canvas.toDataURL();
         img.alt = `Page ${pageNum}`;
 
+        // Drawing canvas (for draw mode)
+        const drawingCanvas = document.createElement('canvas');
+        drawingCanvas.className = 'drawing-canvas';
+        drawingCanvas.width = viewport.width;
+        drawingCanvas.height = viewport.height;
+        drawingCanvas.dataset.pageNum = pageNum;
+        
+        // Editable layer (for text and signatures)
         const editableLayer = document.createElement('div');
         editableLayer.className = 'editable-layer';
         editableLayer.dataset.pageNum = pageNum;
-
+        
         pageContainer.appendChild(img);
+        pageContainer.appendChild(drawingCanvas); // Draw canvas beneath editable layer
         pageContainer.appendChild(editableLayer);
         pdfPages.appendChild(pageContainer);
+
+        // Restore edits if provided (for zoom)
+        if (existingEdits) {
+          // Restore drawings
+          const drawingData = existingEdits.drawings.find(d => d.pageNum === pageNum);
+          if (drawingData) {
+            const drawCtx = drawingCanvas.getContext('2d');
+            const drawingImg = new Image();
+            drawingImg.onload = () => {
+              drawCtx.drawImage(drawingImg, 0, 0);
+            };
+            drawingImg.src = drawingData.data;
+          }
+          
+          // Restore elements
+          const elements = existingEdits.elements.filter(el => el.pageNum === pageNum);
+          elements.forEach(data => {
+            const temp = document.createElement('div');
+            temp.innerHTML = data.html;
+            const el = temp.firstChild;
+            editableLayer.appendChild(el);
+            attachElementHandlers(el);
+          });
+        }
       }
+      
+      // Re-apply current interaction mode
+      setMode(currentMode);
 
       // Recalculate height after all images are rendered
-      setTimeout(() => scheduleHeightCheck(), 100);
+      scheduleHeightCheck();
     }
 
-    // ===== ZOOM CONTROLS =====
+    // ===== MODE CONTROLLER (FIX for Bugs 1, 2, 5) =====
+    function setMode(mode) {
+      currentMode = mode;
+      
+      // Update button active states
+      addTextBtn.classList.toggle('btn-active', mode === 'text');
+      drawBtn.classList.toggle('btn-active', mode === 'draw');
+      addSignatureBtn.classList.remove('btn-active'); // Signature is a modal, not a persistent mode
+
+      // Update layer pointer events
+      document.querySelectorAll('.editable-layer').forEach(layer => {
+        layer.classList.toggle('mode-text', mode === 'text');
+      });
+      document.querySelectorAll('.drawing-canvas').forEach(canvas => {
+        canvas.classList.toggle('mode-draw', mode === 'draw');
+      });
+      
+      // Deselect any active element
+      deselectAllElements();
+    }
+
+    // ===== ZOOM CONTROLS (FIX for Bug 6) =====
     zoomInBtn.addEventListener('click', () => {
       if (currentZoom < 2.0) {
         currentZoom += 0.25;
@@ -742,45 +862,40 @@
     async function updateZoom() {
       zoomDisplay.textContent = `${Math.round(currentZoom * 100)}%`;
       
-      const allElements = [];
-      document.querySelectorAll('.editable-layer').forEach(layer => {
-        const pageNum = layer.dataset.pageNum;
-        const elements = Array.from(layer.children).map(el => ({
+      // Save all existing edits
+      const existingEdits = {
+        drawings: [],
+        elements: []
+      };
+
+      document.querySelectorAll('.drawing-canvas').forEach(canvas => {
+        const pageNum = parseInt(canvas.dataset.pageNum);
+        existingEdits.drawings.push({
           pageNum,
-          html: el.outerHTML,
-          style: el.style.cssText,
-          position: {
-            left: parseFloat(el.style.left) || 0,
-            top: parseFloat(el.style.top) || 0
-          }
-        }));
-        allElements.push(...elements);
+          data: canvas.toDataURL()
+        });
+      });
+      
+      document.querySelectorAll('.editable-layer').forEach(layer => {
+        const pageNum = parseInt(layer.dataset.pageNum);
+        layer.childNodes.forEach(el => {
+          existingEdits.elements.push({
+            pageNum,
+            html: el.outerHTML
+          });
+        });
       });
 
-      await renderAllPages();
-
-      allElements.forEach(data => {
-        const layer = document.querySelector(`.editable-layer[data-page-num="${data.pageNum}"]`);
-        if (layer) {
-          const temp = document.createElement('div');
-          temp.innerHTML = data.html;
-          const el = temp.firstChild;
-          layer.appendChild(el);
-          attachElementHandlers(el);
-        }
-      });
-
-      setTimeout(() => scheduleHeightCheck(), 100);
+      // Re-render all pages and restore edits
+      await renderAllPages(existingEdits);
     }
 
-    // ===== ADD TEXT =====
+    // ===== ADD TEXT (FIX for Bug 1) =====
     addTextBtn.addEventListener('click', () => {
-      currentMode = 'text';
-      addTextBtn.classList.add('btn-active');
-      addSignatureBtn.classList.remove('btn-active');
-      drawBtn.classList.remove('btn-active');
+      setMode(currentMode === 'text' ? 'select' : 'text');
     });
 
+    // Listener to add text when in 'text' mode
     document.addEventListener('click', (e) => {
       if (currentMode === 'text' && e.target.classList.contains('editable-layer')) {
         const layer = e.target;
@@ -789,8 +904,7 @@
         const y = e.clientY - rect.top;
 
         addTextElement(layer, x, y);
-        currentMode = 'select';
-        addTextBtn.classList.remove('btn-active');
+        setMode('select'); // Revert to select mode after adding
       }
     });
 
@@ -798,13 +912,15 @@
       const textEl = document.createElement('div');
       textEl.className = 'text-element';
       textEl.contentEditable = 'true';
-      textEl.textContent = 'Double-click to edit';
+      textEl.textContent = 'Edit me';
       textEl.style.left = `${x}px`;
       textEl.style.top = `${y}px`;
-      textEl.style.fontFamily = 'Arial';
-      textEl.style.fontSize = '16px';
-      textEl.style.color = '#000000';
-      textEl.style.fontWeight = 'normal';
+      
+      // Apply defaults from format modal
+      textEl.style.fontFamily = fontFamilySelect.value;
+      textEl.style.fontSize = fontSizeSelect.value + 'px';
+      textEl.style.color = textColorInput.value;
+      textEl.style.fontWeight = fontWeightSelect.value;
 
       const deleteBtn = document.createElement('div');
       deleteBtn.className = 'delete-btn';
@@ -819,12 +935,70 @@
       layer.appendChild(textEl);
 
       attachElementHandlers(textEl);
-
-      selectedElement = textEl;
-      textFormatModal.classList.add('active');
+      
+      // Select the new text element
+      selectElement(textEl);
+      textEl.focus(); // Focus to edit immediately
       
       scheduleHeightCheck();
     }
+
+    // ===== DRAWING (FIX for Bug 5) =====
+    drawBtn.addEventListener('click', () => {
+      setMode(currentMode === 'draw' ? 'select' : 'draw');
+    });
+
+    pdfViewer.addEventListener('pointerdown', (e) => {
+      if (currentMode !== 'draw' || !e.target.classList.contains('drawing-canvas')) return;
+      
+      isDrawing = true;
+      drawingContext = e.target.getContext('2d');
+      const rect = e.target.getBoundingClientRect();
+      lastDrawPos = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+      
+      drawingContext.beginPath();
+      drawingContext.strokeStyle = drawColor;
+      drawingContext.lineWidth = drawLineWidth;
+      drawingContext.lineCap = 'round';
+      drawingContext.lineJoin = 'round';
+      drawingContext.moveTo(lastDrawPos.x, lastDrawPos.y);
+    });
+
+    pdfViewer.addEventListener('pointermove', (e) => {
+      if (!isDrawing || currentMode !== 'draw') return;
+      
+      const rect = drawingContext.canvas.getBoundingClientRect();
+      const currentPos = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+      
+      drawingContext.lineTo(currentPos.x, currentPos.y);
+      drawingContext.stroke();
+      
+      lastDrawPos = currentPos;
+    });
+
+    pdfViewer.addEventListener('pointerup', () => {
+      if (isDrawing) {
+        drawingContext.closePath();
+        isDrawing = false;
+        drawingContext = null;
+        lastDrawPos = null;
+      }
+    });
+
+    pdfViewer.addEventListener('pointerout', () => {
+      if (isDrawing) {
+        drawingContext.closePath();
+        isDrawing = false;
+        drawingContext = null;
+        lastDrawPos = null;
+      }
+    });
 
     // ===== SIGNATURE =====
     let signatureCtx = null;
@@ -832,9 +1006,11 @@
     let lastSignaturePos = null;
 
     addSignatureBtn.addEventListener('click', () => {
+      setMode('select'); // Exit other modes
       signatureModal.classList.add('active');
 
       const canvas = signaturePad;
+      // Resize canvas based on its *actual* displayed size
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
       signatureCtx = canvas.getContext('2d');
@@ -862,6 +1038,7 @@
 
     function drawSignature(e) {
       if (!isSignatureDrawing) return;
+      e.preventDefault(); // Prevent page scroll on mobile
 
       const rect = signaturePad.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -907,17 +1084,15 @@
       sigEl.className = 'signature-element';
       sigEl.style.left = `${x}px`;
       sigEl.style.top = `${y}px`;
-      sigEl.style.background = 'white';
-      sigEl.style.border = '1px solid #ddd';
-      sigEl.style.padding = '8px';
-      sigEl.style.borderRadius = '4px';
+      sigEl.style.border = 'none';
+      sigEl.style.padding = '0';
 
       const img = document.createElement('img');
       img.src = imageData;
       img.style.display = 'block';
       img.style.maxWidth = '200px';
       img.style.height = 'auto';
-      img.style.pointerEvents = 'none';
+      img.style.pointerEvents = 'none'; // Click-through image
 
       const deleteBtn = document.createElement('div');
       deleteBtn.className = 'delete-btn';
@@ -933,50 +1108,79 @@
       layer.appendChild(sigEl);
 
       attachElementHandlers(sigEl);
+      selectElement(sigEl);
       scheduleHeightCheck();
     }
 
-    // ===== ELEMENT HANDLERS =====
+    // ===== ELEMENT HANDLERS (Drag, Select, Edit) =====
     function attachElementHandlers(element) {
-      element.addEventListener('mousedown', (e) => {
+      element.addEventListener('pointerdown', (e) => {
         if (e.target.classList.contains('delete-btn')) return;
+        if (currentMode !== 'select') setMode('select');
+        
+        // Don't drag if double-clicking to edit text
         if (element.classList.contains('text-element') && element.contentEditable === 'true') return;
 
         e.preventDefault();
         isDragging = true;
-        selectedElement = element;
-
-        document.querySelectorAll('.text-element, .signature-element, .drawing-element').forEach(el => {
-          el.classList.remove('selected');
-        });
-        element.classList.add('selected');
+        selectElement(element);
 
         const rect = element.getBoundingClientRect();
-        dragOffset.x = e.clientX - rect.left;
-        dragOffset.y = e.clientY - rect.top;
+        const parentRect = element.parentElement.getBoundingClientRect();
+        
+        // Calculate offset relative to parent layer
+        dragOffset.x = e.clientX - parentRect.left - parseFloat(element.style.left);
+        dragOffset.y = e.clientY - parentRect.top - parseFloat(element.style.top);
       });
 
       if (element.classList.contains('text-element')) {
         element.addEventListener('dblclick', () => {
-          selectedElement = element;
+          element.contentEditable = 'true';
+          element.focus();
+          selectElement(element);
+          
+          // Show formatting modal
           textFormatModal.classList.add('active');
           scheduleHeightCheck();
 
+          // Load current styles into modal
           fontFamilySelect.value = element.style.fontFamily.replace(/['"]/g, '') || 'Arial';
           fontSizeSelect.value = parseInt(element.style.fontSize) || 16;
           textColorInput.value = rgbToHex(element.style.color) || '#000000';
           fontWeightSelect.value = element.style.fontWeight || 'normal';
         });
+        
+        element.addEventListener('blur', () => {
+           element.contentEditable = 'false';
+        });
       }
     }
+    
+    function selectElement(element) {
+      deselectAllElements();
+      selectedElement = element;
+      element.classList.add('selected');
+    }
+    
+    function deselectAllElements() {
+      document.querySelectorAll('.text-element.selected, .signature-element.selected').forEach(el => {
+        el.classList.remove('selected');
+        if (el.classList.contains('text-element')) {
+          el.contentEditable = 'false';
+        }
+      });
+      selectedElement = null;
+    }
 
-    document.addEventListener('mousemove', (e) => {
+    // Global listeners for dragging and deselecting
+    document.addEventListener('pointermove', (e) => {
       if (!isDragging || !selectedElement) return;
 
       const parentRect = selectedElement.parentElement.getBoundingClientRect();
       let x = e.clientX - parentRect.left - dragOffset.x;
       let y = e.clientY - parentRect.top - dragOffset.y;
 
+      // Constrain to parent bounds
       x = Math.max(0, Math.min(x, parentRect.width - selectedElement.offsetWidth));
       y = Math.max(0, Math.min(y, parentRect.height - selectedElement.offsetHeight));
 
@@ -984,35 +1188,33 @@
       selectedElement.style.top = `${y}px`;
     });
 
-    document.addEventListener('mouseup', () => {
+    document.addEventListener('pointerup', () => {
       isDragging = false;
+    });
+    
+    document.addEventListener('click', (e) => {
+       // Deselect if clicking outside an editable element
+       if (!e.target.closest('.text-element, .signature-element, .modal-content, .toolbar')) {
+         deselectAllElements();
+         textFormatModal.classList.remove('active');
+       }
     });
 
     // ===== TEXT FORMATTING =====
-    fontFamilySelect.addEventListener('change', () => {
+    fontFamilySelect.addEventListener('change', applyTextFormat);
+    fontSizeSelect.addEventListener('change', applyTextFormat);
+    textColorInput.addEventListener('change', applyTextFormat);
+    fontWeightSelect.addEventListener('change', applyTextFormat);
+
+    function applyTextFormat() {
       if (selectedElement && selectedElement.classList.contains('text-element')) {
         selectedElement.style.fontFamily = fontFamilySelect.value;
-      }
-    });
-
-    fontSizeSelect.addEventListener('change', () => {
-      if (selectedElement && selectedElement.classList.contains('text-element')) {
         selectedElement.style.fontSize = fontSizeSelect.value + 'px';
+        selectedElement.style.color = textColorInput.value;
+        selectedElement.style.fontWeight = fontWeightSelect.value;
         scheduleHeightCheck();
       }
-    });
-
-    textColorInput.addEventListener('change', () => {
-      if (selectedElement && selectedElement.classList.contains('text-element')) {
-        selectedElement.style.color = textColorInput.value;
-      }
-    });
-
-    fontWeightSelect.addEventListener('change', () => {
-      if (selectedElement && selectedElement.classList.contains('text-element')) {
-        selectedElement.style.fontWeight = fontWeightSelect.value;
-      }
-    });
+    }
 
     closeFormatBtn.addEventListener('click', () => {
       textFormatModal.classList.remove('active');
@@ -1051,22 +1253,23 @@
       };
     }
 
-    function getPdfLibFont(fontFamily, fontWeight) {
+    async function getPdfLibFont(doc, fontFamily, fontWeight) {
       fontFamily = fontFamily.replace(/['"]/g, '');
       let isBold = fontWeight === 'bold';
-
+      
+      // Embed standard fonts
       switch (fontFamily) {
         case 'Times New Roman':
         case 'Georgia':
-          return isBold ? StandardFonts.TimesRomanBold : StandardFonts.TimesRoman;
+          return await doc.embedFont(isBold ? StandardFonts.TimesRomanBold : StandardFonts.TimesRoman);
         case 'Courier New':
-          return isBold ? StandardFonts.CourierBold : StandardFonts.Courier;
+          return await doc.embedFont(isBold ? StandardFonts.CourierBold : StandardFonts.Courier);
         case 'Arial':
         case 'Helvetica':
         case 'Verdana':
         case 'Comic Sans MS':
         default:
-          return isBold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+          return await doc.embedFont(isBold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica);
       }
     }
 
@@ -1081,7 +1284,7 @@
       URL.revokeObjectURL(link.href);
     }
 
-    // ===== DOWNLOAD =====
+    // ===== DOWNLOAD (FIX for Bug 3) =====
     downloadBtn.addEventListener('click', async () => {
       if (!pdfDoc || !originalPdfBytes) return;
 
@@ -1091,18 +1294,37 @@
       try {
         const pdfLibDoc = await PDFDocument.load(originalPdfBytes);
         const pages = pdfLibDoc.getPages();
+        
+        const allPageContainers = document.querySelectorAll('.pdf-page');
 
-        const allLayers = document.querySelectorAll('.editable-layer');
-
-        for (const layer of allLayers) {
-          const pageNum = parseInt(layer.dataset.pageNum);
+        for (const pageContainer of allPageContainers) {
+          const pageNum = parseInt(pageContainer.dataset.pageNum);
           const page = pages[pageNum - 1];
-          const pageContainer = layer.closest('.pdf-page');
           const originalWidth = parseFloat(pageContainer.dataset.originalWidth);
           const originalHeight = parseFloat(pageContainer.dataset.originalHeight);
-          const renderedWidth = layer.offsetWidth;
-          const scale = renderedWidth / originalWidth;
+          
+          const renderedWidth = pageContainer.offsetWidth;
+          const scale = originalWidth / renderedWidth; // Note: This is inverted from old code for easier math
+          
+          // 1. Add Drawings
+          const drawingCanvas = pageContainer.querySelector('.drawing-canvas');
+          if (drawingCanvas) {
+             const drawingDataUrl = drawingCanvas.toDataURL();
+             // Check if canvas is not blank
+             if (!isCanvasBlank(drawingCanvas)) {
+                const pngImageBytes = await fetch(drawingDataUrl).then(res => res.arrayBuffer());
+                const pngImage = await pdfLibDoc.embedPng(pngImageBytes);
+                page.drawImage(pngImage, {
+                  x: 0,
+                  y: 0,
+                  width: originalWidth,
+                  height: originalHeight,
+                });
+             }
+          }
 
+          // 2. Add Text and Signatures
+          const layer = pageContainer.querySelector('.editable-layer');
           const elements = layer.querySelectorAll('.text-element, .signature-element');
 
           for (const el of elements) {
@@ -1111,19 +1333,25 @@
             const elWidth = el.offsetWidth;
             const elHeight = el.offsetHeight;
 
-            const pdfLib_x = elLeft / scale;
-            
-            if (el.classList.contains('text-element')) {
-              const text = el.textContent.replace('×', ''); 
-              const fontSize = parseFloat(el.style.fontSize) / scale;
-              const color = hexToRgb(el.style.color || '#000000');
-              const font = await pdfLibDoc.embedFont(getPdfLibFont(el.style.fontFamily, el.style.fontWeight));
-              
-              const pdfLib_y = originalHeight - (elTop / scale) - fontSize;
+            // Scale positions back to original PDF coordinates
+            const pdfLib_x = elLeft * scale;
+            const pdfLib_width = elWidth * scale;
+            const pdfLib_height = elHeight * scale;
+            // pdf-lib Y origin is bottom-left
+            const pdfLib_y = originalHeight - (elTop * scale) - pdfLib_height;
 
+            if (el.classList.contains('text-element')) {
+              const text = el.textContent.replace('×', ''); // Remove delete button text
+              const fontSize = parseFloat(el.style.fontSize) * scale;
+              const color = hexToRgb(el.style.color || '#000000');
+              const font = await getPdfLibFont(pdfLibDoc, el.style.fontFamily, el.style.fontWeight);
+              
+              // Calculate padding offset
+              const paddingLeft = parseFloat(getComputedStyle(el).paddingLeft) * scale;
+              
               page.drawText(text, {
-                x: pdfLib_x + (parseFloat(getComputedStyle(el).paddingLeft) / scale),
-                y: pdfLib_y,
+                x: pdfLib_x + paddingLeft,
+                y: pdfLib_y + (parseFloat(getComputedStyle(el).paddingBottom) * scale), // Adjust for baseline
                 size: fontSize,
                 font: font,
                 color: rgb(color.r, color.g, color.b),
@@ -1135,16 +1363,11 @@
               const imgBytes = await fetch(imgData).then(res => res.arrayBuffer());
               const signatureImage = await pdfLibDoc.embedPng(imgBytes);
 
-              const imgWidth = imgEl.offsetWidth / scale;
-              const imgHeight = imgEl.offsetHeight / scale;
-              
-              const pdfLib_y = originalHeight - (elTop / scale) - (elHeight / scale);
-
               page.drawImage(signatureImage, {
-                x: pdfLib_x + (parseFloat(getComputedStyle(el).paddingLeft) / scale),
+                x: pdfLib_x,
                 y: pdfLib_y,
-                width: imgWidth,
-                height: imgHeight,
+                width: pdfLib_width,
+                height: pdfLib_height,
               });
             }
           }
@@ -1161,9 +1384,16 @@
       downloadBtn.textContent = '💾 Download';
       downloadBtn.disabled = false;
     });
+    
+    function isCanvasBlank(canvas) {
+        return !canvas.getContext('2d')
+            .getImageData(0, 0, canvas.width, canvas.height).data
+            .some(channel => channel !== 0);
+    }
 
-    // ===== PRINT =====
+    // ===== PRINT (FIX for Bug 4) =====
     printBtn.addEventListener('click', () => {
+      // The @media print CSS rules will handle this
       window.print();
     });
 
@@ -1182,30 +1412,46 @@
       }
     });
 
-    // ===== FOURTHWALL SCROLLBAR FIX =====
+    // ===== FOURTHWALL SCROLLBAR FIX (per RULE 8 and TROUBLESHOOTING) =====
     let lastHeight = 0;
     let resizeTimer;
 
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
     function sendHeight() {
+      // Use scrollHeight for content height
       const height = document.body.scrollHeight;
       
+      // Only send message if height has *actually* changed 
       if (height !== lastHeight) {
         lastHeight = height;
         window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
     function scheduleHeightCheck() {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(sendHeight, 150);
+        // Clear any pending checks
+        clearTimeout(resizeTimer);
+        // Schedule a new check after 150ms
+        resizeTimer = setTimeout(sendHeight, 150);
     }
 
+    // Send height on initial load (with a slight delay)
+    // This fixes the "Content Cut-Off" race condition.
     window.addEventListener('load', () => {
-      setTimeout(sendHeight, 100);
+        setTimeout(sendHeight, 100);
     });
 
+    // Send height on window resize (debounced)
     window.addEventListener('resize', () => {
-      scheduleHeightCheck();
+        // Use scheduleHeightCheck for built-in debounce
+        scheduleHeightCheck();
     });
     // ===== END OF SCROLLBAR FIX =====
   </script>
