@@ -237,6 +237,7 @@
             text-align: center;
             font-family: sans-serif;
             transition: border-color 0.2s, background 0.2s;
+            -moz-appearance: textfield; /* Remove arrows in Firefox */
         }
 
         .segment-input-group input[type="number"]:focus {
@@ -245,10 +246,11 @@
             background: var(--hover-color);
         }
 
-        /* Remove number input arrows */
+        /* Remove number input arrows (Chrome, Safari) */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
-            opacity: 1;
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         /* ===== BUTTONS ===== */
@@ -398,10 +400,8 @@
 </head>
 <body>
 
-<!-- ===== APP CONTAINER ===== -->
 <div class="app-container">
     
-    <!-- ===== WHEEL SECTION ===== -->
     <div class="wheel-section">
         <div class="wheel-container">
             <div class="wheel-pointer"></div>
@@ -414,7 +414,6 @@
         </div>
     </div>
 
-    <!-- ===== CONTROLS SECTION ===== -->
     <div class="controls-section">
         <div class="controls-card">
             <div class="card-header">
@@ -424,26 +423,15 @@
                 </div>
             </div>
 
-            <!-- ===== SEGMENTS LIST ===== -->
             <div id="segments-list"></div>
 
-            <!-- ===== ACTION BUTTONS ===== -->
             <div class="action-buttons">
                 <button id="add-segment-btn" class="btn btn-accent" type="button">
                     Add Segment
                 </button>
             </div>
 
-            <!-- ===== UTILITY BUTTONS ===== -->
             <div class="utility-row">
-                <button id="share-btn" class="btn" type="button" title="Copy share link">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-right:6px;vertical-align:middle;">
-                        <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"></path>
-                        <polyline points="16 6 12 2 8 6"></polyline>
-                        <line x1="12" y1="2" x2="12" y2="15"></line>
-                    </svg>
-                    Share
-                </button>
                 <button id="reset-btn" class="btn" type="button" title="Reset to default">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-right:6px;vertical-align:middle;">
                         <polyline points="23 4 23 10 17 10"></polyline>
@@ -456,7 +444,6 @@
     </div>
 </div>
 
-<!-- ===== AUDIO ELEMENTS ===== -->
 <audio id="tick-sound" src="https://soundbible.com/mp3/Tick-DeepFrozenApps-397275646.mp3" preload="auto"></audio>
 <audio id="win-sound" src="https://contactherovibes.wordpress.com/wp-content/uploads/2025/07/chime-sound-7143.mp3" preload="auto"></audio>
 
@@ -469,7 +456,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const addSegmentBtn = document.getElementById('add-segment-btn');
     const resultDisplay = document.getElementById('result-display');
     const segmentCount = document.getElementById('segment-count');
-    const shareBtn = document.getElementById('share-btn');
     const resetBtn = document.getElementById('reset-btn');
     const tickSound = document.getElementById('tick-sound');
     const winSound = document.getElementById('win-sound');
@@ -775,23 +761,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSegmentsFromUI();
     };
 
-    // ===== SHARE FUNCTION =====
-    const shareWheel = () => {
-        const url = window.location.href;
-        navigator.clipboard.writeText(url).then(() => {
-            const originalText = shareBtn.innerHTML;
-            shareBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-right:6px;vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg>Copied!';
-            setTimeout(() => {
-                shareBtn.innerHTML = originalText;
-            }, 2000);
-        }).catch(() => {
-            resultDisplay.innerText = 'Failed to copy link';
-            setTimeout(() => {
-                resultDisplay.innerText = 'Click wheel to spin';
-            }, 2000);
-        });
-    };
-
     // ===== RESET FUNCTION =====
     const resetWheel = () => {
         window.history.replaceState(null, '', window.location.pathname);
@@ -808,7 +777,6 @@ document.addEventListener('DOMContentLoaded', () => {
         nextSegmentNumber++;
     });
     
-    shareBtn.addEventListener('click', shareWheel);
     resetBtn.addEventListener('click', resetWheel);
     canvas.addEventListener('click', spin);
     
