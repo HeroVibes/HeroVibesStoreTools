@@ -33,7 +33,6 @@
             color: var(--text-primary);
             padding: 24px 16px;
             overflow-x: hidden;
-            /* No min-height: 100vh; [cite: 59] */
         }
 
         /* ===== MAIN CONTAINER ===== */
@@ -138,69 +137,6 @@
         .rim-segment:nth-child(15) { transform: rotateY(337.5deg) rotateX(90deg); }
         .rim-segment:nth-child(16) { transform: rotateY(360deg) rotateX(90deg); }
 
-        /* ===== CONTROL BUTTONS ===== */
-        .controls {
-            background: var(--card-bg);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            padding: 24px 16px;
-            margin-bottom: 24px;
-        }
-
-        .btn {
-            position: relative;
-            width: 100%;
-            padding: 14px 16px;
-            border-radius: var(--radius);
-            background: var(--card-bg);
-            color: var(--text-primary);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            cursor: pointer;
-            overflow: hidden;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 75%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-            transform: skewX(-25deg);
-            transition: left 0.7s ease-in-out;
-        }
-
-        .btn:hover::before {
-            left: 125%;
-        }
-
-        .btn:hover {
-            background: var(--hover);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn:disabled::before {
-            display: none;
-        }
-
         /* ===== RESULT DISPLAY ===== */
         .result {
             background: var(--card-bg);
@@ -236,64 +172,35 @@
             background: var(--card-bg);
             border: 1px solid var(--outline);
             border-radius: var(--radius);
-            padding: 12px 20px;
+            padding: 0;
+            margin-bottom: 0;
             color: var(--text-primary);
             font-size: 14px;
             font-weight: 500;
             text-align: center;
-            transition: all 0.5s ease-in-out;
-            
-            /* Animate height and opacity */
-            max-height: 0;
+            transition: all 0.3s ease;
             opacity: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-            margin-bottom: 0;
+            height: 0;
             overflow: hidden;
         }
 
         #key-press-popup.show {
-            max-height: 100px; /* Animate in */
             opacity: 1;
-            padding-top: 12px;
-            padding-bottom: 12px;
+            height: auto;
+            padding: 12px 20px;
             margin-bottom: 24px;
         }
 
-        #key-press-popup .key {
+        .key {
+            display: inline-block;
             background: var(--bg);
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 4px;
-            font-family: monospace;
-            color: var(--accent);
-            font-size: 12px;
-        }
-
-        /* ===== INSTRUCTIONS ===== */
-        .instructions {
-            background: var(--card-bg);
             border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            padding: 16px;
-        }
-
-        .instructions p {
-            font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.6;
-            margin-bottom: 8px;
-        }
-
-        .instructions p:last-child {
-            margin-bottom: 0;
-        }
-
-        .instructions code {
-            background: var(--bg);
-            padding: 2px 6px;
-            border-radius: 4px;
             font-family: monospace;
             color: var(--accent);
+            font-weight: bold;
+            margin: 0 4px;
         }
 
         /* ===== MOBILE OPTIMIZATION ===== */
@@ -320,10 +227,6 @@
                 width: 180px;
                 height: 16px;
                 top: calc(50% - 8px);
-            }
-
-            .controls {
-                padding: 20px 12px;
             }
         }
 
@@ -361,21 +264,12 @@
             </div>
         </div>
 
-        <div class="controls">
-            <button class="btn" id="flip-btn" type="button">Flip Coin</button>
-        </div>
-
         <div class="result" id="result">
             <div class="result-text">Result:</div>
             <div class="result-value" id="result-value">-</div>
         </div>
 
         <div id="key-press-popup">Press <span class="key">F</span> for a quick flip!</div>
-
-        <div class="instructions">
-            <p><strong>How to use:</strong> Click the coin or button to flip.</p>
-            <p>Press <code>F</code> on your keyboard for quick flips.</p>
-        </div>
     </div>
 
     <audio id="flip-sound" src="https://contactherovibes.wordpress.com/wp-content/uploads/2025/07/coin-flip-shimmer-85750.mp3" preload="auto"></audio>
@@ -383,7 +277,6 @@
     <script>
         // ===== ELEMENT REFERENCES =====
         const coin = document.getElementById('coin');
-        const flipBtn = document.getElementById('flip-btn');
         const sound = document.getElementById('flip-sound');
         const result = document.getElementById('result');
         const resultValue = document.getElementById('result-value');
@@ -399,12 +292,11 @@
             
             isFlipping = true;
             coin.classList.add('flipping');
-            flipBtn.disabled = true;
             
             // Hide previous result
             if (result.classList.contains('show')) {
                 result.classList.remove('show');
-                scheduleHeightCheck(); // Call height check on hide [cite: 92]
+                scheduleHeightCheck();
             }
             
             // Play sound
@@ -442,22 +334,15 @@
                 currentRotation = finalRotation;
                 coin.style.transition = 'none';
                 coin.classList.remove('flipping');
-                flipBtn.disabled = false;
                 
                 // Show result
                 resultValue.textContent = finalResult;
                 result.classList.add('show');
-                
-                // Notify parent of height change (for result box) [cite: 92]
                 scheduleHeightCheck();
             }, 2000);
         }
 
         // ===== EVENT LISTENERS =====
-        flipBtn.addEventListener('click', () => {
-            flipCoin();
-        });
-
         coin.addEventListener('click', () => {
             flipCoin();
         });
@@ -474,20 +359,21 @@
 
         /**
          * Sends the current scrollHeight to the parent window if it has changed.
-         * This is the *only* function that should send a postMessage. [cite: 81]
+         * This is the *only* function that should send a postMessage.
          */
         function sendHeight() {
           const height = document.body.scrollHeight;
           
-          // Only send message if height has *actually* changed [cite: 83]
+          // Only send message if height has *actually* changed
           if (height !== lastHeight) {
             lastHeight = height;
-            window.parent.postMessage({ frameHeight: height }, '*'); [cite: 84]
+            window.parent.postMessage({ frameHeight: height }, '*');
           }
         }
 
         /**
-         * A debounced version of sendHeight() to be called on content changes. [cite: 85]
+         * A debounced version of sendHeight() to be called on content changes.
+         * This ensures we don't spam messages during rapid changes.
          */
         function scheduleHeightCheck() {
             // Clear any pending checks
@@ -497,29 +383,24 @@
         }
 
         // Send height on initial load (with a slight delay)
-        // This fixes the "Content Cut-Off" race condition. [cite: 88, 89]
         window.addEventListener('load', () => {
-            // Increased delay to 200ms to be safer
-            setTimeout(sendHeight, 200); 
+            setTimeout(sendHeight, 100);
             
-            // --- POPUP LOGIC ---
-            // Animate popup in after 500ms
+            // Show popup after initial load
             setTimeout(() => {
                 keyPopup.classList.add('show');
-                scheduleHeightCheck(); // Popup is growing [cite: 92]
+                scheduleHeightCheck();
 
-                // Animate popup out 2.5 seconds LATER
+                // Hide popup after 2.5 seconds
                 setTimeout(() => {
                     keyPopup.classList.remove('show');
-                    scheduleHeightCheck(); // Popup is shrinking [cite: 92]
-                }, 2500); // 2.5 seconds *after* it appears
-            }, 500); // 0.5 seconds after load
-            // --- END OF POPUP LOGIC ---
+                    scheduleHeightCheck();
+                }, 2500);
+            }, 500);
         });
 
-        // Send height on window resize (debounced) [cite: 90]
+        // Send height on window resize (debounced)
         window.addEventListener('resize', () => {
-            // Use scheduleHeightCheck for built-in debounce
             scheduleHeightCheck();
         });
         
