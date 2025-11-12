@@ -22,17 +22,20 @@
       padding: 0;
     }
 
+    /* --- MODIFIED: Removed padding for iframe height fix --- */
     body {
       background: var(--bg);
       font-family: sans-serif;
       color: var(--text-primary);
-      padding: 24px 16px;
+      margin: 0;
+      padding: 0;
     }
 
     /* --- MAIN CONTAINER --- */
+    /* --- MODIFIED: Added margin to restore body spacing --- */
     .editor-container {
       max-width: 1200px;
-      margin: 0 auto;
+      margin: 24px auto;
       background: var(--card-bg);
       border-radius: var(--radius);
       border: 1px solid var(--outline);
@@ -366,10 +369,11 @@
 
     /* --- RESPONSIVE --- */
     @media (max-width: 768px) {
-      body {
-        padding: 16px 8px;
+      /* --- MODIFIED: Added margin to restore body spacing --- */
+      .editor-container {
+        margin: 16px 8px;
       }
-
+      
       .toolbar {
         padding: 12px;
       }
@@ -639,6 +643,9 @@
       uploadArea.style.display = 'none';
       loading.classList.add('active');
       pdfViewer.classList.remove('active');
+      
+      // Manually notify script that height is changing
+      scheduleHeightCheck();
 
       try {
         const arrayBuffer = await file.arrayBuffer();
@@ -661,13 +668,15 @@
         zoomInBtn.disabled = false;
         zoomOutBtn.disabled = false;
 
-        scheduleHeightCheck();
       } catch (error) {
         console.error('Error loading PDF:', error);
         loading.classList.remove('active');
         uploadArea.style.display = 'block';
         alert('Error loading PDF. Please try again.');
       }
+      
+      // Manually notify script that height has changed
+      scheduleHeightCheck();
     }
 
     /* --- RENDER PAGES --- */
@@ -711,7 +720,8 @@
         pageContainer.appendChild(editableLayer);
         pdfPages.appendChild(pageContainer);
       }
-
+      
+      // Manually notify script that height has changed
       scheduleHeightCheck();
     }
 
@@ -761,7 +771,8 @@
           attachElementHandlers(el);
         }
       });
-
+      
+      // Manually notify script that height has changed
       scheduleHeightCheck();
     }
 
@@ -815,7 +826,8 @@
       // Open format modal
       selectedElement = textEl;
       textFormatModal.classList.add('active');
-
+      
+      // Manually notify script that height has changed
       scheduleHeightCheck();
     }
 
@@ -835,7 +847,8 @@
       signatureCtx.lineWidth = 2;
       signatureCtx.lineCap = 'round';
       signatureCtx.lineJoin = 'round';
-
+      
+      // Manually notify script that height has changed
       scheduleHeightCheck();
     });
 
@@ -956,6 +969,7 @@
         element.addEventListener('dblclick', () => {
           selectedElement = element;
           textFormatModal.classList.add('active');
+          scheduleHeightCheck();
 
           // Load current values
           fontFamilySelect.value = element.style.fontFamily.replace(/['"]/g, '') || 'Arial';
