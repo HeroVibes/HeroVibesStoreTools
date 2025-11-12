@@ -145,14 +145,6 @@
             padding: 16px;
             text-align: center;
             margin-bottom: 24px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s ease;
-        }
-
-        .result.show {
-            opacity: 1;
-            transform: translateY(0);
         }
 
         .result-text {
@@ -165,30 +157,6 @@
             font-size: 20px;
             font-weight: bold;
             color: var(--text-primary);
-        }
-
-        /* ===== KEY PRESS POPUP (IN-FLOW) ===== */
-        #key-press-popup {
-            background: var(--card-bg);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            padding: 0;
-            margin-bottom: 0;
-            color: var(--text-primary);
-            font-size: 14px;
-            font-weight: 500;
-            text-align: center;
-            transition: all 0.3s ease;
-            opacity: 0;
-            height: 0;
-            overflow: hidden;
-        }
-
-        #key-press-popup.show {
-            opacity: 1;
-            height: auto;
-            padding: 12px 20px;
-            margin-bottom: 24px;
         }
 
         .key {
@@ -265,26 +233,59 @@
         </div>
 
         <div class="result" id="result">
-            <div class="result-text">Result:</div>
+            <div class="result-text">Click the coin or press <span class="key">F</span> to flip!</div>
             <div class="result-value" id="result-value">-</div>
         </div>
-
-        <div id="key-press-popup">Press <span class="key">F</span> for a quick flip!</div>
     </div>
-
-    <audio id="flip-sound" src="https://contactherovibes.wordpress.com/wp-content/uploads/2025/07/coin-flip-shimmer-85750.mp3" preload="auto"></audio>
 
     <script>
         // ===== ELEMENT REFERENCES =====
         const coin = document.getElementById('coin');
-        const sound = document.getElementById('flip-sound');
         const result = document.getElementById('result');
         const resultValue = document.getElementById('result-value');
-        const keyPopup = document.getElementById('key-press-popup');
+        const resultText = document.querySelector('.result-text');
 
         // ===== STATE VARIABLES =====
         let isFlipping = false;
         let currentRotation = 0;
+        let hasFlipped = false;
+        let audioContext = null;
+        let audioBuffer = null;
+
+        // ===== AUDIO SETUP =====
+        // Load and decode audio file
+        async function loadAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const response = await fetch('https://herovibes.github.io/HeroVibesStoreTools/CoinFlipper/CoinFlipSFX.mp3');
+                const arrayBuffer = await response.arrayBuffer();
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            } catch (error) {
+                console.log('Audio loading failed:', error);
+            }
+        }
+
+        // Play sound using Web Audio API
+        function playSound() {
+            if (!audioContext || !audioBuffer) return;
+            
+            try {
+                // Resume audio context if suspended (browser autoplay policy)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                const source = audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(audioContext.destination);
+                source.start(0);
+            } catch (error) {
+                console.log('Audio playback failed:', error);
+            }
+        }
+
+        // Load audio on page load
+        loadAudio();
 
         // ===== FLIP FUNCTION =====
         function flipCoin() {
@@ -293,17 +294,15 @@
             isFlipping = true;
             coin.classList.add('flipping');
             
-            // Hide previous result
-            if (result.classList.contains('show')) {
-                result.classList.remove('show');
+            // On first flip, change the result text
+            if (!hasFlipped) {
+                hasFlipped = true;
+                resultText.textContent = 'Result:';
                 scheduleHeightCheck();
             }
             
             // Play sound
-            sound.currentTime = 0;
-            sound.play().catch(() => {
-                // Handle autoplay restrictions
-            });
+            playSound();
 
             // Calculate rotation
             let totalSpins = 5 * 360;
@@ -337,8 +336,6 @@
                 
                 // Show result
                 resultValue.textContent = finalResult;
-                result.classList.add('show');
-                scheduleHeightCheck();
             }, 2000);
         }
 
@@ -385,18 +382,6 @@
         // Send height on initial load (with a slight delay)
         window.addEventListener('load', () => {
             setTimeout(sendHeight, 100);
-            
-            // Show popup after initial load
-            setTimeout(() => {
-                keyPopup.classList.add('show');
-                scheduleHeightCheck();
-
-                // Hide popup after 2.5 seconds
-                setTimeout(() => {
-                    keyPopup.classList.remove('show');
-                    scheduleHeightCheck();
-                }, 2500);
-            }, 500);
         });
 
         // Send height on window resize (debounced)
