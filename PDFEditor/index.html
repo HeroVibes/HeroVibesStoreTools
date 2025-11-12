@@ -27,6 +27,7 @@
       color: var(--text-primary);
       /* DEFAULT PADDING per DESIGN GUIDE */
       padding: 24px 16px;
+      /* Remove min-height per TROUBLESHOOTING */
     }
 
     /* ===== MAIN CONTAINER ===== */
@@ -280,6 +281,18 @@
       user-select: text;
       background: rgba(135, 169, 255, 0.15); /* Light bg when editing */
     }
+    
+    .signature-element {
+       border-style: dashed;
+       padding: 0;
+    }
+    
+    .signature-element img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
 
     .delete-btn {
       position: absolute;
@@ -465,44 +478,16 @@
       text-align: center;
     }
     
-    /* ===== PRINT STYLES (FIX for Bug 4) ===== */
-    @media print {
-      /* Hide everything */
-      body * {
-        visibility: hidden;
-      }
-      
-      /* Show only the PDF viewer and its contents */
-      .pdf-viewer, .pdf-viewer * {
-        visibility: visible;
-      }
-      
-      /* Reset positioning for printing */
-      .pdf-viewer {
-        position: absolute;
-        left: 0;
-        top: 0;
-        padding: 0;
-        margin: 0;
-      }
-      
-      .pdf-page {
-        box-shadow: none;
-        border: none;
-        margin: 0;
-        padding: 0;
-        border-radius: 0;
-      }
-      
-      .delete-btn {
-        display: none !important;
-      }
+    /* ===== PRINT STYLES (Hidden iFrame) ===== */
+    /* We no longer use @media print, as it's unreliable */
+    #print-iframe {
+        display: none;
     }
   </style>
 </head>
 <body>
   <div class="editor-container">
-    <span class="version-display">V1.1.0</span>
+    <span class="version-display">V1.2.0</span>
 
     <div class="toolbar">
       <div class="toolbar-section">
@@ -625,9 +610,12 @@
       </div>
     </div>
   </div>
+  
+  <iframe id="print-iframe"></iframe>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@latest/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
     // ===== PDF.JS SETUP =====
@@ -678,6 +666,7 @@
     const textColorInput = document.getElementById('text-color-input');
     const fontWeightSelect = document.getElementById('font-weight-select');
     const closeFormatBtn = document.getElementById('close-format-btn');
+    const printIframe = document.getElementById('print-iframe');
 
     // ===== UPLOAD HANDLERS =====
     uploadArea.addEventListener('click', () => fileInput.click());
@@ -751,7 +740,6 @@
         const page = await pdfDoc.getPage(pageNum);
         const scale = 1.5 * currentZoom;
         const viewport = page.getViewport({ scale });
-        const unscaledViewport = page.getViewport({ scale: 1.0 });
 
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -766,8 +754,6 @@
         const pageContainer = document.createElement('div');
         pageContainer.className = 'pdf-page';
         pageContainer.dataset.pageNum = pageNum;
-        pageContainer.dataset.originalWidth = unscaledViewport.width;
-        pageContainer.dataset.originalHeight = unscaledViewport.height;
 
         // Base PDF image
         const img = document.createElement('img');
@@ -823,7 +809,7 @@
       scheduleHeightCheck();
     }
 
-    // ===== MODE CONTROLLER (FIX for Bugs 1, 2, 5) =====
+    // ===== MODE CONTROLLER =====
     function setMode(mode) {
       currentMode = mode;
       
@@ -844,7 +830,7 @@
       deselectAllElements();
     }
 
-    // ===== ZOOM CONTROLS (FIX for Bug 6) =====
+    // ===== ZOOM CONTROLS =====
     zoomInBtn.addEventListener('click', () => {
       if (currentZoom < 2.0) {
         currentZoom += 0.25;
@@ -870,10 +856,12 @@
 
       document.querySelectorAll('.drawing-canvas').forEach(canvas => {
         const pageNum = parseInt(canvas.dataset.pageNum);
-        existingEdits.drawings.push({
-          pageNum,
-          data: canvas.toDataURL()
-        });
+        if (!isCanvasBlank(canvas)) {
+            existingEdits.drawings.push({
+                pageNum,
+                data: canvas.toDataURL()
+            });
+        }
       });
       
       document.querySelectorAll('.editable-layer').forEach(layer => {
@@ -890,7 +878,7 @@
       await renderAllPages(existingEdits);
     }
 
-    // ===== ADD TEXT (FIX for Bug 1) =====
+    // ===== ADD TEXT (FIXED) =====
     addTextBtn.addEventListener('click', () => {
       setMode(currentMode === 'text' ? 'select' : 'text');
     });
@@ -911,7 +899,6 @@
     function addTextElement(layer, x, y) {
       const textEl = document.createElement('div');
       textEl.className = 'text-element';
-      textEl.contentEditable = 'true';
       textEl.textContent = 'Edit me';
       textEl.style.left = `${x}px`;
       textEl.style.top = `${y}px`;
@@ -936,14 +923,21 @@
 
       attachElementHandlers(textEl);
       
-      // Select the new text element
-      selectElement(textEl);
-      textEl.focus(); // Focus to edit immediately
+      // --- NEW EDIT LOGIC ---
+      selectElement(textEl); // Select it
+      textEl.contentEditable = 'true'; // Make editable
+      textEl.focus(); // Focus it
+      document.execCommand('selectAll', false, null); // Select text
+      
+      // Show format modal
+      textFormatModal.classList.add('active');
+      loadFormatModal(textEl);
+      // --- END NEW EDIT LOGIC ---
       
       scheduleHeightCheck();
     }
 
-    // ===== DRAWING (FIX for Bug 5) =====
+    // ===== DRAWING =====
     drawBtn.addEventListener('click', () => {
       setMode(currentMode === 'draw' ? 'select' : 'draw');
     });
@@ -1010,7 +1004,6 @@
       signatureModal.classList.add('active');
 
       const canvas = signaturePad;
-      // Resize canvas based on its *actual* displayed size
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
       signatureCtx = canvas.getContext('2d');
@@ -1084,15 +1077,11 @@
       sigEl.className = 'signature-element';
       sigEl.style.left = `${x}px`;
       sigEl.style.top = `${y}px`;
-      sigEl.style.border = 'none';
-      sigEl.style.padding = '0';
+      sigEl.style.width = '200px'; // Default width
 
       const img = document.createElement('img');
       img.src = imageData;
-      img.style.display = 'block';
-      img.style.maxWidth = '200px';
       img.style.height = 'auto';
-      img.style.pointerEvents = 'none'; // Click-through image
 
       const deleteBtn = document.createElement('div');
       deleteBtn.className = 'delete-btn';
@@ -1112,7 +1101,7 @@
       scheduleHeightCheck();
     }
 
-    // ===== ELEMENT HANDLERS (Drag, Select, Edit) =====
+    // ===== ELEMENT HANDLERS (Drag, Select, Edit) (FIXED) =====
     function attachElementHandlers(element) {
       element.addEventListener('pointerdown', (e) => {
         if (e.target.classList.contains('delete-btn')) return;
@@ -1125,33 +1114,23 @@
         isDragging = true;
         selectElement(element);
 
-        const rect = element.getBoundingClientRect();
         const parentRect = element.parentElement.getBoundingClientRect();
         
-        // Calculate offset relative to parent layer
         dragOffset.x = e.clientX - parentRect.left - parseFloat(element.style.left);
         dragOffset.y = e.clientY - parentRect.top - parseFloat(element.style.top);
       });
 
       if (element.classList.contains('text-element')) {
-        element.addEventListener('dblclick', () => {
-          element.contentEditable = 'true';
-          element.focus();
-          selectElement(element);
-          
-          // Show formatting modal
-          textFormatModal.classList.add('active');
-          scheduleHeightCheck();
-
-          // Load current styles into modal
-          fontFamilySelect.value = element.style.fontFamily.replace(/['"]/g, '') || 'Arial';
-          fontSizeSelect.value = parseInt(element.style.fontSize) || 16;
-          textColorInput.value = rgbToHex(element.style.color) || '#000000';
-          fontWeightSelect.value = element.style.fontWeight || 'normal';
+        element.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            element.contentEditable = 'true';
+            element.focus();
+            selectElement(element);
+            textFormatModal.classList.add('active');
         });
-        
         element.addEventListener('blur', () => {
-           element.contentEditable = 'false';
+            element.contentEditable = 'false';
+            // Don't close modal, user might still be formatting
         });
       }
     }
@@ -1160,6 +1139,13 @@
       deselectAllElements();
       selectedElement = element;
       element.classList.add('selected');
+      
+      // If text, show format modal and load styles
+      if (element.classList.contains('text-element')) {
+          textFormatModal.classList.add('active');
+          loadFormatModal(element);
+          scheduleHeightCheck();
+      }
     }
     
     function deselectAllElements() {
@@ -1205,6 +1191,13 @@
     fontSizeSelect.addEventListener('change', applyTextFormat);
     textColorInput.addEventListener('change', applyTextFormat);
     fontWeightSelect.addEventListener('change', applyTextFormat);
+    
+    function loadFormatModal(element) {
+        fontFamilySelect.value = element.style.fontFamily.replace(/['"]/g, '') || 'Arial';
+        fontSizeSelect.value = parseInt(element.style.fontSize) || 16;
+        textColorInput.value = rgbToHex(element.style.color) || '#000000';
+        fontWeightSelect.value = element.style.fontWeight || 'normal';
+    }
 
     function applyTextFormat() {
       if (selectedElement && selectedElement.classList.contains('text-element')) {
@@ -1235,44 +1228,6 @@
       }).join('');
     }
 
-    function hexToRgb(hex) {
-      let r = 0, g = 0, b = 0;
-      if (hex.length == 4) {
-        r = "0x" + hex[1] + hex[1];
-        g = "0x" + hex[2] + hex[2];
-        b = "0x" + hex[3] + hex[3];
-      } else if (hex.length == 7) {
-        r = "0x" + hex[1] + hex[2];
-        g = "0x" + hex[3] + hex[4];
-        b = "0x" + hex[5] + hex[6];
-      }
-      return {
-        r: +r / 255,
-        g: +g / 255,
-        b: +b / 255
-      };
-    }
-
-    async function getPdfLibFont(doc, fontFamily, fontWeight) {
-      fontFamily = fontFamily.replace(/['"]/g, '');
-      let isBold = fontWeight === 'bold';
-      
-      // Embed standard fonts
-      switch (fontFamily) {
-        case 'Times New Roman':
-        case 'Georgia':
-          return await doc.embedFont(isBold ? StandardFonts.TimesRomanBold : StandardFonts.TimesRoman);
-        case 'Courier New':
-          return await doc.embedFont(isBold ? StandardFonts.CourierBold : StandardFonts.Courier);
-        case 'Arial':
-        case 'Helvetica':
-        case 'Verdana':
-        case 'Comic Sans MS':
-        default:
-          return await doc.embedFont(isBold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica);
-      }
-    }
-
     function downloadFile(bytes, fileName, mimeType) {
       const blob = new Blob([bytes], { type: mimeType });
       const link = document.createElement('a');
@@ -1283,99 +1238,70 @@
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
     }
+    
+    function isCanvasBlank(canvas) {
+        return !canvas.getContext('2d')
+            .getImageData(0, 0, canvas.width, canvas.height).data
+            .some(channel => channel !== 0);
+    }
 
-    // ===== DOWNLOAD (FIX for Bug 3) =====
+    // ===== PDF GENERATION (FIXED) =====
+    async function generateFinalPDF() {
+        const pdfLibDoc = await PDFDocument.load(originalPdfBytes);
+        const pages = pdfLibDoc.getPages();
+        
+        for (let i = 0; i < pages.length; i++) {
+            const page = pages[i];
+            const pageNum = i + 1;
+            const pageContainer = document.querySelector(`.pdf-page[data-page-num="${pageNum}"]`);
+            
+            const { width: originalWidth, height: originalHeight } = page.getSize();
+            
+            // 1. Add Drawings
+            const drawingCanvas = pageContainer.querySelector('.drawing-canvas');
+            if (drawingCanvas && !isCanvasBlank(drawingCanvas)) {
+                const pngData = drawingCanvas.toDataURL('image/png');
+                const pngImage = await pdfLibDoc.embedPng(pngData);
+                page.drawImage(pngImage, { x: 0, y: 0, width: originalWidth, height: originalHeight });
+            }
+
+            // 2. Add HTML Elements (Text, Signatures) using html2canvas
+            const editableLayer = pageContainer.querySelector('.editable-layer');
+            
+            // Temporarily remove 'selected' class to avoid printing border
+            const currentlySelected = editableLayer.querySelector('.selected');
+            if (currentlySelected) currentlySelected.classList.remove('selected');
+            
+            const canvas = await html2canvas(editableLayer, {
+                backgroundColor: null, // Transparent background
+                // Match capture size to rendered size
+                width: pageContainer.offsetWidth, 
+                height: pageContainer.offsetHeight,
+                scale: 2 // Higher res capture
+            });
+            
+            // Add 'selected' class back
+            if (currentlySelected) currentlySelected.classList.add('selected');
+
+            const pngData = canvas.toDataURL('image/png');
+            // Check if canvas is not blank (html2canvas can produce blank images)
+            if (pngData.length > 1000) { // Simple check
+                const pngImage = await pdfLibDoc.embedPng(pngData);
+                page.drawImage(pngImage, { x: 0, y: 0, width: originalWidth, height: originalHeight });
+            }
+        }
+        return await pdfLibDoc.save();
+    }
+
+    // ===== DOWNLOAD (FIXED) =====
     downloadBtn.addEventListener('click', async () => {
-      if (!pdfDoc || !originalPdfBytes) return;
-
+      if (!pdfDoc) return;
       downloadBtn.textContent = 'Processing...';
       downloadBtn.disabled = true;
 
       try {
-        const pdfLibDoc = await PDFDocument.load(originalPdfBytes);
-        const pages = pdfLibDoc.getPages();
-        
-        const allPageContainers = document.querySelectorAll('.pdf-page');
-
-        for (const pageContainer of allPageContainers) {
-          const pageNum = parseInt(pageContainer.dataset.pageNum);
-          const page = pages[pageNum - 1];
-          const originalWidth = parseFloat(pageContainer.dataset.originalWidth);
-          const originalHeight = parseFloat(pageContainer.dataset.originalHeight);
-          
-          const renderedWidth = pageContainer.offsetWidth;
-          const scale = originalWidth / renderedWidth; // Note: This is inverted from old code for easier math
-          
-          // 1. Add Drawings
-          const drawingCanvas = pageContainer.querySelector('.drawing-canvas');
-          if (drawingCanvas) {
-             const drawingDataUrl = drawingCanvas.toDataURL();
-             // Check if canvas is not blank
-             if (!isCanvasBlank(drawingCanvas)) {
-                const pngImageBytes = await fetch(drawingDataUrl).then(res => res.arrayBuffer());
-                const pngImage = await pdfLibDoc.embedPng(pngImageBytes);
-                page.drawImage(pngImage, {
-                  x: 0,
-                  y: 0,
-                  width: originalWidth,
-                  height: originalHeight,
-                });
-             }
-          }
-
-          // 2. Add Text and Signatures
-          const layer = pageContainer.querySelector('.editable-layer');
-          const elements = layer.querySelectorAll('.text-element, .signature-element');
-
-          for (const el of elements) {
-            const elLeft = parseFloat(el.style.left);
-            const elTop = parseFloat(el.style.top);
-            const elWidth = el.offsetWidth;
-            const elHeight = el.offsetHeight;
-
-            // Scale positions back to original PDF coordinates
-            const pdfLib_x = elLeft * scale;
-            const pdfLib_width = elWidth * scale;
-            const pdfLib_height = elHeight * scale;
-            // pdf-lib Y origin is bottom-left
-            const pdfLib_y = originalHeight - (elTop * scale) - pdfLib_height;
-
-            if (el.classList.contains('text-element')) {
-              const text = el.textContent.replace('×', ''); // Remove delete button text
-              const fontSize = parseFloat(el.style.fontSize) * scale;
-              const color = hexToRgb(el.style.color || '#000000');
-              const font = await getPdfLibFont(pdfLibDoc, el.style.fontFamily, el.style.fontWeight);
-              
-              // Calculate padding offset
-              const paddingLeft = parseFloat(getComputedStyle(el).paddingLeft) * scale;
-              
-              page.drawText(text, {
-                x: pdfLib_x + paddingLeft,
-                y: pdfLib_y + (parseFloat(getComputedStyle(el).paddingBottom) * scale), // Adjust for baseline
-                size: fontSize,
-                font: font,
-                color: rgb(color.r, color.g, color.b),
-              });
-
-            } else if (el.classList.contains('signature-element')) {
-              const imgEl = el.querySelector('img');
-              const imgData = imgEl.src;
-              const imgBytes = await fetch(imgData).then(res => res.arrayBuffer());
-              const signatureImage = await pdfLibDoc.embedPng(imgBytes);
-
-              page.drawImage(signatureImage, {
-                x: pdfLib_x,
-                y: pdfLib_y,
-                width: pdfLib_width,
-                height: pdfLib_height,
-              });
-            }
-          }
-        }
-
-        const pdfBytes = await pdfLibDoc.save();
+        const pdfBytes = await generateFinalPDF();
         downloadFile(pdfBytes, "edited-document.pdf", "application/pdf");
-
       } catch (error) {
         console.error('Error saving PDF:', error);
         alert('An error occurred while saving the PDF. Please try again.');
@@ -1384,17 +1310,46 @@
       downloadBtn.textContent = '💾 Download';
       downloadBtn.disabled = false;
     });
-    
-    function isCanvasBlank(canvas) {
-        return !canvas.getContext('2d')
-            .getImageData(0, 0, canvas.width, canvas.height).data
-            .some(channel => channel !== 0);
-    }
 
-    // ===== PRINT (FIX for Bug 4) =====
-    printBtn.addEventListener('click', () => {
-      // The @media print CSS rules will handle this
-      window.print();
+    // ===== PRINT (FIXED) =====
+    printBtn.addEventListener('click', async () => {
+      if (!pdfDoc) return;
+      printBtn.textContent = 'Preparing...';
+      printBtn.disabled = true;
+
+      try {
+        const pdfBytes = await generateFinalPDF();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const blobUrl = URL.createObjectURL(blob);
+        
+        // Clean up any old iframe
+        const oldFrame = document.getElementById('print-iframe-instance');
+        if (oldFrame) {
+            document.body.removeChild(oldFrame);
+            URL.revokeObjectURL(oldFrame.src);
+        }
+
+        const printFrame = document.createElement('iframe');
+        printFrame.id = 'print-iframe-instance';
+        printFrame.style.display = 'none';
+        printFrame.src = blobUrl;
+        document.body.appendChild(printFrame);
+        
+        printFrame.onload = () => {
+            printFrame.contentWindow.print();
+            // Clean up after a delay to allow print dialog to open
+            setTimeout(() => {
+                document.body.removeChild(printFrame);
+                URL.revokeObjectURL(blobUrl);
+            }, 2000);
+        };
+      } catch (error) {
+        console.error('Error printing PDF:', error);
+        alert('An error occurred while preparing the PDF for printing.');
+      }
+
+      printBtn.textContent = '🖨️ Print';
+      printBtn.disabled = false;
     });
 
     // ===== CLOSE MODALS ON OUTSIDE CLICK =====
