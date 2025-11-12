@@ -155,33 +155,27 @@
             border-radius: var(--radius);
             padding: 24px 16px;
             margin-bottom: 16px;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
+            text-align: center;
         }
 
         .btn {
             position: relative;
-            flex: 1;
-            padding: 12px 16px;
+            padding: 12px 24px;
             border-radius: var(--radius);
-            background: var(--card-bg);
-            color: var(--text-primary);
+            background: var(--accent);
+            color: #1F1F1F;
             border: 1px solid rgba(255, 255, 255, 0.06);
             cursor: pointer;
             overflow: hidden;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: bold;
             transition: all 0.2s ease;
             font-family: sans-serif;
         }
 
         .btn:hover:not(:disabled) {
-            background: var(--hover);
-            border-color: var(--accent);
+            background: #99b7ff;
+            box-shadow: 0 0 20px rgba(135, 169, 255, 0.3);
         }
 
         .btn:disabled {
@@ -205,15 +199,10 @@
             left: 125%;
         }
 
-        .btn-primary {
-            background: var(--accent);
-            color: #1F1F1F;
-            font-weight: bold;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background: #99b7ff;
-            box-shadow: 0 0 20px rgba(135, 169, 255, 0.3);
+        .hint-text {
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
         }
 
         /* ===== HISTORY SECTION ===== */
@@ -284,22 +273,6 @@
             }
         }
 
-        /* ===== INSTRUCTIONS ===== */
-        .instructions {
-            background: var(--card-bg);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            padding: 16px;
-            margin-top: 16px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        .instructions strong {
-            color: var(--accent);
-        }
-
         /* ===== MOBILE OPTIMIZATION ===== */
         @media (max-width: 480px) {
             body {
@@ -325,10 +298,6 @@
             .dot {
                 width: 16px;
                 height: 16px;
-            }
-
-            .button-group {
-                flex-direction: column;
             }
 
             .btn {
@@ -406,10 +375,8 @@
 
         <!-- ===== CONTROLS SECTION ===== -->
         <div class="controls">
-            <div class="button-group">
-                <button class="btn btn-primary" id="roll-btn">Roll Dice</button>
-                <button class="btn" id="lucky-btn">Lucky 6</button>
-            </div>
+            <button class="btn" id="roll-btn">Roll Dice</button>
+            <div class="hint-text">Tap or press R</div>
         </div>
 
         <!-- ===== ROLL HISTORY ===== -->
@@ -422,21 +389,15 @@
                 <div class="history-empty">No rolls yet. Click the dice or press R to roll!</div>
             </div>
         </div>
-
-        <!-- ===== INSTRUCTIONS ===== -->
-        <div class="instructions">
-            <strong>How to use:</strong> Click the dice, press <strong>R</strong>, or use the buttons below. Press <strong>Ctrl+Alt+R</strong> or click "Lucky 6" to always roll a 6!
-        </div>
     </div>
 
-    <audio id="dice-sound" src="https://contactherovibes.wordpress.com/wp-content/uploads/2025/07/rpg-dice-rolling-95182.mp3" preload="auto"></audio>
+    <audio id="dice-sound" src="https://herovibes.github.io/HeroVibesStoreTools/DiceRoller/SFX/DiceRollSFX.mp3" preload="auto"></audio>
 
     <script>
         // ===== DICE ROLLER LOGIC =====
         const dice = document.getElementById('dice');
         const sound = document.getElementById('dice-sound');
         const rollBtn = document.getElementById('roll-btn');
-        const luckyBtn = document.getElementById('lucky-btn');
         const resultDisplay = document.getElementById('result-display');
         const historyList = document.getElementById('history-list');
         const clearHistoryBtn = document.getElementById('clear-history');
@@ -485,7 +446,6 @@
             isRolling = true;
             dice.classList.add('rolling');
             rollBtn.disabled = true;
-            luckyBtn.disabled = true;
 
             sound.currentTime = 0;
             sound.play().catch(() => {});
@@ -506,24 +466,26 @@
                 isRolling = false;
                 dice.classList.remove('rolling');
                 rollBtn.disabled = false;
-                luckyBtn.disabled = false;
                 showResult(result);
                 updateHistory(result);
             }, 3000);
         }
 
         // ===== EVENT LISTENERS =====
-        rollBtn.addEventListener('click', () => rollDice());
-        luckyBtn.addEventListener('click', () => rollDice(6));
+        rollBtn.addEventListener('click', (e) => {
+            const force6 = e.ctrlKey || e.metaKey; // Ctrl on Windows/Linux, Cmd on Mac
+            rollDice(force6 ? 6 : null);
+        });
+
         dice.addEventListener('click', (e) => {
-            const force6 = e.ctrlKey && e.altKey;
+            const force6 = e.ctrlKey || e.metaKey; // Ctrl on Windows/Linux, Cmd on Mac
             rollDice(force6 ? 6 : null);
         });
 
         window.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'r') {
                 e.preventDefault();
-                const force6 = e.ctrlKey && e.altKey;
+                const force6 = e.ctrlKey || e.metaKey; // Ctrl on Windows/Linux, Cmd on Mac
                 rollDice(force6 ? 6 : null);
             }
         });
