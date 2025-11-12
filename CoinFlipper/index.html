@@ -33,7 +33,7 @@
             color: var(--text-primary);
             padding: 24px 16px;
             overflow-x: hidden;
-            /* Remove min-height: 100vh; to fix FourthWall scroll bug [cite: 53, 60] */
+            /* No min-height: 100vh; [cite: 60] */
         }
 
         /* ===== MAIN CONTAINER ===== */
@@ -231,6 +231,44 @@
             color: var(--text-primary);
         }
 
+        /* ===== KEY PRESS POPUP (IN-FLOW) ===== */
+        #key-press-popup {
+            background: var(--card-bg);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 12px 20px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.5s ease-in-out;
+            
+            /* Animate height and opacity */
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-bottom: 0;
+            overflow: hidden;
+        }
+
+        #key-press-popup.show {
+            max-height: 100px; /* Animate in */
+            opacity: 1;
+            padding-top: 12px;
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+        }
+
+        #key-press-popup .key {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--accent);
+            font-size: 12px;
+        }
+
         /* ===== INSTRUCTIONS ===== */
         .instructions {
             background: var(--card-bg);
@@ -257,42 +295,6 @@
             font-family: monospace;
             color: var(--accent);
         }
-
-        /* ===== KEY PRESS POPUP (NEW) ===== */
-        #key-press-popup {
-            position: fixed; /* [cite: 46] */
-            bottom: -100px; /* Start off-screen */
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--card-bg);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            padding: 12px 20px;
-            color: var(--text-primary);
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            z-index: 100;
-            transition: bottom 0.5s ease-in-out, opacity 0.5s ease-in-out;
-            opacity: 0;
-            pointer-events: none; /* [cite: 49] */
-        }
-
-        #key-press-popup.show {
-            bottom: 30px; /* Animate in */
-            opacity: 1;
-            pointer-events: auto; /* [cite: 48] */
-        }
-
-        #key-press-popup .key {
-            background: var(--bg);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            color: var(--accent);
-            font-size: 12px;
-        }
-
 
         /* ===== MOBILE OPTIMIZATION ===== */
         @media (max-width: 480px) {
@@ -323,16 +325,6 @@
             .controls {
                 padding: 20px 12px;
             }
-            
-            #key-press-popup {
-                bottom: 15px;
-                width: 90%;
-                text-align: center;
-            }
-
-            #key-press-popup.show {
-                bottom: 15px;
-            }
         }
 
         /* ===== ANIMATION CLASSES ===== */
@@ -342,8 +334,6 @@
     </style>
 </head>
 <body>
-
-    <div id="key-press-popup" class="popup">Press <span class="key">F</span> for a quick flip!</div>
 
     <div class="container">
         <div class="coin-display">
@@ -380,6 +370,8 @@
             <div class="result-value" id="result-value">-</div>
         </div>
 
+        <div id="key-press-popup">Press <span class="key">F</span> for a quick flip!</div>
+
         <div class="instructions">
             <p><strong>How to use:</strong> Click the coin or button to flip.</p>
             <p>Press <code>F</code> on your keyboard for quick flips.</p>
@@ -402,7 +394,6 @@
         let currentRotation = 0;
 
         // ===== FLIP FUNCTION =====
-        // Removed 'forceHeads' parameter and logic
         function flipCoin() {
             if (isFlipping) return;
             
@@ -411,7 +402,10 @@
             flipBtn.disabled = true;
             
             // Hide previous result
-            result.classList.remove('show');
+            if (result.classList.contains('show')) {
+                result.classList.remove('show');
+                scheduleHeightCheck(); // Call height check on hide 
+            }
             
             // Play sound
             sound.currentTime = 0;
@@ -423,7 +417,6 @@
             let totalSpins = 5 * 360;
             let finalResult = 'Heads';
             
-            // Standard flip logic
             const isHeads = Math.random() >= 0.5;
             if (!isHeads) {
                 totalSpins += 180;
@@ -455,13 +448,12 @@
                 resultValue.textContent = finalResult;
                 result.classList.add('show');
                 
-                // Notify parent of height change (for result box) [cite: 92]
+                // Notify parent of height change (for result box) 
                 scheduleHeightCheck();
             }, 2000);
         }
 
         // ===== EVENT LISTENERS =====
-        // Removed debug key checks
         flipBtn.addEventListener('click', () => {
             flipCoin();
         });
@@ -481,49 +473,50 @@
         let resizeTimer;
 
         /**
-         * Sends the current scrollHeight to the parent window if it has changed.
-         * This is the *only* function that should send a postMessage. [cite: 33, 81]
+         * Sends the current scrollHeight to the parent window if it has changed. [cite: 80]
+         * This is the *only* function that should send a postMessage. [cite: 81]
          */
         function sendHeight() {
-          const height = document.body.scrollHeight;
+          const height = document.body.scrollHeight; // [cite: 82]
           
-          // Only send message if height has *actually* changed [cite: 35, 83]
+          // Only send message if height has *actually* changed [cite: 83]
           if (height !== lastHeight) {
             lastHeight = height;
-            window.parent.postMessage({ frameHeight: height }, '*'); [cite: 36, 84]
+            window.parent.postMessage({ frameHeight: height }, '*'); // [cite: 84]
           }
         }
 
         /**
-         * A debounced version of sendHeight() to be called on content changes.
-         * This ensures we don't spam messages during rapid changes. [cite: 37, 85]
+         * A debounced version of sendHeight() to be called on content changes. [cite: 85]
          */
         function scheduleHeightCheck() {
             // Clear any pending checks
             clearTimeout(resizeTimer);
-            // Schedule a new check
-            resizeTimer = setTimeout(sendHeight, 150); [cite: 39, 88]
+            // Schedule a new check [cite: 87]
+            resizeTimer = setTimeout(sendHeight, 150);
         }
 
-        // Send height on initial load (with a slight delay)
-        // This fixes the "Content Cut-Off" race condition. [cite: 71, 89]
+        // Send height on initial load (with a slight delay) [cite: 89]
+        // This fixes the "Content Cut-Off" race condition. [cite: 89]
         window.addEventListener('load', () => {
             setTimeout(sendHeight, 100);
             
             // --- NEW POPUP LOGIC ---
-            // Show the popup after 500ms
+            // Animate popup in
             setTimeout(() => {
                 keyPopup.classList.add('show');
+                scheduleHeightCheck(); // Popup is growing 
             }, 500);
 
-            // Hide the popup after 3000ms (500ms + 2500ms)
+            // Animate popup out
             setTimeout(() => {
                 keyPopup.classList.remove('show');
+                scheduleHeightCheck(); // Popup is shrinking 
             }, 3000);
             // --- END OF NEW LOGIC ---
         });
 
-        // Send height on window resize (debounced) [cite: 41, 90]
+        // Send height on window resize (debounced) [cite: 90]
         window.addEventListener('resize', () => {
             // Use scheduleHeightCheck for built-in debounce
             scheduleHeightCheck();
