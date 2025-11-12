@@ -22,7 +22,6 @@
       padding: 0;
     }
 
-    /* --- MODIFIED: Reverted to spec for iframe height fix --- */
     body {
       background: var(--bg);
       font-family: sans-serif;
@@ -30,7 +29,7 @@
       padding: 24px 16px;
     }
 
-    /* --- MAIN CONTAINER --- */
+    /* ===== MAIN CONTAINER ===== */
     .editor-container {
       position: relative;
       max-width: 1200px;
@@ -41,7 +40,7 @@
       overflow: hidden;
     }
 
-    /* --- Version Number Display --- */
+    /* ===== VERSION DISPLAY ===== */
     .version-display {
       position: absolute;
       top: 8px;
@@ -52,7 +51,7 @@
       z-index: 10;
     }
 
-    /* --- TOOLBAR --- */
+    /* ===== TOOLBAR ===== */
     .toolbar {
       background: var(--bg);
       padding: 16px;
@@ -77,7 +76,7 @@
       margin: 0 4px;
     }
 
-    /* --- BUTTONS (FROM TEMPLATE) --- */
+    /* ===== BUTTONS ===== */
     .btn {
       position: relative;
       padding: 10px 16px;
@@ -92,7 +91,6 @@
       transition: background 0.2s;
     }
 
-    /* Shimmer effect */
     .btn::before {
       content: '';
       position: absolute;
@@ -113,7 +111,6 @@
       background: var(--hover);
     }
 
-    /* Accessible focus */
     .btn:focus-visible {
       outline: none;
       box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
@@ -124,7 +121,6 @@
       cursor: not-allowed;
     }
     
-    /* Button modifiers */
     .btn-small {
       padding: 6px 12px;
       font-size: 12px;
@@ -143,7 +139,7 @@
       color: #000;
     }
 
-    /* --- FILE UPLOAD AREA --- */
+    /* ===== FILE UPLOAD AREA ===== */
     .upload-area {
       padding: 48px 24px;
       text-align: center;
@@ -179,7 +175,7 @@
       display: none;
     }
 
-    /* --- PDF VIEWER --- */
+    /* ===== PDF VIEWER ===== */
     .pdf-viewer {
       padding: 24px;
       display: none;
@@ -211,7 +207,7 @@
       height: auto;
     }
 
-    /* --- EDITABLE ELEMENTS --- */
+    /* ===== EDITABLE ELEMENTS ===== */
     .editable-layer {
       position: absolute;
       top: 0;
@@ -282,7 +278,7 @@
       display: flex;
     }
 
-    /* --- MODAL --- */
+    /* ===== MODAL ===== */
     .modal {
       display: none;
       position: fixed;
@@ -329,7 +325,7 @@
       justify-content: flex-end;
     }
 
-    /* --- SIGNATURE PAD --- */
+    /* ===== SIGNATURE PAD ===== */
     .signature-pad {
       width: 100%;
       height: 200px;
@@ -340,7 +336,7 @@
       touch-action: none;
     }
 
-    /* --- FORM ELEMENTS --- */
+    /* ===== FORM ELEMENTS ===== */
     .form-group {
       margin-bottom: 16px;
     }
@@ -377,7 +373,7 @@
       cursor: pointer;
     }
 
-    /* --- RESPONSIVE --- */
+    /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
       body {
         padding: 16px 8px;
@@ -400,7 +396,7 @@
       }
     }
 
-    /* --- LOADING SPINNER --- */
+    /* ===== LOADING SPINNER ===== */
     .loading {
       display: none;
       text-align: center;
@@ -429,7 +425,7 @@
       }
     }
 
-    /* --- ZOOM CONTROLS --- */
+    /* ===== ZOOM CONTROLS ===== */
     .zoom-display {
       font-size: 14px;
       color: var(--text-secondary);
@@ -440,8 +436,9 @@
 </head>
 <body>
   <div class="editor-container">
-    <span class="version-display">V1.0.2</span>
+    <span class="version-display">V1.0.3</span>
 
+    <!-- ===== TOOLBAR ===== -->
     <div class="toolbar">
       <div class="toolbar-section">
         <button class="btn btn-small" id="upload-btn">
@@ -482,6 +479,7 @@
       </div>
     </div>
 
+    <!-- ===== UPLOAD AREA ===== -->
     <div class="upload-area" id="upload-area">
       <div class="upload-icon">📄</div>
       <div class="upload-text">
@@ -491,16 +489,19 @@
       <input type="file" id="file-input" accept=".pdf">
     </div>
 
+    <!-- ===== LOADING ===== -->
     <div class="loading" id="loading">
       <div class="spinner"></div>
       <div>Loading PDF...</div>
     </div>
 
+    <!-- ===== PDF VIEWER ===== -->
     <div class="pdf-viewer" id="pdf-viewer">
       <div class="pdf-pages" id="pdf-pages"></div>
     </div>
   </div>
 
+  <!-- ===== SIGNATURE MODAL ===== -->
   <div class="modal" id="signature-modal">
     <div class="modal-content">
       <div class="modal-header">Create Signature</div>
@@ -515,6 +516,7 @@
     </div>
   </div>
 
+  <!-- ===== TEXT FORMAT MODAL ===== -->
   <div class="modal" id="text-format-modal">
     <div class="modal-content">
       <div class="modal-header">Text Formatting</div>
@@ -565,35 +567,28 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr/npm/pdf-lib@latest/dist/pdf-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@latest/dist/pdf-lib.min.js"></script>
 
   <script>
-    /* --- PDF.JS SETUP --- */
+    // ===== PDF.JS SETUP =====
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    /* --- PDF-LIB SETUP --- */
-    const {
-      PDFDocument,
-      rgb,
-      StandardFonts
-    } = pdfLib;
+    // ===== PDF-LIB SETUP =====
+    const { PDFDocument, rgb, StandardFonts } = PDFLib;
 
-    /* --- GLOBAL STATE --- */
+    // ===== GLOBAL STATE =====
     let pdfDoc = null;
     let originalPdfBytes = null; 
     let currentZoom = 1.0;
     let currentMode = 'select'; 
     let selectedElement = null;
     let isDragging = false;
-    let dragOffset = {
-      x: 0,
-      y: 0
-    };
+    let dragOffset = { x: 0, y: 0 };
     let isDrawing = false;
     let drawingContext = null;
     let drawingStartPos = null;
 
-    /* --- DOM ELEMENTS --- */
+    // ===== DOM ELEMENTS =====
     const uploadArea = document.getElementById('upload-area');
     const fileInput = document.getElementById('file-input');
     const uploadBtn = document.getElementById('upload-btn');
@@ -620,7 +615,7 @@
     const fontWeightSelect = document.getElementById('font-weight-select');
     const closeFormatBtn = document.getElementById('close-format-btn');
 
-    /* --- UPLOAD HANDLERS --- */
+    // ===== UPLOAD HANDLERS =====
     uploadArea.addEventListener('click', () => fileInput.click());
     uploadBtn.addEventListener('click', () => fileInput.click());
 
@@ -649,20 +644,16 @@
       }
     });
 
-    /* --- LOAD PDF --- */
+    // ===== LOAD PDF =====
     async function loadPDF(file) {
       uploadArea.style.display = 'none';
       loading.classList.add('active');
       pdfViewer.classList.remove('active');
-      
-      scheduleHeightCheck();
 
       try {
         const arrayBuffer = await file.arrayBuffer();
         originalPdfBytes = arrayBuffer; 
-        pdfDoc = await pdfjsLib.getDocument({
-          data: arrayBuffer
-        }).promise;
+        pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
         await renderAllPages();
 
@@ -677,28 +668,28 @@
         zoomInBtn.disabled = false;
         zoomOutBtn.disabled = false;
 
+        // Force height recalculation after everything is rendered
+        setTimeout(() => scheduleHeightCheck(), 100);
+        setTimeout(() => scheduleHeightCheck(), 500);
+        setTimeout(() => scheduleHeightCheck(), 1000);
+
       } catch (error) {
         console.error('Error loading PDF:', error);
         loading.classList.remove('active');
         uploadArea.style.display = 'block';
         alert('Error loading PDF. Please try again.');
       }
-      
-      scheduleHeightCheck();
     }
 
-    /* --- RENDER PAGES --- */
+    // ===== RENDER PAGES =====
     async function renderAllPages() {
       pdfPages.innerHTML = '';
+      
       for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
         const page = await pdfDoc.getPage(pageNum);
         const scale = 1.5 * currentZoom;
-        const viewport = page.getViewport({
-          scale
-        });
-        const unscaledViewport = page.getViewport({
-          scale: 1.0
-        }); 
+        const viewport = page.getViewport({ scale });
+        const unscaledViewport = page.getViewport({ scale: 1.0 }); 
 
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -728,11 +719,12 @@
         pageContainer.appendChild(editableLayer);
         pdfPages.appendChild(pageContainer);
       }
-      
-      scheduleHeightCheck();
+
+      // Recalculate height after all images are rendered
+      setTimeout(() => scheduleHeightCheck(), 100);
     }
 
-    /* --- ZOOM CONTROLS --- */
+    // ===== ZOOM CONTROLS =====
     zoomInBtn.addEventListener('click', () => {
       if (currentZoom < 2.0) {
         currentZoom += 0.25;
@@ -749,6 +741,7 @@
 
     async function updateZoom() {
       zoomDisplay.textContent = `${Math.round(currentZoom * 100)}%`;
+      
       const allElements = [];
       document.querySelectorAll('.editable-layer').forEach(layer => {
         const pageNum = layer.dataset.pageNum;
@@ -776,11 +769,11 @@
           attachElementHandlers(el);
         }
       });
-      
-      scheduleHeightCheck();
+
+      setTimeout(() => scheduleHeightCheck(), 100);
     }
 
-    /* --- ADD TEXT --- */
+    // ===== ADD TEXT =====
     addTextBtn.addEventListener('click', () => {
       currentMode = 'text';
       addTextBtn.classList.add('btn-active');
@@ -833,7 +826,7 @@
       scheduleHeightCheck();
     }
 
-    /* --- SIGNATURE --- */
+    // ===== SIGNATURE =====
     let signatureCtx = null;
     let isSignatureDrawing = false;
     let lastSignaturePos = null;
@@ -878,10 +871,8 @@
       signatureCtx.moveTo(lastSignaturePos.x, lastSignaturePos.y);
       signatureCtx.lineTo(x, y);
       signatureCtx.stroke();
-      lastSignaturePos = {
-        x,
-        y
-      };
+      
+      lastSignaturePos = { x, y };
     }
 
     function stopSignatureDrawing() {
@@ -926,7 +917,7 @@
       img.style.display = 'block';
       img.style.maxWidth = '200px';
       img.style.height = 'auto';
-      img.style.pointerEvents = 'none'; 
+      img.style.pointerEvents = 'none';
 
       const deleteBtn = document.createElement('div');
       deleteBtn.className = 'delete-btn';
@@ -945,7 +936,7 @@
       scheduleHeightCheck();
     }
 
-    /* --- ELEMENT HANDLERS --- */
+    // ===== ELEMENT HANDLERS =====
     function attachElementHandlers(element) {
       element.addEventListener('mousedown', (e) => {
         if (e.target.classList.contains('delete-btn')) return;
@@ -997,7 +988,7 @@
       isDragging = false;
     });
 
-    /* --- TEXT FORMATTING --- */
+    // ===== TEXT FORMATTING =====
     fontFamilySelect.addEventListener('change', () => {
       if (selectedElement && selectedElement.classList.contains('text-element')) {
         selectedElement.style.fontFamily = fontFamilySelect.value;
@@ -1028,13 +1019,14 @@
       scheduleHeightCheck();
     });
 
-    /* --- UTILITY FUNCTIONS --- */
+    // ===== UTILITY FUNCTIONS =====
     function rgbToHex(rgb) {
       if (!rgb) return '#000000';
       if (rgb.startsWith('#')) return rgb;
 
       const match = rgb.match(/\d+/g);
       if (!match) return '#000000';
+      
       return '#' + match.slice(0, 3).map(x => {
         const hex = parseInt(x).toString(16);
         return hex.length === 1 ? '0' + hex : hex;
@@ -1042,9 +1034,7 @@
     }
 
     function hexToRgb(hex) {
-      let r = 0,
-        g = 0,
-        b = 0;
+      let r = 0, g = 0, b = 0;
       if (hex.length == 4) {
         r = "0x" + hex[1] + hex[1];
         g = "0x" + hex[2] + hex[2];
@@ -1081,9 +1071,7 @@
     }
 
     function downloadFile(bytes, fileName, mimeType) {
-      const blob = new Blob([bytes], {
-        type: mimeType
-      });
+      const blob = new Blob([bytes], { type: mimeType });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = fileName;
@@ -1093,7 +1081,7 @@
       URL.revokeObjectURL(link.href);
     }
 
-    /* --- DOWNLOAD --- */
+    // ===== DOWNLOAD =====
     downloadBtn.addEventListener('click', async () => {
       if (!pdfDoc || !originalPdfBytes) return;
 
@@ -1150,7 +1138,7 @@
               const imgWidth = imgEl.offsetWidth / scale;
               const imgHeight = imgEl.offsetHeight / scale;
               
-              const pdfLib_y = originalHeight - (elTop / scale) - elHeight + (parseFloat(getComputedStyle(el).paddingBottom) / scale);
+              const pdfLib_y = originalHeight - (elTop / scale) - (elHeight / scale);
 
               page.drawImage(signatureImage, {
                 x: pdfLib_x + (parseFloat(getComputedStyle(el).paddingLeft) / scale),
@@ -1174,13 +1162,12 @@
       downloadBtn.disabled = false;
     });
 
-
-    /* --- PRINT --- */
+    // ===== PRINT =====
     printBtn.addEventListener('click', () => {
       window.print();
     });
 
-    /* --- CLOSE MODALS ON OUTSIDE CLICK --- */
+    // ===== CLOSE MODALS ON OUTSIDE CLICK =====
     signatureModal.addEventListener('click', (e) => {
       if (e.target === signatureModal) {
         signatureModal.classList.remove('active');
@@ -1195,53 +1182,32 @@
       }
     });
 
-    /* --- FOURTHWALL SCROLLBAR FIX --- */
+    // ===== FOURTHWALL SCROLLBAR FIX =====
     let lastHeight = 0;
     let resizeTimer;
 
-    /**
-     * Sends the current scrollHeight to the parent window if it has changed.
-     * This is the *only* function that should send a postMessage.
-     */
     function sendHeight() {
-      // Use scrollHeight for content height
       const height = document.body.scrollHeight;
-
-      // Only send message if height has *actually* changed 
+      
       if (height !== lastHeight) {
         lastHeight = height;
-        window.parent.postMessage({
-          frameHeight: height
-        }, '*');
+        window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
-    /**
-     * A debounced version of sendHeight() to be called on content changes.
-     * This ensures we don't spam messages during rapid changes.
-     */
     function scheduleHeightCheck() {
-      // Clear any pending checks
       clearTimeout(resizeTimer);
-      // Schedule a new check after 150ms
       resizeTimer = setTimeout(sendHeight, 150);
     }
 
-    // Send height on initial load (with a slight delay)
-    // This fixes the "Content Cut-Off" race condition.
     window.addEventListener('load', () => {
-        // --- MODIFIED: Increased delay for render buffer ---
-        setTimeout(sendHeight, 500);
-        // --- NEW: Failsafe check for heavy libraries ---
-        setTimeout(sendHeight, 1000); 
+      setTimeout(sendHeight, 100);
     });
 
-    // Send height on window resize (debounced)
     window.addEventListener('resize', () => {
-      // Use scheduleHeightCheck for built-in debounce
       scheduleHeightCheck();
     });
-    /* --- END OF SCROLLBAR FIX --- */
+    // ===== END OF SCROLLBAR FIX =====
   </script>
 </body>
 </html>
