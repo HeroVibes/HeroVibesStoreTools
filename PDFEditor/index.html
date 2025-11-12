@@ -22,24 +22,36 @@
       padding: 0;
     }
 
-    /* --- MODIFIED: Removed padding for iframe height fix --- */
+    /* --- MODIFIED: Reverted padding to body for height fix --- */
     body {
       background: var(--bg);
       font-family: sans-serif;
       color: var(--text-primary);
-      margin: 0;
-      padding: 0;
+      padding: 24px 16px;
     }
 
     /* --- MAIN CONTAINER --- */
-    /* --- MODIFIED: Added margin to restore body spacing --- */
+    /* --- MODIFIED: Added position:relative for version number --- */
     .editor-container {
+      position: relative;
       max-width: 1200px;
-      margin: 24px auto;
+      /* --- MODIFIED: Reverted margin for height fix --- */
+      margin: 0 auto;
       background: var(--card-bg);
       border-radius: var(--radius);
       border: 1px solid var(--outline);
       overflow: hidden;
+    }
+
+    /* --- NEW: Version Number Display --- */
+    .version-display {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 10px;
+      color: var(--text-secondary);
+      opacity: 0.5;
+      z-index: 10;
     }
 
     /* --- TOOLBAR --- */
@@ -369,11 +381,11 @@
 
     /* --- RESPONSIVE --- */
     @media (max-width: 768px) {
-      /* --- MODIFIED: Added margin to restore body spacing --- */
-      .editor-container {
-        margin: 16px 8px;
+      /* --- MODIFIED: Reverted padding for height fix --- */
+      body {
+        padding: 16px 8px;
       }
-      
+
       .toolbar {
         padding: 12px;
       }
@@ -431,6 +443,8 @@
 </head>
 <body>
   <div class="editor-container">
+    <span class="version-display">V1.0.0</span>
+
     <div class="toolbar">
       <div class="toolbar-section">
         <button class="btn btn-small" id="upload-btn">
@@ -957,7 +971,7 @@
 
         document.querySelectorAll('.text-element, .signature-element, .drawing-element').forEach(el => {
           el.classList.remove('selected');
-        });
+});
         element.classList.add('selected');
 
         const rect = element.getBoundingClientRect();
@@ -1072,178 +1086,4 @@
         case 'Georgia':
           return isBold ? StandardFonts.TimesRomanBold : StandardFonts.TimesRoman;
         case 'Courier New':
-          return isBold ? StandardFonts.CourierBold : StandardFonts.Courier;
-        case 'Arial':
-        case 'Helvetica':
-        case 'Verdana':
-        case 'Comic Sans MS':
-        default:
-          return isBold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-      }
-    }
-
-    function downloadFile(bytes, fileName, mimeType) {
-      const blob = new Blob([bytes], {
-        type: mimeType
-      });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
-    }
-
-    /* --- DOWNLOAD --- */
-    downloadBtn.addEventListener('click', async () => {
-      if (!pdfDoc || !originalPdfBytes) return;
-
-      downloadBtn.textContent = 'Processing...';
-      downloadBtn.disabled = true;
-
-      try {
-        const pdfLibDoc = await PDFDocument.load(originalPdfBytes);
-        const pages = pdfLibDoc.getPages();
-
-        const allLayers = document.querySelectorAll('.editable-layer');
-
-        for (const layer of allLayers) {
-          const pageNum = parseInt(layer.dataset.pageNum);
-          const page = pages[pageNum - 1];
-          const pageContainer = layer.closest('.pdf-page');
-          const originalWidth = parseFloat(pageContainer.dataset.originalWidth);
-          const originalHeight = parseFloat(pageContainer.dataset.originalHeight);
-          const renderedWidth = layer.offsetWidth;
-          const scale = renderedWidth / originalWidth;
-
-          const elements = layer.querySelectorAll('.text-element, .signature-element');
-
-          for (const el of elements) {
-            const elLeft = parseFloat(el.style.left);
-            const elTop = parseFloat(el.style.top);
-            const elWidth = el.offsetWidth;
-            const elHeight = el.offsetHeight;
-
-            // Convert coords from top-left (HTML) to bottom-left (PDF)
-            const pdfLib_x = elLeft / scale;
-            
-            if (el.classList.contains('text-element')) {
-              const text = el.textContent.replace('×', ''); // Remove delete button
-              const fontSize = parseFloat(el.style.fontSize) / scale;
-              const color = hexToRgb(el.style.color || '#000000');
-              const font = await pdfLibDoc.embedFont(getPdfLibFont(el.style.fontFamily, el.style.fontWeight));
-              
-              // Approximate baseline position
-              const pdfLib_y = originalHeight - (elTop / scale) - fontSize;
-
-              page.drawText(text, {
-                x: pdfLib_x + (parseFloat(getComputedStyle(el).paddingLeft) / scale),
-                y: pdfLib_y,
-                size: fontSize,
-                font: font,
-                color: rgb(color.r, color.g, color.b),
-              });
-
-            } else if (el.classList.contains('signature-element')) {
-              const imgEl = el.querySelector('img');
-              const imgData = imgEl.src;
-              const imgBytes = await fetch(imgData).then(res => res.arrayBuffer());
-              const signatureImage = await pdfLibDoc.embedPng(imgBytes);
-
-              const imgWidth = imgEl.offsetWidth / scale;
-              const imgHeight = imgEl.offsetHeight / scale;
-              
-              // Y coord is for the bottom-left corner of the image
-              const pdfLib_y = originalHeight - (elTop / scale) - elHeight + (parseFloat(getComputedStyle(el).paddingBottom) / scale);
-
-              page.drawImage(signatureImage, {
-                x: pdfLib_x + (parseFloat(getComputedStyle(el).paddingLeft) / scale),
-                y: pdfLib_y,
-                width: imgWidth,
-                height: imgHeight,
-              });
-            }
-          }
-        }
-
-        const pdfBytes = await pdfLibDoc.save();
-        downloadFile(pdfBytes, "edited-document.pdf", "application/pdf");
-
-      } catch (error) {
-        console.error('Error saving PDF:', error);
-        alert('An error occurred while saving the PDF. Please try again.');
-      }
-
-      downloadBtn.textContent = '💾 Download';
-      downloadBtn.disabled = false;
-    });
-
-
-    /* --- PRINT --- */
-    printBtn.addEventListener('click', () => {
-      window.print();
-    });
-
-    /* --- CLOSE MODALS ON OUTSIDE CLICK --- */
-    signatureModal.addEventListener('click', (e) => {
-      if (e.target === signatureModal) {
-        signatureModal.classList.remove('active');
-        scheduleHeightCheck();
-      }
-    });
-
-    textFormatModal.addEventListener('click', (e) => {
-      if (e.target === textFormatModal) {
-        textFormatModal.classList.remove('active');
-        scheduleHeightCheck();
-      }
-    });
-
-    /* --- FOURTHWALL SCROLLBAR FIX --- */
-    let lastHeight = 0;
-    let resizeTimer;
-
-    /**
-     * Sends the current scrollHeight to the parent window if it has changed.
-     * This is the *only* function that should send a postMessage.
-     */
-    function sendHeight() {
-      // Use scrollHeight for content height
-      const height = document.body.scrollHeight;
-
-      // Only send message if height has *actually* changed 
-      if (height !== lastHeight) {
-        lastHeight = height;
-        window.parent.postMessage({
-          frameHeight: height
-        }, '*');
-      }
-    }
-
-    /**
-     * A debounced version of sendHeight() to be called on content changes.
-     * This ensures we don't spam messages during rapid changes.
-     */
-    function scheduleHeightCheck() {
-      // Clear any pending checks
-      clearTimeout(resizeTimer);
-      // Schedule a new check after 150ms
-      resizeTimer = setTimeout(sendHeight, 150);
-    }
-
-    // Send height on initial load (with a slight delay)
-    // This fixes the "Content Cut-Off" race condition.
-    window.addEventListener('load', () => {
-      setTimeout(sendHeight, 100);
-    });
-
-    // Send height on window resize (debounced)
-    window.addEventListener('resize', () => {
-      // Use scheduleHeightCheck for built-in debounce
-      scheduleHeightCheck();
-    });
-    /* --- END OF SCROLLBAR FIX --- */
-  </script>
-</body>
-</html>
+          return isCouri...
