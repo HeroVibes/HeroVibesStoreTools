@@ -25,11 +25,16 @@
 
         body {
             margin: 0;
-            padding: 16px; /* Added padding to prevent elements from touching edges */
+            /* Padding removed from body for iframe stability */
             font-family: system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
             /* Removed min-height: 100vh per fix guide [cite: 60] */
+        }
+
+        /* New Tool Wrapper for stable padding */
+        #tool-wrapper {
+            padding: 16px;
         }
 
         /* Main Wrapper Card */
@@ -114,7 +119,7 @@
             gap: 16px;
         }
 
-        /* Button Template  */
+        /* Button Template [cite: 26-31] */
         .btn {
             position: relative;
             padding: 10px 16px;
@@ -235,7 +240,7 @@
             margin: 0;
         }
         
-        /* Mobile Optimisation  */
+        /* Mobile Optimisation */
         @media (max-width: 600px) {
             #CONTROLS {
                 grid-template-columns: 1fr; /* Stack buttons */
@@ -252,37 +257,39 @@
 </head>
 <body>
 
-    <div id="DICE-WRAPPER" class="card-container">
-        <div id="dice-display" data-face="1">
-            <div class="pip pip-top-left"></div>
-            <div class="pip pip-top-right"></div>
-            <div class="pip pip-middle-left"></div>
-            <div class="pip pip-middle-center"></div>
-            <div class="pip pip-middle-right"></div>
-            <div class="pip pip-bottom-left"></div>
-            <div class="pip pip-bottom-right"></div>
-        </div>
-    </div>
+    <div id="tool-wrapper">
 
-    <div id="CONTROLS" class="mb-16">
-        <button id="roll-btn" class="btn primary" type="button">Roll Dice</button>
-        <button id="lucky-btn" class="btn" type="button">Lucky 6</button>
-    </div>
-
-    <div id="HISTORY" class="card-container">
-        <div id="HISTORY-HEADER">
-            <span id="HISTORY-TITLE">Roll History</span>
-            <button id="CLEAR-HISTORY-BTN" type="button">Clear</button>
-        </div>
-        <div id="HISTORY-ITEMS">
+        <div id="DICE-WRAPPER" class="card-container">
+            <div id="dice-display" data-face="1">
+                <div class="pip pip-top-left"></div>
+                <div class="pip pip-top-right"></div>
+                <div class="pip pip-middle-left"></div>
+                <div class="pip pip-middle-center"></div>
+                <div class="pip pip-middle-right"></div>
+                <div class="pip pip-bottom-left"></div>
+                <div class="pip pip-bottom-right"></div>
             </div>
-    </div>
+        </div>
 
-    <div id="HOW-TO-USE" class="mb-16">
-        <strong>How to use:</strong> Click the dice, press <strong>R</strong>, or use the buttons below. Press <strong>Ctrl+Alt+R</strong> or click "Lucky 6" to always roll a 6!
-    </div>
+        <div id="CONTROLS" class="mb-16">
+            <button id="roll-btn" class="btn primary" type="button">Roll Dice</button>
+            <button id="lucky-btn" class="btn" type="button">Lucky 6</button>
+        </div>
 
-    <script>
+        <div id="HISTORY" class="card-container">
+            <div id="HISTORY-HEADER">
+                <span id="HISTORY-TITLE">Roll History</span>
+                <button id="CLEAR-HISTORY-BTN" type="button">Clear</button>
+            </div>
+            <div id="HISTORY-ITEMS">
+                </div>
+        </div>
+
+        <div id="HOW-TO-USE" class="mb-16">
+            <strong>How to use:</strong> Click the dice, press <strong>R</strong>, or use the buttons below. Press <strong>Ctrl+Alt+R</strong> or click "Lucky 6" to always roll a 6!
+        </div>
+
+    </div> <script>
         document.addEventListener('DOMContentLoaded', () => {
             // const rollBtn = document.getElementById('roll-btn');
             const luckyBtn = document.getElementById('lucky-btn');
@@ -306,7 +313,7 @@
                     item.textContent = roll;
                     historyItems.appendChild(item);
                 });
-                // Notify FourthWall of height change 
+                // Notify FourthWall of height change [cite: 92]
                 scheduleHeightCheck();
             }
 
@@ -375,7 +382,7 @@
              */
             function hideTooltip() {
                 howToUse.classList.add('hidden');
-                // Notify FourthWall of height change 
+                // Notify FourthWall of height change [cite: 92]
                 scheduleHeightCheck();
             }
 
@@ -411,7 +418,7 @@
         });
 
         // ===== FOURTHWALL SCROLLBAR FIX =====
-        // The Definitive Iframe Scrollbar Script 
+        // The Definitive Iframe Scrollbar Script [cite: 79-91]
         let lastHeight = 0;
         let resizeTimer;
 
@@ -442,7 +449,7 @@
         }
 
         // Send height on initial load (with a slight delay)
-        // This fixes the "Content Cut-Off" race condition. [cite: 89]
+        // This fixes the "Content Cut-Off" race condition. [cite: 71, 89]
         window.addEventListener('load', () => {
             setTimeout(sendHeight, 100);
         });
