@@ -22,20 +22,12 @@
       padding: 0;
     }
 
-    /* --- MODIFIED: iFrame Height Fix --- */
-    html {
-      height: auto;
-      overflow-y: auto;
-    }
-
-    /* --- MODIFIED: iFrame Height Fix & Design Spec --- */
+    /* --- MODIFIED: Reverted to spec for iframe height fix --- */
     body {
       background: var(--bg);
       font-family: sans-serif;
       color: var(--text-primary);
       padding: 24px 16px;
-      height: auto;
-      overflow-y: auto;
     }
 
     /* --- MAIN CONTAINER --- */
@@ -448,7 +440,7 @@
 </head>
 <body>
   <div class="editor-container">
-    <span class="version-display">V1.0.1</span>
+    <span class="version-display">V1.0.2</span>
 
     <div class="toolbar">
       <div class="toolbar-section">
@@ -573,7 +565,7 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@latest/dist/pdf-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr/npm/pdf-lib@latest/dist/pdf-lib.min.js"></script>
 
   <script>
     /* --- PDF.JS SETUP --- */
@@ -588,9 +580,9 @@
 
     /* --- GLOBAL STATE --- */
     let pdfDoc = null;
-    let originalPdfBytes = null; // For pdf-lib
+    let originalPdfBytes = null; 
     let currentZoom = 1.0;
-    let currentMode = 'select'; // 'select', 'text', 'signature', 'draw'
+    let currentMode = 'select'; 
     let selectedElement = null;
     let isDragging = false;
     let dragOffset = {
@@ -1239,7 +1231,9 @@
     // This fixes the "Content Cut-Off" race condition.
     window.addEventListener('load', () => {
         // --- MODIFIED: Increased delay for render buffer ---
-        setTimeout(sendHeight, 250);
+        setTimeout(sendHeight, 500);
+        // --- NEW: Failsafe check for heavy libraries ---
+        setTimeout(sendHeight, 1000); 
     });
 
     // Send height on window resize (debounced)
