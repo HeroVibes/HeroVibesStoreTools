@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tool Card Template</title>
+  <style>
+    /* ===== VARIABLES ===== */
+    :root {
+      --bg-primary: #191919;
+      --bg-secondary: #1F1F1F;
+      --bg-hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --gold: #FFD700;
+      --radius: 12px;
+    }
+
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg-primary);
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+      padding: 24px 16px;
+      margin: 0;
+    }
+
+    /* ===== CARD CONTAINER ===== */
+    .tool-card {
+      max-width: 320px;
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      display: block;
+      position: relative;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    /* NEW TOOL - Golden border */
+    .tool-card.new-tool {
+      border-color: rgba(255, 215, 0, 0.3);
+    }
+
+    /* Top accent bar */
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), rgba(135, 169, 255, 0.4));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+      border-radius: var(--radius) var(--radius) 0 0;
+      z-index: 2;
+    }
+
+    .tool-card.new-tool::before {
+      background: linear-gradient(90deg, var(--gold), rgba(255, 215, 0, 0.4));
+    }
+
+    /* Shimmer effect */
+    .tool-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(135, 169, 255, 0.15) 50%, transparent 100%);
+      transform: translateX(-100%) skewX(-25deg);
+      transition: none;
+      border-radius: var(--radius);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .tool-card.new-tool::after {
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 215, 0, 0.15) 50%, transparent 100%);
+    }
+
+    .tool-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(135, 169, 255, 0.4);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .tool-card.new-tool:hover {
+      border-color: rgba(255, 215, 0, 0.5);
+    }
+
+    .tool-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .tool-card:hover::after {
+      animation: shimmer 0.8s ease-out;
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%) skewX(-25deg);
+      }
+      100% {
+        transform: translateX(200%) skewX(-25deg);
+      }
+    }
+
+    /* ===== CARD CONTENT ===== */
+    .card-content {
+      position: relative;
+      z-index: 3;
+    }
+
+    .card-icon {
+      font-size: 40px;
+      margin-bottom: 16px;
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .tool-card:hover .card-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      letter-spacing: -0.3px;
+      line-height: 1.3;
+    }
+
+    .card-description {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    /* ===== TAGS ===== */
+    .card-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .card-tag:not(.new-tag) {
+      background: rgba(135, 169, 255, 0.12);
+      color: var(--accent);
+    }
+
+    .new-tag {
+      background: rgba(255, 215, 0, 0.15);
+      color: var(--gold);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    /* ===== MOBILE OPTIMIZATION ===== */
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 12px;
+      }
+
+      .tool-card {
+        max-width: 100%;
+        padding: 20px;
+      }
+
+      .card-icon {
+        font-size: 36px;
+        margin-bottom: 14px;
+      }
+
+      .card-title {
+        font-size: 18px;
+      }
+
+      .card-description {
+        font-size: 12px;
+        margin-bottom: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== TOOL CARD - COPY THIS ENTIRE BLOCK ===== -->
+  <a href="https://herovibes.store/pages/your-tool" class="tool-card">
+    <div class="card-content">
+      <div class="card-icon">🎨</div>
+      <h3 class="card-title">Tool Name</h3>
+      <p class="card-description">A brief description of what your tool does and why it's useful for creators.</p>
+      <div class="card-tags">
+        <span class="card-tag">FREE</span>
+      </div>
+    </div>
+  </a>
+  <!-- ===== END OF TOOL CARD ===== -->
+
+  <script>
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+      scheduleHeightCheck();
+    });
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+
+</body>
+</html>
