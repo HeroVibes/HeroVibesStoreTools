@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kits Tool</title>
+  <style>
+    /* ===== DESIGN SYSTEM ===== */
+    :root {
+      --bg-primary: #191919;
+      --bg-secondary: #1F1F1F;
+      --bg-hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 24px 16px;
+      overflow-x: hidden;
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ===== KITS GRID (MAIN PAGE) ===== */
+    #main-page {
+      animation: fadeIn 0.3s ease;
+    }
+
+    #kits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    /* ===== KIT CARD ===== */
+    .kit-card {
+      position: relative;
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .kit-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .kit-card:hover {
+      background: var(--bg-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .kit-card:hover::before {
+      left: 125%;
+    }
+
+    .kit-card-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent), #6B8FE8);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 24px;
+    }
+
+    .kit-card h3 {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .kit-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .kit-card-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ===== KIT DETAIL PAGE ===== */
+    #kit-detail {
+      animation: fadeIn 0.3s ease;
+    }
+
+    #back-button {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      margin-bottom: 24px;
+      transition: all 0.2s ease;
+    }
+
+    #back-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    #back-button:hover {
+      background: var(--bg-hover);
+    }
+
+    #back-button:hover::before {
+      left: 125%;
+    }
+
+    #back-button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
+
+    #kit-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--outline);
+    }
+
+    /* ===== PRODUCT ITEMS ===== */
+    #kit-items {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .item-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+    }
+
+    .item-card:hover {
+      border-color: rgba(135, 169, 255, 0.3);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    .item-image-container {
+      width: 100%;
+      height: 200px;
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .item-image-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 60%, rgba(25,25,25,0.8));
+      pointer-events: none;
+    }
+
+    .item-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.4s ease;
+    }
+
+    .item-card:hover img {
+      transform: scale(1.05);
+    }
+
+    .item-info {
+      padding: 24px 16px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-info h4 {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .item-info p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 16px;
+      flex-grow: 1;
+    }
+
+    /* ===== BUY BUTTON ===== */
+    .btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      align-self: flex-start;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .btn:hover {
+      background: #6B8FE8;
+      box-shadow: 0 4px 12px rgba(135, 169, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn:hover::before {
+      left: 125%;
+    }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
+
+    /* ===== UTILITY CLASSES ===== */
+    .hidden {
+      display: none !important;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (min-width: 640px) {
+      .item-card {
+        flex-direction: row;
+      }
+
+      .item-image-container {
+        width: 240px;
+        height: auto;
+        min-height: 180px;
+      }
+
+      .item-image-container::after {
+        background: linear-gradient(to right, transparent 60%, rgba(25,25,25,0.8));
+      }
+    }
+
+    @media (max-width: 639px) {
+      body {
+        padding: 16px 12px;
+      }
+
+      #kits-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .kit-card {
+        padding: 20px 12px;
+      }
+
+      .item-info {
+        padding: 20px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- ===== MAIN PAGE: KITS GRID ===== -->
+    <div id="main-page">
+      <div id="kits-grid"></div>
+    </div>
+
+    <!-- ===== DETAIL PAGE: KIT ITEMS ===== -->
+    <div id="kit-detail" class="hidden">
+      <button id="back-button">← Back to Kits</button>
+      <h2 id="kit-title"></h2>
+      <div id="kit-items"></div>
+    </div>
+  </div>
+
+  <script>
+    // ===== KITS DATA =====
+    // TO ADD A NEW KIT: Copy the template below and add it to the array
+    const kits = [
+      {
+        title: "The Best Budget PC Build",
+        slug: "budget-pc-build",
+        icon: "🖥️", // Emoji icon for the kit card
+        itemCount: 6, // Number of items in the kit
+        items: [
+          {
+            name: "AMD Ryzen 5 5600X",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=CPU",
+            description: "A powerful 6-core CPU perfect for budget gaming and productivity. Great performance at an affordable price point.",
+            link: "https://amzn.to/example"
+          },
+          {
+            name: "MSI B550M PRO Motherboard",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Motherboard",
+            description: "Solid micro-ATX motherboard with all essential features including PCIe 4.0 support and USB 3.2 Gen2.",
+            link: "https://amzn.to/example2"
+          },
+          {
+            name: "Corsair Vengeance 16GB RAM",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=RAM",
+            description: "Fast DDR4 memory kit with excellent compatibility and reliability for smooth multitasking.",
+            link: "https://amzn.to/example3"
+          },
+          {
+            name: "NVIDIA GTX 1660 Super",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=GPU",
+            description: "Great 1080p gaming graphics card that handles modern games at high settings with ease.",
+            link: "https://amzn.to/example4"
+          },
+          {
+            name: "Samsung 500GB NVMe SSD",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=SSD",
+            description: "Blazing fast NVMe storage for quick boot times and fast game loading.",
+            link: "https://amzn.to/example5"
+          },
+          {
+            name: "EVGA 600W Power Supply",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=PSU",
+            description: "Reliable 80+ Bronze certified power supply with enough headroom for upgrades.",
+            link: "https://amzn.to/example6"
+          }
+        ]
+      },
+      {
+        title: "Starter Content Creator Kit",
+        slug: "creator-starter-kit",
+        icon: "🎥",
+        itemCount: 5,
+        items: [
+          {
+            name: "Elgato Wave:3 Microphone",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Microphone",
+            description: "Top-tier USB condenser microphone with crystal clear audio quality and built-in mixing controls.",
+            link: "https://amzn.to/example7"
+          },
+          {
+            name: "Logitech C920 Webcam",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Webcam",
+            description: "Industry-standard 1080p webcam with excellent low-light performance and autofocus.",
+            link: "https://amzn.to/example8"
+          },
+          {
+            name: "Neewer LED Ring Light",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Ring+Light",
+            description: "18-inch dimmable ring light with adjustable color temperature for professional-looking videos.",
+            link: "https://amzn.to/example9"
+          },
+          {
+            name: "Rode PSA1 Boom Arm",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Boom+Arm",
+            description: "Professional studio boom arm with smooth movement and cable management.",
+            link: "https://amzn.to/example10"
+          },
+          {
+            name: "Elgato Stream Deck",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Stream+Deck",
+            description: "Customizable control deck with 15 LCD keys for quick access to your streaming tools.",
+            link: "https://amzn.to/example11"
+          }
+        ]
+      },
+      {
+        title: "Professional Photography Setup",
+        slug: "pro-photography-setup",
+        icon: "📷",
+        itemCount: 4,
+        items: [
+          {
+            name: "Sony A7 III Camera Body",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Camera",
+            description: "Full-frame mirrorless camera with exceptional image quality and autofocus performance.",
+            link: "https://amzn.to/example12"
+          },
+          {
+            name: "Sony 24-70mm f/2.8 GM Lens",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Lens",
+            description: "Versatile professional zoom lens with constant f/2.8 aperture throughout the range.",
+            link: "https://amzn.to/example13"
+          },
+          {
+            name: "Manfrotto Carbon Fiber Tripod",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Tripod",
+            description: "Lightweight yet sturdy carbon fiber tripod with fluid head for smooth movements.",
+            link: "https://amzn.to/example14"
+          },
+          {
+            name: "SanDisk 128GB SD Card",
+            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=SD+Card",
+            description: "High-speed UHS-II SD card with fast read/write speeds for 4K video recording.",
+            link: "https://amzn.to/example15"
+          }
+        ]
+      }
+      // ===== ADD MORE KITS HERE =====
+      // Copy the template above and customize:
+      // - title: Display name of the kit
+      // - slug: URL-friendly identifier (no spaces, lowercase)
+      // - icon: Emoji to display on the kit card
+      // - itemCount: Total number of items (for display)
+      // - items: Array of products with name, image, description, and affiliate link
+    ];
+
+    // ===== DOM ELEMENTS =====
+    const grid = document.getElementById("kits-grid");
+    const mainPage = document.getElementById("main-page");
+    const detailPage = document.getElementById("kit-detail");
+    const kitTitle = document.getElementById("kit-title");
+    const kitItems = document.getElementById("kit-items");
+    const backButton = document.getElementById("back-button");
+
+    // ===== LOAD KITS GRID =====
+    function loadKits(start = 0, count = 12) {
+      for (let i = start; i < start + count && i < kits.length; i++) {
+        const kit = kits[i];
+        const card = document.createElement("div");
+        card.className = "kit-card";
+        card.innerHTML = `
+          <div class="kit-card-icon">${kit.icon}</div>
+          <h3>${kit.title}</h3>
+          <div class="kit-card-meta">
+            <span>📦 ${kit.itemCount} items</span>
+          </div>
+        `;
+        card.onclick = () => openKit(kit.slug);
+        grid.appendChild(card);
+      }
+    }
+
+    // ===== OPEN KIT DETAIL =====
+    function openKit(slug) {
+      const kit = kits.find(k => k.slug === slug);
+      if (!kit) return;
+
+      kitTitle.textContent = kit.title;
+      kitItems.innerHTML = "";
+
+      kit.items.forEach(item => {
+        const itemCard = document.createElement("div");
+        itemCard.className = "item-card";
+        itemCard.innerHTML = `
+          <div class="item-image-container">
+            <img src="${item.image}" alt="${item.name}" loading="lazy">
+          </div>
+          <div class="item-info">
+            <h4>${item.name}</h4>
+            <p>${item.description}</p>
+            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="btn">
+              <span>View Product</span>
+              <span>→</span>
+            </a>
+          </div>
+        `;
+        kitItems.appendChild(itemCard);
+      });
+
+      window.history.pushState({}, "", `#/${slug}`);
+      mainPage.classList.add("hidden");
+      detailPage.classList.remove("hidden");
+      scheduleHeightCheck();
+    }
+
+    // ===== BACK TO KITS =====
+    backButton.onclick = () => {
+      window.history.pushState({}, "", `/`);
+      mainPage.classList.remove("hidden");
+      detailPage.classList.add("hidden");
+      scheduleHeightCheck();
+    };
+
+    // ===== HANDLE BROWSER NAVIGATION =====
+    window.addEventListener("popstate", () => {
+      const slug = window.location.hash.split("/")[1];
+      if (slug) {
+        openKit(slug);
+      } else {
+        mainPage.classList.remove("hidden");
+        detailPage.classList.add("hidden");
+        scheduleHeightCheck();
+      }
+    });
+
+    // ===== INITIALIZE =====
+    // Check if there's a kit in the URL on page load
+    const initialSlug = window.location.hash.split("/")[1];
+    if (initialSlug) {
+      openKit(initialSlug);
+    }
+    loadKits();
+
+    // ===== OPTIONAL: INFINITE SCROLL =====
+    window.addEventListener("scroll", () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+        if (grid.childElementCount < kits.length && !detailPage.classList.contains("hidden")) {
+          return; // Don't load more kits while viewing a kit detail
+        }
+        if (grid.childElementCount < kits.length) {
+          loadKits(grid.childElementCount, 6);
+          scheduleHeightCheck();
+        }
+      }
+    });
+  </script>
+
+  <script>
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+      scheduleHeightCheck();
+    });
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+</body>
+</html>
