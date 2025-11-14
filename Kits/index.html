@@ -419,9 +419,14 @@
         padding: 16px 12px;
       }
 
+      /* 2 columns on mobile */
       #kits-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
+      }
+
+      .kit-card h3 {
+        font-size: 16px;
       }
 
       .kit-card-content {
@@ -438,6 +443,13 @@
 
       .btn {
         width: 100%;
+      }
+    }
+
+    /* Very small screens - back to 1 column */
+    @media (max-width: 400px) {
+      #kits-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -465,7 +477,7 @@
   <script>
     // ===== KITS DATA =====
     // TO ADD A NEW KIT: Copy the template below and add it to the array
-    // DIRECT LINK FORMAT: Add ?kit=SLUG_NAME to your page URL (e.g., ?kit=travel-backpack)
+    // DIRECT LINK: Use data-kit="slug" attribute on your iframe or pass slug via postMessage
     const kits = [
       {
         title: "The Travelling Vlogger",
@@ -510,26 +522,88 @@
             videoReview: ""
           }
         ]
+      },
+      {
+        title: "Hero's PC Build",
+        slug: "hero-pc-build",
+        thumbnailLink: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/NZXTH9AXTCase.webp",
+        itemCount: 8,
+        items: [
+          {
+            name: "GPU | EVGA Nvidia RTX 2060",
+            image: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/EVGANvidiaRTX2060.webp",
+            description: "A mid-tier GPU, capable of all your essential video editing needs and some decent gaming - worth considering an upgrade to the 30 or 40 series though.",
+            linkOfficial: "",
+            linkUK: "https://amzn.to/4llU1Dx",
+            linkUS: "https://amzn.to/3EcCOf4",
+            videoReview: ""
+          },
+          {
+            name: "RAM | Corsair Vengeance Pro DDR4",
+            image: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/CorsairVengeanceProDDR4.webp",
+            description: "Powerful memory... with lights. These are a great bargain and can actually be controlled via the iCUE app for different aesthetics.",
+            linkOfficial: "",
+            linkUK: "https://amzn.to/3Gd9dCL",
+            linkUS: "https://amzn.to/3FZ3vEG",
+            videoReview: ""
+          },
+          {
+            name: "MOBO | MSI B450 TOMAHAWK MAX",
+            image: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/MSIB450TomahawkMax.webp",
+            description: "Great motherboard, cheap and cheerful. Plenty of better options these days, though! (US Link is for a newer model, the B550)",
+            linkOfficial: "",
+            linkUK: "https://amzn.to/4i82JTe",
+            linkUS: "https://amzn.to/3YnaH3z",
+            videoReview: ""
+          },
+          {
+            name: "CPU | AMD Ryzen 9 3900X",
+            image: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/AMDRyzen93900X.webp",
+            description: "An absolute beast of a CPU, and incredibly budget-friendly.",
+            linkOfficial: "",
+            linkUK: "https://amzn.to/3RD7cSO",
+            linkUS: "https://amzn.to/4jiPvnn",
+            videoReview: ""
+          },
+          {
+            name: "CASE | NZXT H9 AXT Mid-Tower",
+            image: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/NZXTH9AXTCase.webp",
+            description: "There are very few cases more beautiful than the NZXT H9. It's just a shame they're always out of stock.",
+            linkOfficial: "",
+            linkUK: "https://amzn.to/3FUAZnI",
+            linkUS: "https://amzn.to/4jnfgTC",
+            videoReview: ""
+          },
+          {
+            name: "PSU | Corsair RM750 750w",
+            image: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/CorsairRM750.webp",
+            description: "In the words of Darth Sidious: "UNLIMITED POWER". Well, so long as you pay the electric bill.",
+            linkOfficial: "",
+            linkUK: "https://amzn.to/42KlYg3",
+            linkUS: "https://amzn.to/3Gd9XI3",
+            videoReview: ""
+          },
+          {
+            name: "SSD | Silicon Power 1TB Internal SSD",
+            image: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/SiliconPower1TBSSD.webp",
+            description: "This is my primary drive for essential storage, then there are a few additional storage options for videos, editing etc.",
+            linkOfficial: "",
+            linkUK: "https://amzn.to/4iXDF2j",
+            linkUS: "https://amzn.to/4j1FpYA",
+            videoReview: ""
+          },
+          {
+            name: "CPU Cooler | NZXT Kraken X63",
+            image: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/NZXTKrakenx63.webp",
+            description: "A powerful CPU cooler with an easy install and great aesthetics.",
+            linkOfficial: "",
+            linkUK: "https://amzn.to/4joJaai",
+            linkUS: "https://amzn.to/4co86fu",
+            videoReview: ""
+          }
+        ]
       }
       // ===== ADD MORE KITS HERE =====
-      // Template for new kit:
-      // {
-      //   title: "Kit Name",
-      //   slug: "kit-url-slug",
-      //   thumbnailLink: "https://your-image-url.com/image.jpg",
-      //   itemCount: 3,
-      //   items: [
-      //     {
-      //       name: "Product Name",
-      //       image: "https://product-image.jpg",
-      //       description: "Product description here",
-      //       linkOfficial: "https://official-store-link.com",  // Leave empty "" to hide
-      //       linkUK: "https://amazon.co.uk/link",              // Leave empty "" to hide
-      //       linkUS: "https://amazon.com/link",                // Leave empty "" to hide
-      //       videoReview: "https://youtube.com/watch?v=xxx"    // Leave empty "" to hide
-      //     }
-      //   ]
-      // }
     ];
 
     // ===== DOM ELEMENTS =====
@@ -633,9 +707,12 @@
         kitItems.appendChild(itemCard);
       });
 
-      // Update URL without page reload
-      const newUrl = `${window.location.pathname}?kit=${slug}`;
-      window.history.pushState({ slug }, "", newUrl);
+      // Send message to parent that we've opened this kit
+      window.parent.postMessage({ 
+        type: 'kitOpened', 
+        slug: slug,
+        title: kit.title 
+      }, '*');
       
       mainPage.classList.add("hidden");
       detailPage.classList.remove("hidden");
@@ -644,28 +721,22 @@
 
     // ===== BACK TO KITS =====
     backButton.onclick = () => {
-      window.history.pushState({}, "", window.location.pathname);
+      window.parent.postMessage({ type: 'kitClosed' }, '*');
       mainPage.classList.remove("hidden");
       detailPage.classList.add("hidden");
       scheduleHeightCheck();
     };
 
-    // ===== HANDLE BROWSER NAVIGATION =====
-    window.addEventListener("popstate", (event) => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const slug = urlParams.get('kit');
-      
-      if (slug) {
-        openKit(slug);
-      } else {
-        mainPage.classList.remove("hidden");
-        detailPage.classList.add("hidden");
-        scheduleHeightCheck();
+    // ===== LISTEN FOR MESSAGES FROM PARENT =====
+    window.addEventListener('message', (event) => {
+      // Accept messages from parent window to open specific kits
+      if (event.data && event.data.type === 'openKit' && event.data.slug) {
+        openKit(event.data.slug);
       }
     });
 
     // ===== INITIALIZE =====
-    // Check if there's a kit in the URL on page load (works in iframes!)
+    // Check URL parameters on load
     const urlParams = new URLSearchParams(window.location.search);
     const initialSlug = urlParams.get('kit');
     
@@ -679,7 +750,7 @@
     window.addEventListener("scroll", () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
         if (!detailPage.classList.contains("hidden")) {
-          return; // Don't load more kits while viewing a kit detail
+          return;
         }
         if (grid.childElementCount < kits.length) {
           loadKits(grid.childElementCount, 6);
