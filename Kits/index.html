@@ -696,7 +696,7 @@
         
         itemCard.innerHTML = `
           <div class="item-image-container">
-            <img src="${item.name}" alt="${item.name}" loading="lazy">
+            <img src="${item.image}" alt="${item.name}" loading="lazy">
           </div>
           <div class="item-info">
             <h4>${item.name}</h4>
@@ -748,9 +748,25 @@
     // ===== INITIALIZE =====
     function initializeApp() {
       console.log('Initializing Kits Tool...');
+      console.log('Full URL:', window.location.href);
       
-      // Check URL parameters on load
-      const urlParams = new URLSearchParams(window.location.search);
+      // Check URL parameters on load - need to check parent window URL when in iframe
+      let urlParams;
+      try {
+        // Try to read from parent window if in iframe
+        if (window.parent !== window) {
+          urlParams = new URLSearchParams(window.parent.location.search);
+          console.log('Reading from parent URL');
+        } else {
+          urlParams = new URLSearchParams(window.location.search);
+          console.log('Reading from own URL');
+        }
+      } catch (e) {
+        // If we can't access parent due to cross-origin, fall back to own URL
+        urlParams = new URLSearchParams(window.location.search);
+        console.log('Fallback to own URL (cross-origin blocked)');
+      }
+      
       const initialSlug = urlParams.get('kit');
       
       console.log('URL Parameter kit:', initialSlug);
