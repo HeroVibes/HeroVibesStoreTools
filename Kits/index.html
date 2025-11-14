@@ -15,6 +15,9 @@
       --text-primary: #D4D4D4;
       --text-secondary: #8C8C8C;
       --radius: 8px;
+      --green: #4CAF50;
+      --blue: #87A9FF;
+      --red: #F44336;
     }
 
     * {
@@ -55,9 +58,8 @@
       background: var(--bg-secondary);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
-      padding: 24px 16px;
-      cursor: pointer;
       overflow: hidden;
+      cursor: pointer;
       transition: all 0.3s ease;
     }
 
@@ -71,6 +73,7 @@
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
       transform: skewX(-25deg);
       transition: left 0.7s ease-in-out;
+      z-index: 1;
     }
 
     .kit-card:hover {
@@ -83,16 +86,27 @@
       left: 125%;
     }
 
-    .kit-card-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, var(--accent), #6B8FE8);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-      font-size: 24px;
+    .kit-card-thumbnail {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: var(--bg-primary);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .kit-card-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .kit-card:hover .kit-card-thumbnail img {
+      transform: scale(1.05);
+    }
+
+    .kit-card-content {
+      padding: 16px;
     }
 
     .kit-card h3 {
@@ -174,6 +188,7 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+      margin-bottom: 24px;
     }
 
     .item-card {
@@ -193,7 +208,7 @@
 
     .item-image-container {
       width: 100%;
-      height: 200px;
+      aspect-ratio: 16 / 9;
       background: var(--bg-primary);
       display: flex;
       align-items: center;
@@ -213,7 +228,7 @@
     .item-card img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       transition: transform 0.4s ease;
     }
 
@@ -243,16 +258,29 @@
       flex-grow: 1;
     }
 
-    /* ===== BUY BUTTON ===== */
+    /* ===== BUTTON GROUPS ===== */
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .video-review-container {
+      padding-top: 8px;
+      border-top: 1px solid var(--outline);
+      margin-top: 8px;
+    }
+
+    /* ===== PURCHASE BUTTONS ===== */
     .btn {
       position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       padding: 10px 16px;
       border-radius: var(--radius);
-      background: var(--accent);
       color: #fff;
       text-decoration: none;
       font-size: 14px;
@@ -261,7 +289,8 @@
       cursor: pointer;
       overflow: hidden;
       transition: all 0.3s ease;
-      align-self: flex-start;
+      flex: 1;
+      min-width: fit-content;
     }
 
     .btn::before {
@@ -276,12 +305,6 @@
       transition: left 0.7s ease-in-out;
     }
 
-    .btn:hover {
-      background: #6B8FE8;
-      box-shadow: 0 4px 12px rgba(135, 169, 255, 0.3);
-      transform: translateY(-1px);
-    }
-
     .btn:hover::before {
       left: 125%;
     }
@@ -289,6 +312,74 @@
     .btn:focus-visible {
       outline: none;
       box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
+
+    .btn-official {
+      background: var(--green);
+    }
+
+    .btn-official:hover {
+      background: #45a049;
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-uk {
+      background: var(--blue);
+    }
+
+    .btn-uk:hover {
+      background: #6B8FE8;
+      box-shadow: 0 4px 12px rgba(135, 169, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-us {
+      background: var(--red);
+    }
+
+    .btn-us:hover {
+      background: #da190b;
+      box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* ===== VIDEO REVIEW BUTTON ===== */
+    .btn-video {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--outline);
+      font-size: 12px;
+      padding: 8px 12px;
+      align-self: flex-start;
+    }
+
+    .btn-video:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: rgba(135, 169, 255, 0.3);
+    }
+
+    /* ===== DISCLAIMER ===== */
+    .disclaimer {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-align: center;
+      padding: 16px;
+      margin-top: 24px;
+      border-top: 1px solid var(--outline);
+      line-height: 1.5;
+    }
+
+    .disclaimer a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .disclaimer a:hover {
+      opacity: 0.8;
+      text-decoration: underline;
     }
 
     /* ===== UTILITY CLASSES ===== */
@@ -314,9 +405,8 @@
       }
 
       .item-image-container {
-        width: 240px;
-        height: auto;
-        min-height: 180px;
+        width: 320px;
+        min-width: 320px;
       }
 
       .item-image-container::after {
@@ -334,12 +424,20 @@
         gap: 12px;
       }
 
-      .kit-card {
-        padding: 20px 12px;
+      .kit-card-content {
+        padding: 12px;
       }
 
       .item-info {
         padding: 20px 12px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
       }
     }
   </style>
@@ -356,134 +454,82 @@
       <button id="back-button">← Back to Kits</button>
       <h2 id="kit-title"></h2>
       <div id="kit-items"></div>
+      <div class="disclaimer">
+        Some of the links on this page may be affiliate links, which means we may earn a small commission if you make a purchase. 
+        This helps support the website at no extra cost to you. 
+        <a href="https://12boom.com/2024/09/17/affiliate-links/" target="_blank" rel="noopener noreferrer">Learn more about affiliate links</a>.
+      </div>
     </div>
   </div>
 
   <script>
     // ===== KITS DATA =====
     // TO ADD A NEW KIT: Copy the template below and add it to the array
+    // DIRECT LINK FORMAT: Add ?kit=SLUG_NAME to your page URL (e.g., ?kit=travel-backpack)
     const kits = [
       {
-        title: "The Best Budget PC Build",
-        slug: "budget-pc-build",
-        icon: "🖥️", // Emoji icon for the kit card
-        itemCount: 6, // Number of items in the kit
-        items: [
-          {
-            name: "AMD Ryzen 5 5600X",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=CPU",
-            description: "A powerful 6-core CPU perfect for budget gaming and productivity. Great performance at an affordable price point.",
-            link: "https://amzn.to/example"
-          },
-          {
-            name: "MSI B550M PRO Motherboard",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Motherboard",
-            description: "Solid micro-ATX motherboard with all essential features including PCIe 4.0 support and USB 3.2 Gen2.",
-            link: "https://amzn.to/example2"
-          },
-          {
-            name: "Corsair Vengeance 16GB RAM",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=RAM",
-            description: "Fast DDR4 memory kit with excellent compatibility and reliability for smooth multitasking.",
-            link: "https://amzn.to/example3"
-          },
-          {
-            name: "NVIDIA GTX 1660 Super",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=GPU",
-            description: "Great 1080p gaming graphics card that handles modern games at high settings with ease.",
-            link: "https://amzn.to/example4"
-          },
-          {
-            name: "Samsung 500GB NVMe SSD",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=SSD",
-            description: "Blazing fast NVMe storage for quick boot times and fast game loading.",
-            link: "https://amzn.to/example5"
-          },
-          {
-            name: "EVGA 600W Power Supply",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=PSU",
-            description: "Reliable 80+ Bronze certified power supply with enough headroom for upgrades.",
-            link: "https://amzn.to/example6"
-          }
-        ]
-      },
-      {
-        title: "Starter Content Creator Kit",
-        slug: "creator-starter-kit",
-        icon: "🎥",
-        itemCount: 5,
-        items: [
-          {
-            name: "Elgato Wave:3 Microphone",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Microphone",
-            description: "Top-tier USB condenser microphone with crystal clear audio quality and built-in mixing controls.",
-            link: "https://amzn.to/example7"
-          },
-          {
-            name: "Logitech C920 Webcam",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Webcam",
-            description: "Industry-standard 1080p webcam with excellent low-light performance and autofocus.",
-            link: "https://amzn.to/example8"
-          },
-          {
-            name: "Neewer LED Ring Light",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Ring+Light",
-            description: "18-inch dimmable ring light with adjustable color temperature for professional-looking videos.",
-            link: "https://amzn.to/example9"
-          },
-          {
-            name: "Rode PSA1 Boom Arm",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Boom+Arm",
-            description: "Professional studio boom arm with smooth movement and cable management.",
-            link: "https://amzn.to/example10"
-          },
-          {
-            name: "Elgato Stream Deck",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Stream+Deck",
-            description: "Customizable control deck with 15 LCD keys for quick access to your streaming tools.",
-            link: "https://amzn.to/example11"
-          }
-        ]
-      },
-      {
-        title: "Professional Photography Setup",
-        slug: "pro-photography-setup",
-        icon: "📷",
+        title: "The Travelling Vlogger",
+        slug: "travel-backpack",
+        thumbnailLink: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/SonyZV-E1.webp",
         itemCount: 4,
         items: [
           {
-            name: "Sony A7 III Camera Body",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Camera",
+            name: "Sony ZV-E1",
+            image: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/SonyZV-E1.webp",
             description: "Full-frame mirrorless camera with exceptional image quality and autofocus performance.",
-            link: "https://amzn.to/example12"
+            linkOfficial: "",
+            linkUK: "https://amzn.to/4og2wBn",
+            linkUS: "https://amzn.to/4nZdKKh",
+            videoReview: ""
           },
           {
-            name: "Sony 24-70mm f/2.8 GM Lens",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Lens",
-            description: "Versatile professional zoom lens with constant f/2.8 aperture throughout the range.",
-            link: "https://amzn.to/example13"
+            name: "Sigma 28-70 f2.8 Lens",
+            image: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/Sigma28-70.webp",
+            description: "A beautiful lens with remarkable bokeh and image quality - perfect for vlogs and cinematics.",
+            linkOfficial: "",
+            linkUK: "https://amzn.to/4hgUIfC",
+            linkUS: "https://amzn.to/3KVTjzm",
+            videoReview: ""
           },
           {
-            name: "Manfrotto Carbon Fiber Tripod",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=Tripod",
-            description: "Lightweight yet sturdy carbon fiber tripod with fluid head for smooth movements.",
-            link: "https://amzn.to/example14"
+            name: "Hollyland Lark M2 Wireless Lavs",
+            image: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/HollylandLarkM2.webp",
+            description: "Simple and easy-to-use lav mics that work both with your camera and your phone.",
+            linkOfficial: "",
+            linkUK: "https://amzn.to/4mZeIoq",
+            linkUS: "https://amzn.to/4oeoC6M",
+            videoReview: ""
           },
           {
-            name: "SanDisk 128GB SD Card",
-            image: "https://via.placeholder.com/300x300/1F1F1F/87A9FF?text=SD+Card",
-            description: "High-speed UHS-II SD card with fast read/write speeds for 4K video recording.",
-            link: "https://amzn.to/example15"
+            name: "Elgato Keylight Neo",
+            image: "https://herovibes.github.io/HeroVibesStoreTools/Kits/Pictures/ElgatoKeylightNeo.webp",
+            description: "A portable light with variable brightness and temperature settings - when paired with a suitable powerbank, can run for hours and be taken anywhere",
+            linkOfficial: "https://elgato.sjv.io/o4OAoe",
+            linkUK: "https://amzn.to/43RyLPs",
+            linkUS: "https://amzn.to/3GamnAV",
+            videoReview: ""
           }
         ]
       }
       // ===== ADD MORE KITS HERE =====
-      // Copy the template above and customize:
-      // - title: Display name of the kit
-      // - slug: URL-friendly identifier (no spaces, lowercase)
-      // - icon: Emoji to display on the kit card
-      // - itemCount: Total number of items (for display)
-      // - items: Array of products with name, image, description, and affiliate link
+      // Template for new kit:
+      // {
+      //   title: "Kit Name",
+      //   slug: "kit-url-slug",
+      //   thumbnailLink: "https://your-image-url.com/image.jpg",
+      //   itemCount: 3,
+      //   items: [
+      //     {
+      //       name: "Product Name",
+      //       image: "https://product-image.jpg",
+      //       description: "Product description here",
+      //       linkOfficial: "https://official-store-link.com",  // Leave empty "" to hide
+      //       linkUK: "https://amazon.co.uk/link",              // Leave empty "" to hide
+      //       linkUS: "https://amazon.com/link",                // Leave empty "" to hide
+      //       videoReview: "https://youtube.com/watch?v=xxx"    // Leave empty "" to hide
+      //     }
+      //   ]
+      // }
     ];
 
     // ===== DOM ELEMENTS =====
@@ -501,10 +547,14 @@
         const card = document.createElement("div");
         card.className = "kit-card";
         card.innerHTML = `
-          <div class="kit-card-icon">${kit.icon}</div>
-          <h3>${kit.title}</h3>
-          <div class="kit-card-meta">
-            <span>📦 ${kit.itemCount} items</span>
+          <div class="kit-card-thumbnail">
+            <img src="${kit.thumbnailLink}" alt="${kit.title}" loading="lazy">
+          </div>
+          <div class="kit-card-content">
+            <h3>${kit.title}</h3>
+            <div class="kit-card-meta">
+              <span>📦 ${kit.itemCount} items</span>
+            </div>
           </div>
         `;
         card.onclick = () => openKit(kit.slug);
@@ -523,6 +573,52 @@
       kit.items.forEach(item => {
         const itemCard = document.createElement("div");
         itemCard.className = "item-card";
+        
+        // Build purchase buttons HTML
+        let buttonsHTML = '<div class="button-group">';
+        
+        if (item.linkOfficial) {
+          buttonsHTML += `
+            <a href="${item.linkOfficial}" target="_blank" rel="noopener noreferrer" class="btn btn-official">
+              <span>Official Store</span>
+              <span>→</span>
+            </a>
+          `;
+        }
+        
+        if (item.linkUK) {
+          buttonsHTML += `
+            <a href="${item.linkUK}" target="_blank" rel="noopener noreferrer" class="btn btn-uk">
+              <span>Buy on Amazon UK</span>
+              <span>→</span>
+            </a>
+          `;
+        }
+        
+        if (item.linkUS) {
+          buttonsHTML += `
+            <a href="${item.linkUS}" target="_blank" rel="noopener noreferrer" class="btn btn-us">
+              <span>Buy on Amazon US</span>
+              <span>→</span>
+            </a>
+          `;
+        }
+        
+        buttonsHTML += '</div>';
+        
+        // Add video review button if available
+        let videoHTML = '';
+        if (item.videoReview) {
+          videoHTML = `
+            <div class="video-review-container">
+              <a href="${item.videoReview}" target="_blank" rel="noopener noreferrer" class="btn btn-video">
+                <span>🎥</span>
+                <span>Watch Video Review</span>
+              </a>
+            </div>
+          `;
+        }
+        
         itemCard.innerHTML = `
           <div class="item-image-container">
             <img src="${item.image}" alt="${item.name}" loading="lazy">
@@ -530,16 +626,17 @@
           <div class="item-info">
             <h4>${item.name}</h4>
             <p>${item.description}</p>
-            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="btn">
-              <span>View Product</span>
-              <span>→</span>
-            </a>
+            ${buttonsHTML}
+            ${videoHTML}
           </div>
         `;
         kitItems.appendChild(itemCard);
       });
 
-      window.history.pushState({}, "", `#/${slug}`);
+      // Update URL without page reload
+      const newUrl = `${window.location.pathname}?kit=${slug}`;
+      window.history.pushState({ slug }, "", newUrl);
+      
       mainPage.classList.add("hidden");
       detailPage.classList.remove("hidden");
       scheduleHeightCheck();
@@ -547,15 +644,17 @@
 
     // ===== BACK TO KITS =====
     backButton.onclick = () => {
-      window.history.pushState({}, "", `/`);
+      window.history.pushState({}, "", window.location.pathname);
       mainPage.classList.remove("hidden");
       detailPage.classList.add("hidden");
       scheduleHeightCheck();
     };
 
     // ===== HANDLE BROWSER NAVIGATION =====
-    window.addEventListener("popstate", () => {
-      const slug = window.location.hash.split("/")[1];
+    window.addEventListener("popstate", (event) => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const slug = urlParams.get('kit');
+      
       if (slug) {
         openKit(slug);
       } else {
@@ -566,17 +665,20 @@
     });
 
     // ===== INITIALIZE =====
-    // Check if there's a kit in the URL on page load
-    const initialSlug = window.location.hash.split("/")[1];
+    // Check if there's a kit in the URL on page load (works in iframes!)
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialSlug = urlParams.get('kit');
+    
     if (initialSlug) {
       openKit(initialSlug);
+    } else {
+      loadKits();
     }
-    loadKits();
 
     // ===== OPTIONAL: INFINITE SCROLL =====
     window.addEventListener("scroll", () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
-        if (grid.childElementCount < kits.length && !detailPage.classList.contains("hidden")) {
+        if (!detailPage.classList.contains("hidden")) {
           return; // Don't load more kits while viewing a kit detail
         }
         if (grid.childElementCount < kits.length) {
