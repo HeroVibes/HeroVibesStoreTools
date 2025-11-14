@@ -476,8 +476,6 @@
 
   <script>
     // ===== KITS DATA =====
-    // TO ADD A NEW KIT: Copy the template below and add it to the array
-    // DIRECT LINK: Use data-kit="slug" attribute on your iframe or pass slug via postMessage
     const kits = [
       {
         title: "The Travelling Vlogger",
@@ -603,7 +601,6 @@
           }
         ]
       }
-      // ===== ADD MORE KITS HERE =====
     ];
 
     // ===== DOM ELEMENTS =====
@@ -634,12 +631,16 @@
         card.onclick = () => openKit(kit.slug);
         grid.appendChild(card);
       }
+      scheduleHeightCheck();
     }
 
     // ===== OPEN KIT DETAIL =====
     function openKit(slug) {
       const kit = kits.find(k => k.slug === slug);
-      if (!kit) return;
+      if (!kit) {
+        console.error('Kit not found:', slug);
+        return;
+      }
 
       kitTitle.textContent = kit.title;
       kitItems.innerHTML = "";
@@ -708,11 +709,15 @@
       });
 
       // Send message to parent that we've opened this kit
-      window.parent.postMessage({ 
-        type: 'kitOpened', 
-        slug: slug,
-        title: kit.title 
-      }, '*');
+      try {
+        window.parent.postMessage({ 
+          type: 'kitOpened', 
+          slug: slug,
+          title: kit.title 
+        }, '*');
+      } catch (e) {
+        console.log('PostMessage not available:', e);
+      }
       
       mainPage.classList.add("hidden");
       detailPage.classList.remove("hidden");
@@ -721,7 +726,11 @@
 
     // ===== BACK TO KITS =====
     backButton.onclick = () => {
-      window.parent.postMessage({ type: 'kitClosed' }, '*');
+      try {
+        window.parent.postMessage({ type: 'kitClosed' }, '*');
+      } catch (e) {
+        console.log('PostMessage not available:', e);
+      }
       mainPage.classList.remove("hidden");
       detailPage.classList.add("hidden");
       scheduleHeightCheck();
@@ -731,19 +740,35 @@
     window.addEventListener('message', (event) => {
       // Accept messages from parent window to open specific kits
       if (event.data && event.data.type === 'openKit' && event.data.slug) {
+        console.log('Received openKit message:', event.data.slug);
         openKit(event.data.slug);
       }
     });
 
     // ===== INITIALIZE =====
-    // Check URL parameters on load
-    const urlParams = new URLSearchParams(window.location.search);
-    const initialSlug = urlParams.get('kit');
-    
-    if (initialSlug) {
-      openKit(initialSlug);
+    function initializeApp() {
+      console.log('Initializing Kits Tool...');
+      
+      // Check URL parameters on load
+      const urlParams = new URLSearchParams(window.location.search);
+      const initialSlug = urlParams.get('kit');
+      
+      console.log('URL Parameter kit:', initialSlug);
+      
+      if (initialSlug) {
+        console.log('Opening kit from URL:', initialSlug);
+        openKit(initialSlug);
+      } else {
+        console.log('Loading all kits');
+        loadKits();
+      }
+    }
+
+    // Run initialization when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeApp);
     } else {
-      loadKits();
+      initializeApp();
     }
 
     // ===== OPTIONAL: INFINITE SCROLL =====
@@ -754,7 +779,6 @@
         }
         if (grid.childElementCount < kits.length) {
           loadKits(grid.childElementCount, 6);
-          scheduleHeightCheck();
         }
       }
     });
@@ -770,7 +794,11 @@
       
       if (height !== lastHeight) {
         lastHeight = height;
-        window.parent.postMessage({ frameHeight: height }, '*');
+        try {
+          window.parent.postMessage({ frameHeight: height }, '*');
+        } catch (e) {
+          console.log('Cannot send height to parent');
+        }
       }
     }
 
