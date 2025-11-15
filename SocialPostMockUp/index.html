@@ -6,456 +6,456 @@
     <style>
         /* ===== GLOBAL STYLES ===== */
         * {
-            margin: 0; [cite: 96]
+            margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            background: #191919; [cite: 97, 26]
-            font-family: sans-serif; [cite: 97]
-            padding: 24px 16px; [cite: 97]
-            color: #D4D4D4; [cite: 97]
-            /* Removed min-height: 100vh per troubleshooting guide [cite: 55] */
+            background: #191919;
+            font-family: sans-serif;
+            padding: 24px 16px;
+            color: #D4D4D4;
+            /* Removed min-height: 100vh per troubleshooting guide */
         }
 
         /* ===== MAIN CONTAINER ===== */
         .container {
-            max-width: 1400px; [cite: 98]
-            margin: 0 auto; [cite: 98]
+            max-width: 1400px;
+            margin: 0 auto;
             position: relative;
         }
 
         /* ===== VERSION NUMBER ===== */
         .version {
-            position: fixed; [cite: 99]
-            bottom: 8px; [cite: 99]
+            position: fixed;
+            bottom: 8px;
             right: 8px;
             font-size: 10px;
-            color: #8C8C8C; [cite: 99]
+            color: #8C8C8C;
             opacity: 0.5;
             user-select: none;
-            z-index: 1000; [cite: 100]
+            z-index: 1000;
         }
 
         /* ===== STATUS MESSAGE ===== */
         .status-message {
-            text-align: center; [cite: 101]
-            padding: 12px; [cite: 101]
+            text-align: center;
+            padding: 12px;
             border-radius: 8px;
             margin-bottom: 16px;
-            font-size: 12px; [cite: 101]
-            display: none; [cite: 102]
+            font-size: 12px;
+            display: none;
         }
 
         .status-message.error {
-            background: rgba(255, 59, 48, 0.1); [cite: 103]
-            border: 1px solid rgba(255, 59, 48, 0.3); [cite: 103]
-            color: #FF3B30; [cite: 103]
-            display: block; [cite: 104]
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            color: #FF3B30;
+            display: block;
         }
 
         .status-message.success {
-            background: rgba(52, 199, 89, 0.1); [cite: 105]
-            border: 1px solid rgba(52, 199, 89, 0.3); [cite: 105]
-            color: #34C759; [cite: 105]
-            display: block; [cite: 106]
+            background: rgba(52, 199, 89, 0.1);
+            border: 1px solid rgba(52, 199, 89, 0.3);
+            color: #34C759;
+            display: block;
         }
 
         .status-message.info {
-            background: rgba(135, 169, 255, 0.1); [cite: 107]
-            border: 1px solid rgba(135, 169, 255, 0.3); [cite: 107]
-            color: #87A9FF; [cite: 107]
-            display: block; [cite: 108]
+            background: rgba(135, 169, 255, 0.1);
+            border: 1px solid rgba(135, 169, 255, 0.3);
+            color: #87A9FF;
+            display: block;
         }
 
         /* ===== TWO COLUMN LAYOUT (DESKTOP) ===== */
         .content-wrapper {
-            display: grid; [cite: 109]
-            grid-template-columns: 1fr; [cite: 109]
+            display: grid;
+            grid-template-columns: 1fr;
             gap: 16px;
         }
 
         @media (min-width: 900px) {
             .content-wrapper {
-                grid-template-columns: 1fr 600px; [cite: 110]
+                grid-template-columns: 1fr 600px;
             }
 
             .preview-section {
-                order: 2; [cite: 111]
-                position: sticky; [cite: 111]
+                order: 2;
+                position: sticky;
                 top: 16px;
                 align-self: start;
             }
 
             .settings-column {
-                order: 1; [cite: 112]
+                order: 1;
             }
         }
 
         /* ===== TAB SYSTEM ===== */
         .tab-container {
-            background: #1F1F1F; [cite: 113]
-            border: 1px solid #323232; [cite: 113]
+            background: #1F1F1F;
+            border: 1px solid #323232;
             border-radius: 8px;
-            padding: 16px; [cite: 113]
-            margin-bottom: 16px; [cite: 114]
+            padding: 16px;
+            margin-bottom: 16px;
         }
 
         .tab-buttons {
-            display: flex; [cite: 115]
-            gap: 8px; [cite: 115]
-            margin-bottom: 16px; [cite: 115]
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
         }
 
         .tab-btn {
-            position: relative; [cite: 116]
-            padding: 10px 16px; [cite: 116]
-            border-radius: 8px; [cite: 116]
-            background: #191919; [cite: 116]
-            color: #8C8C8C; [cite: 116]
-            border: 1px solid #323232; [cite: 116]
-            cursor: pointer; [cite: 116]
-            overflow: hidden; [cite: 116]
-            font-size: 14px; [cite: 116]
-            font-family: sans-serif; [cite: 117]
-            transition: all 0.3s ease; [cite: 117]
+            position: relative;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: #191919;
+            color: #8C8C8C;
+            border: 1px solid #323232;
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px;
+            font-family: sans-serif;
+            transition: all 0.3s ease;
         }
 
         .tab-btn.active {
-            background: #1F1F1F; [cite: 118]
-            color: #87A9FF; [cite: 118]
-            border-color: #87A9FF; [cite: 118]
+            background: #1F1F1F;
+            color: #87A9FF;
+            border-color: #87A9FF;
         }
 
         .tab-btn:hover {
-            background: #323232; [cite: 119]
+            background: #323232;
         }
 
         .tab-content {
-            display: none; [cite: 120]
+            display: none;
         }
 
         .tab-content.active {
-            display: block; [cite: 121]
+            display: block;
         }
 
         /* ===== DISCLAIMER ===== */
         .disclaimer {
-            background: rgba(135, 169, 255, 0.1); [cite: 122]
-            border: 1px solid rgba(135, 169, 255, 0.2); [cite: 122]
-            border-radius: 8px; [cite: 122]
-            padding: 12px; [cite: 122]
-            margin-bottom: 16px; [cite: 122]
-            font-size: 11px; [cite: 122]
-            color: #8C8C8C; [cite: 122]
-            line-height: 1.5; [cite: 123]
+            background: rgba(135, 169, 255, 0.1);
+            border: 1px solid rgba(135, 169, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 11px;
+            color: #8C8C8C;
+            line-height: 1.5;
         }
 
         .disclaimer strong {
-            color: #87A9FF; [cite: 124]
+            color: #87A9FF;
         }
 
         /* ===== INPUT SECTION ===== */
         .input-section {
-            background: #1F1F1F; [cite: 125]
-            border: 1px solid #323232; [cite: 125]
+            background: #1F1F1F;
+            border: 1px solid #323232;
             border-radius: 8px;
-            padding: 24px 16px; [cite: 125]
-            margin-bottom: 16px; [cite: 126]
+            padding: 24px 16px;
+            margin-bottom: 16px;
         }
 
         .section-header {
-            font-size: 14px; [cite: 127]
-            font-weight: bold; [cite: 127]
-            color: #D4D4D4; [cite: 127]
-            margin-bottom: 16px; [cite: 127]
+            font-size: 14px;
+            font-weight: bold;
+            color: #D4D4D4;
+            margin-bottom: 16px;
         }
 
         .input-group {
-            display: flex; [cite: 128]
-            gap: 12px; [cite: 128]
-            margin-bottom: 16px; [cite: 128]
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
         .input-group.column {
-            flex-direction: column; [cite: 129]
+            flex-direction: column;
         }
 
         .input-group input[type="text"],
         .input-group textarea {
-            flex: 1; [cite: 130]
-            background: #191919; [cite: 130]
-            border: 1px solid #323232; [cite: 130]
-            border-radius: 8px; [cite: 130]
-            padding: 10px 16px; [cite: 130]
-            color: #D4D4D4; [cite: 130]
-            font-size: 14px; [cite: 130]
-            font-family: sans-serif; [cite: 131]
+            flex: 1;
+            background: #191919;
+            border: 1px solid #323232;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: #D4D4D4;
+            font-size: 14px;
+            font-family: sans-serif;
         }
 
         .input-group input[type="number"],
         .input-group input[type="date"] {
-            background: #191919; [cite: 132]
-            border: 1px solid #323232; [cite: 132]
-            border-radius: 8px; [cite: 132]
-            padding: 10px 16px; [cite: 132]
-            color: #D4D4D4; [cite: 132]
-            font-size: 14px; [cite: 132]
-            font-family: sans-serif; [cite: 132]
-            color-scheme: dark; [cite: 133]
+            background: #191919;
+            border: 1px solid #323232;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: #D4D4D4;
+            font-size: 14px;
+            font-family: sans-serif;
+            color-scheme: dark;
         }
 
         /* Remove number input arrows */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none; [cite: 134]
-            margin: 0; [cite: 134]
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         input[type="number"] {
-            -moz-appearance: textfield; [cite: 135]
+            -moz-appearance: textfield;
         }
 
         .input-group textarea {
-            min-height: 120px; [cite: 136]
-            resize: vertical; [cite: 136]
-            font-size: 14px; [cite: 136]
+            min-height: 120px;
+            resize: vertical;
+            font-size: 14px;
             line-height: 1.4;
         }
 
         .input-group input:focus,
         .input-group textarea:focus {
-            outline: none; [cite: 137]
-            border-color: #87A9FF; [cite: 137]
+            outline: none;
+            border-color: #87A9FF;
         }
 
         .input-group input::placeholder,
         .input-group textarea::placeholder {
-            color: #8C8C8C; [cite: 138]
+            color: #8C8C8C;
         }
 
         .input-label {
-            font-size: 12px; [cite: 139]
-            color: #8C8C8C; [cite: 139]
-            margin-bottom: 8px; [cite: 139]
-            display: block; [cite: 139]
+            font-size: 12px;
+            color: #8C8C8C;
+            margin-bottom: 8px;
+            display: block;
         }
 
         /* ===== LABEL WITH CHECKBOX ===== */
         .label-with-checkbox {
-            display: flex; [cite: 140]
-            align-items: center; [cite: 140]
-            justify-content: space-between; [cite: 140]
-            margin-bottom: 8px; [cite: 140]
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
         }
 
         .label-with-checkbox .input-label {
-            margin-bottom: 0; [cite: 141]
+            margin-bottom: 0;
         }
 
         .checkbox-toggle {
-            display: flex; [cite: 142]
-            align-items: center; [cite: 142]
-            gap: 6px; [cite: 142]
-            cursor: pointer; [cite: 142]
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
         }
 
         .checkbox-toggle input[type="checkbox"] {
-            width: 16px; [cite: 143]
-            height: 16px; [cite: 143]
-            cursor: pointer; [cite: 143]
-            accent-color: #87A9FF; [cite: 143]
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #87A9FF;
         }
 
         .checkbox-toggle label {
-            font-size: 11px; [cite: 144]
-            color: #8C8C8C; [cite: 144]
-            cursor: pointer; [cite: 144]
-            user-select: none; [cite: 144]
+            font-size: 11px;
+            color: #8C8C8C;
+            cursor: pointer;
+            user-select: none;
         }
 
         .stats-grid {
-            display: grid; [cite: 145]
-            grid-template-columns: repeat(3, 1fr); [cite: 145]
-            gap: 12px; [cite: 145]
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
         }
 
         .stats-grid .input-group {
-            margin-bottom: 0; [cite: 146]
+            margin-bottom: 0;
         }
 
         /* ===== FILE UPLOAD ===== */
         .file-upload-container {
-            display: flex; [cite: 147]
-            align-items: center; [cite: 147]
-            gap: 12px; [cite: 147]
-            margin-bottom: 16px; [cite: 147]
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
         .file-upload-btn {
-            position: relative; [cite: 148]
-            padding: 10px 16px; [cite: 148]
-            border-radius: 8px; [cite: 148]
-            background: #1F1F1F; [cite: 148]
-            color: #D4D4D4; [cite: 148]
-            border: 1px solid rgba(255,255,255,0.06); [cite: 148]
-            cursor: pointer; [cite: 148]
-            overflow: hidden; [cite: 148]
-            font-size: 14px; [cite: 148]
-            font-family: sans-serif; [cite: 149]
-            white-space: nowrap; [cite: 149]
+            position: relative;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: #1F1F1F;
+            color: #D4D4D4;
+            border: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px;
+            font-family: sans-serif;
+            white-space: nowrap;
         }
 
         .file-upload-btn::before {
-            content: ''; [cite: 150]
-            position: absolute; [cite: 150]
-            top: 0; [cite: 150]
-            left: -100%; [cite: 150]
-            width: 75%; [cite: 150]
-            height: 100%; [cite: 150]
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); [cite: 150]
-            transform: skewX(-25deg); [cite: 150]
-            transition: left 0.7s ease-in-out; [cite: 151]
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
         }
 
         .file-upload-btn:hover::before {
-            left: 125%; [cite: 152]
+            left: 125%;
         }
 
         .file-upload-btn input[type="file"] {
-            position: absolute; [cite: 153]
-            opacity: 0; [cite: 153]
-            cursor: pointer; [cite: 153]
-            width: 100%; [cite: 153]
-            height: 100%; [cite: 153]
-            top: 0; [cite: 153]
-            left: 0; [cite: 154]
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
         }
 
         .upload-preview {
-            width: 48px; [cite: 155]
-            height: 48px; [cite: 155]
-            border-radius: 50%; [cite: 155]
-            object-fit: cover; [cite: 155]
-            border: 2px solid #323232; [cite: 155]
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #323232;
         }
 
         .file-name {
-            font-size: 12px; [cite: 157]
-            color: #8C8C8C; [cite: 157]
-            flex: 1; [cite: 157]
-            overflow: hidden; [cite: 157]
-            text-overflow: ellipsis; [cite: 157]
-            white-space: nowrap; [cite: 158]
+            font-size: 12px;
+            color: #8C8C8C;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         /* ===== BUTTONS ===== */
         .btn {
-            position: relative; [cite: 159]
-            padding: 10px 16px; [cite: 159]
-            border-radius: 8px; [cite: 159]
-            background: #1F1F1F; [cite: 159]
-            color: #D4D4D4; [cite: 159]
-            border: 1px solid rgba(255,255,255,0.06); [cite: 159]
-            cursor: pointer; [cite: 159]
-            overflow: hidden; [cite: 159]
-            font-size: 14px; [cite: 159]
-            font-family: sans-serif; [cite: 160]
-            white-space: nowrap; [cite: 160]
+            position: relative;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: #1F1F1F;
+            color: #D4D4D4;
+            border: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px;
+            font-family: sans-serif;
+            white-space: nowrap;
         }
 
         .btn::before {
-            content: ''; [cite: 161]
-            position: absolute; [cite: 161]
-            top: 0; [cite: 161]
-            left: -100%; [cite: 161]
-            width: 75%; [cite: 161]
-            height: 100%; [cite: 161]
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); [cite: 161]
-            transform: skewX(-25deg); [cite: 161]
-            transition: left 0.7s ease-in-out; [cite: 162]
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
         }
 
         .btn:hover::before {
-            left: 125%; [cite: 163]
+            left: 125%;
         }
 
         .btn:focus-visible {
-            outline: none; [cite: 164]
-            box-shadow: 0 0 0 3px rgba(135,169,255,0.12); [cite: 164, 31]
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
         }
 
         .btn:disabled {
-            opacity: 0.5; [cite: 165]
-            cursor: not-allowed; [cite: 165]
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .btn:disabled::before {
-            display: none; [cite: 166]
+            display: none;
         }
 
         /* ===== CUSTOMIZATION OPTIONS ===== */
         .customization-section {
-            background: #1F1F1F; [cite: 167]
-            border: 1px solid #323232; [cite: 167]
-            border-radius: 8px; [cite: 167]
-            padding: 24px 16px; [cite: 167]
-            margin-bottom: 16px; [cite: 168]
+            background: #1F1F1F;
+            border: 1px solid #323232;
+            border-radius: 8px;
+            padding: 24px 16px;
+            margin-bottom: 16px;
         }
 
         .options-grid {
-            display: grid; [cite: 169]
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); [cite: 169]
-            gap: 12px; [cite: 169]
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
         }
 
         .option-item {
-            display: flex; [cite: 170]
-            align-items: center; [cite: 170]
-            gap: 8px; [cite: 170]
-            cursor: pointer; [cite: 170]
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
         }
 
         .option-item input[type="checkbox"],
         .option-item input[type="radio"] {
-            width: 18px; [cite: 171]
-            height: 18px; [cite: 171]
-            cursor: pointer; [cite: 171]
-            accent-color: #87A9FF; [cite: 171]
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #87A9FF;
         }
 
         .option-item label {
-            font-size: 12px; [cite: 172]
-            color: #D4D4D4; [cite: 172]
-            cursor: pointer; [cite: 172]
-            user-select: none; [cite: 172]
+            font-size: 12px;
+            color: #D4D4D4;
+            cursor: pointer;
+            user-select: none;
         }
 
         /* ===== PREVIEW AREA ===== */
         .preview-section {
-            background: #1F1F1F; [cite: 173]
-            border: 1px solid #323232; [cite: 173]
-            border-radius: 8px; [cite: 173]
-            padding: 24px 16px; [cite: 173]
-            margin-bottom: 16px; [cite: 174]
+            background: #1F1F1F;
+            border: 1px solid #323232;
+            border-radius: 8px;
+            padding: 24px 16px;
+            margin-bottom: 16px;
         }
 
         .preview-container {
-            display: flex; [cite: 175]
-            justify-content: center; [cite: 175]
-            align-items: center; [cite: 175]
-            min-height: 300px; [cite: 175]
-            padding: 20px; [cite: 175]
-            transition: background-color 0.3s ease; [cite: 175]
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            padding: 20px;
+            transition: background-color 0.3s ease;
         }
 
         .preview-container.dark-bg {
-            background-color: #15202B; [cite: 177]
+            background-color: #15202B;
         }
 
         .preview-container.light-bg {
-            background-color: #F7F9FA; [cite: 178]
+            background-color: #F7F9FA;
         }
 
         .preview-container.transparent-bg {
@@ -464,485 +464,485 @@
                 linear-gradient(-45deg, #2a2a2a 25%, transparent 25%), 
                 linear-gradient(45deg, transparent 75%, #2a2a2a 75%), 
                
-[cite: 179]  linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
-            background-size: 20px 20px; [cite: 179]
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px; [cite: 180]
+  linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
 
         /* ===== TWEET CARD ===== */
         #tweet-card {
-            max-width: 600px; [cite: 181]
-            width: 100%; [cite: 181]
-            border-radius: 16px; [cite: 181]
-            padding: 20px; [cite: 181]
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3); [cite: 181]
-            transition: all 0.3s ease; [cite: 182]
+            max-width: 600px;
+            width: 100%;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
         }
 
         #tweet-card.rounded-corners {
-            border-radius: 24px; [cite: 183]
+            border-radius: 24px;
         }
 
         /* Light Mode Card */
         #tweet-card.light-mode {
-            background: #FFFFFF; [cite: 184]
+            background: #FFFFFF;
         }
 
         #tweet-card.light-mode .author-name {
-            color: #14171A; [cite: 185]
+            color: #14171A;
         }
 
         #tweet-card.light-mode .author-username {
-            color: #657786; [cite: 186]
+            color: #657786;
         }
 
         #tweet-card.light-mode .tweet-text {
-            color: #14171A; [cite: 187]
+            color: #14171A;
         }
 
         #tweet-card.light-mode .tweet-stats {
-            border-top-color: #E1E8ED; [cite: 188]
+            border-top-color: #E1E8ED;
         }
 
         #tweet-card.light-mode .stat-item {
-            color: #657786; [cite: 189]
+            color: #657786;
         }
 
         #tweet-card.light-mode .stat-value {
-            color: #14171A; [cite: 190]
+            color: #14171A;
         }
 
         /* Dark Mode Card */
         #tweet-card.dark-mode {
-            background: #192734; [cite: 191]
+            background: #192734;
         }
 
         #tweet-card.dark-mode .author-name {
-            color: #FFFFFF; [cite: 192]
+            color: #FFFFFF;
         }
 
         #tweet-card.dark-mode .author-username {
-            color: #8B98A5; [cite: 193]
+            color: #8B98A5;
         }
 
         #tweet-card.dark-mode .tweet-text {
-            color: #FFFFFF; [cite: 194]
+            color: #FFFFFF;
         }
 
         #tweet-card.dark-mode .tweet-stats {
-            border-top-color: #2F3336; [cite: 195]
+            border-top-color: #2F3336;
         }
 
         #tweet-card.dark-mode .stat-item {
-            color: #8B98A5; [cite: 196]
+            color: #8B98A5;
         }
 
         #tweet-card.dark-mode .stat-value {
-            color: #FFFFFF; [cite: 197]
+            color: #FFFFFF;
         }
 
         .card-header {
-            display: flex; [cite: 198]
-            align-items: center; [cite: 198]
-            gap: 12px; [cite: 198]
-            margin-bottom: 12px; [cite: 198]
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         .profile-pic {
-            width: 48px; [cite: 199]
-            height: 48px; [cite: 199]
-            border-radius: 50%; [cite: 199]
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
             /* MODIFIED: Replaced object-fit with background-size for html2canvas bug */
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            background: #E1E8ED; [cite: 199]
-            flex-shrink: 0; [cite: 199]
+            background-color: #E1E8ED; /* Fallback color */
+            flex-shrink: 0;
         }
 
         .author-info {
-            display: flex; [cite: 201]
-            flex-direction: column; [cite: 201]
-            min-width: 0; [cite: 201]
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
         }
 
         .author-name {
-            font-size: 15px; [cite: 202]
-            font-weight: bold; [cite: 202]
-            white-space: nowrap; [cite: 202]
-            overflow: hidden; [cite: 202]
-            text-overflow: ellipsis; [cite: 202]
+            font-size: 15px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .author-username {
-            font-size: 15px; [cite: 203]
-            white-space: nowrap; [cite: 203]
-            overflow: hidden; [cite: 203]
-            text-overflow: ellipsis; [cite: 203]
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .tweet-text {
-            font-size: 23px; [cite: 204]
-            line-height: 1.4; [cite: 204]
-            word-wrap: break-word; [cite: 204]
-            margin-bottom: 12px; [cite: 204]
-            white-space: pre-wrap; [cite: 204]
+            font-size: 23px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            margin-bottom: 12px;
+            white-space: pre-wrap;
         }
 
         .tweet-mention,
         .tweet-hashtag {
-            color: #1DA1F2; [cite: 205]
+            color: #1DA1F2;
         }
 
         .tweet-stats {
-            display: flex; [cite: 206]
-            gap: 16px; [cite: 206]
-            padding-top: 12px; [cite: 206]
-            font-size: 15px; [cite: 206]
-            border-top: 1px solid; [cite: 206]
+            display: flex;
+            gap: 16px;
+            padding-top: 12px;
+            font-size: 15px;
+            border-top: 1px solid;
         }
 
         .stat-item {
-            display: flex; [cite: 207]
-            gap: 4px; [cite: 207]
+            display: flex;
+            gap: 4px;
         }
 
         .stat-value {
-            font-weight: bold; [cite: 208]
+            font-weight: bold;
         }
 
         /* ===== VISIBILITY TOGGLES ===== */
         .hide-profile-pic .profile-pic {
-            display: none; [cite: 209]
+            display: none;
         }
 
         .hide-likes .stat-likes {
-            display: none; [cite: 210]
+            display: none;
         }
 
         .hide-retweets .stat-retweets {
-            display: none; [cite: 211]
+            display: none;
         }
 
         .hide-date .stat-date {
-            display: none; [cite: 212]
+            display: none;
         }
 
         /* ===== DOWNLOAD SECTION ===== */
         .download-section {
-            display: flex; [cite: 213]
-            justify-content: center; [cite: 213]
-            gap: 12px; [cite: 213]
+            display: flex;
+            justify-content: center;
+            gap: 12px;
         }
 
         /* ===== MOBILE RESPONSIVE ===== */
         @media (max-width: 768px) {
             body {
-                padding: 16px 12px; [cite: 214]
+                padding: 16px 12px;
             }
 
             .tab-container,
             .input-section,
             .customization-section,
             .preview-section {
-                padding: 16px 12px; [cite: 215]
+                padding: 16px 12px;
             }
 
             .input-group {
-                flex-direction: column; [cite: 216]
+                flex-direction: column;
             }
 
             .tab-buttons {
-                flex-wrap: wrap; [cite: 217]
+                flex-wrap: wrap;
             }
 
             #tweet-card {
-                padding: 16px; [cite: 218]
+                padding: 16px;
             }
 
             .tweet-text {
-                font-size: 18px; [cite: 219]
+                font-size: 18px;
             }
 
             .tweet-stats {
-                flex-wrap: wrap; [cite: 220]
-                gap: 12px; [cite: 220]
+                flex-wrap: wrap;
+                gap: 12px;
             }
 
             .download-section {
-                flex-direction: column; [cite: 221]
+                flex-direction: column;
             }
 
             .download-section .btn {
-                width: 100%; [cite: 222]
+                width: 100%;
             }
 
             .file-upload-container {
-                flex-direction: column; [cite: 223]
-                align-items: flex-start; [cite: 223]
+                flex-direction: column;
+                align-items: flex-start;
             }
 
             .stats-grid {
-                grid-template-columns: 1fr; [cite: 224]
+                grid-template-columns: 1fr;
             }
 
             /* Mobile: Preview at top */
             .content-wrapper {
-                display: flex; [cite: 225]
-                flex-direction: column; [cite: 225]
+                display: flex;
+                flex-direction: column;
             }
 
             .preview-section {
-                order: -1; [cite: 226]
+                order: -1;
             }
 
             .version {
-                position: static; [cite: 227]
-                text-align: center; [cite: 227]
-                margin-top: 16px; [cite: 227]
-                opacity: 0.3; [cite: 227]
+                position: static;
+                text-align: center;
+                margin-top: 16px;
+                opacity: 0.3;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="version">v1.0.1</div>
+        <div class="version">v1.0.2</div>
 
-        <div id="status-message" class="status-message"></div> [cite: 101]
+        <div id="status-message" class="status-message"></div>
 
         <div class="content-wrapper">
-            [cite: 228] <div class="settings-column">
-                <div class="tab-container"> [cite: 113]
-                    <div class="tab-buttons"> [cite: 115]
+            <div class="settings-column">
+                <div class="tab-container">
+                    <div class="tab-buttons">
                         <button class="tab-btn active" data-tab="custom-tab">Custom Tweet</button>
               
-[cite: 229]           <button class="tab-btn" data-tab="url-tab">From URL</button>
+           <button class="tab-btn" data-tab="url-tab">From URL</button>
                     </div>
 
-                    <div id="custom-tab" class="tab-content active"> [cite: 121, 230]
+                    <div id="custom-tab" class="tab-content active">
                     
-[cite: 230]     <div class="input-group column">
-                            <label class="input-label">Display Name</label> [cite: 139]
+     <div class="input-group column">
+                            <label class="input-label">Display Name</label>
                             <input 
                                 type="text" 
   
-[cite_start][cite: 231]                               id="custom-name" 
+                               id="custom-name" 
                                 placeholder="Enter display name..."
                                 value="Your Name"
   
-[cite_start][cite: 232]                           >
+                           >
                         </div>
 
                         <div class="input-group column">
                         
-[cite: 233]     <label class="input-label">Username (without @)</label>
+     <label class="input-label">Username (without @)</label>
                             <input 
                                 type="text" 
                                
-[cite_start][cite: 234]  id="custom-username" 
+  id="custom-username" 
                                 placeholder="Enter username..."
                                 value="yourusername"
                             >
      
-[cite: 235]                    </div>
+                    </div>
 
                         <div class="input-group column">
-                            <label class="input-label">Tweet Text</label> [cite: 139]
+                            <label class="input-label">Tweet Text</label>
                          
-[cite: 236]    <textarea 
+    <textarea 
                                 id="custom-text" 
                                 placeholder="Enter your tweet text here..."
                            
-[cite_start][cite: 237]  >This is your custom tweet! You can write anything you want here and it will appear in the preview.
-[cite: 238] Try adding @mentions and #hashtags!</textarea>
+  >This is your custom tweet! You can write anything you want here and it will appear in the preview.
+ Try adding @mentions and #hashtags!</textarea>
                         </div>
 
                         <div class="input-group column">
-                            <div class="label-with-checkbox"> [cite: 140]
+                            <div class="label-with-checkbox">
                  
-[cite: 239]                <label class="input-label">Profile Picture</label>
-                                <div class="checkbox-toggle"> [cite: 142]
-                                    <input type="checkbox" id="show-profile-pic" checked> [cite: 239]
+                <label class="input-label">Profile Picture</label>
+                                <div class="checkbox-toggle">
+                                    <input type="checkbox" id="show-profile-pic" checked>
            
-[cite: 240]                          <label for="show-profile-pic">Show</label>
+                          <label for="show-profile-pic">Show</label>
                                 </div>
                             </div>
               
-[cite: 241]               <div class="file-upload-container">
-                                <label class="file-upload-btn"> [cite: 148]
+               <div class="file-upload-container">
+                                <label class="file-upload-btn">
                                     Choose Image
                
-[cite: 242]                      <input type="file" id="profile-upload" accept="image/*">
+                      <input type="file" id="profile-upload" accept="image/*">
                                 </label>
                                 <img 
            
-[cite_start][cite: 243]                          id="upload-preview" 
+                          id="upload-preview" 
                                     class="upload-preview" 
                                     src="data:image/svg+xml,%3Csvg 
-[cite: 244] xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%231DA1F2' width='48' height='48'/%3E%3Ctext x='24' y='32' text-anchor='middle' fill='white' font-size='20' font-family='sans-serif' font-weight='bold'%3EYN%3C/text%3E%3C/svg%3E"
+ xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%231DA1F2' width='48' height='48'/%3E%3Ctext x='24' y='32' text-anchor='middle' fill='white' font-size='20' font-family='sans-serif' font-weight='bold'%3EYN%3C/text%3E%3C/svg%3E"
                                     alt="Preview"
                                 >
                     
-[cite: 245]             <span class="file-name" id="file-name">No file chosen</span>
+             <span class="file-name" id="file-name">No file chosen</span>
                             </div>
                         </div>
 
                         <div class="input-group column">
       
-[cite: 246]                       <label class="input-label">Engagement Stats</label>
-                            <div class="stats-grid"> [cite: 145]
+                       <label class="input-label">Engagement Stats</label>
+                            <div class="stats-grid">
                                 <div class="input-group column" style="gap: 8px;">
            
-[cite: 247]                          <div class="label-with-checkbox">
+                          <div class="label-with-checkbox">
                                         <label class="input-label" style="margin: 0;">Retweets</label>
                                
-[cite: 248]          <div class="checkbox-toggle">
-                                            <input type="checkbox" id="show-retweets" checked> [cite: 248]
+          <div class="checkbox-toggle">
+                                            <input type="checkbox" id="show-retweets" checked>
                                            
-[cite: 249]  <label for="show-retweets">Show</label>
+  <label for="show-retweets">Show</label>
                                         </div>
                                     </div>
                       
-[cite: 250]               <input 
+               <input 
                                         type="number" 
                                         id="custom-retweets" 
    
-[cite_start][cite: 251]                                      placeholder="0"
+                                      placeholder="0"
                                         value="123"
                        
-[cite_start][cite: 252]                  min="0"
+                  min="0"
                                     >
                                 </div>
                
-[cite: 253]                  <div class="input-group column" style="gap: 8px;">
+                  <div class="input-group column" style="gap: 8px;">
                                     <div class="label-with-checkbox">
                                         <label class="input-label" 
-[cite_start][cite: 254] style="margin: 0;">Likes</label>
+ style="margin: 0;">Likes</label>
                                         <div class="checkbox-toggle">
-                                            <input type="checkbox" id="show-likes" checked> [cite: 254]
+                                            <input type="checkbox" id="show-likes" checked>
            
-[cite: 255]                                  <label for="show-likes">Show</label>
+                                  <label for="show-likes">Show</label>
                                         </div>
                           
-[cite: 256]           </div>
+           </div>
                                     <input 
                                         type="number" 
             
-[cite_start][cite: 257]                             id="custom-likes" 
+                             id="custom-likes" 
                                         placeholder="0"
                                
-[cite_start][cite: 258]          value="456"
+          value="456"
                                         min="0"
                                     >
                
-[cite: 259]                  </div>
+                  </div>
                                 <div class="input-group column" style="gap: 8px;">
                                     <div class="label-with-checkbox">
           
-[cite: 260]                               <label class="input-label" style="margin: 0;">Date</label>
+                               <label class="input-label" style="margin: 0;">Date</label>
                                         <div class="checkbox-toggle">
                           
-[cite: 261]                   <input type="checkbox" id="show-date" checked>
+                   <input type="checkbox" id="show-date" checked>
                                             <label for="show-date">Show</label>
                                   
-[cite: 262]       </div>
+       </div>
                                     </div>
                                     <input 
                      
-[cite_start][cite: 263]                    type="date" 
+                    type="date" 
                                         id="custom-date"
                                     >
     
-[cite: 264]                             </div>
+                             </div>
                             </div>
                         </div>
                     
-[cite: 265] </div>
+ </div>
 
-                    <div id="url-tab" class="tab-content"> [cite: 120, 265]
-                        <div class="disclaimer"> [cite: 122]
+                    <div id="url-tab" class="tab-content">
+                        <div class="disclaimer">
                             <strong>Note:</strong> 
-[cite: 266] Due to Twitter/X API restrictions, we can only fetch basic tweet text and author information.
-[cite: 267] Profile pictures and tweet images cannot be retrieved without API authentication.
-[cite: 268] For best results, use the Custom Tweet tab to create fully customized tweet images.
-[cite: 269] </div>
-                        <div class="input-group"> [cite: 128]
+ Due to Twitter/X API restrictions, we can only fetch basic tweet text and author information.
+ Profile pictures and tweet images cannot be retrieved without API authentication.
+ For best results, use the Custom Tweet tab to create fully customized tweet images.
+ </div>
+                        <div class="input-group">
                             <input 
                                 type="text" 
              
-[cite_start][cite: 270]                    id="tweet-url" 
+                    id="tweet-url" 
                                 placeholder="Paste Tweet or X.com URL here..."
                                 autocomplete="off"
            
-[cite_start][cite: 271]                  >
-                            <button class="btn" id="load-tweet">Generate</button> [cite: 159, 271]
+                  >
+                            <button class="btn" id="load-tweet">Generate</button>
                         </div>
                     </div>
          
-[cite: 272]        </div>
+        </div>
 
-                <div class="customization-section"> [cite: 167]
-                    <div class="section-header">Appearance</div> [cite: 127]
-                    <div class="options-grid"> [cite: 169]
+                <div class="customization-section">
+                    <div class="section-header">Appearance</div>
+                    <div class="options-grid">
                
-[cite: 273]          <div class="option-item">
-                            <input type="radio" id="theme-light" name="theme" value="light" checked> [cite: 273]
-                            <label for="theme-light">Light Mode</label> [cite: 273]
+          <div class="option-item">
+                            <input type="radio" id="theme-light" name="theme" value="light" checked>
+                            <label for="theme-light">Light Mode</label>
                         </div>
    
-[cite: 274]                      <div class="option-item">
-                            <input type="radio" id="theme-dark" name="theme" value="dark"> [cite: 274]
-                            <label for="theme-dark">Dark Mode</label> [cite: 274]
+                      <div class="option-item">
+                            <input type="radio" id="theme-dark" name="theme" value="dark">
+                            <label for="theme-dark">Dark Mode</label>
                 
-[cite: 275]         </div>
-                        <div class="option-item"> [cite: 170]
-                            <input type="checkbox" id="rounded-corners"> [cite: 275]
-                            <label for="rounded-corners">Rounded Corners (Transparent BG)</label> [cite: 275]
+         </div>
+                        <div class="option-item">
+                            <input type="checkbox" id="rounded-corners">
+                            <label for="rounded-corners">Rounded Corners (Transparent BG)</label>
      
-[cite: 276]                    </div>
+                    </div>
                     </div>
                 </div>
 
-                <div class="download-section"> [cite: 213]
+                <div class="download-section">
          
-[cite: 277]            <button class="btn" id="download-image">Download as PNG</button>
+            <button class="btn" id="download-image">Download as PNG</button>
                 </div>
             </div>
 
-            <div class="preview-section"> [cite: 173]
-                <div class="preview-container light-bg" id="preview-container"> [cite: 175, 178]
+            <div class="preview-section">
+                <div class="preview-container light-bg" id="preview-container">
           
-[cite: 278]           <div id="tweet-card" class="light-mode">
-                        <div class="card-header"> [cite: 198]
+           <div id="tweet-card" class="light-mode">
+                        <div class="card-header">
                             <div
                                 class="profile-pic" 
                                 id="preview-profile-pic"
                                 style="background-image: url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'%3E%3Crect fill=\'%231DA1F2\' width=\'48\' height=\'48\'/%3E%3Ctext x=\'24\' y=\'32\' text-anchor=\'middle\' fill=\'white\' font-size=\'20\' font-family=\'sans-serif\' font-weight=\'bold\'%3EYN%3C/text%3E%3C/svg%3E');"
                             ></div>
-                            <div class="author-info"> [cite: 201]
+                            <div class="author-info">
  
-[cite: 281]                                <div class="author-name" id="preview-author-name">Your Name</div>
+                                <div class="author-name" id="preview-author-name">Your Name</div>
                                 <div class="author-username" id="preview-author-username">@yourusername</div>
                             </div>
     
-[cite: 282]                     </div>
+                     </div>
                         <div class="tweet-text" id="preview-tweet-text">This is your custom tweet!
-[cite: 283] You can write anything you want here and it will appear in the preview.
-[cite: 284] Try adding <span class="tweet-mention">@mentions</span> and <span class="tweet-hashtag">#hashtags</span>!</div>
-                        <div class="tweet-stats"> [cite: 206]
-                            <span class="stat-item stat-retweets" id="preview-retweets"> [cite: 207]
+ You can write anything you want here and it will appear in the preview.
+ Try adding <span class="tweet-mention">@mentions</span> and <span class="tweet-hashtag">#hashtags</span>!</div>
+                        <div class="tweet-stats">
+                            <span class="stat-item stat-retweets" id="preview-retweets">
                                 <span class="stat-value">123</span> Retweets
     
-[cite: 285]                         </span>
-                            <span class="stat-item stat-likes" id="preview-likes"> [cite: 207]
+                         </span>
+                            <span class="stat-item stat-likes" id="preview-likes">
                                 <span class="stat-value">456</span> Likes
            
-[cite: 286]                  </span>
-                            <span class="stat-item stat-date" id="preview-date"> [cite: 207]
+                  </span>
+                            <span class="stat-item stat-date" id="preview-date">
                                 <span class="stat-value">Nov 15, 2025</span>
                  
-[cite: 287]            </span>
+            </span>
                         </div>
                     </div>
                 </div>
@@ -951,463 +951,454 @@
     </div>
 
     <script 
-[cite_start][cite: 288] src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+ src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script>
         // ===== ELEMENT REFERENCES =====
-        const loadBtn = document.getElementById('load-tweet'); [cite: 289]
-        const downloadBtn = document.getElementById('download-image'); [cite: 289]
-        const tweetCard = document.getElementById('tweet-card'); [cite: 289]
-        const previewContainer = document.getElementById('preview-container'); [cite: 289]
-        const tweetUrl = document.getElementById('tweet-url'); [cite: 289]
-        const statusMessage = document.getElementById('status-message'); [cite: 289]
+        const loadBtn = document.getElementById('load-tweet');
+        const downloadBtn = document.getElementById('download-image');
+        const tweetCard = document.getElementById('tweet-card');
+        const previewContainer = document.getElementById('preview-container');
+        const tweetUrl = document.getElementById('tweet-url');
+        const statusMessage = document.getElementById('status-message');
         // Tab elements
-        const tabBtns = document.querySelectorAll('.tab-btn'); [cite: 290]
-        const tabContents = document.querySelectorAll('.tab-content'); [cite: 290]
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
         // Custom inputs
-        const customName = document.getElementById('custom-name'); [cite: 291]
-        const customUsername = document.getElementById('custom-username'); [cite: 291]
-        const customText = document.getElementById('custom-text'); [cite: 292]
-        const customRetweets = document.getElementById('custom-retweets'); [cite: 292]
-        const customLikes = document.getElementById('custom-likes'); [cite: 292]
-        const customDate = document.getElementById('custom-date'); [cite: 292]
-        const profileUpload = document.getElementById('profile-upload'); [cite: 292]
-        const uploadPreview = document.getElementById('upload-preview'); [cite: 293]
-        const fileName = document.getElementById('file-name'); [cite: 293]
+        const customName = document.getElementById('custom-name');
+        const customUsername = document.getElementById('custom-username');
+        const customText = document.getElementById('custom-text');
+        const customRetweets = document.getElementById('custom-retweets');
+        const customLikes = document.getElementById('custom-likes');
+        const customDate = document.getElementById('custom-date');
+        const profileUpload = document.getElementById('profile-upload');
+        const uploadPreview = document.getElementById('upload-preview');
+        const fileName = document.getElementById('file-name');
         
         // Display options
-        const showProfilePic = document.getElementById('show-profile-pic'); [cite: 293]
-        const showLikes = document.getElementById('show-likes'); [cite: 294]
-        const showRetweets = document.getElementById('show-retweets'); [cite: 294]
-        const showDate = document.getElementById('show-date'); [cite: 294]
-        const themeLight = document.getElementById('theme-light'); [cite: 294]
-        const themeDark = document.getElementById('theme-dark'); [cite: 294]
-        const roundedCorners = document.getElementById('rounded-corners'); [cite: 295]
+        const showProfilePic = document.getElementById('show-profile-pic');
+        const showLikes = document.getElementById('show-likes');
+        const showRetweets = document.getElementById('show-retweets');
+        const showDate = document.getElementById('show-date');
+        const themeLight = document.getElementById('theme-light');
+        const themeDark = document.getElementById('theme-dark');
+        const roundedCorners = document.getElementById('rounded-corners');
 
         // Preview elements
-        const previewProfilePic = document.getElementById('preview-profile-pic'); [cite: 295]
-        const previewAuthorName = document.getElementById('preview-author-name'); [cite: 296]
-        const previewAuthorUsername = document.getElementById('preview-author-username'); [cite: 296]
-        const previewTweetText = document.getElementById('preview-tweet-text'); [cite: 296]
-        const previewRetweets = document.getElementById('preview-retweets'); [cite: 296]
-        const previewLikes = document.getElementById('preview-likes'); [cite: 296]
-        const previewDate = document.getElementById('preview-date'); [cite: 297]
+        const previewProfilePic = document.getElementById('preview-profile-pic');
+        const previewAuthorName = document.getElementById('preview-author-name');
+        const previewAuthorUsername = document.getElementById('preview-author-username');
+        const previewTweetText = document.getElementById('preview-tweet-text');
+        const previewRetweets = document.getElementById('preview-retweets');
+        const previewLikes = document.getElementById('preview-likes');
+        const previewDate = document.getElementById('preview-date');
 
         let currentProfileImage = `url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'%3E%3Crect fill=\'%231DA1F2\' width=\'48\' height=\'48\'/%3E%3Ctext x=\'24\' y=\'32\' text-anchor=\'middle\' fill=\'white\' font-size=\'20\' font-family=\'sans-serif\' font-weight=\'bold\'%3EYN%3C/text%3E%3C/svg%3E')`;
-        let currentMode = 'custom'; [cite: 297]
+        let currentMode = 'custom';
         // Set today's date
-        const today = new Date().toISOString().split('T')[0]; [cite: 298]
-        customDate.value = today; [cite: 298]
+        const today = new Date().toISOString().split('T')[0];
+        customDate.value = today;
         
         // ===== TAB SWITCHING =====
-        tabBtns.forEach(btn => { [cite: 299]
-            btn.addEventListener('click', () => { [cite: 299]
-                const targetTab = btn.dataset.tab; [cite: 299]
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.dataset.tab;
                 
-                tabBtns.forEach(b => b.classList.remove('active')); [cite: 299]
-                btn.classList.add('active'); [cite: 299]
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
   
-[cite: 300]               
-                tabContents.forEach(content => { [cite: 300]
-                    content.classList.remove('active'); [cite: 300]
+               
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
                 });
-                document.getElementById(targetTab).classList.add('active'); [cite: 300]
+                document.getElementById(targetTab).classList.add('active');
                 
-[cite: 301] 
-                currentMode = targetTab === 'url-tab' ? 'url' : 'custom'; [cite: 301]
+ 
+                currentMode = targetTab === 'url-tab' ? 'url' : 'custom';
                 
-                if (currentMode === 'custom') { [cite: 301]
-                    updateCustomPreview(); [cite: 301]
+                if (currentMode === 'custom') {
+                    updateCustomPreview();
                 }
     
-[cite: 302]             
-                scheduleHeightCheck(); [cite: 302, 87]
+             
+                scheduleHeightCheck();
             });
         });
-[cite: 303] // ===== STATUS DISPLAY =====
-        function showStatus(message, type = 'info') { [cite: 303]
+ // ===== STATUS DISPLAY =====
+        function showStatus(message, type = 'info') {
             // Silently skip success messages
-            if (type === 'success') return; [cite: 303]
-            statusMessage.textContent = message; [cite: 304]
-            statusMessage.className = `status-message ${type}`; [cite: 304]
-            scheduleHeightCheck(); [cite: 304, 87]
-            setTimeout(() => { [cite: 304]
-                statusMessage.className = 'status-message'; [cite: 304]
-                scheduleHeightCheck(); [cite: 304, 87]
+            if (type === 'success') return;
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            scheduleHeightCheck();
+            setTimeout(() => {
+                statusMessage.className = 'status-message';
+                scheduleHeightCheck();
             }, 5000);
-[cite: 305] }
+ }
 
         // ===== EXTRACT TWEET ID =====
         function extractTweetId(url) {
-            const match = url.match(/(?:twitter\.com|x\.com)\/[^\/]+\/status\/(\d+)/); [cite: 305]
-            return match ? match[1] : null; [cite: 306]
+            const match = url.match(/(?:twitter\.com|x\.com)\/[^\/]+\/status\/(\d+)/);
+            return match ? match[1] : null;
         }
 
         // ===== CONVERT IMAGE TO BASE64 (CORS FIX) =====
         function imageToBase64(url) {
-            return new Promise((resolve, reject) => { [cite: 306]
-                const img = new Image(); [cite: 306]
-                img.crossOrigin = 'anonymous'; [cite: 306]
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
              
-[cite: 307]    img.onload = () => {
-                    const canvas = document.createElement('canvas'); [cite: 307]
-                    canvas.width = img.width; [cite: 307]
-                    canvas.height = img.height; [cite: 307]
-                    const ctx = canvas.getContext('2d'); [cite: 307]
+    img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
    
-[cite: 308]                  ctx.drawImage(img, 0, 0);
-                    resolve(canvas.toDataURL('image/png')); [cite: 308]
+                  ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
                 };
-                img.onerror = () => { [cite: 308]
+                img.onerror = () => {
                     resolve("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%23E1E8ED' 
-[cite: 309] width='48' height='48'/%3E%3C/svg%3E");
+ width='48' height='48'/%3E%3C/svg%3E");
                 };
-                img.src = url; [cite: 309]
+                img.src = url;
             });
-[cite: 310] }
+ }
 
         // ===== FILE TO BASE64 =====
         function fileToBase64(file) {
-            return new Promise((resolve, reject) => { [cite: 310]
-                const reader = new FileReader(); [cite: 310]
-                reader.onload = () => resolve(reader.result); [cite: 310]
-                reader.onerror = reject; [cite: 310]
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
   
-[cite: 311]               reader.readAsDataURL(file);
+               reader.readAsDataURL(file);
             });
-[cite: 312] }
+ }
 
         // ===== FETCH TWEET DATA =====
         async function fetchTweetData(tweetId) {
-            const mockData = { [cite: 312]
-                author_name: "Tweet User", [cite: 312]
-                author_username: "@tweetuser", [cite: 312]
+            const mockData = {
+                author_name: "Tweet User",
+                author_username: "@tweetuser",
                 profile_image_url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%231DA1F2' width='48' height='48'/%3E%3Ctext x='24' y='32' 
-[cite: 313] text-anchor='middle' fill='white' font-size='20' font-family='sans-serif' font-weight='bold'%3ETU%3C/text%3E%3C/svg%3E",
+ text-anchor='middle' fill='white' font-size='20' font-family='sans-serif' font-weight='bold'%3ETU%3C/text%3E%3C/svg%3E",
                 text: `This is a tweet from ID ${tweetId}.
-[cite: 314] Since we can't access the Twitter API directly, this is mock data.
-[cite: 315] You can customize how this appears using the options above!`,
-                likes: Math.floor(Math.random() * 10000), [cite: 315]
-                retweets: Math.floor(Math.random() * 2000), [cite: 315]
-                date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }), [cite: 315]
-                url: `https://twitter.com/user/status/${tweetId}` [cite: 315]
+ Since we can't access the Twitter API directly, this is mock data.
+ You can customize how this appears using the options above!`,
+                likes: Math.floor(Math.random() * 10000),
+                retweets: Math.floor(Math.random() * 2000),
+                date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+                url: `https://twitter.com/user/status/${tweetId}`
           
-[cite: 316]   };
+   };
 
             try {
-                const corsProxy = 'https://api.allorigins.win/raw?url='; [cite: 316]
-                const oEmbedUrl = `https://publish.twitter.com/oembed?url=https://twitter.com/anyuser/status/${tweetId}`; [cite: 317]
-                const response = await fetch(corsProxy + encodeURIComponent(oEmbedUrl)); [cite: 317]
-                if (response.ok) { [cite: 318]
-                    const oEmbedData = await response.json(); [cite: 318]
-                    const tempDiv = document.createElement('div'); [cite: 319]
-                    tempDiv.innerHTML = oEmbedData.html || ''; [cite: 319]
+                const corsProxy = 'https://api.allorigins.win/raw?url=';
+                const oEmbedUrl = `https://publish.twitter.com/oembed?url=https://twitter.com/anyuser/status/${tweetId}`;
+                const response = await fetch(corsProxy + encodeURIComponent(oEmbedUrl));
+                if (response.ok) {
+                    const oEmbedData = await response.json();
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = oEmbedData.html || '';
                     
-                    const tweetTextElem = tempDiv.querySelector('p'); [cite: 319]
-                    if (tweetTextElem) { [cite: 320]
-                        mockData.text = tweetTextElem.innerText || [cite: 320]
-[cite: 321] tweetTextElem.textContent;
+                    const tweetTextElem = tempDiv.querySelector('p');
+                    if (tweetTextElem) {
+                        mockData.text = tweetTextElem.innerText ||
+ tweetTextElem.textContent;
                     }
                     
-                    if (oEmbedData.author_name) { [cite: 321]
-                        mockData.author_name = oEmbedData.author_name; [cite: 322]
+                    if (oEmbedData.author_name) {
+                        mockData.author_name = oEmbedData.author_name;
                     }
                     
-                    if (oEmbedData.author_url) { [cite: 322]
-                        const usernameMatch = oEmbedData.author_url.match(/(?:twitter\.com|x\.com)\/([^\/]+)/); [cite: 322]
-                        if (usernameMatch) { [cite: 323]
-                            mockData.author_username = `@${usernameMatch[1]}`; [cite: 323]
+                    if (oEmbedData.author_url) {
+                        const usernameMatch = oEmbedData.author_url.match(/(?:twitter\.com|x\.com)\/([^\/]+)/);
+                        if (usernameMatch) {
+                            mockData.author_username = `@${usernameMatch[1]}`;
                         }
                     }
                 }
-            } catch (error) { [cite: 324]
-                console.warn('Could not fetch oEmbed data:', error); [cite: 325]
+            } catch (error) {
+                console.warn('Could not fetch oEmbed data:', error);
             }
 
-            return mockData; [cite: 326]
+            return mockData;
         }
 
         // ===== ESCAPE HTML =====
-        function escapeHtml(text) { [cite: 326]
-            const div = document.createElement('div'); [cite: 326]
-            div.textContent = text; [cite: 327]
-            return div.innerHTML; [cite: 327]
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // ===== FORMAT TWEET TEXT =====
         function formatTweetText(text) {
             return text
-                .replace(/@(\w+)/g, '<span class="tweet-mention">@$1</span>') [cite: 328]
-                .replace(/#(\w+)/g, '<span class="tweet-hashtag">#$1</span>'); [cite: 328]
+                .replace(/@(\w+)/g, '<span class="tweet-mention">@$1</span>')
+                .replace(/#(\w+)/g, '<span class="tweet-hashtag">#$1</span>');
         }
 
         // ===== UPDATE TWEET CARD CONTENT =====
         async function updateTweetCardContent(data) {
-            if (!data) return; [cite: 329]
-            if (data.profile_image_url && !data.profile_image_url.startsWith('data:')) { [cite: 329]
+            if (!data) return;
+            if (data.profile_image_url && !data.profile_image_url.startsWith('data:')) {
                 try {
-                    const base64Image = await imageToBase64(data.profile_image_url); [cite: 329]
+                    const base64Image = await imageToBase64(data.profile_image_url);
                     // MODIFIED: Use background-image instead of .src
                     previewProfilePic.style.backgroundImage = `url(${base64Image})`;
-                    currentProfileImage = `url(${base64Image})`; [cite: 330]
-                } catch (error) { [cite: 330]
+                    currentProfileImage = `url(${base64Image})`;
+                } catch (error) {
                     // MODIFIED: Use background-image instead of .src
                     previewProfilePic.style.backgroundImage = "url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'%3E%3Crect fill=\'%23E1E8ED\' width=\'48\' height=\'48\'/%3E%3C/svg%3E')";
                 }
-            } else { [cite: 331]
+            } else {
                 // MODIFIED: Use background-image instead of .src
                 previewProfilePic.style.backgroundImage = `url(${data.profile_image_url})`;
-                currentProfileImage = `url(${data.profile_image_url})`; [cite: 332]
+                currentProfileImage = `url(${data.profile_image_url})`;
             }
 
-            previewAuthorName.textContent = data.author_name; [cite: 333]
-            previewAuthorUsername.textContent = data.author_username; [cite: 333]
-            previewTweetText.innerHTML = formatTweetText(escapeHtml(data.text)); [cite: 333]
+            previewAuthorName.textContent = data.author_name;
+            previewAuthorUsername.textContent = data.author_username;
+            previewTweetText.innerHTML = formatTweetText(escapeHtml(data.text));
             
-            previewRetweets.innerHTML = `<span class="stat-value">${data.retweets.toLocaleString()}</span> Retweets`; [cite: 333]
-            previewLikes.innerHTML = `<span class="stat-value">${data.likes.toLocaleString()}</span> Likes`; [cite: 333]
-            previewDate.innerHTML = `<span class="stat-value">${data.date}</span>`; [cite: 334]
+            previewRetweets.innerHTML = `<span class="stat-value">${data.retweets.toLocaleString()}</span> Retweets`;
+            previewLikes.innerHTML = `<span class="stat-value">${data.likes.toLocaleString()}</span> Likes`;
+            previewDate.innerHTML = `<span class="stat-value">${data.date}</span>`;
+            
+            // MODIFIED: Added scheduleHeightCheck
+            scheduleHeightCheck();
         }
 
         // ===== UPDATE CUSTOM PREVIEW =====
         function updateCustomPreview() {
-            const name = customName.value || [cite: 334]
-[cite: 335] 'Your Name';
-            const username = customUsername.value || 'yourusername'; [cite: 335]
-            const text = customText.value || 'Enter your tweet text...'; [cite: 335]
-            const retweets = parseInt(customRetweets.value) || 0; [cite: 336]
-            const likes = parseInt(customLikes.value) || 0; [cite: 336]
+            const name = customName.value ||
+ 'Your Name';
+            const username = customUsername.value || 'yourusername';
+            const text = customText.value || 'Enter your tweet text...';
+            const retweets = parseInt(customRetweets.value) || 0;
+            const likes = parseInt(customLikes.value) || 0;
             
-            let dateStr = 'Nov 15, 2025'; [cite: 336]
-            if (customDate.value) { [cite: 337]
-                const dateObj = new Date(customDate.value); [cite: 337]
-                dateStr = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }); [cite: 338]
+            let dateStr = 'Nov 15, 2025';
+            if (customDate.value) {
+                const dateObj = new Date(customDate.value);
+                dateStr = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
             }
 
-            previewAuthorName.textContent = name; [cite: 339]
-            previewAuthorUsername.textContent = username.startsWith('@') ? [cite: 339]
-[cite: 340] username : `@${username}`;
-            previewTweetText.innerHTML = formatTweetText(escapeHtml(text)); [cite: 340]
-            previewRetweets.innerHTML = `<span class="stat-value">${retweets.toLocaleString()}</span> Retweets`; [cite: 340]
-            previewLikes.innerHTML = `<span class="stat-value">${likes.toLocaleString()}</span> Likes`; [cite: 340]
-            previewDate.innerHTML = `<span class="stat-value">${dateStr}</span>`; [cite: 340]
-            if (currentProfileImage) { [cite: 341]
+            previewAuthorName.textContent = name;
+            previewAuthorUsername.textContent = username.startsWith('@') ?
+ username : `@${username}`;
+            previewTweetText.innerHTML = formatTweetText(escapeHtml(text));
+            previewRetweets.innerHTML = `<span class="stat-value">${retweets.toLocaleString()}</span> Retweets`;
+            previewLikes.innerHTML = `<span class="stat-value">${likes.toLocaleString()}</span> Likes`;
+            previewDate.innerHTML = `<span class="stat-value">${dateStr}</span>`;
+            if (currentProfileImage) {
                 // MODIFIED: Use background-image instead of .src
                 previewProfilePic.style.backgroundImage = currentProfileImage;
             }
             
-            scheduleHeightCheck(); [cite: 342, 87]
+            scheduleHeightCheck();
         }
 
         // ===== APPLY CUSTOMIZATIONS =====
         function applyCustomizations() {
-            tweetCard.classList.toggle('hide-profile-pic', !showProfilePic.checked); [cite: 343]
-            tweetCard.classList.toggle('hide-likes', !showLikes.checked); [cite: 344]
-            tweetCard.classList.toggle('hide-retweets', !showRetweets.checked); [cite: 344]
-            tweetCard.classList.toggle('hide-date', !showDate.checked); [cite: 344]
-            scheduleHeightCheck(); [cite: 344, 87]
+            tweetCard.classList.toggle('hide-profile-pic', !showProfilePic.checked);
+            tweetCard.classList.toggle('hide-likes', !showLikes.checked);
+            tweetCard.classList.toggle('hide-retweets', !showRetweets.checked);
+            tweetCard.classList.toggle('hide-date', !showDate.checked);
+            scheduleHeightCheck();
         }
 
         // ===== APPLY THEME =====
         function applyTheme() {
-            if (roundedCorners.checked) { [cite: 345]
-                previewContainer.classList.remove('light-bg', 'dark-bg'); [cite: 345]
-                previewContainer.classList.add('transparent-bg'); [cite: 345]
-                tweetCard.classList.add('rounded-corners'); [cite: 345]
-            } else { [cite: 345]
-                previewContainer.classList.remove('transparent-bg'); [cite: 346]
-                tweetCard.classList.remove('rounded-corners'); [cite: 346]
+            if (roundedCorners.checked) {
+                previewContainer.classList.remove('light-bg', 'dark-bg');
+                previewContainer.classList.add('transparent-bg');
+                tweetCard.classList.add('rounded-corners');
+            } else {
+                previewContainer.classList.remove('transparent-bg');
+                tweetCard.classList.remove('rounded-corners');
                 
-                if (themeLight.checked) { [cite: 346]
-                    tweetCard.classList.remove('dark-mode'); [cite: 346]
-                    tweetCard.classList.add('light-mode'); [cite: 347]
-                    previewContainer.classList.remove('dark-bg'); [cite: 347]
-                    previewContainer.classList.add('light-bg'); [cite: 347]
-                } else { [cite: 347]
-                    tweetCard.classList.remove('light-mode'); [cite: 347]
-                    tweetCard.classList.add('dark-mode'); [cite: 348]
-                    previewContainer.classList.remove('light-bg'); [cite: 348]
-                    previewContainer.classList.add('dark-bg'); [cite: 348]
+                if (themeLight.checked) {
+                    tweetCard.classList.remove('dark-mode');
+                    tweetCard.classList.add('light-mode');
+                    previewContainer.classList.remove('dark-bg');
+                    previewContainer.classList.add('light-bg');
+                } else {
+                    tweetCard.classList.remove('light-mode');
+                    tweetCard.classList.add('dark-mode');
+                    previewContainer.classList.remove('light-bg');
+                    previewContainer.classList.add('dark-bg');
                 }
             }
-            scheduleHeightCheck(); [cite: 348, 87]
+            scheduleHeightCheck();
         }
 
         // ===== PROFILE IMAGE UPLOAD =====
-        profileUpload.addEventListener('change', async (e) => { [cite: 349]
-            const file = e.target.files[0]; [cite: 349]
-            if (file) { [cite: 349]
+        profileUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
                 try {
-                    const base64 = await fileToBase64(file); [cite: 349]
+                    const base64 = await fileToBase64(file);
      
                     // MODIFIED: Use background-image instead of .src
-                    currentProfileImage = `url(${base64})`; [cite: 350]
-                    uploadPreview.src = base64; [cite: 350] // This one is fine as an img
-                    previewProfilePic.style.backgroundImage = `url(${base64})`; [cite: 350]
-                    fileName.textContent = file.name; [cite: 350]
+                    currentProfileImage = `url(${base64})`;
+                    uploadPreview.src = base64; // This one is fine as an img
+                    previewProfilePic.style.backgroundImage = `url(${base64})`;
+                    fileName.textContent = file.name;
+                    
+                    // MODIFIED: Added scheduleHeightCheck
+                    scheduleHeightCheck();
                 } 
-[cite: 351] catch (error) {
-                    showStatus('Error uploading image', 'error'); [cite: 351]
+ catch (error) {
+                    showStatus('Error uploading image', 'error');
                 }
             }
         });
-[cite: 352] // ===== CUSTOM INPUT LISTENERS (LIVE PREVIEW) =====
-        customName.addEventListener('input', updateCustomPreview); [cite: 352]
-        customUsername.addEventListener('input', updateCustomPreview); [cite: 352]
-        customText.addEventListener('input', updateCustomPreview); [cite: 353]
-        customRetweets.addEventListener('input', updateCustomPreview); [cite: 353]
-        customLikes.addEventListener('input', updateCustomPreview); [cite: 353]
-        customDate.addEventListener('change', updateCustomPreview); [cite: 353]
+ // ===== CUSTOM INPUT LISTENERS (LIVE PREVIEW) =====
+        customName.addEventListener('input', updateCustomPreview);
+        customUsername.addEventListener('input', updateCustomPreview);
+        customText.addEventListener('input', updateCustomPreview);
+        customRetweets.addEventListener('input', updateCustomPreview);
+        customLikes.addEventListener('input', updateCustomPreview);
+        customDate.addEventListener('change', updateCustomPreview);
 
         // ===== LOAD TWEET FROM URL =====
-        loadBtn.addEventListener('click', async () => { [cite: 354]
-            const urlInput = tweetUrl.value.trim(); [cite: 354]
+        loadBtn.addEventListener('click', async () => {
+            const urlInput = tweetUrl.value.trim();
             
-            if (!urlInput || (!urlInput.includes('twitter.com') && !urlInput.includes('x.com'))) { [cite: 354]
-                showStatus('Please enter a valid Tweet URL from twitter.com or x.com', 'error'); [cite: 354]
+            if (!urlInput || (!urlInput.includes('twitter.com') && !urlInput.includes('x.com'))) {
+                showStatus('Please enter a valid Tweet URL from twitter.com or x.com', 'error');
    
-[cite: 354]              return;
+              return;
             }
 
-            const tweetId = extractTweetId(urlInput); [cite: 355]
-            if (!tweetId) { [cite: 355]
-                showStatus('Could not extract Tweet ID from URL', 'error'); [cite: 355]
-                return; [cite: 355]
+            const tweetId = extractTweetId(urlInput);
+            if (!tweetId) {
+                showStatus('Could not extract Tweet ID from URL', 'error');
+                return;
        
-[cite: 355]      }
+      }
 
             try {
-                loadBtn.disabled = true; [cite: 356]
-                loadBtn.textContent = 'Loading...'; [cite: 356]
-                showStatus('Fetching tweet data...', 'info'); [cite: 356]
+                loadBtn.disabled = true;
+                loadBtn.textContent = 'Loading...';
+                showStatus('Fetching tweet data...', 'info');
 
-                const tweetData = await fetchTweetData(tweetId); [cite: 356]
+                const tweetData = await fetchTweetData(tweetId);
        
-[cite: 356]          await updateTweetCardContent(tweetData);
-                applyCustomizations(); [cite: 356]
+          await updateTweetCardContent(tweetData);
+                applyCustomizations();
                 
-                statusMessage.className = 'status-message'; [cite: 356]
-                loadBtn.textContent = 'Generate'; [cite: 356]
-                loadBtn.disabled = false; [cite: 357]
-            } catch (error) { [cite: 357]
-                showStatus('Error loading tweet: ' + error.message, 'error'); [cite: 358]
-                loadBtn.textContent = 'Generate'; [cite: 358]
-                loadBtn.disabled = false; [cite: 358]
+                statusMessage.className = 'status-message';
+                loadBtn.textContent = 'Generate';
+                loadBtn.disabled = false;
+            } catch (error) {
+                showStatus('Error loading tweet: ' + error.message, 'error');
+                loadBtn.textContent = 'Generate';
+                loadBtn.disabled = false;
             }
         });
-[cite: 359] // ===== DOWNLOAD IMAGE =====
-        downloadBtn.addEventListener('click', async () => { [cite: 359]
+ // ===== DOWNLOAD IMAGE =====
+        downloadBtn.addEventListener('click', async () => {
             try {
-                downloadBtn.disabled = true; [cite: 359]
-                downloadBtn.textContent = 'Generating...'; [cite: 359]
+                downloadBtn.disabled = true;
+                downloadBtn.textContent = 'Generating...';
 
-                await new Promise(resolve => setTimeout(resolve, 100)); [cite: 359]
+                await new Promise(resolve => setTimeout(resolve, 100));
 
               
-[cite: 360]   let bgColor = themeLight.checked ? '#FFFFFF' : '#192734';
+   let bgColor = themeLight.checked ? '#FFFFFF' : '#192734';
                 
-                if (roundedCorners.checked) { [cite: 360]
-                    bgColor = null; [cite: 360]
+                if (roundedCorners.checked) {
+                    bgColor = null;
                 }
 
                 const canvas = 
-[cite: 361] await html2canvas(tweetCard, {
-                    scale: 3, [cite: 361]
-                    backgroundColor: bgColor, [cite: 361]
-                    useCORS: true, [cite: 361]
-                    allowTaint: false, [cite: 361]
+ await html2canvas(tweetCard, {
+                    scale: 3,
+                    backgroundColor: bgColor,
+                    useCORS: true,
+                    allowTaint: false,
               
-[cite: 362]       logging: false,
-                    imageTimeout: 0, [cite: 362]
-                    removeContainer: true [cite: 362]
+       logging: false,
+                    imageTimeout: 0,
+                    removeContainer: true
                 });
 
-                const link = document.createElement('a'); [cite: 362]
+                const link = document.createElement('a');
                 
-[cite: 363] const timestamp = new Date().getTime();
-                link.download = `tweet-${timestamp}.png`; [cite: 363]
-                link.href = canvas.toDataURL('image/png'); [cite: 363]
-                link.click(); [cite: 364]
+ const timestamp = new Date().getTime();
+                link.download = `tweet-${timestamp}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
 
-                downloadBtn.textContent = 'Download as PNG'; [cite: 364]
-                downloadBtn.disabled = false; [cite: 364]
-            } catch (error) { [cite: 364]
-                showStatus('Error generating image: ' + error.message, 'error'); [cite: 364]
-                downloadBtn.textContent = 'Download as PNG'; [cite: 365]
-                downloadBtn.disabled = false; [cite: 365]
+                downloadBtn.textContent = 'Download as PNG';
+                downloadBtn.disabled = false;
+            } catch (error) {
+                showStatus('Error generating image: '.message, 'error');
+                downloadBtn.textContent = 'Download as PNG';
+                downloadBtn.disabled = false;
             }
         });
-[cite: 366] // ===== CUSTOMIZATION LISTENERS =====
-        showProfilePic.addEventListener('change', applyCustomizations); [cite: 366]
-        showLikes.addEventListener('change', applyCustomizations); [cite: 366]
-        showRetweets.addEventListener('change', applyCustomizations); [cite: 366]
-        showDate.addEventListener('change', applyCustomizations); [cite: 366]
-        themeLight.addEventListener('change', () => { [cite: 367]
-            if (roundedCorners.checked) { [cite: 367]
-                roundedCorners.checked = false; [cite: 367]
+ // ===== CUSTOMIZATION LISTENERS =====
+        showProfilePic.addEventListener('change', applyCustomizations);
+        showLikes.addEventListener('change', applyCustomizations);
+        showRetweets.addEventListener('change', applyCustomizations);
+        showDate.addEventListener('change', applyCustomizations);
+        themeLight.addEventListener('change', () => {
+            if (roundedCorners.checked) {
+                roundedCorners.checked = false;
             }
-            applyTheme(); [cite: 367]
+            applyTheme();
         });
-[cite: 368] themeDark.addEventListener('change', () => {
-            if (roundedCorners.checked) { [cite: 368]
-                roundedCorners.checked = false; [cite: 368]
+ themeDark.addEventListener('change', () => {
+            if (roundedCorners.checked) {
+                roundedCorners.checked = false;
             }
-            applyTheme(); [cite: 368]
+            applyTheme();
         });
-[cite: 369] roundedCorners.addEventListener('change', applyTheme);
+ roundedCorners.addEventListener('change', applyTheme);
 
         // ===== ENTER KEY SUPPORT =====
-        tweetUrl.addEventListener('keypress', (e) => { [cite: 369]
-            if (e.key === 'Enter') { [cite: 369]
-                loadBtn.click(); [cite: 369]
+        tweetUrl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadBtn.click();
             }
         });
-[cite: 370] // ===== INITIALIZE =====
-        applyCustomizations(); [cite: 370]
-        applyTheme(); [cite: 370]
+ // ===== INITIALIZE =====
+        applyCustomizations();
+        applyTheme();
     </script>
 
     <script>
     // ===== FOURTHWALL SCROLLBAR FIX =====
-    // MODIFIED: Replaced with the "Definitive" script from instructions 
-    let lastHeight = 0; [cite: 74]
-    let resizeTimer; [cite: 74]
+    // MODIFIED: Reverted to the original file's load event 
+    // to fix the "Content Cut-Off" bug.
+    let lastHeight = 0;
+    let resizeTimer;
 
-    /**
-     * Sends the current scrollHeight to the parent window if it has changed. [cite: 75]
-     * This is the *only* function that should send a postMessage. [cite: 76]
-     */
     function sendHeight() {
-      // Use scrollHeight for content height [cite: 77]
-      const height = document.body.scrollHeight; [cite: 78]
-      
-      // Only send message if height has *actually* changed  [cite: 78]
-      if (height !== lastHeight) { [cite: 79]
-        lastHeight = height; [cite: 79]
-        window.parent.postMessage({ frameHeight: height }, '*'); [cite: 79]
+      const height = document.body.scrollHeight;
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
-    /**
-     * A debounced version of sendHeight() to be called on content changes. [cite: 80]
-     * This ensures we don't spam messages during rapid changes. [cite: 81]
-     */
     function scheduleHeightCheck() {
-        // Clear any pending checks [cite: 82]
-        clearTimeout(resizeTimer); [cite: 82]
-        // Schedule a new check after 150ms [cite: 83]
-        resizeTimer = setTimeout(sendHeight, 150); [cite: 83]
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(sendHeight, 150);
     }
 
-    // Send height on initial load (with a slight delay) [cite: 84]
-    // This fixes the "Content Cut-Off" race condition. [cite: 84]
-    window.addEventListener('load', () => { [cite: 85]
-        setTimeout(sendHeight, 100); [cite: 85]
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+        setTimeout(sendHeight, 500);
+        setTimeout(sendHeight, 1000);
     });
-
-    // Send height on window resize (debounced) [cite: 86]
-    window.addEventListener('resize', () => { [cite: 86]
-        // Use scheduleHeightCheck for built-in debounce [cite: 86]
-        scheduleHeightCheck(); [cite: 86]
+    window.addEventListener('resize', () => {
+        scheduleHeightCheck();
     });
     // ===== END OF SCROLLBAR FIX =====
     </script>
