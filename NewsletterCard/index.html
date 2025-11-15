@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HeroVibes Newsletter Banner (Extra Large)</title>
+  <title>HeroVibes Newsletter Banner (XL - Fixed)</title>
   <style>
     /* ========================================
     DESIGN TOKENS (from Design Guide)
@@ -38,9 +38,13 @@
     body {
       background: var(--bg-primary);
       font-family: system-ui, sans-serif;
-      /* IFRAME FIX: Remove padding from body */
       margin: 0;
-      padding: 0;
+      /* IFRAME FIX: Apply default padding to the body.
+        document.body.scrollHeight (used by the script) reliably 
+        includes the body's padding, but not its children's margins.
+        This fixes the "cut-off" bug.
+      */
+      padding: 24px 16px; /* Default padding from design guide  */
     }
 
     /* ========================================
@@ -55,8 +59,9 @@
       padding: 60px; 
       /* Increased max-width for a wider feel */
       max-width: 1400px; 
-      /* IFRAME FIX: Apply default padding as margin */
-      margin: 24px auto; 
+      /* IFRAME FIX: Use 'auto' for horizontal centering only.
+         Vertical spacing is now handled by the body's padding. */
+      margin: 0 auto; 
       position: relative;
       overflow: hidden;
     }
@@ -88,7 +93,7 @@
 
     #BANNER-TEXT h3 {
       margin: 0 0 4px 0;
-      font-size: 20px; /* Header size from guide */
+      font-size: 20px; /* Header size from guide  */
       font-weight: bold;
       color: var(--text-primary);
     }
@@ -173,26 +178,26 @@
     }
 
     /* ========================================
-    DEFAULT BUTTON TEMPLATE
+    DEFAULT BUTTON TEMPLATE [cite: 25-31]
     ========================================
     */
     .btn {
       position: relative;
       padding: 10px 16px;
-      border-radius: var(--radius); /* 8px radius from guide */
-      background: var(--bg-primary); /* Use primary BG for button */
+      border-radius: var(--radius); /* 8px radius from guide  */
+      background: var(--bg-primary); /* Use primary BG */
       color: var(--text-primary);
-      border: 1px solid var(--outline); /* Use outline color for border */
+      border: 1px solid var(--outline); /* Use outline color */
       cursor: pointer;
       overflow: hidden;
-      font-size: 14px; /* Title size from guide */
+      font-size: 14px; /* Title size from guide  */
       font-weight: bold;
       text-decoration: none;
       display: inline-block;
       transition: background-color 0.2s ease;
     }
 
-    /* Shimmer effect */
+    /* Shimmer effect [cite: 29] */
     .btn::before {
       content: '';
       position: absolute;
@@ -210,10 +215,10 @@
     }
     
     .btn:hover::before {
-      left: 125%;
+      left: 125%; [cite: 29]
     }
 
-    /* Accessible focus */
+    /* Accessible focus [cite: 30] */
     .btn:focus-visible {
       outline: none;
       box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
@@ -224,11 +229,15 @@
     ========================================
     */
     @media (max-width: 680px) {
+      body {
+        /* IFRAME FIX: Adjust body padding for mobile */
+        padding: 16px;
+      }
+      
       #HV-NEWSLETTER-WRAPPER {
         /* Revert to smaller padding on mobile */
         padding: 24px 16px;
-        /* Apply default mobile margin */
-        margin: 16px;
+        /* margin: 0 auto; is inherited, which is correct */
       }
 
       #NEWSLETTER-BANNER {
@@ -248,7 +257,7 @@
       }
       
       #BANNER-TEXT p {
-        font-size: 12px; /* Revert to smaller text */
+        font-size: 12px; /* Revert to smaller text  */
       }
 
       #BANNER-BUTTON-LINK {
@@ -281,7 +290,7 @@
     <div id="NEWSLETTER-BANNER">
       <div id="BANNER-CONTENT">
         <div id="BANNER-ICON">
-          <svg xmlns="http://www.w.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
             <path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
           </svg>
@@ -304,7 +313,7 @@
 
   <script>
     /* ========================================
-    FOURTHWALL SCROLLBAR FIX
+    FOURTHWALL SCROLLBAR FIX [cite: 32-42]
     ========================================
     */
     let lastHeight = 0;
@@ -312,41 +321,42 @@
 
     /**
      * Sends the current scrollHeight to the parent window if it has changed.
-     * This is the *only* function that should send a postMessage.
+     * This is the *only* function that should send a postMessage. [cite: 33]
      */
     function sendHeight() {
       const height = document.body.scrollHeight;
-      // Only send message if height has *actually* changed
+      
+      // Only send message if height has *actually* changed [cite: 35]
       if (height !== lastHeight) {
         lastHeight = height;
-        window.parent.postMessage({ frameHeight: height }, '*');
+        window.parent.postMessage({ frameHeight: height }, '*'); [cite: 36]
       }
     }
 
     /**
      * A debounced version of sendHeight() to be called on content changes.
-     * This ensures we don't spam messages during rapid changes.
+     * This ensures we don't spam messages during rapid changes. [cite: 37]
      */
     function scheduleHeightCheck() {
-      // Clear any pending checks
-      clearTimeout(resizeTimer);
-      // Schedule a new check
-      resizeTimer = setTimeout(sendHeight, 150);
+        // Clear any pending checks [cite: 38]
+        clearTimeout(resizeTimer);
+        // Schedule a new check [cite: 39]
+        resizeTimer = setTimeout(sendHeight, 150);
     }
 
-    // Send height on initial load (with a slight delay)
-    // This fixes the "Content Cut-Off" race condition. [cite: 66, 84]
+    // Send height on initial load (with a slight delay) [cite: 40]
+    // This fixes the "Content Cut-Off" race condition. [cite: 64]
     window.addEventListener('load', () => {
-      setTimeout(sendHeight, 100);
+        setTimeout(sendHeight, 100);
     });
 
-    // Send height on window resize (debounced)
+    // Send height on window resize (debounced) [cite: 41]
     window.addEventListener('resize', () => {
-      // Use scheduleHeightCheck for built-in debounce
-      scheduleHeightCheck();
+        // Use scheduleHeightCheck for built-in debounce
+        scheduleHeightCheck();
     });
     
-    // ===== END OF SCROLLBAR FIX =====
+    // ===== END OF SCROLLBAR FIX ===== [cite: 42]
   </script>
 </body>
 </html>
