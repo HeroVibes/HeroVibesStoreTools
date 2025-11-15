@@ -492,10 +492,13 @@
       height: 100%;
       background: rgba(0,0,0,0.9);
       z-index: 9999;
-      align-items: center;
+      /* --- FIX: Changed 'center' to 'flex-start' to align to top --- */
+      align-items: flex-start;
       justify-content: center;
-      padding: 20px;
+      /* --- FIX: Added padding-top for close button clearance --- */
+      padding: 60px 20px 20px 20px;
       animation: fadeIn 0.3s;
+      overflow-y: auto; /* For safety on small screens */
     }
 
     .modal.active {
@@ -1091,7 +1094,7 @@
         { 
           name: 'Thumbnail Downloader', 
           desc: 'Grab any thumbnail from any YouTube video - all you need is a link!',
-          url: 'https://herovibes.store/pages/thumbnail-downloader'
+          url: 'httpsg://herovibes.store/pages/thumbnail-downloader'
         },
         { 
           name: 'Whiteboard', 
@@ -1149,10 +1152,10 @@
       mediaCard.addEventListener('click', (e) => {
         e.preventDefault();
         
-        // --- FIX: 1. Scroll iframe content to top INSTANTLY ---
+        // 1. Scroll iframe content to top INSTANTLY
         window.scrollTo({ top: 0, behavior: 'auto' });
         
-        // --- FIX: 2. Send message to parent to scroll up ---
+        // 2. Send message to parent to scroll up
         window.parent.postMessage({ scrollToTop: true }, '*');
         
         // 3. Now open the modal
