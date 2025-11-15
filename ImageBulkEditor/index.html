@@ -891,8 +891,12 @@
         processed: false,
         blob: null,
         element: null,
-     
-       filters: {
+        // TRANSFORM FIX: Track transforms separately from cropper
+        transforms: {
+          scaleX: 1,
+          scaleY: 1
+        },
+        filters: {
             brightness: 100,
             contrast: 100,
             saturate: 100
@@ -1060,17 +1064,13 @@
       const imageData = images.find(img => img.id === id);
       if (!imageData || !imageData.cropper) return;
 
-      // FLIP FIX: Get current scale values and invert them properly
-      const imageDataObj = imageData.cropper.getImageData();
-      
+      // FLIP FIX: Store flips in our own tracking object and apply to cropper
       if (direction === 'h') {
-        // Flip horizontally - invert scaleX
-        const currentScaleX = imageDataObj.scaleX !== undefined ? imageDataObj.scaleX : 1;
-        imageData.cropper.scaleX(-currentScaleX);
+        imageData.transforms.scaleX *= -1;
+        imageData.cropper.scaleX(imageData.transforms.scaleX);
       } else if (direction === 'v') {
-        // Flip vertically - invert scaleY
-        const currentScaleY = imageDataObj.scaleY !== undefined ? imageDataObj.scaleY : 1;
-        imageData.cropper.scaleY(-currentScaleY);
+        imageData.transforms.scaleY *= -1;
+        imageData.cropper.scaleY(imageData.transforms.scaleY);
       }
         
       imageData.processed = false;
@@ -1086,6 +1086,9 @@
       if (!imageData || !imageData.cropper) return;
       imageData.cropper.reset();
       
+      // Reset transforms
+      imageData.transforms = { scaleX: 1, scaleY: 1 };
+      
       imageData.filters = { brightness: 100, contrast: 100, saturate: 100 };
       updateImagePreviewFilters(imageData);
       
@@ -1094,7 +1097,7 @@
       document.getElementById(`saturate-${id}`).value = 100;
       document.getElementById(`brightness-val-${id}`).textContent = '100%';
       document.getElementById(`contrast-val-${id}`).textContent = '100%';
-      document.getElementById(`saturate-${id}`).textContent = '100%';
+      document.getElementById(`saturate-val-${id}`).textContent = '100%';
       
       imageData.processed = false;
       imageData.blob = null;
@@ -1217,32 +1220,41 @@
             options.height = dimensions.height;
           }
 
-          // FILTER FIX: Get the cropped canvas WITHOUT filters first
-          const croppedCanvas = imageData.cropper.getCroppedCanvas(options);
+          // Get cropped canvas
+          let croppedCanvas = imageData.cropper.getCroppedCanvas(options);
           
-          // FILTER FIX: Create a new canvas to apply filters manually
-          const filterCanvas = document.createElement('canvas');
-          filterCanvas.width = croppedCanvas.width;
-          filterCanvas.height = croppedCanvas.height;
-          const ctx = filterCanvas.getContext('2d');
+          // FILTER & TRANSFORM FIX: Create a new canvas to apply ALL transformations
+          const outputCanvas = document.createElement('canvas');
+          outputCanvas.width = croppedCanvas.width;
+          outputCanvas.height = croppedCanvas.height;
+          const ctx = outputCanvas.getContext('2d');
           
-          // FILTER FIX: Build the filter string from stored filter values
+          // Apply transforms (flips) manually
+          ctx.save();
+          if (imageData.transforms.scaleX === -1 || imageData.transforms.scaleY === -1) {
+            const tx = imageData.transforms.scaleX === -1 ? outputCanvas.width : 0;
+            const ty = imageData.transforms.scaleY === -1 ? outputCanvas.height : 0;
+            ctx.translate(tx, ty);
+            ctx.scale(imageData.transforms.scaleX, imageData.transforms.scaleY);
+          }
+          
+          // Build and apply filters
           const f = imageData.filters;
           const perImageFilters = `brightness(${f.brightness}%) contrast(${f.contrast}%) saturate(${f.saturate}%)`;
           
-          // FILTER FIX: Combine with global filter if set
           if (currentGlobalFilter === 'none' || !currentGlobalFilter) {
             ctx.filter = perImageFilters;
           } else {
             ctx.filter = `${currentGlobalFilter} ${perImageFilters}`;
           }
           
-          // FILTER FIX: Draw the cropped image WITH filters applied
+          // Draw the image with all transformations
           ctx.drawImage(croppedCanvas, 0, 0);
+          ctx.restore();
           
-          // Convert the filtered canvas to blob
+          // Convert to blob
           imageData.blob = await new Promise((resolve) => {
-              filterCanvas.toBlob(
+              outputCanvas.toBlob(
                 (blob) => resolve(blob),
                 format,
                 (format === 'image/png') ? undefined : qualityValue
