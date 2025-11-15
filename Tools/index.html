@@ -364,52 +364,78 @@
     <!-- ===== CATEGORY FILTERS ===== -->
     <div class="category-filters">
       <button class="category-btn active" data-category="all">
-        All Tools <span class="category-count">(12)</span>
+        All Tools <span class="category-count">(19)</span>
       </button>
       <button class="category-btn" data-category="video">
         Video <span class="category-count">(4)</span>
       </button>
       <button class="category-btn" data-category="design">
-        Design <span class="category-count">(3)</span>
+        Design <span class="category-count">(7)</span>
       </button>
       <button class="category-btn" data-category="productivity">
-        Productivity <span class="category-count">(2)</span>
+        Productivity <span class="category-count">(8)</span>
       </button>
       <button class="category-btn" data-category="social">
         Social Media <span class="category-count">(3)</span>
+      </button>
+      <button class="category-btn" data-category="security">
+        Security <span class="category-count">(3)</span>
       </button>
     </div>
 
     <!-- ===== TOOLS GRID ===== -->
     <div class="tools-grid" id="toolsGrid">
 
-      <!-- ===== TOOL CARD TEMPLATE =====
-      
-      TO ADD A NEW TOOL:
-      1. Copy this entire card block
-      2. Update data-categories with comma-separated categories
-      3. Add class="new-tool" if it's a new tool
-      4. Update href with the tool URL
-      5. Update thumbnail (use img src or placeholder emoji)
-      6. Update card-title
-      7. Update card-description
-      8. Update card-categories badges
-      9. Add new-tag if needed
-      
-      -->
+      <!-- TOOL 1: Affiliate Card Generator -->
+      <a href="https://herovibes.store/pages/affiliate-card-generator" class="tool-card" data-categories="design,social" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">🛍️</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Affiliate Card Generator</h3>
+          <p class="card-description">Create professional HTML cards to showcase affiliate products on your blogs, articles, and websites in seconds.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Design</span>
+              <span class="card-category">Social</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
 
-      <!-- TOOL 1: Event Calendar -->
-      <a href="https://herovibes.store/pages/calendar" class="tool-card" data-categories="productivity,video">
+      <!-- TOOL 2: Blurry Wallpaper Generator -->
+      <a href="https://herovibes.store/pages/blurry-wallpaper" class="tool-card" data-categories="design" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">🌈</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Blurry Wallpaper Generator</h3>
+          <p class="card-description">Generate stunning 4K wallpapers with a beautiful blurry aesthetic in seconds. Perfect for desktops and devices.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Design</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- TOOL 3: Event Calendar -->
+      <a href="https://herovibes.store/pages/calendar" class="tool-card" data-categories="productivity" target="_blank" rel="noopener noreferrer">
         <div class="card-thumbnail">
           <div class="card-thumbnail-placeholder">📅</div>
         </div>
         <div class="card-content">
           <h3 class="card-title">Event Calendar</h3>
-          <p class="card-description">Never miss another release date or event. Sync important dates with your own calendar and stay organized.</p>
+          <p class="card-description">Stay up to date with the latest releases and events from gaming, tech, and entertainment industries.</p>
           <div class="card-footer">
             <div class="card-categories">
               <span class="card-category">Productivity</span>
-              <span class="card-category">Video</span>
             </div>
             <div class="card-tags">
               <span class="card-tag">FREE</span>
@@ -418,34 +444,53 @@
         </div>
       </a>
 
-      <!-- TOOL 2: Bulk Image Editor -->
-      <a href="https://herovibes.store/pages/image-editor" class="tool-card new-tool" data-categories="design">
+      <!-- TOOL 4: Bulk Image Editor -->
+      <a href="https://herovibes.store/pages/image-editor" class="tool-card" data-categories="design" target="_blank" rel="noopener noreferrer">
         <div class="card-thumbnail">
           <div class="card-thumbnail-placeholder">🖼️</div>
         </div>
         <div class="card-content">
           <h3 class="card-title">Bulk Image Editor</h3>
-          <p class="card-description">Instantly crop, compress and convert your images in bulk. Perfect for batch processing thumbnails and graphics.</p>
+          <p class="card-description">Batch-edit images with cropping, compressing, converting, and filters all at once. Save hours of manual work.</p>
           <div class="card-footer">
             <div class="card-categories">
               <span class="card-category">Design</span>
             </div>
             <div class="card-tags">
               <span class="card-tag">FREE</span>
-              <span class="card-tag new-tag">NEW</span>
             </div>
           </div>
         </div>
       </a>
 
-      <!-- TOOL 3: Markers to Timestamps -->
-      <a href="https://herovibes.store/pages/markers-to-timestamps" class="tool-card" data-categories="video">
+      <!-- TOOL 5: LUT Previewer -->
+      <a href="https://herovibes.store/pages/lut-previewer" class="tool-card" data-categories="design,video" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">🎨</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">LUT Previewer</h3>
+          <p class="card-description">Preview your LUTs on your own photos without needing additional software. Perfect for color grading workflows.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Design</span>
+              <span class="card-category">Video</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- TOOL 6: Timestamps from Chapters -->
+      <a href="https://herovibes.store/pages/timestamps-from-chapters" class="tool-card" data-categories="video" target="_blank" rel="noopener noreferrer">
         <div class="card-thumbnail">
           <div class="card-thumbnail-placeholder">⏱️</div>
         </div>
         <div class="card-content">
-          <h3 class="card-title">Markers to Timestamps</h3>
-          <p class="card-description">Convert your Premiere Pro or DaVinci Resolve markers to YouTube timestamps in seconds. Save hours of manual work.</p>
+          <h3 class="card-title">Timestamps from Chapters</h3>
+          <p class="card-description">Convert Premiere Pro or DaVinci Resolve chapters to YouTube timestamps by dragging your .csv or .edl files.</p>
           <div class="card-footer">
             <div class="card-categories">
               <span class="card-category">Video</span>
@@ -457,14 +502,14 @@
         </div>
       </a>
 
-      <!-- TOOL 4: Media Kit Maker -->
-      <a href="https://herovibes.store/pages/media-kit-maker" class="tool-card new-tool" data-categories="social,productivity">
+      <!-- TOOL 7: Media Kit Maker -->
+      <a href="https://herovibes.store/pages/media-kit-maker" class="tool-card" data-categories="social,productivity" target="_blank" rel="noopener noreferrer">
         <div class="card-thumbnail">
           <div class="card-thumbnail-placeholder">📊</div>
         </div>
         <div class="card-content">
           <h3 class="card-title">Media Kit Maker</h3>
-          <p class="card-description">Generate your own professional brand media kit in under a minute. Perfect for sponsorship pitches and partnerships.</p>
+          <p class="card-description">Generate professional brand media kits in seconds with customizable elements. Perfect for sponsorship pitches.</p>
           <div class="card-footer">
             <div class="card-categories">
               <span class="card-category">Social</span>
@@ -472,20 +517,38 @@
             </div>
             <div class="card-tags">
               <span class="card-tag">FREE</span>
-              <span class="card-tag new-tag">NEW</span>
             </div>
           </div>
         </div>
       </a>
 
-      <!-- TOOL 5: QR Code Generator -->
-      <a href="https://herovibes.store/pages/qr-generator" class="tool-card" data-categories="design,social">
+      <!-- TOOL 8: Password Generator -->
+      <a href="https://herovibes.store/pages/password-generator" class="tool-card" data-categories="security" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">🔑</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Password Generator</h3>
+          <p class="card-description">Generate secure, random passwords in seconds with customizable length and character requirements.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Security</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- TOOL 9: QR Code Generator -->
+      <a href="https://herovibes.store/pages/qr-generator" class="tool-card" data-categories="design,social" target="_blank" rel="noopener noreferrer">
         <div class="card-thumbnail">
           <div class="card-thumbnail-placeholder">📱</div>
         </div>
         <div class="card-content">
           <h3 class="card-title">QR Code Generator</h3>
-          <p class="card-description">Create custom QR codes with unique colors, backgrounds and branding. Make your QR codes stand out from the crowd.</p>
+          <p class="card-description">Create QR codes for websites, emails, WiFi passwords, and more with extensive customization options.</p>
           <div class="card-footer">
             <div class="card-categories">
               <span class="card-category">Design</span>
@@ -498,16 +561,56 @@
         </div>
       </a>
 
-      <!-- TOOL 6: Steganography Embedder -->
-      <a href="https://herovibes.store/pages/steganography-password-creator" class="tool-card" data-categories="design">
+      <!-- TOOL 10: Secure Folder Generator -->
+      <a href="https://herovibes.store/pages/secure-folder" class="tool-card" data-categories="security" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">🔒</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Secure Folder Generator</h3>
+          <p class="card-description">Protect your files with password-protected folders. Only you know the password to access your secured content.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Security</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- TOOL 11: Soundboard -->
+      <a href="https://herovibes.store/pages/soundboard" class="tool-card" data-categories="video,productivity" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">🎵</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Soundboard</h3>
+          <p class="card-description">Your personal soundboard with hotkey controls, custom sounds, effects, and basic recording functions.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Video</span>
+              <span class="card-category">Productivity</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- TOOL 12: Steganography Encoder -->
+      <a href="https://herovibes.store/pages/steganography-encoder" class="tool-card" data-categories="security,design" target="_blank" rel="noopener noreferrer">
         <div class="card-thumbnail">
           <div class="card-thumbnail-placeholder">🔐</div>
         </div>
         <div class="card-content">
-          <h3 class="card-title">Steganography Embedder</h3>
-          <p class="card-description">Hide secret passwords or messages inside images with no coding required. Perfect for secure sharing and Easter eggs.</p>
+          <h3 class="card-title">Steganography Encoder</h3>
+          <p class="card-description">Embed or decrypt hidden messages inside images with zero coding knowledge. Perfect for secure sharing.</p>
           <div class="card-footer">
             <div class="card-categories">
+              <span class="card-category">Security</span>
               <span class="card-category">Design</span>
             </div>
             <div class="card-tags">
@@ -517,18 +620,36 @@
         </div>
       </a>
 
-      <!-- TOOL 7: Stream Deck Icon Maker -->
-      <a href="https://herovibes.store/pages/stream-deck-icon-maker" class="tool-card" data-categories="design,video">
+      <!-- TOOL 13: Stream Deck Actions -->
+      <a href="https://herovibes.store/pages/stream-deck-actions" class="tool-card" data-categories="productivity" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">⚙️</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Stream Deck Actions</h3>
+          <p class="card-description">Advanced Stream Deck actions for power users with custom .bat or .sh scripts, icons, and setup walkthroughs.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Productivity</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- TOOL 14: Stream Deck Icon Maker -->
+      <a href="https://herovibes.store/pages/stream-deck-icon-maker" class="tool-card" data-categories="design" target="_blank" rel="noopener noreferrer">
         <div class="card-thumbnail">
           <div class="card-thumbnail-placeholder">🎮</div>
         </div>
         <div class="card-content">
           <h3 class="card-title">Stream Deck Icon Maker</h3>
-          <p class="card-description">Batch-create custom icons for the Elgato Stream Deck that perfectly match your aesthetic and branding.</p>
+          <p class="card-description">Batch-create custom Stream Deck icons with customizable elements, logos, and branding options.</p>
           <div class="card-footer">
             <div class="card-categories">
               <span class="card-category">Design</span>
-              <span class="card-category">Video</span>
             </div>
             <div class="card-tags">
               <span class="card-tag">FREE</span>
@@ -537,14 +658,14 @@
         </div>
       </a>
 
-      <!-- TOOL 8: Thumbnail Downloader -->
-      <a href="https://herovibes.store/pages/thumbnail-downloader" class="tool-card" data-categories="video,social">
+      <!-- TOOL 15: YouTube Thumbnail Downloader -->
+      <a href="https://herovibes.store/pages/thumbnail-downloader" class="tool-card" data-categories="video,social" target="_blank" rel="noopener noreferrer">
         <div class="card-thumbnail">
           <div class="card-thumbnail-placeholder">📥</div>
         </div>
         <div class="card-content">
-          <h3 class="card-title">Thumbnail Downloader</h3>
-          <p class="card-description">Download any YouTube thumbnail in maximum quality. All you need is a video link to get the full-resolution image.</p>
+          <h3 class="card-title">YouTube Thumbnail Downloader</h3>
+          <p class="card-description">Download any YouTube thumbnail in maximum quality. Just paste a URL and get the full-resolution image.</p>
           <div class="card-footer">
             <div class="card-categories">
               <span class="card-category">Video</span>
@@ -557,76 +678,74 @@
         </div>
       </a>
 
-      <!-- TOOL 9: Whiteboard -->
-      <a href="https://herovibes.store/pages/whiteboard" class="tool-card new-tool" data-categories="productivity">
+      <!-- TOOL 16: Timers -->
+      <a href="https://herovibes.store/pages/timers" class="tool-card" data-categories="productivity" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">⏲️</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Timers</h3>
+          <p class="card-description">Create and manage multiple custom timers with fine-tuned controls. Perfect for time management and workflows.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Productivity</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- TOOL 17: Timezone Converter -->
+      <a href="https://herovibes.store/pages/time-zone-converter" class="tool-card" data-categories="productivity" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">🌍</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Timezone Converter</h3>
+          <p class="card-description">Quickly convert timezones at a glance. Enter a time and see it across various timezones worldwide.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Productivity</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- TOOL 18: Whiteboard -->
+      <a href="https://herovibes.store/pages/whiteboard" class="tool-card" data-categories="productivity" target="_blank" rel="noopener noreferrer">
         <div class="card-thumbnail">
           <div class="card-thumbnail-placeholder">📝</div>
         </div>
         <div class="card-content">
           <h3 class="card-title">Whiteboard</h3>
-          <p class="card-description">Organize your images, code snippets, links and ideas in-browser with a virtual whiteboard. Collaborate in real-time.</p>
+          <p class="card-description">Save notes, images, code, and more on a custom whiteboard. Share your whiteboard with others for collaboration.</p>
           <div class="card-footer">
             <div class="card-categories">
               <span class="card-category">Productivity</span>
             </div>
             <div class="card-tags">
               <span class="card-tag">FREE</span>
-              <span class="card-tag new-tag">NEW</span>
             </div>
           </div>
         </div>
       </a>
 
-      <!-- TOOL 10: Writer's Toolkit -->
-      <a href="https://herovibes.store/pages/writers-toolkit" class="tool-card" data-categories="productivity">
+      <!-- TOOL 19: Writer's Toolkit -->
+      <a href="https://herovibes.store/pages/writers-toolkit" class="tool-card" data-categories="productivity" target="_blank" rel="noopener noreferrer">
         <div class="card-thumbnail">
           <div class="card-thumbnail-placeholder">✍️</div>
         </div>
         <div class="card-content">
           <h3 class="card-title">Writer's Toolkit</h3>
-          <p class="card-description">Bulk replace words, remove AI characters, convert markdown, and format text. Essential tools for content writers.</p>
+          <p class="card-description">A text editor with AI-character filter, find and replace, markdown converter, and more essential writing tools.</p>
           <div class="card-footer">
             <div class="card-categories">
               <span class="card-category">Productivity</span>
-            </div>
-            <div class="card-tags">
-              <span class="card-tag">FREE</span>
-            </div>
-          </div>
-        </div>
-      </a>
-
-      <!-- TOOL 11: Color Palette Generator -->
-      <a href="https://herovibes.store/pages/color-palette" class="tool-card new-tool" data-categories="design">
-        <div class="card-thumbnail">
-          <div class="card-thumbnail-placeholder">🎨</div>
-        </div>
-        <div class="card-content">
-          <h3 class="card-title">Color Palette Generator</h3>
-          <p class="card-description">Generate beautiful color palettes for your brand, thumbnails, and designs. Export in multiple formats.</p>
-          <div class="card-footer">
-            <div class="card-categories">
-              <span class="card-category">Design</span>
-            </div>
-            <div class="card-tags">
-              <span class="card-tag">FREE</span>
-              <span class="card-tag new-tag">NEW</span>
-            </div>
-          </div>
-        </div>
-      </a>
-
-      <!-- TOOL 12: Social Post Scheduler -->
-      <a href="https://herovibes.store/pages/post-scheduler" class="tool-card" data-categories="social">
-        <div class="card-thumbnail">
-          <div class="card-thumbnail-placeholder">🗓️</div>
-        </div>
-        <div class="card-content">
-          <h3 class="card-title">Social Post Scheduler</h3>
-          <p class="card-description">Plan and organize your social media content calendar. Perfect for batch creating and scheduling posts.</p>
-          <div class="card-footer">
-            <div class="card-categories">
-              <span class="card-category">Social</span>
             </div>
             <div class="card-tags">
               <span class="card-tag">FREE</span>
