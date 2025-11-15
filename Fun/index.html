@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HeroVibes Fun Tools</title>
+  <style>
+    /* ===== VARIABLES ===== */
+    :root {
+      --bg-primary: #191919;
+      --bg-secondary: #1F1F1F;
+      --bg-hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --gold: #FFD700;
+      --radius: 12px;
+    }
+
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg-primary);
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+      padding: 24px 16px;
+      margin: 0;
+    }
+
+    /* ===== CONTAINER ===== */
+    .tools-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ===== HEADER ===== */
+    .tools-header {
+      margin-bottom: 32px;
+    }
+
+    .header-title {
+      font-size: 32px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .header-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    /* ===== CATEGORY FILTERS ===== */
+    .category-filters {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--outline);
+    }
+
+    .category-btn {
+      position: relative;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--outline);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .category-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(135, 169, 255, 0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .category-btn:hover {
+      background: var(--bg-hover);
+      border-color: rgba(135, 169, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .category-btn:hover::before {
+      left: 125%;
+    }
+
+    .category-btn.active {
+      background: var(--accent);
+      color: var(--bg-primary);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .category-btn.active:hover {
+      background: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .category-count {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-left: 6px;
+    }
+
+    /* ===== TOOLS GRID ===== */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    /* ===== TOOL CARD ===== */
+    .tool-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      display: block;
+      position: relative;
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), rgba(135, 169, 255, 0.4));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+      z-index: 2;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(135, 169, 255, 0.4);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .tool-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .tool-card.hidden {
+      display: none;
+    }
+
+    /* ===== CARD THUMBNAIL ===== */
+    .card-thumbnail {
+      width: 100%;
+      height: 200px;
+      background: var(--bg-hover);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .tool-card:hover .card-thumbnail img {
+      transform: scale(1.05);
+    }
+
+    .card-thumbnail-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      background: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-secondary) 100%);
+    }
+
+    /* ===== CARD CONTENT ===== */
+    .card-content {
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+      line-height: 1.3;
+    }
+
+    .card-description {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 16px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* ===== CARD FOOTER ===== */
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-categories {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .card-category {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(135, 169, 255, 0.12);
+      color: var(--accent);
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .card-tags {
+      display: flex;
+      gap: 6px;
+    }
+
+    .card-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      background: rgba(135, 169, 255, 0.12);
+      color: var(--accent);
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      display: none;
+    }
+
+    .empty-state.visible {
+      display: block;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    .empty-state-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* ===== MOBILE OPTIMIZATION ===== */
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 12px;
+      }
+
+      .header-title {
+        font-size: 24px;
+      }
+
+      .tools-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .category-filters {
+        gap: 8px;
+      }
+
+      .category-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+      }
+
+      .card-thumbnail {
+        height: 180px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="tools-container">
+    
+    <!-- ===== HEADER ===== -->
+    <div class="tools-header">
+      <h1 class="header-title">Fun Tools</h1>
+      <p class="header-subtitle">Interactive tools for entertainment, games, and engaging with your audience</p>
+    </div>
+
+    <!-- ===== CATEGORY FILTERS ===== -->
+    <div class="category-filters">
+      <button class="category-btn active" data-category="all">
+        All Tools <span class="category-count">(4)</span>
+      </button>
+      <button class="category-btn" data-category="games">
+        Games <span class="category-count">(2)</span>
+      </button>
+      <button class="category-btn" data-category="randomizers">
+        Randomizers <span class="category-count">(3)</span>
+      </button>
+      <button class="category-btn" data-category="interactive">
+        Interactive <span class="category-count">(2)</span>
+      </button>
+    </div>
+
+    <!-- ===== TOOLS GRID ===== -->
+    <div class="tools-grid" id="toolsGrid">
+
+      <!-- TOOL 1: Bingo Card Maker -->
+      <a href="https://herovibes.store/pages/bingo-card" class="tool-card" data-categories="games,interactive" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">🎱</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Bingo Card Maker</h3>
+          <p class="card-description">Create custom bingo cards with your own text and images. Perfect for livestreamers engaging with their audience during streams.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Games</span>
+              <span class="card-category">Interactive</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- TOOL 2: Coin Flipper -->
+      <a href="https://herovibes.store/pages/coin-flip" class="tool-card" data-categories="randomizers" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">🪙</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Coin Flipper</h3>
+          <p class="card-description">Make quick decisions with a simple coin flip. Get instant heads or tails results with smooth animations.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Randomizers</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- TOOL 3: Dice Roll -->
+      <a href="https://herovibes.store/pages/dice-roll" class="tool-card" data-categories="games,randomizers" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">🎲</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Dice Roll</h3>
+          <p class="card-description">Roll a virtual 6-sided die for gaming, decision-making, or random number generation. Simple and effective.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Games</span>
+              <span class="card-category">Randomizers</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- TOOL 4: Wheel Spin -->
+      <a href="https://herovibes.store/pages/wheel-spin" class="tool-card" data-categories="randomizers,interactive" target="_blank" rel="noopener noreferrer">
+        <div class="card-thumbnail">
+          <div class="card-thumbnail-placeholder">🎡</div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Wheel Spin</h3>
+          <p class="card-description">Customize your own spinning wheel to randomly select winners, make decisions, or choose options. Perfect for giveaways and audience engagement.</p>
+          <div class="card-footer">
+            <div class="card-categories">
+              <span class="card-category">Randomizers</span>
+              <span class="card-category">Interactive</span>
+            </div>
+            <div class="card-tags">
+              <span class="card-tag">FREE</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- ===== EMPTY STATE ===== -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-state-icon">🔍</div>
+      <p class="empty-state-text">No tools found in this category</p>
+    </div>
+
+  </div>
+
+  <script>
+    // ===== CATEGORY FILTERING =====
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    const toolCards = document.querySelectorAll('.tool-card');
+    const emptyState = document.getElementById('emptyState');
+
+    categoryButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const category = button.dataset.category;
+        
+        // Update active state
+        categoryButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        // Filter tools
+        let visibleCount = 0;
+        toolCards.forEach(card => {
+          const categories = card.dataset.categories;
+          
+          if (category === 'all' || categories.includes(category)) {
+            card.classList.remove('hidden');
+            visibleCount++;
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+        
+        // Show/hide empty state
+        if (visibleCount === 0) {
+          emptyState.classList.add('visible');
+        } else {
+          emptyState.classList.remove('visible');
+        }
+
+        // Notify iframe of height change
+        scheduleHeightCheck();
+      });
+    });
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+      scheduleHeightCheck();
+    });
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+
+</body>
+</html>
