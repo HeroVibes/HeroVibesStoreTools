@@ -1064,7 +1064,7 @@
           url: 'https://herovibes.store/pages/image-editor'
         },
         { 
-          name: 'Timestamps from Chapters', 
+          name: 'Markers to Timestamps', 
           desc: 'Convert your Premiere or Davinci markers to YT Timestamps in seconds.',
           url: 'https://herovibes.store/pages/markers-to-timestamps'
         },
@@ -1079,9 +1079,9 @@
           url: 'https://herovibes.store/pages/qr-generator'
         },
         { 
-          name: 'Steganography Encoder', 
+          name: 'Steganography Embedder', 
           desc: 'Stash a secret password or message inside of an image - no coding required.',
-          url: 'httpsact://herovibes.store/pages/steganography-password-creator'
+          url: 'https://herovibes.store/pages/steganography-password-creator'
         },
         { 
           name: 'Stream Deck Icon Maker', 
@@ -1101,7 +1101,7 @@
         { 
           name: 'Writer\'s Toolkit', 
           desc: 'A simple writing tool that bulk-replaces words, removes AI characters and converts to/from markdown.',
-          url: 'httpshttps://herovibes.store/pages/writers-toolkit'
+          url: 'https://herovibes.store/pages/writers-toolkit'
         }
       ];
       let currentToolIndex = 0;
@@ -1148,8 +1148,14 @@
 
       mediaCard.addEventListener('click', (e) => {
         e.preventDefault();
+        
+        // --- FIX: Send message to parent to scroll up ---
+        window.parent.postMessage({ scrollToTop: true }, '*');
+        
+        // Now open the modal
         mediaModal.classList.add('active');
         document.body.style.overflow = 'hidden';
+        
         // SCROLLBAR FIX: Notify parent of height change
         scheduleHeightCheck();
       });
