@@ -19,7 +19,8 @@
             --card-image: #31a414;
             --card-link: #2e4e79;
             --card-youtube: #9c06bb;
-            --card-code: #272822;
+            --card-code: #f92672;
+            --card-audio: #ff6b35;
             --bottom-glow: rgba(135,169,255,0.3);
             --delete-red: #ff5f57;
         }
@@ -34,6 +35,10 @@
             background: var(--primary-bg);
             color: var(--primary-text);
             width: 100%;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         body {
@@ -137,6 +142,10 @@
             font-family: inherit;
             min-width: 200px;
             transition: border-color 0.2s;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         #link-input:focus {
@@ -270,6 +279,10 @@
             text-align: right;
             outline: none;
             border-radius: 4px;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         #add-page-btn {
@@ -343,7 +356,6 @@
             letter-spacing: 0.5px;
             color: var(--secondary-text);
             cursor: text;
-            user-select: none;
             transition: color 0.2s;
         }
 
@@ -353,6 +365,10 @@
             border-radius: 3px;
             padding: 0 4px;
             margin: -1px 0;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         .card-note .card-header { border-left: 4px solid var(--card-note); }
@@ -360,15 +376,16 @@
         .card-link .card-header { border-left: 4px solid var(--card-link); }
         .card-youtube .card-header { border-left: 4px solid var(--card-youtube); }
         .card-code .card-header { border-left: 4px solid var(--card-code); background: #1e1e1e; }
+        .card-audio .card-header { border-left: 4px solid var(--card-audio); }
 
         /* ===== RESIZE HANDLE ===== */
         .resize-handle {
             position: absolute;
             bottom: 0;
-            right: 0;
+            left: 0;
             width: 20px;
             height: 20px;
-            cursor: nwse-resize;
+            cursor: nesw-resize;
             z-index: 10;
             touch-action: none;
         }
@@ -377,12 +394,12 @@
             content: '';
             position: absolute;
             bottom: 2px;
-            right: 2px;
+            left: 2px;
             width: 0;
             height: 0;
             border-style: solid;
             border-width: 0 0 12px 12px;
-            border-color: transparent transparent var(--secondary-text) transparent;
+            border-color: transparent transparent transparent var(--secondary-text);
             opacity: 0.4;
             transition: opacity 0.2s;
         }
@@ -406,7 +423,8 @@
         }
 
         .card-note .card-body,
-        .card-link .card-body {
+        .card-link .card-body,
+        .card-audio .card-body {
             padding: 16px;
         }
 
@@ -426,6 +444,10 @@
             outline: none;
             color: var(--primary-text);
             line-height: 1.6;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         .card-text-content::placeholder {
@@ -446,10 +468,23 @@
             overflow-wrap: break-word;
             word-break: break-all;
             line-height: 1.6;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         .card-link-content:hover {
             text-decoration: underline;
+        }
+
+        .card-audio-content {
+            width: 100%;
+        }
+
+        .card-audio-content audio {
+            width: 100%;
+            outline: none;
         }
 
         .card-code-content {
@@ -460,6 +495,10 @@
             padding: 16px;
             scrollbar-width: thin;
             scrollbar-color: #5f5f5f #272822;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         .card-code-content > code[class*="language-"] {
@@ -483,6 +522,10 @@
             font-size: 13px;
             padding: 16px;
             line-height: 1.5;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         .card-code-content::-webkit-scrollbar {
@@ -610,6 +653,10 @@
             overflow: auto;
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             border: 1px solid var(--outline-color);
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         .modal-content h2 {
@@ -793,7 +840,7 @@
             <div class="control-left">
                 <button id="add-note-btn" title="Add a new note (N)">Add Note</button>
                 <input type="text" id="link-input" placeholder="Paste link or code...">
-                <button id="upload-btn" title="Upload an image">Upload</button>
+                <button id="upload-btn" title="Upload an image or audio">Upload</button>
             </div>
             <div class="control-right">
                 <div class="control-separator"></div>
@@ -822,12 +869,12 @@
             <ul>
                 <li>Click <strong>Add Note</strong> or press <strong>N</strong> to create a text note.</li>
                 <li><strong>Paste</strong> any link, code, or text — it auto-detects type!</li>
-                <li><strong>Drag & drop</strong> images or use the <strong>Upload</strong> button.</li>
+                <li><strong>Drag & drop</strong> images/audio or use the <strong>Upload</strong> button.</li>
             </ul>
             <p><strong>Organize:</strong></p>
             <ul>
                 <li>Drag cards by the top bar to move them (or tap & hold on mobile).</li>
-                <li>Resize cards by dragging the bottom-right corner.</li>
+                <li>Resize cards by dragging the bottom-left corner.</li>
                 <li>Double-click <strong>Code</strong> cards to edit inline.</li>
                 <li>Rename cards by clicking their label (Note, Code, etc.).</li>
             </ul>
@@ -848,7 +895,7 @@
                 <li><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg> Copy to clipboard</li>
                 <li><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Delete card</li>
             </ul>
-            <p class="version">Version 1.1.0</p>
+            <p class="version">Version 1.2.0</p>
             <button id="close-help" class="btn">Got it!</button>
         </div>
     </div>
@@ -866,7 +913,7 @@
 
     <!-- HIDDEN FILE INPUTS -->
     <input type="file" id="import-file-input" style="display: none;" accept=".json">
-    <input type="file" id="upload-file-input" style="display: none;" accept="image/*">
+    <input type="file" id="upload-file-input" style="display: none;" accept="image/*,audio/*">
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -1053,7 +1100,8 @@
                     image: 'Image',
                     link: 'Link',
                     youtube: 'Video',
-                    code: 'Code'
+                    code: 'Code',
+                    audio: 'Audio'
                 };
                 return labels[type] || type;
             };
@@ -1123,6 +1171,9 @@
                     case 'code':
                         contentHtml = `<pre class="card-code-content"><code class="language-javascript">${escapeHtml(cardData.content)}</code></pre>`;
                         break;
+                    case 'audio':
+                        contentHtml = `<div class="card-audio-content"><audio controls src="${cardData.content}"></audio></div>`;
+                        break;
                 }
                 
                 card.innerHTML = `
@@ -1169,19 +1220,19 @@
                 // DRAGGING - MOUSE
                 const header = card.querySelector('.card-header');
                 header.addEventListener('mousedown', (e) => {
-                    if (e.target === label) return;
+                    if (e.target === label && label.isContentEditable) return;
                     startDrag(e, cardData, card);
                 });
 
                 // DRAGGING - TOUCH (tap and hold)
                 let touchHoldTimer;
                 header.addEventListener('touchstart', (e) => {
-                    if (e.target === label) return;
+                    if (e.target === label && label.isContentEditable) return;
                     
                     touchHoldTimer = setTimeout(() => {
                         startTouchDrag(e, cardData, card);
                     }, 500);
-                });
+                }, { passive: true });
 
                 header.addEventListener('touchend', () => {
                     clearTimeout(touchHoldTimer);
@@ -1189,7 +1240,7 @@
 
                 header.addEventListener('touchmove', () => {
                     clearTimeout(touchHoldTimer);
-                });
+                }, { passive: true });
 
                 // RESIZING - MOUSE
                 const resizeHandle = card.querySelector('.resize-handle');
@@ -1202,7 +1253,7 @@
                 resizeHandle.addEventListener('touchstart', (e) => {
                     e.stopPropagation();
                     startTouchResize(e, cardData, card);
-                });
+                }, { passive: false });
 
                 // CARD ACTIONS
                 card.querySelector('.delete-btn').addEventListener('click', () => deleteCard(cardData.id));
@@ -1312,6 +1363,7 @@
                 const initialTop = cardElement.offsetTop;
                 
                 const onMove = (moveEvent) => {
+                    moveEvent.preventDefault();
                     const touch = moveEvent.touches[0];
                     const deltaX = touch.clientX - initialX;
                     const deltaY = touch.clientY - initialY;
@@ -1350,19 +1402,26 @@
                 const initialY = e.clientY;
                 const initialWidth = cardElement.offsetWidth;
                 const initialHeight = cardElement.offsetHeight;
+                const initialLeft = cardElement.offsetLeft;
                 
                 const onMove = (moveEvent) => {
                     const deltaX = moveEvent.clientX - initialX;
                     const deltaY = moveEvent.clientY - initialY;
                     
-                    let newWidth = initialWidth + deltaX;
+                    let newWidth = initialWidth - deltaX;
                     let newHeight = initialHeight + deltaY;
+                    let newLeft = initialLeft + deltaX;
                     
                     newWidth = Math.max(180, newWidth);
                     newHeight = Math.max(120, newHeight);
                     
+                    if (newWidth === 180) {
+                        newLeft = initialLeft + initialWidth - 180;
+                    }
+                    
                     cardElement.style.width = `${newWidth}px`;
                     cardElement.style.height = `${newHeight}px`;
+                    cardElement.style.left = `${newLeft}px`;
                 };
                 
                 const onUp = () => {
@@ -1371,6 +1430,7 @@
                     cardElement.classList.remove('resizing');
                     cardData.width = cardElement.style.width;
                     cardData.height = cardElement.style.height;
+                    cardData.x = cardElement.style.left;
                     saveState();
                     setTimeout(scheduleHeightCheck, 100);
                 };
@@ -1391,20 +1451,28 @@
                 const initialY = touch.clientY;
                 const initialWidth = cardElement.offsetWidth;
                 const initialHeight = cardElement.offsetHeight;
+                const initialLeft = cardElement.offsetLeft;
                 
                 const onMove = (moveEvent) => {
+                    moveEvent.preventDefault();
                     const touch = moveEvent.touches[0];
                     const deltaX = touch.clientX - initialX;
                     const deltaY = touch.clientY - initialY;
                     
-                    let newWidth = initialWidth + deltaX;
+                    let newWidth = initialWidth - deltaX;
                     let newHeight = initialHeight + deltaY;
+                    let newLeft = initialLeft + deltaX;
                     
                     newWidth = Math.max(180, newWidth);
                     newHeight = Math.max(120, newHeight);
                     
+                    if (newWidth === 180) {
+                        newLeft = initialLeft + initialWidth - 180;
+                    }
+                    
                     cardElement.style.width = `${newWidth}px`;
                     cardElement.style.height = `${newHeight}px`;
+                    cardElement.style.left = `${newLeft}px`;
                 };
                 
                 const onUp = () => {
@@ -1413,6 +1481,7 @@
                     cardElement.classList.remove('resizing');
                     cardData.width = cardElement.style.width;
                     cardData.height = cardElement.style.height;
+                    cardData.x = cardElement.style.left;
                     saveState();
                     setTimeout(scheduleHeightCheck, 100);
                 };
@@ -1442,6 +1511,9 @@
                         const response = await fetch(cardData.content);
                         const blob = await response.blob();
                         await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                        success = true;
+                    } else if (cardData.type === 'audio') {
+                        await navigator.clipboard.writeText(cardData.content);
                         success = true;
                     }
                 } catch (err) {
@@ -1478,14 +1550,20 @@
                             filename = `link-${Date.now()}.txt`;
                             break;
                         case 'image':
-                            const response = await fetch(cardData.content);
-                            blob = await response.blob();
+                            const imgResponse = await fetch(cardData.content);
+                            blob = await imgResponse.blob();
                             const ext = blob.type.split('/')[1] || 'png';
                             filename = `${cardData.customName.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'image'}-${Date.now()}.${ext}`;
                             break;
                         case 'youtube':
                             blob = new Blob([cardData.content], { type: 'text/plain' });
                             filename = `youtube-${Date.now()}.txt`;
+                            break;
+                        case 'audio':
+                            const audioResponse = await fetch(cardData.content);
+                            blob = await audioResponse.blob();
+                            const audioExt = blob.type.split('/')[1] || 'mp3';
+                            filename = `${cardData.customName.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'audio'}-${Date.now()}.${audioExt}`;
                             break;
                         default:
                             return;
@@ -1514,8 +1592,12 @@
                     const reader = new FileReader();
                     reader.onload = (e) => createCardData({ type: 'image', content: e.target.result });
                     reader.readAsDataURL(file);
+                } else if (file?.type.startsWith('audio/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => createCardData({ type: 'audio', content: e.target.result });
+                    reader.readAsDataURL(file);
                 } else {
-                    alert('Only image files are supported.');
+                    alert('Only image and audio files are supported.');
                 }
             };
 
