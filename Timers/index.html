@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Circle Timers</title>
   <style>
     /* ===== CSS VARIABLES ===== */
@@ -24,47 +26,103 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       background: var(--primary-bg);
       color: var(--primary-text);
       padding: 24px 16px;
-      /*
-        REMOVED: min-height: 100vh;
-        This was causing the "failure to shrink" problem.
-      */
       overflow-x: hidden;
+      touch-action: manipulation;
     }
 
     /* ===== MAIN CONTAINER ===== */
     .container {
-      max-width: 1400px;
+      max-width: 800px;
       margin: 0 auto;
     }
 
-    /* ===== TIMER ROWS ===== */
-    #rows-container {
+    /* ===== HEADER CONTROLS ===== */
+    .header-controls {
       display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .timer-row {
-      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
-      gap: 16px;
       justify-content: center;
     }
 
+    .header-controls button {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--secondary-bg);
+      color: var(--primary-text);
+      border: 1px solid var(--outline-color);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .header-controls button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .header-controls button:hover::before {
+      left: 125%;
+    }
+
+    .header-controls button:hover {
+      background: var(--hover-color);
+      border-color: var(--accent-color);
+    }
+
+    .header-controls button:active {
+      transform: scale(0.95);
+    }
+
+    .header-controls button.reset-all {
+      color: var(--warning-yellow);
+    }
+
+    .header-controls button.export {
+      color: var(--accent-color);
+    }
+
+    .header-controls button.import {
+      color: var(--accent-color);
+    }
+
+    /* Hidden file input */
+    #import-file {
+      display: none;
+    }
+
+    /* ===== TIMERS GRID ===== */
+    .timers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
     /* ===== TIMER CARD ===== */
-    .timer {
+    .timer-card {
       background: var(--secondary-bg);
       border: 1px solid var(--outline-color);
       border-radius: var(--radius);
       padding: 16px;
-      width: 180px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -72,33 +130,30 @@
       position: relative;
     }
 
-    .timer:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(135, 169, 255, 0.1);
+    .timer-card:active {
+      transform: scale(0.98);
     }
 
     /* ===== TIMER TITLE ===== */
-    .title {
+    .timer-title {
       font-size: 14px;
       font-weight: 600;
       color: var(--primary-text);
       margin-bottom: 12px;
-      outline: none;
-      cursor: text;
       text-align: center;
       width: 100%;
-      padding: 4px 8px;
+      padding: 6px 8px;
       border-radius: 4px;
-      transition: background 0.2s ease;
+      background: transparent;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      cursor: pointer;
     }
 
-    .title:hover {
-      background: rgba(135, 169, 255, 0.05);
-    }
-
-    .title:focus {
+    .timer-title:focus {
+      outline: none;
       background: var(--hover-color);
-      border-bottom: 2px solid var(--accent-color);
+      border-color: var(--accent-color);
     }
 
     /* ===== CIRCLE TIMER ===== */
@@ -108,15 +163,11 @@
       height: 120px;
       margin-bottom: 12px;
       cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .circle-container:hover {
-      transform: scale(1.05);
+      touch-action: manipulation;
     }
 
     .circle-container:active {
-      transform: scale(0.98);
+      transform: scale(0.95);
     }
 
     .progress-ring {
@@ -128,31 +179,15 @@
     .ring-bg {
       fill: none;
       stroke: var(--hover-color);
-      stroke-width: 6;
+      stroke-width: 8;
     }
 
-    .ring {
+    .ring-progress {
       fill: none;
       stroke: var(--accent-color);
-      stroke-width: 6;
+      stroke-width: 8;
       stroke-linecap: round;
-      transition: stroke-dashoffset 0.5s ease, stroke 0.3s ease;
-    }
-
-    /* Ring pulse animation for start */
-    @keyframes ringPulse {
-      0%, 100% { 
-        stroke-width: 6;
-        opacity: 1;
-      }
-      50% { 
-        stroke-width: 10;
-        opacity: 0.8;
-      }
-    }
-
-    .ring.pulse {
-      animation: ringPulse 0.6s ease-out;
+      transition: stroke 0.3s ease;
     }
 
     .time-display {
@@ -160,30 +195,54 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       color: var(--primary-text);
       user-select: none;
       pointer-events: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ===== STATE INDICATOR ===== */
+    .state-indicator {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--secondary-text);
+      transition: all 0.3s ease;
+    }
+
+    .state-indicator.running {
+      background: #4CAF50;
+      box-shadow: 0 0 8px #4CAF50;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
 
     /* ===== TIMER CONTROLS ===== */
-    .controls {
+    .timer-controls {
       display: flex;
       gap: 8px;
       width: 100%;
       justify-content: center;
     }
 
-    .controls button {
+    .timer-controls button {
       position: relative;
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       padding: 0;
       background: var(--secondary-bg);
       border: 1px solid var(--outline-color);
       color: var(--primary-text);
-      font-size: 16px;
+      font-size: 18px;
       border-radius: var(--radius);
       cursor: pointer;
       overflow: hidden;
@@ -191,10 +250,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      touch-action: manipulation;
     }
 
-    /* Shimmer effect on hover */
-    .controls button::before {
+    .timer-controls button::before {
       content: '';
       position: absolute;
       top: 0;
@@ -206,52 +265,46 @@
       transition: left 0.7s ease-in-out;
     }
 
-    .controls button:hover::before {
+    .timer-controls button:active::before {
       left: 125%;
     }
 
-    .controls button:hover {
-      background: var(--hover-color);
-      border-color: var(--accent-color);
-      transform: translateY(-2px);
+    .timer-controls button:active {
+      transform: scale(0.9);
     }
 
-    .controls button:active {
-      transform: translateY(0);
-    }
-
-    .controls button.edit {
+    .timer-controls button.edit-btn {
       color: var(--accent-color);
     }
 
-    .controls button.reset {
+    .timer-controls button.reset-btn {
       color: var(--accent-color);
     }
 
-    .controls button.delete {
-      color: #ff6b6b;
+    .timer-controls button.delete-btn {
+      color: var(--danger-red);
     }
 
-    /* ===== ADD BUTTON ===== */
-    .add-btn {
+    /* ===== ADD TIMER BUTTON ===== */
+    .add-timer-btn {
+      grid-column: 1 / -1;
       position: relative;
       background: var(--secondary-bg);
-      border: 1px solid var(--outline-color);
+      border: 2px dashed var(--outline-color);
       color: var(--accent-color);
-      font-size: 32px;
+      font-size: 48px;
       border-radius: var(--radius);
       cursor: pointer;
-      width: 180px;
-      height: 224px;
+      height: 100px;
       transition: all 0.3s ease;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
+      touch-action: manipulation;
     }
 
-    /* Shimmer effect on add button */
-    .add-btn::before {
+    .add-timer-btn::before {
       content: '';
       position: absolute;
       top: 0;
@@ -263,53 +316,79 @@
       transition: left 0.7s ease-in-out;
     }
 
-    .add-btn:hover::before {
+    .add-timer-btn:active::before {
       left: 125%;
     }
 
-    .add-btn:hover {
+    .add-timer-btn:active {
+      transform: scale(0.98);
       background: var(--hover-color);
       border-color: var(--accent-color);
-      transform: scale(1.02);
     }
 
-    .add-btn:active {
-      transform: scale(0.98);
-    }
-
-    /* ===== POPUP EDITOR ===== */
-    .popup {
+    /* ===== MOBILE TIME PICKER MODAL ===== */
+    .time-modal {
       position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    .time-modal.active {
+      display: flex;
+    }
+
+    .time-modal-content {
       background: var(--secondary-bg);
       border: 1px solid var(--accent-color);
       border-radius: var(--radius);
-      padding: 16px;
-      z-index: 1000;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      min-width: 220px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: auto;
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     }
 
-    .popup.hidden {
-      display: none;
-      pointer-events: none;
+    .time-modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-align: center;
+      color: var(--primary-text);
     }
 
-    .popup-fields {
+    .time-inputs {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 12px;
+      margin-bottom: 20px;
       justify-content: center;
+      align-items: center;
     }
 
-    .popup input {
-      width: 55px;
-      padding: 8px;
-      font-size: 14px;
+    .time-input-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .time-input-label {
+      font-size: 12px;
+      color: var(--secondary-text);
+      text-transform: uppercase;
+    }
+
+    .time-input {
+      width: 70px;
+      height: 60px;
+      font-size: 24px;
       text-align: center;
       background: var(--primary-bg);
       color: var(--primary-text);
@@ -317,45 +396,47 @@
       border-radius: var(--radius);
       outline: none;
       transition: border-color 0.2s ease;
+      font-variant-numeric: tabular-nums;
       -moz-appearance: textfield;
     }
 
-    /* REMOVE UP/DOWN ARROWS FROM NUMBER INPUTS */
-    .popup input::-webkit-outer-spin-button,
-    .popup input::-webkit-inner-spin-button {
+    .time-input::-webkit-outer-spin-button,
+    .time-input::-webkit-inner-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
 
-    .popup input:focus {
+    .time-input:focus {
       border-color: var(--accent-color);
     }
 
-    .popup input::placeholder {
+    .time-colon {
+      font-size: 24px;
       color: var(--secondary-text);
+      margin-top: 20px;
     }
 
-    .popup-buttons {
+    .time-modal-buttons {
       display: flex;
-      gap: 8px;
+      gap: 12px;
     }
 
-    .popup-buttons button {
+    .time-modal-buttons button {
       position: relative;
       flex: 1;
-      padding: 10px 16px;
+      padding: 14px;
       border-radius: var(--radius);
       background: var(--secondary-bg);
       color: var(--primary-text);
       border: 1px solid var(--outline-color);
       cursor: pointer;
       overflow: hidden;
-      font-size: 14px;
+      font-size: 16px;
+      font-weight: 600;
       transition: all 0.2s ease;
     }
 
-    /* Shimmer effect on popup buttons */
-    .popup-buttons button::before {
+    .time-modal-buttons button::before {
       content: '';
       position: absolute;
       top: 0;
@@ -367,48 +448,31 @@
       transition: left 0.7s ease-in-out;
     }
 
-    .popup-buttons button:hover::before {
+    .time-modal-buttons button:active::before {
       left: 125%;
     }
 
-    .popup-buttons button:hover {
-      background: var(--hover-color);
+    .time-modal-buttons button:active {
+      transform: scale(0.95);
+    }
+
+    .time-modal-buttons .save-btn {
+      color: var(--accent-color);
       border-color: var(--accent-color);
     }
 
-    .popup-buttons button#popup-save {
-      color: var(--accent-color);
+    .time-modal-buttons .cancel-btn {
+      color: var(--danger-red);
     }
 
-    .popup-buttons button#popup-cancel {
-      color: #ff6b6b;
-    }
-
-    /* ===== NATIVE TIME INPUT (Mobile) ===== */
-    .native-time-input {
-      display: none;
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* ===== MOBILE OPTIMIZATION ===== */
-    @media (max-width: 768px) {
+    /* ===== MOBILE OPTIMIZATIONS ===== */
+    @media (max-width: 480px) {
       body {
         padding: 16px 12px;
       }
 
-      .timer-row {
+      .timers-grid {
         gap: 12px;
-      }
-
-      .timer, .add-btn {
-        width: calc(50% - 6px);
-        min-width: 150px;
-      }
-
-      .add-btn {
-        height: 200px;
       }
 
       .circle-container {
@@ -417,24 +481,32 @@
       }
 
       .time-display {
-        font-size: 18px;
+        font-size: 16px;
       }
 
-      .title {
-        font-size: 13px;
+      .timer-controls button {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
       }
 
-      .controls button {
-        width: 32px;
-        height: 32px;
-        font-size: 14px;
+      .header-controls {
+        gap: 6px;
+      }
+
+      .header-controls button {
+        padding: 8px 12px;
+        font-size: 12px;
       }
     }
 
-    @media (max-width: 480px) {
-      .timer, .add-btn {
-        width: 100%;
-        max-width: 300px;
+    @media (max-width: 360px) {
+      .timers-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .add-timer-btn {
+        height: 80px;
       }
     }
 
@@ -444,472 +516,533 @@
       box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.3);
     }
 
-    /* Hide audio element */
+    /* ===== HIDDEN AUDIO ===== */
     audio {
       display: none;
     }
   </style>
 </head>
 <body>
+  <!-- HEADER CONTROLS -->
   <div class="container">
-    <div id="rows-container"></div>
-  </div>
-
-  <audio id="alarm-sound" src="https://contactherovibes.wordpress.com/wp-content/uploads/2025/06/new-notification-09-352705.mp3" preload="auto"></audio>
-
-  <div id="popup" class="popup hidden">
-    <div class="popup-fields">
-      <input type="number" id="popup-hours" min="0" max="23" placeholder="HH" />
-      <input type="number" id="popup-minutes" min="0" max="59" placeholder="MM" />
-      <input type="number" id="popup-seconds" min="0" max="59" placeholder="SS" />
+    <div class="header-controls">
+      <button class="reset-all" id="reset-all-btn" aria-label="Reset All Timers">⟲ Reset All</button>
+      <button class="export" id="export-btn" aria-label="Export Timers">↓ Export</button>
+      <button class="import" id="import-btn" aria-label="Import Timers">↑ Import</button>
+      <input type="file" id="import-file" accept=".json" aria-label="Import File Input">
     </div>
-    <div class="popup-buttons">
-      <button id="popup-save">✓ Save</button>
-      <button id="popup-cancel">✕ Cancel</button>
+
+    <!-- TIMERS GRID -->
+    <div class="timers-grid" id="timers-grid">
+      <!-- Timers will be added here dynamically -->
     </div>
   </div>
+
+  <!-- TIME PICKER MODAL -->
+  <div class="time-modal" id="time-modal">
+    <div class="time-modal-content">
+      <div class="time-modal-title">Set Timer Duration</div>
+      <div class="time-inputs">
+        <div class="time-input-group">
+          <label class="time-input-label">Hours</label>
+          <input type="number" class="time-input" id="hours-input" min="0" max="23" value="0">
+        </div>
+        <span class="time-colon">:</span>
+        <div class="time-input-group">
+          <label class="time-input-label">Minutes</label>
+          <input type="number" class="time-input" id="minutes-input" min="0" max="59" value="5">
+        </div>
+        <span class="time-colon">:</span>
+        <div class="time-input-group">
+          <label class="time-input-label">Seconds</label>
+          <input type="number" class="time-input" id="seconds-input" min="0" max="59" value="0">
+        </div>
+      </div>
+      <div class="time-modal-buttons">
+        <button class="save-btn" id="modal-save-btn">✓ Save</button>
+        <button class="cancel-btn" id="modal-cancel-btn">✕ Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALARM SOUND -->
+  <audio id="alarm-sound" preload="auto">
+    <source src="https://contactherovibes.wordpress.com/wp-content/uploads/2025/06/new-notification-09-352705.mp3" type="audio/mpeg">
+  </audio>
 
   <script>
-    // ===== CONFIGURATION =====
-    const defaultTimes = [5, 10, 30, 60, 120];
-    const maxPerRow = 6;
+    // ===== TIMER STATE MANAGEMENT =====
     let timers = [];
+    let currentEditingId = null;
+    const STORAGE_KEY = 'circle-timers-data';
 
     // ===== DOM ELEMENTS =====
-    const rowsContainer = document.getElementById('rows-container');
-    const popup = document.getElementById('popup');
-    const hInput = document.getElementById('popup-hours');
-    const mInput = document.getElementById('popup-minutes');
-    const sInput = document.getElementById('popup-seconds');
-    const popupSave = document.getElementById('popup-save');
-    const popupCancel = document.getElementById('popup-cancel');
-    let currentEditing = null;
+    const timersGrid = document.getElementById('timers-grid');
+    const timeModal = document.getElementById('time-modal');
+    const hoursInput = document.getElementById('hours-input');
+    const minutesInput = document.getElementById('minutes-input');
+    const secondsInput = document.getElementById('seconds-input');
+    const modalSaveBtn = document.getElementById('modal-save-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    const resetAllBtn = document.getElementById('reset-all-btn');
+    const exportBtn = document.getElementById('export-btn');
+    const importBtn = document.getElementById('import-btn');
+    const importFile = document.getElementById('import-file');
+    const alarmSound = document.getElementById('alarm-sound');
 
-    // ===== MOBILE DETECTION =====
-    function isMobile() {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-      window.innerWidth <= 768;
+    // ===== UTILITY FUNCTIONS =====
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
 
-    // ===== URL MANAGEMENT =====
-    function parseURLTimers() {
-      const params = new URLSearchParams(window.location.search);
-      const timersParam = params.get('timers');
-      if (timersParam) {
+    function formatTime(totalSeconds) {
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+      
+      if (hrs > 0) {
+        return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      }
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function getRingColor(percentage) {
+      if (percentage > 0.5) {
+        return '#87A9FF'; // Accent color
+      } else if (percentage > 0.2) {
+        return '#FFD700'; // Warning yellow
+      } else {
+        return '#FF4444'; // Danger red
+      }
+    }
+
+    // ===== LOCAL STORAGE FUNCTIONS =====
+    function saveToStorage() {
+      const data = timers.map(t => ({
+        id: t.id,
+        label: t.label,
+        duration: t.duration,
+        remaining: t.remaining,
+        isRunning: t.isRunning
+      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadFromStorage() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      if (data) {
         try {
-          return JSON.parse(decodeURIComponent(timersParam));
+          return JSON.parse(data);
         } catch (e) {
-          console.error('Failed to parse URL timers:', e);
+          console.error('Failed to parse stored data:', e);
+          return null;
         }
       }
       return null;
     }
 
-    function updateURL() {
-      const timerData = timers.map(t => ({
-        label: t.label,
-        seconds: t.originalSeconds
-      }));
-      const encoded = encodeURIComponent(JSON.stringify(timerData));
-      const newURL = `${window.location.pathname}?timers=${encoded}`;
-      window.history.replaceState({}, '', newURL);
-    }
-
-    // ===== COLOR CALCULATION BASED ON PERCENTAGE =====
-    function getRingColor(percentage) {
-      if (percentage > 0.5) {
-        const factor = (percentage - 0.5) * 2;
-        const r = Math.round(135 + (255 - 135) * (1 - factor));
-        const g = Math.round(169 + (215 - 169) * (1 - factor));
-        const b = Math.round(255 * factor);
-        return `rgb(${r}, ${g}, ${b})`;
-      } else if (percentage > 0.2) {
-        const factor = (percentage - 0.2) / 0.3;
-        const r = 255;
-        const g = Math.round(215 * factor);
-        const b = 0;
-        return `rgb(${r}, ${g}, ${b})`;
-      } else {
-        return '#FF4444';
-      }
-    }
-
-    // ===== CREATE TIMER FUNCTION =====
-    function createTimer(minutes = 5, label = "Timer") {
-      const timer = {
-        label,
-        originalSeconds: minutes * 60,
-        remainingSeconds: minutes * 60,
-        interval: null,
-        element: null,
-        isRunning: false,
-        hasStarted: false
-      };
-
-      const wrapper = document.createElement('div');
-      wrapper.className = 'timer';
-      wrapper.innerHTML = `
-        <div class="title" contenteditable="true">${label}</div>
-        <div class="circle-container">
-          <svg class="progress-ring" width="120" height="120">
-            <circle class="ring-bg" r="54" cx="60" cy="60" />
-            <circle class="ring" r="54" cx="60" cy="60" />
-          </svg>
-          <div class="time-display">00:00</div>
-        </div>
-        <div class="controls">
-          <button class="edit" title="Edit Time" aria-label="Edit Timer">✎</button>
-          <button class="reset" title="Reset Timer" aria-label="Reset Timer">↻</button>
-          <button class="delete" title="Delete Timer" aria-label="Delete Timer">✕</button>
-        </div>
-        <input type="time" class="native-time-input" step="1" />
-      `;
-      const ring = wrapper.querySelector('.ring');
-      const radius = 54;
-      const circumference = 2 * Math.PI * radius;
-      ring.style.strokeDasharray = circumference;
-      const display = wrapper.querySelector('.time-display');
-      const title = wrapper.querySelector('.title');
-      const nativeInput = wrapper.querySelector('.native-time-input');
-      
-      // ===== DISPLAY UPDATE FUNCTION =====
-      function updateDisplay() {
-        const total = timer.remainingSeconds;
-        const hrs = Math.floor(total / 3600);
-        const min = Math.floor((total % 3600) / 60);
-        const sec = total % 60;
-        if (hrs > 0) {
-          display.textContent = `${hrs}:${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-        } else {
-          display.textContent = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-        }
-      }
-
-      // ===== RING UPDATE FUNCTION =====
-      function updateRing() {
-        const progress = timer.remainingSeconds / timer.originalSeconds;
-        const offset = circumference - (progress * circumference);
-        ring.style.strokeDashoffset = offset;
-        ring.style.stroke = getRingColor(progress);
-      }
-
-      // ===== RESET FUNCTION =====
-      function resetToOriginal() {
-        timer.remainingSeconds = timer.originalSeconds;
-        timer.hasStarted = false;
-        updateDisplay();
-        updateRing();
-      }
-
-      // ===== TICK FUNCTION =====
-      function tick() {
-        if (timer.remainingSeconds > 0) {
-          timer.remainingSeconds--;
-          updateDisplay();
-          updateRing();
-        } else {
-          clearInterval(timer.interval);
-          timer.interval = null;
-          timer.isRunning = false;
-          
-          const alarm = document.getElementById('alarm-sound');
-          alarm.play().catch(e => console.log('Audio play failed:', e));
-        }
-      }
-
-      // ===== CIRCLE CLICK =====
-      wrapper.querySelector('.circle-container').addEventListener('click', () => {
-        if (timer.interval) {
-          clearInterval(timer.interval);
-          timer.interval = null;
-          timer.isRunning = false;
-        } else {
-          if (!timer.hasStarted) {
-            ring.classList.add('pulse');
-            setTimeout(() => ring.classList.remove('pulse'), 600);
-            timer.hasStarted = true;
-          }
-          
-          timer.interval = setInterval(tick, 1000);
-          timer.isRunning = true;
-        }
-      });
-      
-      // ===== EDIT BUTTON =====
-      wrapper.querySelector('.edit').addEventListener('click', (e) => {
-        if (isMobile()) {
-          const hrs = Math.floor(timer.originalSeconds / 3600);
-          const min = Math.floor((timer.originalSeconds % 3600) / 60);
-          const sec = timer.originalSeconds % 60;
-          
-          nativeInput.value = `${hrs.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-          
-          nativeInput.click();
-          nativeInput.focus();
-        } else {
-          currentEditing = timer;
-          const total = timer.originalSeconds;
-          hInput.value = Math.floor(total / 3600);
-          mInput.value = Math.floor((total % 3600) / 60);
-          sInput.value = total % 60;
-
-          popup.classList.remove('hidden');
-          setTimeout(() => hInput.focus(), 100);
-          
-          // Height check when popup opens
-          scheduleHeightCheck();
-        }
-      });
-      
-      // ===== NATIVE TIME INPUT HANDLER =====
-      nativeInput.addEventListener('change', (e) => {
-        const timeValue = e.target.value;
-        if (timeValue) {
-          const parts = timeValue.split(':');
-          const hrs = parseInt(parts[0] || 0);
-          const min = parseInt(parts[1] || 0);
-          const sec = parseInt(parts[2] || 0);
-          
-          const totalSec = hrs * 3600 + min * 60 + sec;
-          
-          if (totalSec > 0) {
-            timer.originalSeconds = totalSec;
-            timer.remainingSeconds = totalSec;
-            timer.hasStarted = false;
-            
-            clearInterval(timer.interval);
-            timer.interval = null;
-            timer.isRunning = false;
-            
-            updateDisplay();
-            updateRing();
-            updateURL();
-          }
-        }
-      });
-
-      // ===== RESET BUTTON =====
-      wrapper.querySelector('.reset').addEventListener('click', () => {
-        clearInterval(timer.interval);
-        timer.interval = null;
-        timer.isRunning = false;
-        resetToOriginal();
-      });
-      
-      // ===== DELETE BUTTON =====
-      wrapper.querySelector('.delete').addEventListener('click', () => {
-        clearInterval(timer.interval);
-        wrapper.remove();
-        timers = timers.filter(t => t !== timer);
-        renderRows(); // Re-render the rows
-        updateURL();
-        scheduleHeightCheck(); // Manually trigger height check
-      });
-      
-      // ===== TITLE EDIT =====
-      title.addEventListener('blur', () => {
-        timer.label = title.textContent.trim() || "Timer";
-        title.textContent = timer.label;
-        updateURL();
-      });
-      title.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          title.blur();
-        }
-      });
-      
-      updateDisplay();
-      updateRing();
-
-      timer.element = wrapper;
-      timers.push(timer); // Add timer to the array
-      // Do NOT call renderRows() here.
-      return timer;
-    }
-
-    // ===== RENDER ROWS FUNCTION =====
-    function renderRows() {
-      rowsContainer.innerHTML = ''; // Clear existing rows
-      const chunked = chunkArray(timers, maxPerRow);
-
-      chunked.forEach((row) => {
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'timer-row';
-        row.forEach(timer => rowDiv.appendChild(timer.element));
-
-        if (row.length < maxPerRow) {
-          const addBtn = document.createElement('button');
-          addBtn.className = 'add-btn';
-          addBtn.textContent = '+';
-          addBtn.setAttribute('aria-label', 'Add New Timer');
-          addBtn.onclick = () => {
-            createTimer(5);
-            renderRows(); // Re-render after adding
-            updateURL();
-            scheduleHeightCheck(); // Manually trigger height check
-          };
-          rowDiv.appendChild(addBtn);
-        }
+    // ===== TIMER CLASS =====
+    class Timer {
+      constructor(id, label, duration, remaining = null, isRunning = false) {
+        this.id = id;
+        this.label = label;
+        this.duration = duration; // in seconds
+        this.remaining = remaining !== null ? remaining : duration;
+        this.isRunning = isRunning;
+        this.interval = null;
+        this.element = null;
+        this.ringElement = null;
+        this.displayElement = null;
+        this.stateIndicator = null;
         
-        rowsContainer.appendChild(rowDiv);
-      });
-      
-      if (timers.length % maxPerRow === 0 && timers.length < 24) {
-        const newRow = document.createElement('div');
-        newRow.className = 'timer-row';
-        const addBtn = document.createElement('button');
-        addBtn.className = 'add-btn';
-        addBtn.textContent = '+';
-        addBtn.setAttribute('aria-label', 'Add New Timer');
-        addBtn.onclick = () => {
-          createTimer(5);
-          renderRows(); // Re-render after adding
-          updateURL();
-          scheduleHeightCheck(); // Manually trigger height check
-        };
-        newRow.appendChild(addBtn);
-        rowsContainer.appendChild(newRow);
+        this.createUI();
+        if (this.isRunning) {
+          this.start();
+        }
       }
-      
-      // Do NOT call scheduleHeightCheck() here.
-      // It will be called by the function that *called* renderRows().
-    }
 
-    // ===== CHUNK ARRAY HELPER =====
-    function chunkArray(arr, size) {
-      const result = [];
-      for (let i = 0; i < arr.length; i += size) {
-        result.push(arr.slice(i, i + size));
-      }
-      return result;
-    }
+      createUI() {
+        // TIMER CARD
+        const card = document.createElement('div');
+        card.className = 'timer-card';
+        card.innerHTML = `
+          <div class="state-indicator"></div>
+          <input type="text" class="timer-title" value="${this.label}" maxlength="30">
+          <div class="circle-container">
+            <svg class="progress-ring" viewBox="0 0 120 120">
+              <circle class="ring-bg" cx="60" cy="60" r="54"></circle>
+              <circle class="ring-progress" cx="60" cy="60" r="54"></circle>
+            </svg>
+            <div class="time-display">${formatTime(this.remaining)}</div>
+          </div>
+          <div class="timer-controls">
+            <button class="edit-btn" aria-label="Edit Timer">⚙</button>
+            <button class="reset-btn" aria-label="Reset Timer">↻</button>
+            <button class="delete-btn" aria-label="Delete Timer">✕</button>
+          </div>
+        `;
 
-    // ===== POPUP SAVE BUTTON =====
-    popupSave.addEventListener('click', () => {
-      const h = parseInt(hInput.value || 0);
-      const m = parseInt(mInput.value || 0);
-      const s = parseInt(sInput.value || 0);
-      const totalSec = h * 3600 + m * 60 + s;
-
-      if (!isNaN(totalSec) && totalSec > 0) {
-        currentEditing.originalSeconds = totalSec;
-        currentEditing.remainingSeconds = totalSec;
-        currentEditing.hasStarted = false;
-
-        clearInterval(currentEditing.interval);
-        currentEditing.interval = null;
-        currentEditing.isRunning = false;
-
-        const display = currentEditing.element.querySelector('.time-display');
-        const ring = currentEditing.element.querySelector('.ring');
+        this.element = card;
+        this.ringElement = card.querySelector('.ring-progress');
+        this.displayElement = card.querySelector('.time-display');
+        this.stateIndicator = card.querySelector('.state-indicator');
+        
+        // Calculate ring properties
         const radius = 54;
         const circumference = 2 * Math.PI * radius;
+        this.ringElement.style.strokeDasharray = circumference;
         
-        ring.style.strokeDasharray = circumference;
-        ring.style.strokeDashoffset = 0;
-
-        const hrs = Math.floor(totalSec / 3600);
-        const min = Math.floor((totalSec % 3600) / 60);
-        const sec = totalSec % 60;
-
-        if (hrs > 0) {
-          display.textContent = `${hrs}:${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-        } else {
-          display.textContent = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-        }
-
-        ring.style.stroke = getRingColor(1);
+        this.updateRing();
         
-        updateURL();
+        // EVENT LISTENERS
+        const titleInput = card.querySelector('.timer-title');
+        titleInput.addEventListener('blur', () => {
+          this.label = titleInput.value.trim() || 'Timer';
+          titleInput.value = this.label;
+          saveToStorage();
+        });
+        
+        titleInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            titleInput.blur();
+          }
+        });
+
+        // Circle click to start/pause
+        card.querySelector('.circle-container').addEventListener('click', () => {
+          if (this.isRunning) {
+            this.pause();
+          } else {
+            this.start();
+          }
+        });
+
+        // Edit button
+        card.querySelector('.edit-btn').addEventListener('click', () => {
+          this.openEditModal();
+        });
+
+        // Reset button
+        card.querySelector('.reset-btn').addEventListener('click', () => {
+          this.reset();
+        });
+
+        // Delete button
+        card.querySelector('.delete-btn').addEventListener('click', () => {
+          this.delete();
+        });
       }
 
-      popup.classList.add('hidden');
-      currentEditing = null;
+      updateDisplay() {
+        this.displayElement.textContent = formatTime(this.remaining);
+      }
+
+      updateRing() {
+        const radius = 54;
+        const circumference = 2 * Math.PI * radius;
+        const progress = this.remaining / this.duration;
+        const offset = circumference - (progress * circumference);
+        
+        this.ringElement.style.strokeDashoffset = offset;
+        this.ringElement.style.stroke = getRingColor(progress);
+      }
+
+      tick() {
+        if (this.remaining > 0) {
+          this.remaining--;
+          this.updateDisplay();
+          this.updateRing();
+          saveToStorage();
+        } else {
+          this.complete();
+        }
+      }
+
+      start() {
+        if (!this.isRunning && this.remaining > 0) {
+          this.isRunning = true;
+          this.stateIndicator.classList.add('running');
+          this.interval = setInterval(() => this.tick(), 1000);
+          saveToStorage();
+        }
+      }
+
+      pause() {
+        if (this.isRunning) {
+          this.isRunning = false;
+          this.stateIndicator.classList.remove('running');
+          clearInterval(this.interval);
+          this.interval = null;
+          saveToStorage();
+        }
+      }
+
+      reset() {
+        this.pause();
+        this.remaining = this.duration;
+        this.updateDisplay();
+        this.updateRing();
+        saveToStorage();
+      }
+
+      complete() {
+        this.pause();
+        this.remaining = 0;
+        this.updateDisplay();
+        this.updateRing();
+        
+        // Play alarm sound
+        alarmSound.play().catch(e => console.log('Audio play failed:', e));
+        
+        // Vibrate on mobile if supported
+        if ('vibrate' in navigator) {
+          navigator.vibrate([200, 100, 200]);
+        }
+        
+        saveToStorage();
+      }
+
+      openEditModal() {
+        currentEditingId = this.id;
+        
+        const hrs = Math.floor(this.duration / 3600);
+        const mins = Math.floor((this.duration % 3600) / 60);
+        const secs = this.duration % 60;
+        
+        hoursInput.value = hrs;
+        minutesInput.value = mins;
+        secondsInput.value = secs;
+        
+        timeModal.classList.add('active');
+        setTimeout(() => hoursInput.focus(), 100);
+        scheduleHeightCheck();
+      }
+
+      updateDuration(newDuration) {
+        this.duration = newDuration;
+        this.remaining = newDuration;
+        this.pause();
+        this.updateDisplay();
+        this.updateRing();
+        saveToStorage();
+      }
+
+      delete() {
+        this.pause();
+        this.element.remove();
+        timers = timers.filter(t => t.id !== this.id);
+        renderGrid();
+        saveToStorage();
+        scheduleHeightCheck();
+      }
+    }
+
+    // ===== GRID RENDERING =====
+    function renderGrid() {
+      // Clear grid
+      timersGrid.innerHTML = '';
       
-      // Height check when popup closes
+      // Add all timer elements
+      timers.forEach(timer => {
+        timersGrid.appendChild(timer.element);
+      });
+      
+      // Add "Add Timer" button
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-timer-btn';
+      addBtn.textContent = '+';
+      addBtn.setAttribute('aria-label', 'Add New Timer');
+      addBtn.addEventListener('click', addNewTimer);
+      timersGrid.appendChild(addBtn);
+      
+      scheduleHeightCheck();
+    }
+
+    // ===== ADD NEW TIMER =====
+    function addNewTimer() {
+      const id = generateId();
+      const timer = new Timer(id, `Timer ${timers.length + 1}`, 300); // Default 5 minutes
+      timers.push(timer);
+      renderGrid();
+      saveToStorage();
+    }
+
+    // ===== MODAL CONTROLS =====
+    modalSaveBtn.addEventListener('click', () => {
+      const hrs = parseInt(hoursInput.value) || 0;
+      const mins = parseInt(minutesInput.value) || 0;
+      const secs = parseInt(secondsInput.value) || 0;
+      
+      const totalSeconds = hrs * 3600 + mins * 60 + secs;
+      
+      if (totalSeconds > 0 && currentEditingId) {
+        const timer = timers.find(t => t.id === currentEditingId);
+        if (timer) {
+          timer.updateDuration(totalSeconds);
+        }
+      }
+      
+      timeModal.classList.remove('active');
+      currentEditingId = null;
       scheduleHeightCheck();
     });
 
-    // ===== POPUP CANCEL BUTTON =====
-    popupCancel.addEventListener('click', () => {
-      popup.classList.add('hidden');
-      currentEditing = null;
-      
-      // Height check when popup closes
+    modalCancelBtn.addEventListener('click', () => {
+      timeModal.classList.remove('active');
+      currentEditingId = null;
       scheduleHeightCheck();
     });
-    
-    // ===== CLOSE POPUP ON ESCAPE =====
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
-        popup.classList.add('hidden');
-        currentEditing = null;
+
+    // Close modal on backdrop click
+    timeModal.addEventListener('click', (e) => {
+      if (e.target === timeModal) {
+        timeModal.classList.remove('active');
+        currentEditingId = null;
         scheduleHeightCheck();
       }
     });
-    
-    // ===== INITIALIZE TIMERS =====
-    function initializeTimers() {
-      const urlTimers = parseURLTimers();
-      if (urlTimers && urlTimers.length > 0) {
-        urlTimers.forEach(timerData => {
-          createTimer(timerData.seconds / 60, timerData.label);
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && timeModal.classList.contains('active')) {
+        timeModal.classList.remove('active');
+        currentEditingId = null;
+        scheduleHeightCheck();
+      }
+    });
+
+    // ===== HEADER CONTROLS =====
+    resetAllBtn.addEventListener('click', () => {
+      if (confirm('Reset all timers to their original duration?')) {
+        timers.forEach(timer => timer.reset());
+      }
+    });
+
+    exportBtn.addEventListener('click', () => {
+      const data = timers.map(t => ({
+        label: t.label,
+        duration: t.duration
+      }));
+      
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `circle-timers-${Date.now()}.json`;
+      a.click();
+      
+      URL.revokeObjectURL(url);
+    });
+
+    importBtn.addEventListener('click', () => {
+      importFile.click();
+    });
+
+    importFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          
+          if (Array.isArray(data)) {
+            // Clear existing timers
+            timers.forEach(t => t.pause());
+            timers = [];
+            
+            // Create new timers from imported data
+            data.forEach(item => {
+              if (item.label && item.duration) {
+                const id = generateId();
+                const timer = new Timer(id, item.label, item.duration);
+                timers.push(timer);
+              }
+            });
+            
+            renderGrid();
+            saveToStorage();
+          }
+        } catch (error) {
+          alert('Invalid JSON file. Please check the file format.');
+          console.error('Import error:', error);
+        }
+      };
+      
+      reader.readAsText(file);
+      importFile.value = ''; // Reset input
+    });
+
+    // ===== INITIALIZATION =====
+    function initialize() {
+      const savedData = loadFromStorage();
+      
+      if (savedData && savedData.length > 0) {
+        // Load from storage
+        savedData.forEach(data => {
+          const timer = new Timer(
+            data.id,
+            data.label,
+            data.duration,
+            data.remaining,
+            false // Don't auto-start on page load
+          );
+          timers.push(timer);
         });
       } else {
-        defaultTimes.forEach(min => createTimer(min, `${min}m Timer`));
-        updateURL(); // Only update URL if we used defaults
+        // Create default timers
+        const defaultTimers = [
+          { label: '5min Timer', duration: 300 },
+          { label: '10min Timer', duration: 600 },
+          { label: '30min Timer', duration: 1800 },
+          { label: '1hr Timer', duration: 3600 }
+        ];
+        
+        defaultTimers.forEach(data => {
+          const id = generateId();
+          const timer = new Timer(id, data.label, data.duration);
+          timers.push(timer);
+        });
+        
+        saveToStorage();
       }
       
-      renderRows(); // Call renderRows ONCE after all timers are created
+      renderGrid();
     }
 
-    initializeTimers(); // Run initialization
-
-    // ===== FOURTHWALL SCROLLBAR FIX (STABLE VERSION) =====
+    // ===== FOURTHWALL SCROLLBAR FIX =====
     let lastHeight = 0;
     let resizeTimer;
 
-    /**
-     * Sends the current scrollHeight to the parent window if it has changed.
-     * This is the *only* function that should send a postMessage.
-     */
     function sendHeight() {
-      // Use scrollHeight for content height
       const height = document.body.scrollHeight;
       
-      // Only send message if height has *actually* changed
       if (height !== lastHeight) {
         lastHeight = height;
         window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
-    /**
-     * A debounced version of sendHeight() to be called on content changes.
-     * This ensures we don't spam messages during rapid changes.
-     */
     function scheduleHeightCheck() {
-        // Clear any pending checks
-        clearTimeout(resizeTimer);
-        // Schedule a new check after 150ms
-        resizeTimer = setTimeout(sendHeight, 150);
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sendHeight, 150);
     }
 
-    // Send height on initial load (with a slight delay)
-    // This now runs AFTER initializeTimers() has built the DOM
-    // and AFTER the browser has loaded CSS, fonts, etc.
     window.addEventListener('load', () => {
-        setTimeout(sendHeight, 100);
+      setTimeout(sendHeight, 100);
     });
 
-    // Send height on window resize (debounced)
     window.addEventListener('resize', () => {
-        // Use scheduleHeightCheck for built-in debounce
-        scheduleHeightCheck();
+      scheduleHeightCheck();
     });
     
     // ===== END OF SCROLLBAR FIX =====
+
+    // Start the app
+    initialize();
   </script>
 </body>
 </html>
