@@ -1,0 +1,1250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Video to GIF Converter</title>
+  <style>
+    :root {
+      --bg: #191919;
+      --card-bg: #1F1F1F;
+      --hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: var(--bg);
+      font-family: sans-serif;
+      color: var(--text-primary);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ===== UPLOAD SECTION ===== */
+    .upload-card {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 16px;
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--outline);
+      border-radius: var(--radius);
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--accent);
+      background: rgba(135, 169, 255, 0.05);
+    }
+
+    .upload-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(135, 169, 255, 0.1);
+    }
+
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .upload-text {
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .upload-subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    #videoInput {
+      display: none;
+    }
+
+    /* ===== VIDEO PREVIEW & TRIM SECTION ===== */
+    .video-section {
+      display: none;
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 16px;
+    }
+
+    .video-preview-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto 20px;
+      background: #000;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    #videoPreview {
+      width: 100%;
+      display: block;
+    }
+
+    .warning-banner {
+      background: rgba(255, 152, 0, 0.1);
+      border: 1px solid rgba(255, 152, 0, 0.3);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+
+    /* ===== TIMELINE TRIMMER ===== */
+    .timeline-section {
+      margin-top: 20px;
+    }
+
+    .section-label {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .timeline-wrapper {
+      position: relative;
+      width: 100%;
+      height: 80px;
+      background: var(--hover);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .timeline-frames {
+      display: flex;
+      height: 100%;
+      position: relative;
+    }
+
+    .timeline-frame {
+      flex: 1;
+      min-width: 40px;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      border-right: 1px solid var(--outline);
+    }
+
+    .timeline-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+
+    .timeline-selection {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: rgba(135, 169, 255, 0.2);
+      border-left: 3px solid var(--accent);
+      border-right: 3px solid var(--accent);
+      pointer-events: all;
+      cursor: move;
+    }
+
+    .timeline-handle {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 12px;
+      background: var(--accent);
+      cursor: ew-resize;
+    }
+
+    .timeline-handle.left {
+      left: -6px;
+    }
+
+    .timeline-handle.right {
+      right: -6px;
+    }
+
+    .timeline-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    /* ===== CONTROLS SECTION ===== */
+    .controls-card {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 16px;
+    }
+
+    .control-group {
+      margin-bottom: 20px;
+    }
+
+    .control-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .control-value {
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--hover);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: none;
+    }
+
+    /* ===== CROP SECTION ===== */
+    .crop-section {
+      margin-top: 20px;
+    }
+
+    .crop-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto 16px;
+      display: none;
+    }
+
+    .crop-canvas-container {
+      position: relative;
+      background: #000;
+      border-radius: var(--radius);
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    #cropCanvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .crop-overlay {
+      position: absolute;
+      border: 2px solid var(--accent);
+      cursor: move;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+    }
+
+    .crop-handle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    .crop-handle.nw { top: -6px; left: -6px; cursor: nw-resize; }
+    .crop-handle.ne { top: -6px; right: -6px; cursor: ne-resize; }
+    .crop-handle.sw { bottom: -6px; left: -6px; cursor: sw-resize; }
+    .crop-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      font-family: sans-serif;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .btn:hover::before {
+      left: 125%;
+    }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn:disabled::before {
+      display: none;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #000;
+      font-weight: bold;
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    /* ===== OUTPUT SECTION ===== */
+    .output-section {
+      display: none;
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 16px;
+    }
+
+    .output-preview {
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto 16px;
+      background: #000;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    #outputGif {
+      width: 100%;
+      display: block;
+    }
+
+    .output-info {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    /* ===== PROGRESS ===== */
+    .progress-section {
+      display: none;
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--hover);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 16px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .progress-subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 600px) {
+      body {
+        padding: 16px 12px;
+      }
+
+      .upload-card,
+      .video-section,
+      .controls-card,
+      .output-section,
+      .progress-section {
+        padding: 16px 12px;
+      }
+
+      .btn-group {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline-wrapper {
+        height: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- ===== UPLOAD SECTION ===== -->
+    <div class="upload-card" id="uploadCard">
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-icon">🎬</div>
+        <div class="upload-text">Click or drag video to upload</div>
+        <div class="upload-subtext">MP4, WebM, MOV up to 100MB</div>
+      </div>
+      <input type="file" id="videoInput" accept="video/*" />
+    </div>
+
+    <!-- ===== VIDEO PREVIEW & TRIM SECTION ===== -->
+    <div class="video-section" id="videoSection">
+      <div id="warningBanner" class="warning-banner" style="display: none;">
+        ⚠️ Video is longer than 10 seconds. Please trim it using the timeline below.
+      </div>
+
+      <div class="video-preview-wrapper">
+        <video id="videoPreview" controls></video>
+      </div>
+
+      <div class="timeline-section">
+        <div class="section-label">Trim Video (Max 10 seconds)</div>
+        <div class="timeline-wrapper" id="timelineWrapper">
+          <div class="timeline-frames" id="timelineFrames"></div>
+          <div class="timeline-overlay">
+            <div class="timeline-selection" id="timelineSelection">
+              <div class="timeline-handle left" id="handleLeft"></div>
+              <div class="timeline-handle right" id="handleRight"></div>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-info">
+          <span>Start: <span id="startTime">0.0s</span></span>
+          <span>Duration: <span id="durationTime">0.0s</span></span>
+          <span>End: <span id="endTime">0.0s</span></span>
+        </div>
+      </div>
+
+      <div class="crop-section">
+        <div class="section-label">
+          <span>Crop Video (Optional)</span>
+          <button class="btn" id="toggleCropBtn" style="width: auto; padding: 6px 12px; font-size: 12px;">Enable Crop</button>
+        </div>
+        <div class="crop-wrapper" id="cropWrapper">
+          <div class="crop-canvas-container" id="cropCanvasContainer">
+            <canvas id="cropCanvas"></canvas>
+            <div class="crop-overlay" id="cropOverlay">
+              <div class="crop-handle nw"></div>
+              <div class="crop-handle ne"></div>
+              <div class="crop-handle sw"></div>
+              <div class="crop-handle se"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn" id="resetBtn">Reset Video</button>
+        <button class="btn primary" id="continueBtn">Continue to Settings</button>
+      </div>
+    </div>
+
+    <!-- ===== CONTROLS SECTION ===== -->
+    <div class="controls-card" id="controlsCard" style="display: none;">
+      <div class="control-group">
+        <div class="control-label">
+          <span>Frame Rate</span>
+          <span class="control-value"><span id="fpsValue">10</span> FPS</span>
+        </div>
+        <input type="range" id="fpsSlider" min="5" max="30" value="10" step="1" />
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Quality</span>
+          <span class="control-value"><span id="qualityValue">Medium</span></span>
+        </div>
+        <input type="range" id="qualitySlider" min="1" max="3" value="2" step="1" />
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Playback Speed</span>
+          <span class="control-value"><span id="speedValue">1.0</span>x</span>
+        </div>
+        <input type="range" id="speedSlider" min="0.25" max="2" value="1" step="0.25" />
+      </div>
+
+      <div class="btn-group">
+        <button class="btn" id="backBtn">Back to Video</button>
+        <button class="btn primary" id="convertBtn">Convert to GIF</button>
+      </div>
+    </div>
+
+    <!-- ===== PROGRESS SECTION ===== -->
+    <div class="progress-section" id="progressSection">
+      <div class="progress-text">Converting to GIF...</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-subtext" id="progressText">Processing frames...</div>
+    </div>
+
+    <!-- ===== OUTPUT SECTION ===== -->
+    <div class="output-section" id="outputSection">
+      <div class="section-label" style="text-align: center;">Your GIF is Ready!</div>
+      <div class="output-preview">
+        <img id="outputGif" alt="Generated GIF" />
+      </div>
+      <div class="output-info" id="outputInfo"></div>
+      <div class="btn-group">
+        <button class="btn" id="newConversionBtn">Convert Another</button>
+        <button class="btn primary" id="downloadBtn">Download GIF</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gifshot@latest/dist/gifshot.min.js"></script>
+  <script>
+    // ===== STATE MANAGEMENT =====
+    let state = {
+      videoFile: null,
+      videoElement: null,
+      videoDuration: 0,
+      startTime: 0,
+      endTime: 0,
+      trimDuration: 0,
+      fps: 10,
+      quality: 2,
+      speed: 1.0,
+      cropEnabled: false,
+      cropRect: { x: 0, y: 0, width: 0, height: 0 },
+      generatedGif: null,
+      lastDraggedHandle: null
+    };
+
+    // ===== DOM ELEMENTS =====
+    const uploadZone = document.getElementById('uploadZone');
+    const videoInput = document.getElementById('videoInput');
+    const uploadCard = document.getElementById('uploadCard');
+    const videoSection = document.getElementById('videoSection');
+    const warningBanner = document.getElementById('warningBanner');
+    const videoPreview = document.getElementById('videoPreview');
+    const timelineFrames = document.getElementById('timelineFrames');
+    const timelineSelection = document.getElementById('timelineSelection');
+    const handleLeft = document.getElementById('handleLeft');
+    const handleRight = document.getElementById('handleRight');
+    const timelineWrapper = document.getElementById('timelineWrapper');
+    const startTimeSpan = document.getElementById('startTime');
+    const durationTimeSpan = document.getElementById('durationTime');
+    const endTimeSpan = document.getElementById('endTime');
+    const toggleCropBtn = document.getElementById('toggleCropBtn');
+    const cropWrapper = document.getElementById('cropWrapper');
+    const cropCanvas = document.getElementById('cropCanvas');
+    const cropOverlay = document.getElementById('cropOverlay');
+    const resetBtn = document.getElementById('resetBtn');
+    const continueBtn = document.getElementById('continueBtn');
+    const controlsCard = document.getElementById('controlsCard');
+    const fpsSlider = document.getElementById('fpsSlider');
+    const fpsValue = document.getElementById('fpsValue');
+    const qualitySlider = document.getElementById('qualitySlider');
+    const qualityValue = document.getElementById('qualityValue');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedValue = document.getElementById('speedValue');
+    const backBtn = document.getElementById('backBtn');
+    const convertBtn = document.getElementById('convertBtn');
+    const progressSection = document.getElementById('progressSection');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const outputSection = document.getElementById('outputSection');
+    const outputGif = document.getElementById('outputGif');
+    const outputInfo = document.getElementById('outputInfo');
+    const newConversionBtn = document.getElementById('newConversionBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    // ===== UPLOAD HANDLING =====
+    uploadZone.addEventListener('click', () => videoInput.click());
+
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleVideoUpload(files[0]);
+      }
+    });
+
+    videoInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleVideoUpload(e.target.files[0]);
+      }
+    });
+
+    function handleVideoUpload(file) {
+      console.log('📁 Video upload started:', file.name);
+      if (!file.type.startsWith('video/')) {
+        alert('Please upload a valid video file');
+        return;
+      }
+
+      state.videoFile = file;
+      const url = URL.createObjectURL(file);
+      videoPreview.src = url;
+
+      videoPreview.addEventListener('loadedmetadata', () => {
+        state.videoDuration = videoPreview.duration;
+        state.startTime = 0;
+        state.endTime = Math.min(10, state.videoDuration);
+        state.trimDuration = state.endTime - state.startTime;
+
+        console.log('📹 Video loaded:', {
+          duration: state.videoDuration,
+          dimensions: `${videoPreview.videoWidth}x${videoPreview.videoHeight}`
+        });
+
+        if (state.videoDuration > 10) {
+          warningBanner.style.display = 'block';
+        } else {
+          warningBanner.style.display = 'none';
+        }
+
+        uploadCard.style.display = 'none';
+        videoSection.style.display = 'block';
+        
+        generateTimeline();
+        updateTimelineDisplay();
+        initializeCrop();
+        scheduleHeightCheck();
+      });
+    }
+
+    // ===== TIMELINE GENERATION =====
+    function generateTimeline() {
+      console.log('🎞️ Generating timeline...');
+      timelineFrames.innerHTML = '';
+      const frameCount = 10;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      let framesLoaded = 0;
+
+      for (let i = 0; i < frameCount; i++) {
+        const frameDiv = document.createElement('div');
+        frameDiv.className = 'timeline-frame';
+        
+        const time = (state.videoDuration / frameCount) * i;
+        
+        const captureAtTime = (targetTime, element) => {
+          videoPreview.currentTime = targetTime;
+          
+          const seekHandler = () => {
+            if (Math.abs(videoPreview.currentTime - targetTime) < 0.1) {
+              canvas.width = videoPreview.videoWidth;
+              canvas.height = videoPreview.videoHeight;
+              ctx.drawImage(videoPreview, 0, 0);
+              element.style.backgroundImage = `url(${canvas.toDataURL()})`;
+              videoPreview.removeEventListener('seeked', seekHandler);
+              
+              framesLoaded++;
+              if (framesLoaded === frameCount) {
+                videoPreview.currentTime = state.startTime;
+                console.log('✅ Timeline generated successfully');
+              }
+            }
+          };
+          
+          videoPreview.addEventListener('seeked', seekHandler);
+        };
+
+        captureAtTime(time, frameDiv);
+        timelineFrames.appendChild(frameDiv);
+      }
+
+      initializeTimelineSelection();
+    }
+
+    // ===== TIMELINE SELECTION =====
+    function initializeTimelineSelection() {
+      const maxDuration = Math.min(10, state.videoDuration);
+      const percentage = (maxDuration / state.videoDuration) * 100;
+      
+      timelineSelection.style.left = '0%';
+      timelineSelection.style.width = percentage + '%';
+
+      let isDragging = false;
+      let dragType = null;
+      let startX = 0;
+      let startLeft = 0;
+      let startWidth = 0;
+
+      function startDrag(e, type) {
+        isDragging = true;
+        dragType = type;
+        state.lastDraggedHandle = type;
+        startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        startLeft = parseFloat(timelineSelection.style.left);
+        startWidth = parseFloat(timelineSelection.style.width);
+        e.preventDefault();
+      }
+
+      function doDrag(e) {
+        if (!isDragging) return;
+        
+        const currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const deltaX = currentX - startX;
+        const wrapperWidth = timelineWrapper.offsetWidth;
+        const deltaPercent = (deltaX / wrapperWidth) * 100;
+
+        if (dragType === 'left') {
+          let newLeft = startLeft + deltaPercent;
+          let newWidth = startWidth - deltaPercent;
+          
+          if (newLeft < 0) newLeft = 0;
+          if (newWidth < 5) newWidth = 5;
+          if (newLeft + newWidth > 100) newLeft = 100 - newWidth;
+
+          const maxWidth = (10 / state.videoDuration) * 100;
+          if (newWidth > maxWidth) {
+            newWidth = maxWidth;
+            newLeft = startLeft + startWidth - maxWidth;
+          }
+
+          timelineSelection.style.left = newLeft + '%';
+          timelineSelection.style.width = newWidth + '%';
+        } else if (dragType === 'right') {
+          let newWidth = startWidth + deltaPercent;
+          
+          if (newWidth < 5) newWidth = 5;
+          if (startLeft + newWidth > 100) newWidth = 100 - startLeft;
+
+          const maxWidth = (10 / state.videoDuration) * 100;
+          if (newWidth > maxWidth) newWidth = maxWidth;
+
+          timelineSelection.style.width = newWidth + '%';
+        } else if (dragType === 'selection') {
+          let newLeft = startLeft + deltaPercent;
+          
+          if (newLeft < 0) newLeft = 0;
+          if (newLeft + startWidth > 100) newLeft = 100 - startWidth;
+
+          timelineSelection.style.left = newLeft + '%';
+        }
+
+        updateTimelineDisplay();
+      }
+
+      function endDrag() {
+        isDragging = false;
+        dragType = null;
+      }
+
+      handleLeft.addEventListener('mousedown', (e) => startDrag(e, 'left'));
+      handleLeft.addEventListener('touchstart', (e) => startDrag(e, 'left'));
+      
+      handleRight.addEventListener('mousedown', (e) => startDrag(e, 'right'));
+      handleRight.addEventListener('touchstart', (e) => startDrag(e, 'right'));
+      
+      timelineSelection.addEventListener('mousedown', (e) => {
+        if (e.target === timelineSelection) startDrag(e, 'selection');
+      });
+      timelineSelection.addEventListener('touchstart', (e) => {
+        if (e.target === timelineSelection) startDrag(e, 'selection');
+      });
+
+      document.addEventListener('mousemove', doDrag);
+      document.addEventListener('touchmove', doDrag);
+      document.addEventListener('mouseup', endDrag);
+      document.addEventListener('touchend', endDrag);
+    }
+
+    function updateTimelineDisplay() {
+      const left = parseFloat(timelineSelection.style.left);
+      const width = parseFloat(timelineSelection.style.width);
+
+      state.startTime = (left / 100) * state.videoDuration;
+      state.trimDuration = (width / 100) * state.videoDuration;
+      state.endTime = state.startTime + state.trimDuration;
+
+      startTimeSpan.textContent = state.startTime.toFixed(1) + 's';
+      durationTimeSpan.textContent = state.trimDuration.toFixed(1) + 's';
+      endTimeSpan.textContent = state.endTime.toFixed(1) + 's';
+
+      // UPDATE VIDEO PREVIEW
+      if (!state.cropEnabled) {
+        if (state.lastDraggedHandle === 'left' || state.lastDraggedHandle === 'selection') {
+          videoPreview.currentTime = state.startTime;
+        } else if (state.lastDraggedHandle === 'right') {
+          videoPreview.currentTime = state.endTime;
+        }
+      }
+
+      if (state.trimDuration > 10) {
+        warningBanner.style.display = 'block';
+        continueBtn.disabled = true;
+      } else {
+        warningBanner.style.display = 'none';
+        continueBtn.disabled = false;
+      }
+    }
+
+    // ===== CROP FUNCTIONALITY =====
+    function initializeCrop() {
+      const ctx = cropCanvas.getContext('2d');
+      
+      cropCanvas.width = videoPreview.videoWidth;
+      cropCanvas.height = videoPreview.videoHeight;
+      
+      state.cropRect = {
+        x: 0,
+        y: 0,
+        width: cropCanvas.width,
+        height: cropCanvas.height
+      };
+
+      drawCropCanvas();
+    }
+
+    function drawCropCanvas() {
+      const ctx = cropCanvas.getContext('2d');
+      ctx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+      ctx.drawImage(videoPreview, 0, 0, cropCanvas.width, cropCanvas.height);
+
+      if (state.cropEnabled) {
+        updateCropOverlay();
+      }
+    }
+
+    function updateCropOverlay() {
+      const scaleX = cropCanvas.offsetWidth / cropCanvas.width;
+      const scaleY = cropCanvas.offsetHeight / cropCanvas.height;
+
+      cropOverlay.style.left = (state.cropRect.x * scaleX) + 'px';
+      cropOverlay.style.top = (state.cropRect.y * scaleY) + 'px';
+      cropOverlay.style.width = (state.cropRect.width * scaleX) + 'px';
+      cropOverlay.style.height = (state.cropRect.height * scaleY) + 'px';
+    }
+
+    toggleCropBtn.addEventListener('click', () => {
+      state.cropEnabled = !state.cropEnabled;
+      
+      if (state.cropEnabled) {
+        cropWrapper.style.display = 'block';
+        toggleCropBtn.textContent = 'Disable Crop';
+        videoPreview.pause();
+        videoPreview.currentTime = state.startTime;
+        
+        setTimeout(() => {
+          drawCropCanvas();
+          initializeCropDrag();
+        }, 100);
+      } else {
+        cropWrapper.style.display = 'none';
+        toggleCropBtn.textContent = 'Enable Crop';
+        state.cropRect = {
+          x: 0,
+          y: 0,
+          width: cropCanvas.width,
+          height: cropCanvas.height
+        };
+      }
+      
+      scheduleHeightCheck();
+    });
+
+    function initializeCropDrag() {
+      let isDragging = false;
+      let dragType = null;
+      let startX = 0;
+      let startY = 0;
+
+      function startDrag(e, type) {
+        isDragging = true;
+        dragType = type;
+        startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        e.preventDefault();
+      }
+
+      function doDrag(e) {
+        if (!isDragging) return;
+
+        const currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const currentY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        const deltaX = currentX - startX;
+        const deltaY = currentY - startY;
+
+        const scaleX = cropCanvas.width / cropCanvas.offsetWidth;
+        const scaleY = cropCanvas.height / cropCanvas.offsetHeight;
+
+        const dx = deltaX * scaleX;
+        const dy = deltaY * scaleY;
+
+        if (dragType === 'move') {
+          state.cropRect.x = Math.max(0, Math.min(cropCanvas.width - state.cropRect.width, state.cropRect.x + dx));
+          state.cropRect.y = Math.max(0, Math.min(cropCanvas.height - state.cropRect.height, state.cropRect.y + dy));
+        } else if (dragType.includes('resize')) {
+          const minSize = 50;
+          
+          if (dragType.includes('e')) {
+            const newWidth = state.cropRect.width + dx;
+            if (newWidth >= minSize && state.cropRect.x + newWidth <= cropCanvas.width) {
+              state.cropRect.width = newWidth;
+            }
+          }
+          if (dragType.includes('w')) {
+            const newWidth = state.cropRect.width - dx;
+            const newX = state.cropRect.x + dx;
+            if (newWidth >= minSize && newX >= 0) {
+              state.cropRect.width = newWidth;
+              state.cropRect.x = newX;
+            }
+          }
+          if (dragType.includes('s')) {
+            const newHeight = state.cropRect.height + dy;
+            if (newHeight >= minSize && state.cropRect.y + newHeight <= cropCanvas.height) {
+              state.cropRect.height = newHeight;
+            }
+          }
+          if (dragType.includes('n')) {
+            const newHeight = state.cropRect.height - dy;
+            const newY = state.cropRect.y + dy;
+            if (newHeight >= minSize && newY >= 0) {
+              state.cropRect.height = newHeight;
+              state.cropRect.y = newY;
+            }
+          }
+        }
+
+        startX = currentX;
+        startY = currentY;
+        updateCropOverlay();
+      }
+
+      function endDrag() {
+        isDragging = false;
+        dragType = null;
+      }
+
+      cropOverlay.addEventListener('mousedown', (e) => {
+        if (e.target === cropOverlay) startDrag(e, 'move');
+      });
+      cropOverlay.addEventListener('touchstart', (e) => {
+        if (e.target === cropOverlay) startDrag(e, 'move');
+      });
+
+      const handles = cropOverlay.querySelectorAll('.crop-handle');
+      handles.forEach(handle => {
+        const type = 'resize-' + handle.className.split(' ')[1];
+        handle.addEventListener('mousedown', (e) => startDrag(e, type));
+        handle.addEventListener('touchstart', (e) => startDrag(e, type));
+      });
+
+      document.addEventListener('mousemove', doDrag);
+      document.addEventListener('touchmove', doDrag);
+      document.addEventListener('mouseup', endDrag);
+      document.addEventListener('touchend', endDrag);
+    }
+
+    // ===== NAVIGATION BUTTONS =====
+    resetBtn.addEventListener('click', () => {
+      location.reload();
+    });
+
+    continueBtn.addEventListener('click', () => {
+      videoSection.style.display = 'none';
+      controlsCard.style.display = 'block';
+      scheduleHeightCheck();
+    });
+
+    backBtn.addEventListener('click', () => {
+      controlsCard.style.display = 'none';
+      videoSection.style.display = 'block';
+      scheduleHeightCheck();
+    });
+
+    // ===== CONTROL SLIDERS =====
+    fpsSlider.addEventListener('input', () => {
+      state.fps = parseInt(fpsSlider.value);
+      fpsValue.textContent = state.fps;
+    });
+
+    qualitySlider.addEventListener('input', () => {
+      const qualities = ['Low', 'Medium', 'High'];
+      state.quality = parseInt(qualitySlider.value);
+      qualityValue.textContent = qualities[state.quality - 1];
+    });
+
+    speedSlider.addEventListener('input', () => {
+      state.speed = parseFloat(speedSlider.value);
+      speedValue.textContent = state.speed.toFixed(2);
+    });
+
+    // ===== GIF CONVERSION =====
+    convertBtn.addEventListener('click', async () => {
+      console.log('🎬 Starting GIF conversion...');
+      
+      controlsCard.style.display = 'none';
+      progressSection.style.display = 'block';
+      scheduleHeightCheck();
+
+      try {
+        await generateGif();
+        
+        console.log('✅ GIF generation complete!');
+        progressSection.style.display = 'none';
+        outputSection.style.display = 'block';
+        scheduleHeightCheck();
+      } catch (error) {
+        console.error('❌ GIF generation error:', error);
+        alert('Error generating GIF: ' + error.message);
+        controlsCard.style.display = 'block';
+        progressSection.style.display = 'none';
+        scheduleHeightCheck();
+      }
+    });
+
+    async function generateGif() {
+      return new Promise(async (resolve, reject) => {
+        console.log('🎨 GIF generation started with gifshot library');
+        
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+          let width, height;
+          if (state.cropEnabled) {
+            width = Math.round(state.cropRect.width);
+            height = Math.round(state.cropRect.height);
+          } else {
+            width = videoPreview.videoWidth;
+            height = videoPreview.videoHeight;
+          }
+
+          const maxDimension = 600;
+          if (width > maxDimension || height > maxDimension) {
+            const scale = maxDimension / Math.max(width, height);
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const adjustedDuration = state.trimDuration / state.speed;
+          const frameCount = Math.ceil(state.fps * adjustedDuration);
+          const interval = 1 / state.fps;
+          
+          console.log('📊 Capturing', frameCount, 'frames at', state.fps, 'fps');
+          
+          const images = [];
+          let currentFrame = 0;
+
+          async function captureFrame() {
+            if (currentFrame >= frameCount) {
+              console.log('✅ All frames captured, creating GIF...');
+              
+              // Create GIF using gifshot
+              gifshot.createGIF({
+                images: images,
+                gifWidth: width,
+                gifHeight: height,
+                interval: interval / state.speed,
+                numFrames: frameCount,
+                frameDuration: 1,
+                sampleInterval: state.quality === 1 ? 20 : (state.quality === 2 ? 10 : 5)
+              }, function(obj) {
+                if (!obj.error) {
+                  console.log('🎉 GIF created successfully!');
+                  
+                  // Convert base64 to blob
+                  fetch(obj.image)
+                    .then(res => res.blob())
+                    .then(blob => {
+                      state.generatedGif = blob;
+                      outputGif.src = obj.image;
+                      
+                      const sizeKB = (blob.size / 1024).toFixed(2);
+                      outputInfo.textContent = `Size: ${sizeKB} KB | ${width}x${height}px | ${state.fps} FPS`;
+                      
+                      resolve();
+                    })
+                    .catch(reject);
+                } else {
+                  console.error('❌ gifshot error:', obj.error);
+                  reject(new Error(obj.error));
+                }
+              });
+              
+              return;
+            }
+
+            const progress = currentFrame / frameCount;
+            const videoTime = state.startTime + (progress * state.trimDuration);
+            
+            videoPreview.currentTime = videoTime;
+            
+            await new Promise(res => {
+              const seekHandler = () => {
+                videoPreview.removeEventListener('seeked', seekHandler);
+                
+                ctx.clearRect(0, 0, width, height);
+                
+                if (state.cropEnabled) {
+                  ctx.drawImage(
+                    videoPreview,
+                    state.cropRect.x, state.cropRect.y,
+                    state.cropRect.width, state.cropRect.height,
+                    0, 0, width, height
+                  );
+                } else {
+                  ctx.drawImage(videoPreview, 0, 0, width, height);
+                }
+                
+                images.push(canvas.toDataURL('image/png'));
+                
+                currentFrame++;
+                const progressPercent = (currentFrame / frameCount) * 100;
+                progressFill.style.width = progressPercent + '%';
+                progressText.textContent = `Processing frame ${currentFrame} of ${frameCount}`;
+                
+                res();
+              };
+              
+              videoPreview.addEventListener('seeked', seekHandler);
+            });
+            
+            await captureFrame();
+          }
+
+          await captureFrame();
+          
+        } catch (err) {
+          console.error('❌ Error in generateGif:', err);
+          reject(err);
+        }
+      });
+    }
+
+    // ===== OUTPUT BUTTONS =====
+    downloadBtn.addEventListener('click', () => {
+      console.log('💾 Downloading GIF...');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(state.generatedGif);
+      a.download = 'converted.gif';
+      a.click();
+    });
+
+    newConversionBtn.addEventListener('click', () => {
+      location.reload();
+    });
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+      scheduleHeightCheck();
+    });
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+</body>
+</html>
