@@ -23,6 +23,19 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            position: relative;
+        }
+
+        /* ===== VERSION NUMBER ===== */
+        .version {
+            position: fixed;
+            bottom: 8px;
+            right: 8px;
+            font-size: 10px;
+            color: #8C8C8C;
+            opacity: 0.5;
+            user-select: none;
+            z-index: 1000;
         }
 
         /* ===== STATUS MESSAGE ===== */
@@ -125,6 +138,22 @@
 
         .tab-content.active {
             display: block;
+        }
+
+        /* ===== DISCLAIMER ===== */
+        .disclaimer {
+            background: rgba(135, 169, 255, 0.1);
+            border: 1px solid rgba(135, 169, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 11px;
+            color: #8C8C8C;
+            line-height: 1.5;
+        }
+
+        .disclaimer strong {
+            color: #87A9FF;
         }
 
         /* ===== INPUT SECTION ===== */
@@ -662,11 +691,21 @@
             .preview-section {
                 order: -1;
             }
+
+            .version {
+                position: static;
+                text-align: center;
+                margin-top: 16px;
+                opacity: 0.3;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- VERSION NUMBER -->
+        <div class="version">v1.0.0</div>
+
         <!-- STATUS MESSAGE -->
         <div id="status-message" class="status-message"></div>
 
@@ -787,6 +826,9 @@
 
                     <!-- URL TAB CONTENT -->
                     <div id="url-tab" class="tab-content">
+                        <div class="disclaimer">
+                            <strong>Note:</strong> Due to Twitter/X API restrictions, we can only fetch basic tweet text and author information. Profile pictures and tweet images cannot be retrieved without API authentication. For best results, use the Custom Tweet tab to create fully customized tweet images.
+                        </div>
                         <div class="input-group">
                             <input 
                                 type="text" 
@@ -841,9 +883,7 @@
                                 <div class="author-username" id="preview-author-username">@yourusername</div>
                             </div>
                         </div>
-                        <div class="tweet-text" id="preview-tweet-text">
-                            This is your custom tweet! You can write anything you want here and it will appear in the preview. Try adding <span class="tweet-mention">@mentions</span> and <span class="tweet-hashtag">#hashtags</span>!
-                        </div>
+                        <div class="tweet-text" id="preview-tweet-text">This is your custom tweet! You can write anything you want here and it will appear in the preview. Try adding <span class="tweet-mention">@mentions</span> and <span class="tweet-hashtag">#hashtags</span>!</div>
                         <div class="tweet-stats">
                             <span class="stat-item stat-retweets" id="preview-retweets">
                                 <span class="stat-value">123</span> Retweets
@@ -1236,7 +1276,6 @@
         showDate.addEventListener('change', applyCustomizations);
         
         themeLight.addEventListener('change', () => {
-            // If rounded corners is checked, uncheck it temporarily to allow theme change
             if (roundedCorners.checked) {
                 roundedCorners.checked = false;
             }
@@ -1244,7 +1283,6 @@
         });
         
         themeDark.addEventListener('change', () => {
-            // If rounded corners is checked, uncheck it temporarily to allow theme change
             if (roundedCorners.checked) {
                 roundedCorners.checked = false;
             }
