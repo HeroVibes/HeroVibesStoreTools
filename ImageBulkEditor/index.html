@@ -350,6 +350,7 @@
       height: 280px;
       background: var(--primary-bg);
       overflow: hidden;
+      touch-action: none;
     }
 
     .image-preview img {
@@ -508,7 +509,7 @@
     
     .cropper-canvas,
     .cropper-view-box img {
-        transition: filter 0.1s ease;
+        transition: none !important;
     }
 
     /* ============================================
@@ -557,17 +558,17 @@
       }
       
       input[type="range"]::-webkit-slider-thumb {
-        width: 24px;
-        height: 24px;
+        width: 28px;
+        height: 28px;
       }
       
       input[type="range"]::-moz-range-thumb {
-        width: 24px;
-        height: 24px;
+        width: 28px;
+        height: 28px;
       }
       
       .slider-group {
-        padding: 4px 0;
+        padding: 8px 0;
       }
     }
 
@@ -966,48 +967,60 @@
           updateImageInfo(imageData);
       });
       
-      // MOBILE FIX: Use both 'input' and 'change' events for filter sliders
+      // MOBILE FIX: Debounce filter slider updates to prevent constant cropper redrawing
       card.querySelectorAll('.filter-slider').forEach(slider => {
+          let filterTimeout;
           const updateFilter = (e) => {
-              const id = parseInt(e.target.dataset.id, 10);
-              const filter = e.target.dataset.filter;
-              const value = e.target.value;
-              
-              const imgData = images.find(img => img.id === id);
-              if (!imgData) return;
+              clearTimeout(filterTimeout);
+              filterTimeout = setTimeout(() => {
+                  const id = parseInt(e.target.dataset.id, 10);
+                  const filter = e.target.dataset.filter;
+                  const value = e.target.value;
+                  
+                  const imgData = images.find(img => img.id === id);
+                  if (!imgData) return;
 
-              imgData.filters[filter] = value;
-              updateImagePreviewFilters(imgData);
-              
-              document.getElementById(`${filter}-val-${id}`).textContent = `${value}%`;
+                  imgData.filters[filter] = value;
+                  updateImagePreviewFilters(imgData);
+                  
+                  document.getElementById(`${filter}-val-${id}`).textContent = `${value}%`;
 
-              imgData.processed = false;
-              imgData.blob = null;
-              updateImageInfo(imgData);
+                  imgData.processed = false;
+                  imgData.blob = null;
+                  updateImageInfo(imgData);
+              }, isMobileDevice ? 50 : 0);
           };
           
-          // Listen to both events for better mobile compatibility
           slider.addEventListener('input', updateFilter);
           slider.addEventListener('change', updateFilter);
       });
 
       setTimeout(() => {
- 
          const img = document.getElementById(`img-${imageData.id}`);
         const ratio = getAspectRatio();
+        
+        // MOBILE FIX: Disable most cropper interactions on mobile
         imageData.cropper = new Cropper(img, {
           aspectRatio: ratio,
           viewMode: 1,
           autoCropArea: 1,
           responsive: true,
           background: false,
-          zoomOnWheel: !isMobileDevice,
-          zoomOnTouch: true,
+          zoomOnWheel: false,
+          zoomOnTouch: false,
           toggleDragModeOnDblclick: false,
-        
-           minContainerHeight: 280,
+          dragMode: isMobileDevice ? 'move' : 'crop',
+          cropBoxMovable: !isMobileDevice,
+          cropBoxResizable: !isMobileDevice,
+          minContainerHeight: 280,
           ready: function() {
               updateImagePreviewFilters(imageData);
+              
+              // MOBILE FIX: Disable rotation/scaling events on mobile
+              if (isMobileDevice) {
+                  const container = this.cropper.container;
+                  container.style.touchAction = 'pan-y';
+              }
           }
         });
       }, 100);
@@ -1049,19 +1062,21 @@
       const imageData = images.find(img => img.id === id);
       if (!imageData || !imageData.cropper) return;
 
-      const data = imageData.cropper.getImageData();
-        
+      // MOBILE FIX: Use scale method correctly
       if (direction === 'h') {
-        const currentScaleX = data.scaleX || 1;
-        imageData.cropper.scaleX(currentScaleX * -1);
-      } else {
-        const currentScaleY = data.scaleY || 1;
-        imageData.cropper.scaleY(currentScaleY * -1);
+        const currentScaleX = imageData.cropper.getData().scaleX || 1;
+        imageData.cropper.scaleX(-currentScaleX);
+      } else if (direction === 'v') {
+        const currentScaleY = imageData.cropper.getData().scaleY || 1;
+        imageData.cropper.scaleY(-currentScaleY);
       }
         
       imageData.processed = false;
       imageData.blob = null;
       updateImageInfo(imageData);
+      
+      // Re-apply filters after flip
+      setTimeout(() => updateImagePreviewFilters(imageData), 100);
     }
 
     function resetCropper(id) {
@@ -1077,7 +1092,7 @@
       document.getElementById(`saturate-${id}`).value = 100;
       document.getElementById(`brightness-val-${id}`).textContent = '100%';
       document.getElementById(`contrast-val-${id}`).textContent = '100%';
-      document.getElementById(`saturate-${id}`).textContent = '100%';
+      document.getElementById(`saturate-val-${id}`).textContent = '100%';
       
       imageData.processed = false;
       imageData.blob = null;
@@ -1088,40 +1103,31 @@
         FILTER HANDLING
         ============================================ */
     function updateImagePreviewFilters(imageData) {
-        if (!imageData.element) return;
+        if (!imageData.element || !imageData.cropper) return;
         
-        // MOBILE FIX: Get the actual image element being displayed by cropper
-        const cropperCanvas = imageData.element.querySelector('.cropper-canvas');
-        const cropperViewBoxImage = imageData.element.querySelector('.cropper-view-box img');
+        // Get all the image elements we need to apply filters to
+        const originalImg = document.getElementById(`img-${imageData.id}`);
+        const cropperImages = imageData.element.querySelectorAll('.cropper-canvas img, .cropper-view-box img');
 
         const filters = imageData.filters;
-        const perImageFilters = `
-            brightness(${filters.brightness}%) 
-            contrast(${filters.contrast}%) 
-            saturate(${filters.saturate}%)
-        `;
+        const perImageFilters = `brightness(${filters.brightness}%) contrast(${filters.contrast}%) saturate(${filters.saturate}%)`;
         let combinedFilter;
+        
         if (currentGlobalFilter === 'none' || !currentGlobalFilter) {
             combinedFilter = perImageFilters;
         } else {
             combinedFilter = `${currentGlobalFilter} ${perImageFilters}`;
         }
 
-        // MOBILE FIX: Apply filters and force a repaint
-        if (cropperCanvas) {
-            cropperCanvas.style.filter = combinedFilter;
-            // Force repaint on mobile
-            if (isMobileDevice) {
-                cropperCanvas.style.transform = 'translateZ(0)';
-            }
+        // Apply to original image
+        if (originalImg) {
+            originalImg.style.filter = combinedFilter;
         }
-        if (cropperViewBoxImage) {
-            cropperViewBoxImage.style.filter = combinedFilter;
-            // Force repaint on mobile
-            if (isMobileDevice) {
-                cropperViewBoxImage.style.transform = 'translateZ(0)';
-            }
-        }
+        
+        // Apply to all cropper-generated images
+        cropperImages.forEach(img => {
+            img.style.filter = combinedFilter;
+        });
     }
     
     function applyGlobalFilter() {
@@ -1171,6 +1177,9 @@
           imageData.processed = false;
           imageData.blob = null;
           updateImageInfo(imageData);
+          
+          // Re-apply filters after aspect ratio change
+          setTimeout(() => updateImagePreviewFilters(imageData), 100);
         }
       });
     }
@@ -1215,11 +1224,8 @@
           const ctx = filterCanvas.getContext('2d');
           
           const f = imageData.filters;
-          const perImageFilters = `
-              brightness(${f.brightness}%) 
-              contrast(${f.contrast}%) 
-              saturate(${f.saturate}%)
-          `;
+          const perImageFilters = `brightness(${f.brightness}%) contrast(${f.contrast}%) saturate(${f.saturate}%)`;
+          
           if (currentGlobalFilter === 'none' || !currentGlobalFilter) {
             ctx.filter = perImageFilters;
           } else {
@@ -1233,7 +1239,6 @@
                 format,
                 (format === 'image/png') ? undefined : qualityValue
               );
-          
           });
 
           imageData.processed = true;
