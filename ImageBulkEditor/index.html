@@ -549,6 +549,26 @@
         left: 8px;
         max-width: none;
       }
+      
+      /* MOBILE SLIDER IMPROVEMENTS */
+      input[type="range"] {
+        height: 8px;
+        padding: 8px 0;
+      }
+      
+      input[type="range"]::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+      }
+      
+      input[type="range"]::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+      }
+      
+      .slider-group {
+        padding: 4px 0;
+      }
     }
 
     @media (max-width: 480px) {
@@ -719,6 +739,7 @@
     let currentGlobalFilter = 'none';
     let lastHeight = 0;
     let resizeTimer;
+    let isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
     /* ============================================
         DOM ELEMENTS
@@ -945,11 +966,11 @@
           updateImageInfo(imageData);
       });
       
+      // MOBILE FIX: Use both 'input' and 'change' events for filter sliders
       card.querySelectorAll('.filter-slider').forEach(slider => {
-          slider.addEventListener('input', (e) => {
+          const updateFilter = (e) => {
               const id = parseInt(e.target.dataset.id, 10);
               const filter = e.target.dataset.filter;
- 
               const value = e.target.value;
               
               const imgData = images.find(img => img.id === id);
@@ -957,14 +978,17 @@
 
               imgData.filters[filter] = value;
               updateImagePreviewFilters(imgData);
- 
               
               document.getElementById(`${filter}-val-${id}`).textContent = `${value}%`;
 
               imgData.processed = false;
               imgData.blob = null;
               updateImageInfo(imgData);
-          });
+          };
+          
+          // Listen to both events for better mobile compatibility
+          slider.addEventListener('input', updateFilter);
+          slider.addEventListener('change', updateFilter);
       });
 
       setTimeout(() => {
@@ -977,7 +1001,7 @@
           autoCropArea: 1,
           responsive: true,
           background: false,
-          zoomOnWheel: true,
+          zoomOnWheel: !isMobileDevice,
           zoomOnTouch: true,
           toggleDragModeOnDblclick: false,
         
@@ -1021,8 +1045,6 @@
     /* ============================================
         IMAGE TRANSFORMATIONS
         ============================================ */
-    // rotateImage function removed as requested
-
     function flipImage(id, direction) {
       const imageData = images.find(img => img.id === id);
       if (!imageData || !imageData.cropper) return;
@@ -1030,8 +1052,7 @@
       const data = imageData.cropper.getImageData();
         
       if (direction === 'h') {
-        const currentScaleX = data.scaleX ||
-        1;
+        const currentScaleX = data.scaleX || 1;
         imageData.cropper.scaleX(currentScaleX * -1);
       } else {
         const currentScaleY = data.scaleY || 1;
@@ -1056,7 +1077,7 @@
       document.getElementById(`saturate-${id}`).value = 100;
       document.getElementById(`brightness-val-${id}`).textContent = '100%';
       document.getElementById(`contrast-val-${id}`).textContent = '100%';
-      document.getElementById(`saturate-val-${id}`).textContent = '100%';
+      document.getElementById(`saturate-${id}`).textContent = '100%';
       
       imageData.processed = false;
       imageData.blob = null;
@@ -1068,6 +1089,8 @@
         ============================================ */
     function updateImagePreviewFilters(imageData) {
         if (!imageData.element) return;
+        
+        // MOBILE FIX: Get the actual image element being displayed by cropper
         const cropperCanvas = imageData.element.querySelector('.cropper-canvas');
         const cropperViewBoxImage = imageData.element.querySelector('.cropper-view-box img');
 
@@ -1084,11 +1107,20 @@
             combinedFilter = `${currentGlobalFilter} ${perImageFilters}`;
         }
 
+        // MOBILE FIX: Apply filters and force a repaint
         if (cropperCanvas) {
             cropperCanvas.style.filter = combinedFilter;
+            // Force repaint on mobile
+            if (isMobileDevice) {
+                cropperCanvas.style.transform = 'translateZ(0)';
+            }
         }
         if (cropperViewBoxImage) {
             cropperViewBoxImage.style.filter = combinedFilter;
+            // Force repaint on mobile
+            if (isMobileDevice) {
+                cropperViewBoxImage.style.transform = 'translateZ(0)';
+            }
         }
     }
     
