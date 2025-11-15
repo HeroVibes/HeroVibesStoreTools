@@ -21,8 +21,63 @@
 
         /* ===== MAIN CONTAINER ===== */
         .container {
-            max-width: 1000px;
+            max-width: 1400px;
             margin: 0 auto;
+        }
+
+        /* ===== STATUS MESSAGE ===== */
+        .status-message {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .status-message.error {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            color: #FF3B30;
+            display: block;
+        }
+
+        .status-message.success {
+            background: rgba(52, 199, 89, 0.1);
+            border: 1px solid rgba(52, 199, 89, 0.3);
+            color: #34C759;
+            display: block;
+        }
+
+        .status-message.info {
+            background: rgba(135, 169, 255, 0.1);
+            border: 1px solid rgba(135, 169, 255, 0.3);
+            color: #87A9FF;
+            display: block;
+        }
+
+        /* ===== TWO COLUMN LAYOUT (DESKTOP) ===== */
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 900px) {
+            .content-wrapper {
+                grid-template-columns: 1fr 600px;
+            }
+
+            .preview-section {
+                order: 2;
+                position: sticky;
+                top: 16px;
+                align-self: start;
+            }
+
+            .settings-column {
+                order: 1;
+            }
         }
 
         /* ===== TAB SYSTEM ===== */
@@ -121,6 +176,17 @@
             font-family: sans-serif;
         }
 
+        /* Remove number input arrows */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
         .input-group textarea {
             min-height: 120px;
             resize: vertical;
@@ -144,6 +210,16 @@
             color: #8C8C8C;
             margin-bottom: 8px;
             display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stats-grid .input-group {
+            margin-bottom: 0;
         }
 
         /* ===== FILE UPLOAD ===== */
@@ -319,6 +395,16 @@
             background-color: #F7F9FA;
         }
 
+        .preview-container.transparent-bg {
+            background-image: 
+                linear-gradient(45deg, #2a2a2a 25%, transparent 25%), 
+                linear-gradient(-45deg, #2a2a2a 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #2a2a2a 75%), 
+                linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
         /* ===== TWEET CARD ===== */
         #tweet-card {
             max-width: 600px;
@@ -327,6 +413,10 @@
             padding: 20px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
             transition: all 0.3s ease;
+        }
+
+        #tweet-card.rounded-corners {
+            border-radius: 24px;
         }
 
         /* Light Mode Card */
@@ -478,37 +568,6 @@
             gap: 12px;
         }
 
-        /* ===== STATUS MESSAGE ===== */
-        .status-message {
-            text-align: center;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 12px;
-            display: none;
-        }
-
-        .status-message.error {
-            background: rgba(255, 59, 48, 0.1);
-            border: 1px solid rgba(255, 59, 48, 0.3);
-            color: #FF3B30;
-            display: block;
-        }
-
-        .status-message.success {
-            background: rgba(52, 199, 89, 0.1);
-            border: 1px solid rgba(52, 199, 89, 0.3);
-            color: #34C759;
-            display: block;
-        }
-
-        .status-message.info {
-            background: rgba(135, 169, 255, 0.1);
-            border: 1px solid rgba(135, 169, 255, 0.3);
-            color: #87A9FF;
-            display: block;
-        }
-
         /* ===== MOBILE RESPONSIVE ===== */
         @media (max-width: 768px) {
             body {
@@ -555,6 +614,20 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Mobile: Preview at top */
+            .content-wrapper {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .preview-section {
+                order: -1;
+            }
         }
     </style>
 </head>
@@ -563,172 +636,194 @@
         <!-- STATUS MESSAGE -->
         <div id="status-message" class="status-message"></div>
 
-        <!-- TAB SYSTEM -->
-        <div class="tab-container">
-            <div class="tab-buttons">
-                <button class="tab-btn active" data-tab="url-tab">From URL</button>
-                <button class="tab-btn" data-tab="custom-tab">Custom Tweet</button>
-            </div>
-
-            <!-- URL TAB CONTENT -->
-            <div id="url-tab" class="tab-content active">
-                <div class="input-group">
-                    <input 
-                        type="text" 
-                        id="tweet-url" 
-                        placeholder="Paste Tweet or X.com URL here..."
-                        autocomplete="off"
-                    >
-                    <button class="btn" id="load-tweet">Generate</button>
-                </div>
-            </div>
-
-            <!-- CUSTOM TAB CONTENT -->
-            <div id="custom-tab" class="tab-content">
-                <div class="input-group column">
-                    <label class="input-label">Display Name</label>
-                    <input 
-                        type="text" 
-                        id="custom-name" 
-                        placeholder="Enter display name..."
-                        value="Your Name"
-                    >
-                </div>
-
-                <div class="input-group column">
-                    <label class="input-label">Username (without @)</label>
-                    <input 
-                        type="text" 
-                        id="custom-username" 
-                        placeholder="Enter username..."
-                        value="yourusername"
-                    >
-                </div>
-
-                <div class="input-group column">
-                    <label class="input-label">Tweet Text</label>
-                    <textarea 
-                        id="custom-text" 
-                        placeholder="Enter your tweet text here..."
-                    >This is your custom tweet! You can write anything you want here and it will appear in the preview below. Try adding @mentions and #hashtags!</textarea>
-                </div>
-
-                <div class="input-group column">
-                    <label class="input-label">Profile Picture</label>
-                    <div class="file-upload-container">
-                        <label class="file-upload-btn">
-                            Choose Image
-                            <input type="file" id="profile-upload" accept="image/*">
-                        </label>
-                        <img 
-                            id="upload-preview" 
-                            class="upload-preview" 
-                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%231DA1F2' width='48' height='48'/%3E%3Ctext x='24' y='32' text-anchor='middle' fill='white' font-size='20' font-family='sans-serif' font-weight='bold'%3EYN%3C/text%3E%3C/svg%3E"
-                            alt="Preview"
-                        >
-                        <span class="file-name" id="file-name">No file chosen</span>
+        <div class="content-wrapper">
+            <!-- SETTINGS COLUMN -->
+            <div class="settings-column">
+                <!-- TAB SYSTEM -->
+                <div class="tab-container">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="url-tab">From URL</button>
+                        <button class="tab-btn" data-tab="custom-tab">Custom Tweet</button>
                     </div>
-                </div>
 
-                <div class="input-group" style="margin-bottom: 0;">
-                    <input 
-                        type="number" 
-                        id="custom-retweets" 
-                        placeholder="Retweets"
-                        value="123"
-                        min="0"
-                        style="flex: 1;"
-                    >
-                    <input 
-                        type="number" 
-                        id="custom-likes" 
-                        placeholder="Likes"
-                        value="456"
-                        min="0"
-                        style="flex: 1;"
-                    >
-                    <input 
-                        type="date" 
-                        id="custom-date" 
-                        style="flex: 1;"
-                    >
-                </div>
-            </div>
-        </div>
-
-        <!-- CUSTOMIZATION OPTIONS -->
-        <div class="customization-section">
-            <div class="section-header">Display Options</div>
-            <div class="options-grid">
-                <div class="option-item">
-                    <input type="checkbox" id="show-profile-pic" checked>
-                    <label for="show-profile-pic">Show Profile Picture</label>
-                </div>
-                <div class="option-item">
-                    <input type="checkbox" id="show-likes" checked>
-                    <label for="show-likes">Show Likes</label>
-                </div>
-                <div class="option-item">
-                    <input type="checkbox" id="show-retweets" checked>
-                    <label for="show-retweets">Show Retweets</label>
-                </div>
-                <div class="option-item">
-                    <input type="checkbox" id="show-date" checked>
-                    <label for="show-date">Show Date</label>
-                </div>
-            </div>
-
-            <div class="section-header" style="margin-top: 20px;">Theme</div>
-            <div class="options-grid">
-                <div class="option-item">
-                    <input type="radio" id="theme-light" name="theme" value="light" checked>
-                    <label for="theme-light">Light Mode</label>
-                </div>
-                <div class="option-item">
-                    <input type="radio" id="theme-dark" name="theme" value="dark">
-                    <label for="theme-dark">Dark Mode</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- PREVIEW AREA -->
-        <div class="preview-section">
-            <div class="preview-container light-bg" id="preview-container">
-                <div id="tweet-card" class="light-mode">
-                    <div class="card-header">
-                        <img 
-                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%231DA1F2' width='48' height='48'/%3E%3Ctext x='24' y='32' text-anchor='middle' fill='white' font-size='20' font-family='sans-serif' font-weight='bold'%3EYN%3C/text%3E%3C/svg%3E" 
-                            alt="Profile" 
-                            class="profile-pic" 
-                            id="preview-profile-pic"
-                            crossorigin="anonymous"
-                        >
-                        <div class="author-info">
-                            <div class="author-name" id="preview-author-name">Your Name</div>
-                            <div class="author-username" id="preview-author-username">@yourusername</div>
+                    <!-- URL TAB CONTENT -->
+                    <div id="url-tab" class="tab-content active">
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                id="tweet-url" 
+                                placeholder="Paste Tweet or X.com URL here..."
+                                autocomplete="off"
+                            >
+                            <button class="btn" id="load-tweet">Generate</button>
                         </div>
                     </div>
-                    <div class="tweet-text" id="preview-tweet-text">
-                        This is your custom tweet! You can write anything you want here and it will appear in the preview below. Try adding @mentions and #hashtags!
+
+                    <!-- CUSTOM TAB CONTENT -->
+                    <div id="custom-tab" class="tab-content">
+                        <div class="input-group column">
+                            <label class="input-label">Display Name</label>
+                            <input 
+                                type="text" 
+                                id="custom-name" 
+                                placeholder="Enter display name..."
+                                value="Your Name"
+                            >
+                        </div>
+
+                        <div class="input-group column">
+                            <label class="input-label">Username (without @)</label>
+                            <input 
+                                type="text" 
+                                id="custom-username" 
+                                placeholder="Enter username..."
+                                value="yourusername"
+                            >
+                        </div>
+
+                        <div class="input-group column">
+                            <label class="input-label">Tweet Text</label>
+                            <textarea 
+                                id="custom-text" 
+                                placeholder="Enter your tweet text here..."
+                            >This is your custom tweet! You can write anything you want here and it will appear in the preview below. Try adding @mentions and #hashtags!</textarea>
+                        </div>
+
+                        <div class="input-group column">
+                            <label class="input-label">Profile Picture</label>
+                            <div class="file-upload-container">
+                                <label class="file-upload-btn">
+                                    Choose Image
+                                    <input type="file" id="profile-upload" accept="image/*">
+                                </label>
+                                <img 
+                                    id="upload-preview" 
+                                    class="upload-preview" 
+                                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%231DA1F2' width='48' height='48'/%3E%3Ctext x='24' y='32' text-anchor='middle' fill='white' font-size='20' font-family='sans-serif' font-weight='bold'%3EYN%3C/text%3E%3C/svg%3E"
+                                    alt="Preview"
+                                >
+                                <span class="file-name" id="file-name">No file chosen</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group column">
+                            <label class="input-label">Engagement Stats</label>
+                            <div class="stats-grid">
+                                <div class="input-group column" style="gap: 8px;">
+                                    <label class="input-label" style="margin: 0;">Retweets</label>
+                                    <input 
+                                        type="number" 
+                                        id="custom-retweets" 
+                                        placeholder="0"
+                                        value="123"
+                                        min="0"
+                                    >
+                                </div>
+                                <div class="input-group column" style="gap: 8px;">
+                                    <label class="input-label" style="margin: 0;">Likes</label>
+                                    <input 
+                                        type="number" 
+                                        id="custom-likes" 
+                                        placeholder="0"
+                                        value="456"
+                                        min="0"
+                                    >
+                                </div>
+                                <div class="input-group column" style="gap: 8px;">
+                                    <label class="input-label" style="margin: 0;">Date</label>
+                                    <input 
+                                        type="date" 
+                                        id="custom-date"
+                                    >
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="tweet-stats">
-                        <span class="stat-item stat-retweets" id="preview-retweets">
-                            <span class="stat-value">123</span> Retweets
-                        </span>
-                        <span class="stat-item stat-likes" id="preview-likes">
-                            <span class="stat-value">456</span> Likes
-                        </span>
-                        <span class="stat-item stat-date" id="preview-date">
-                            <span class="stat-value">Nov 15, 2025</span>
-                        </span>
+                </div>
+
+                <!-- CUSTOMIZATION OPTIONS -->
+                <div class="customization-section">
+                    <div class="section-header">Display Options</div>
+                    <div class="options-grid">
+                        <div class="option-item">
+                            <input type="checkbox" id="show-profile-pic" checked>
+                            <label for="show-profile-pic">Show Profile Picture</label>
+                        </div>
+                        <div class="option-item">
+                            <input type="checkbox" id="show-likes" checked>
+                            <label for="show-likes">Show Likes</label>
+                        </div>
+                        <div class="option-item">
+                            <input type="checkbox" id="show-retweets" checked>
+                            <label for="show-retweets">Show Retweets</label>
+                        </div>
+                        <div class="option-item">
+                            <input type="checkbox" id="show-date" checked>
+                            <label for="show-date">Show Date</label>
+                        </div>
+                    </div>
+
+                    <div class="section-header" style="margin-top: 20px;">Theme</div>
+                    <div class="options-grid">
+                        <div class="option-item">
+                            <input type="radio" id="theme-light" name="theme" value="light" checked>
+                            <label for="theme-light">Light Mode</label>
+                        </div>
+                        <div class="option-item">
+                            <input type="radio" id="theme-dark" name="theme" value="dark">
+                            <label for="theme-dark">Dark Mode</label>
+                        </div>
+                    </div>
+
+                    <div class="section-header" style="margin-top: 20px;">Download Options</div>
+                    <div class="options-grid">
+                        <div class="option-item">
+                            <input type="checkbox" id="rounded-corners">
+                            <label for="rounded-corners">Rounded Corners (Transparent BG)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DOWNLOAD SECTION -->
+                <div class="download-section">
+                    <button class="btn" id="download-image">Download as PNG</button>
+                </div>
+            </div>
+
+            <!-- PREVIEW SECTION -->
+            <div class="preview-section">
+                <div class="preview-container light-bg" id="preview-container">
+                    <div id="tweet-card" class="light-mode">
+                        <div class="card-header">
+                            <img 
+                                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%231DA1F2' width='48' height='48'/%3E%3Ctext x='24' y='32' text-anchor='middle' fill='white' font-size='20' font-family='sans-serif' font-weight='bold'%3EYN%3C/text%3E%3C/svg%3E" 
+                                alt="Profile" 
+                                class="profile-pic" 
+                                id="preview-profile-pic"
+                                crossorigin="anonymous"
+                            >
+                            <div class="author-info">
+                                <div class="author-name" id="preview-author-name">Your Name</div>
+                                <div class="author-username" id="preview-author-username">@yourusername</div>
+                            </div>
+                        </div>
+                        <div class="tweet-text" id="preview-tweet-text">
+                            This is your custom tweet! You can write anything you want here and it will appear in the preview below. Try adding @mentions and #hashtags!
+                        </div>
+                        <div class="tweet-stats">
+                            <span class="stat-item stat-retweets" id="preview-retweets">
+                                <span class="stat-value">123</span> Retweets
+                            </span>
+                            <span class="stat-item stat-likes" id="preview-likes">
+                                <span class="stat-value">456</span> Likes
+                            </span>
+                            <span class="stat-item stat-date" id="preview-date">
+                                <span class="stat-value">Nov 15, 2025</span>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- DOWNLOAD SECTION -->
-        <div class="download-section">
-            <button class="btn" id="download-image">Download as PNG</button>
         </div>
     </div>
 
@@ -764,6 +859,7 @@
         const showDate = document.getElementById('show-date');
         const themeLight = document.getElementById('theme-light');
         const themeDark = document.getElementById('theme-dark');
+        const roundedCorners = document.getElementById('rounded-corners');
 
         // Preview elements
         const previewProfilePic = document.getElementById('preview-profile-pic');
@@ -974,16 +1070,25 @@
 
         // ===== APPLY THEME =====
         function applyTheme() {
-            if (themeLight.checked) {
-                tweetCard.classList.remove('dark-mode');
-                tweetCard.classList.add('light-mode');
-                previewContainer.classList.remove('dark-bg');
-                previewContainer.classList.add('light-bg');
+            if (roundedCorners.checked) {
+                previewContainer.classList.remove('light-bg', 'dark-bg');
+                previewContainer.classList.add('transparent-bg');
+                tweetCard.classList.add('rounded-corners');
             } else {
-                tweetCard.classList.remove('light-mode');
-                tweetCard.classList.add('dark-mode');
-                previewContainer.classList.remove('light-bg');
-                previewContainer.classList.add('dark-bg');
+                previewContainer.classList.remove('transparent-bg');
+                tweetCard.classList.remove('rounded-corners');
+                
+                if (themeLight.checked) {
+                    tweetCard.classList.remove('dark-mode');
+                    tweetCard.classList.add('light-mode');
+                    previewContainer.classList.remove('dark-bg');
+                    previewContainer.classList.add('light-bg');
+                } else {
+                    tweetCard.classList.remove('light-mode');
+                    tweetCard.classList.add('dark-mode');
+                    previewContainer.classList.remove('light-bg');
+                    previewContainer.classList.add('dark-bg');
+                }
             }
             scheduleHeightCheck();
         }
@@ -1056,9 +1161,16 @@
 
                 await new Promise(resolve => setTimeout(resolve, 100));
 
+                let bgColor = themeLight.checked ? '#FFFFFF' : '#192734';
+                
+                // If rounded corners is checked, use transparent background
+                if (roundedCorners.checked) {
+                    bgColor = null;
+                }
+
                 const canvas = await html2canvas(tweetCard, {
                     scale: 3,
-                    backgroundColor: themeLight.checked ? '#FFFFFF' : '#192734',
+                    backgroundColor: bgColor,
                     useCORS: true,
                     allowTaint: false,
                     logging: false,
@@ -1089,6 +1201,7 @@
         showDate.addEventListener('change', applyCustomizations);
         themeLight.addEventListener('change', applyTheme);
         themeDark.addEventListener('change', applyTheme);
+        roundedCorners.addEventListener('change', applyTheme);
 
         // ===== ENTER KEY SUPPORT =====
         tweetUrl.addEventListener('keypress', (e) => {
