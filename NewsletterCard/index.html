@@ -1,572 +1,198 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Newsletter Card</title>
-  <style>
-    :root{
-      --bg:#191919;
-      --card-bg:#1F1F1F;
-      --btn-bg:#1F1F1F;
-      --hover-bg:#323232;
-      --outline:#323232;
-      --accent:#87A9FF;
-      --text-primary:#D4D4D4;
-      --text-secondary:#8C8C8C;
-      --radius:8px;
-    }
-    
-    *{
-      box-sizing:border-box;
-    }
-    
-    body{
-      margin:0;
-      padding:0;
-      background:var(--bg);
-      font-family:sans-serif;
-    }
-    
-    /* ===== NEWSLETTER CARD ===== */
-    .newsletter-card{
-      position:relative;
-      width:100%;
-      padding:40px 32px;
-      background:var(--card-bg);
-      border-top:1px solid var(--outline);
-      border-bottom:1px solid var(--outline);
-      overflow:hidden;
-      transition:border-color 0.3s ease, background 0.3s ease;
-    }
-    
-    .newsletter-card:hover{
-      border-color:var(--accent);
-      background:rgba(31,31,31,0.8);
-    }
-    
-    /* Gradient overlay on hover */
-    .newsletter-card::after{
-      content:'';
-      position:absolute;
-      top:0;
-      left:0;
-      right:0;
-      bottom:0;
-      background:linear-gradient(135deg, rgba(135,169,255,0.08) 0%, transparent 60%);
-      opacity:0;
-      transition:opacity 0.4s ease;
-      pointer-events:none;
-    }
-    
-    .newsletter-card:hover::after{
-      opacity:1;
-    }
-    
-    /* Content container */
-    .card-inner{
-      max-width:1200px;
-      margin:0 auto;
-      position:relative;
-      z-index:1;
-    }
-    
-    /* ===== CARD HEADER ===== */
-    .card-header{
-      display:flex;
-      align-items:center;
-      gap:24px;
-      margin-bottom:24px;
-    }
-    
-    /* ===== EMAIL ICON ===== */
-    .email-icon{
-      font-size:64px;
-      flex-shrink:0;
-      user-select:none;
-      transition:transform 0.3s ease;
-      position:relative;
-      filter:drop-shadow(0 4px 12px rgba(135,169,255,0.2));
-    }
-    
-    .newsletter-card:hover .email-icon{
-      animation:emailBounce 0.7s ease-in-out;
-    }
-    
-    @keyframes emailBounce{
-      0%, 100%{ transform:translateY(0) rotate(0deg); }
-      20%{ transform:translateY(-12px) rotate(-8deg); }
-      40%{ transform:translateY(0) rotate(0deg); }
-      60%{ transform:translateY(-6px) rotate(4deg); }
-      80%{ transform:translateY(0) rotate(0deg); }
-    }
-    
-    /* Pulse ring around email */
-    .email-icon::after{
-      content:'';
-      position:absolute;
-      top:50%;
-      left:50%;
-      width:90px;
-      height:90px;
-      border:3px solid var(--accent);
-      border-radius:50%;
-      transform:translate(-50%, -50%);
-      opacity:0;
-      animation:pulse 2.5s ease-in-out infinite;
-    }
-    
-    @keyframes pulse{
-      0%{ transform:translate(-50%, -50%) scale(0.7); opacity:0; }
-      40%{ opacity:0.4; }
-      100%{ transform:translate(-50%, -50%) scale(1.4); opacity:0; }
-    }
-    
-    /* ===== HEADER TEXT ===== */
-    .header-text{
-      flex:1;
-    }
-    
-    .card-title{
-      font-size:24px;
-      font-weight:bold;
-      color:var(--text-primary);
-      margin:0 0 6px 0;
-      line-height:1.2;
-    }
-    
-    .card-subtitle{
-      font-size:13px;
-      color:var(--accent);
-      margin:0;
-      text-transform:uppercase;
-      letter-spacing:1px;
-      font-weight:600;
-      opacity:0.9;
-    }
-    
-    /* ===== CARD DESCRIPTION ===== */
-    .card-description{
-      font-size:15px;
-      color:var(--text-secondary);
-      margin:0 0 28px 0;
-      line-height:1.7;
-      max-width:900px;
-    }
-    
-    .highlight{
-      color:var(--accent);
-      font-weight:700;
-      text-shadow:0 0 20px rgba(135,169,255,0.3);
-    }
-    
-    /* ===== FEATURES GRID ===== */
-    .features-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-      gap:16px;
-      margin-bottom:28px;
-    }
-    
-    .feature-item{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:14px 16px;
-      background:rgba(135,169,255,0.06);
-      border-radius:8px;
-      border:1px solid rgba(135,169,255,0.12);
-      transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .newsletter-card:hover .feature-item{
-      background:rgba(135,169,255,0.1);
-      border-color:rgba(135,169,255,0.25);
-      transform:translateY(-3px);
-      box-shadow:0 4px 12px rgba(135,169,255,0.15);
-    }
-    
-    .feature-icon{
-      font-size:28px;
-      flex-shrink:0;
-      transition:transform 0.3s ease;
-    }
-    
-    .newsletter-card:hover .feature-icon{
-      transform:scale(1.1) rotate(5deg);
-    }
-    
-    .feature-text{
-      font-size:13px;
-      color:var(--text-primary);
-      line-height:1.4;
-      font-weight:500;
-    }
-    
-    /* ===== STATS BAR ===== */
-    .stats-bar{
-      display:flex;
-      justify-content:space-around;
-      gap:20px;
-      padding:20px;
-      background:linear-gradient(135deg, rgba(135,169,255,0.05), rgba(135,169,255,0.02));
-      border-radius:8px;
-      margin-bottom:28px;
-      border:1px solid rgba(135,169,255,0.1);
-    }
-    
-    .stat-item{
-      text-align:center;
-      transition:transform 0.3s ease;
-    }
-    
-    .newsletter-card:hover .stat-item{
-      transform:translateY(-2px);
-    }
-    
-    .stat-number{
-      font-size:26px;
-      font-weight:bold;
-      color:var(--accent);
-      display:block;
-      margin-bottom:6px;
-      text-shadow:0 0 20px rgba(135,169,255,0.4);
-    }
-    
-    .stat-label{
-      font-size:11px;
-      color:var(--text-secondary);
-      text-transform:uppercase;
-      letter-spacing:1px;
-      font-weight:600;
-    }
-    
-    /* ===== CTA SECTION ===== */
-    .cta-section{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:20px;
-      padding:24px;
-      background:rgba(135,169,255,0.04);
-      border-radius:8px;
-      border:1px solid rgba(135,169,255,0.08);
-    }
-    
-    .cta-text{
-      flex:1;
-    }
-    
-    .cta-headline{
-      font-size:16px;
-      font-weight:700;
-      color:var(--text-primary);
-      margin:0 0 6px 0;
-    }
-    
-    .cta-subtext{
-      font-size:12px;
-      color:var(--text-secondary);
-      margin:0;
-    }
-    
-    /* ===== SUBSCRIBE BUTTON ===== */
-    .btn{
-      position:relative;
-      padding:14px 32px;
-      border-radius:var(--radius);
-      background:var(--accent);
-      color:#0a0a0a;
-      border:none;
-      cursor:pointer;
-      overflow:hidden;
-      font-size:15px;
-      font-weight:700;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      font-family:sans-serif;
-      transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      flex-shrink:0;
-      box-shadow:0 4px 16px rgba(135,169,255,0.3);
-    }
-    
-    .btn:hover{
-      transform:translateY(-3px) scale(1.02);
-      box-shadow:0 8px 24px rgba(135,169,255,0.5);
-      background:#9bb8ff;
-    }
-    
-    .btn:active{
-      transform:translateY(-1px) scale(1);
-    }
-    
-    /* shimmer effect */
-    .btn::before{
-      content:'';
-      position:absolute;
-      top:0;
-      left:-100%;
-      width:75%;
-      height:100%;
-      background:linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
-      transform:skewX(-25deg);
-      transition:left .6s ease-in-out;
-    }
-    
-    .btn:hover::before{
-      left:125%;
-    }
-    
-    .btn-arrow{
-      font-size:18px;
-      transition:transform 0.3s ease;
-    }
-    
-    .btn:hover .btn-arrow{
-      transform:translateX(4px);
-    }
-    
-    /* accessible focus */
-    .btn:focus-visible{
-      outline:none;
-      box-shadow:0 0 0 4px rgba(135,169,255,0.4);
-    }
-    
-    /* ===== BADGE ===== */
-    .badge{
-      display:inline-block;
-      padding:6px 14px;
-      background:linear-gradient(135deg, rgba(135,169,255,0.2), rgba(135,169,255,0.1));
-      color:var(--accent);
-      font-size:11px;
-      font-weight:700;
-      border-radius:20px;
-      text-transform:uppercase;
-      letter-spacing:1px;
-      margin-bottom:20px;
-      border:1px solid rgba(135,169,255,0.3);
-      box-shadow:0 2px 8px rgba(135,169,255,0.2);
-    }
-    
-    /* ===== MOBILE OPTIMIZATION ===== */
-    @media (max-width: 768px){
-      .newsletter-card{
-        padding:28px 20px;
-      }
-      
-      .card-inner{
-        padding:0;
-      }
-      
-      .card-header{
-        flex-direction:column;
-        text-align:center;
-        margin-bottom:20px;
-        gap:16px;
-      }
-      
-      .email-icon{
-        font-size:56px;
-      }
-      
-      .card-title{
-        font-size:20px;
-      }
-      
-      .card-subtitle{
-        font-size:12px;
-      }
-      
-      .card-description{
-        font-size:14px;
-        margin-bottom:24px;
-      }
-      
-      .features-grid{
-        grid-template-columns:1fr;
-        gap:12px;
-        margin-bottom:24px;
-      }
-      
-      .stats-bar{
-        flex-wrap:wrap;
-        gap:16px;
-        padding:16px;
-      }
-      
-      .stat-item{
-        flex:1;
-        min-width:80px;
-      }
-      
-      .stat-number{
-        font-size:22px;
-      }
-      
-      .cta-section{
-        flex-direction:column;
-        text-align:center;
-        padding:20px;
-      }
-      
-      .btn{
-        width:100%;
-        justify-content:center;
-        padding:16px 32px;
-      }
-    }
-    
-    @media (max-width: 480px){
-      .newsletter-card{
-        padding:24px 16px;
-      }
-      
-      .email-icon{
-        font-size:48px;
-      }
-      
-      .card-title{
-        font-size:18px;
-      }
-      
-      .features-grid{
-        gap:10px;
-      }
-      
-      .feature-item{
-        padding:12px 14px;
-      }
-      
-      .stats-bar{
-        flex-direction:column;
-      }
-      
-      .stat-item{
-        width:100%;
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        padding:8px 0;
-        border-bottom:1px solid rgba(135,169,255,0.1);
-      }
-      
-      .stat-item:last-child{
-        border-bottom:none;
-      }
-      
-      .stat-number{
-        margin-bottom:0;
-      }
-    }
-  </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HeroVibes Newsletter Banner</title>
+    <style>
+        /* DESIGN TOKENS [cite: 19, 26] */
+        :root {
+            --bg: #191919;
+            --card-bg: #1F1F1F;
+            --btn-bg: #1F1F1F; /* Button uses card-bg */
+            --hover: #323232;
+            --outline: #323232;
+            --accent: #87A9FF;
+            --text-primary: #D4D4D4;
+            --text-secondary: #8C8C8C;
+            --radius: 8px;
+        }
+
+        /* RESET & BODY STYLES */
+        body {
+            margin: 0;
+            padding: 24px 16px; /* Default Padding  */
+            background: var(--bg);
+            font-family: system-ui, sans-serif; /* Sans-Serif Font  */
+            /* min-height: 100vh; REMOVED to prevent "Failure to Shrink" bug [cite: 55] */
+        }
+
+        /* BANNER STYLES */
+        #NEWSLETTER-BANNER {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap; /* For mobile stacking */
+            gap: 16px;
+            
+            background: var(--card-bg);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+
+        #BANNER-TEXT {
+            flex: 1;
+            min-width: 250px; /* Prevents text from getting too squished */
+        }
+
+        #BANNER-TEXT h3 {
+            margin: 0 0 4px 0;
+            font-size: 20px; /* Header Font Size  */
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        #BANNER-TEXT p {
+            margin: 0;
+            font-size: 12px; /* Text Font Size  */
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        #BANNER-BUTTON-LINK {
+            flex-shrink: 0; /* Prevents button from shrinking */
+        }
+
+        /* BUTTON STYLE (Based on template ) */
+        .btn {
+            /* Copied from template */
+            position: relative;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            background: var(--btn-bg);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.06); /* [cite: 28] */
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px; /* Title Font Size  */
+            font-weight: bold;
+            text-decoration: none; /* Added for <a> tag */
+            display: inline-block; /* Added for <a> tag */
+            transition: background-color 0.2s ease;
+        }
+        
+        /* Shimmer effect [cite: 29] */
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
+        }
+
+        .btn:hover {
+            background: var(--hover);
+        }
+
+        .btn:hover::before {
+            left: 125%; /* [cite: 30] */
+        }
+
+        /* Accessible focus [cite: 31] */
+        .btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+        }
+
+        /* MOBILE OPTIMISATION  */
+        @media (max-width: 600px) {
+            body {
+                padding: 16px; /* Reduce padding slightly on small screens */
+            }
+            
+            #NEWSLETTER-BANNER {
+                flex-direction: column; /* Stack vertically */
+                text-align: center;
+                padding: 16px;
+            }
+
+            #BANNER-BUTTON-LINK {
+                width: 100%; /* Make button full-width */
+            }
+            
+            .btn {
+                width: 100%; /* Make button full-width */
+                box-sizing: border-box; /* Include padding in width */
+            }
+        }
+    </style>
 </head>
 <body>
-  <!-- ===== NEWSLETTER CARD ===== -->
-  <div class="newsletter-card">
-    <div class="card-inner">
-      <div class="badge">✨ Free Weekly Newsletter</div>
-      
-      <div class="card-header">
-        <div class="email-icon">📧</div>
-        <div class="header-text">
-          <h2 class="card-title">Stay Updated with the HeroVibes Newsletter</h2>
-          <p class="card-subtitle">Every Monday • 100% Free • No Spam Ever</p>
+
+    <div id="NEWSLETTER-BANNER">
+        <div id="BANNER-TEXT">
+            <h3>Get The Creator Workspace</h3>
+            <p>Weekly news, 3000+ free assets, Amazon deals, free games & more!</p>
         </div>
-      </div>
-      
-      <p class="card-description">Join thousands of creators and get the latest gaming, tech, and entertainment news delivered to your inbox. Plus instant access to <span class="highlight">over 3,000 creator resources</span>, exclusive discounts, pro tutorials, and insider tips that will level up your content game—all completely free, every Monday morning.</p>
-      
-      <div class="features-grid">
-        <div class="feature-item">
-          <span class="feature-icon">🎮</span>
-          <span class="feature-text">Gaming & Tech News</span>
+        <div id="BANNER-BUTTON-LINK">
+            <a href="https://herovibes.substack.com/" 
+               class="btn" 
+               target="_blank" 
+               rel="noopener noreferrer">
+                Subscribe For Free
+            </a>
         </div>
-        <div class="feature-item">
-          <span class="feature-icon">🎬</span>
-          <span class="feature-text">Content Creation Tips</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">📦</span>
-          <span class="feature-text">3,000+ Free Resources</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">💰</span>
-          <span class="feature-text">Exclusive Discounts</span>
-        </div>
-      </div>
-      
-      <div class="stats-bar">
-        <div class="stat-item">
-          <span class="stat-number">10k+</span>
-          <span class="stat-label">Subscribers</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">100%</span>
-          <span class="stat-label">Free Forever</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">Weekly</span>
-          <span class="stat-label">Every Monday</span>
-        </div>
-      </div>
-      
-      <div class="cta-section">
-        <div class="cta-text">
-          <p class="cta-headline">🚀 Join thousands of creators today</p>
-          <p class="cta-subtext">Unsubscribe anytime • No credit card required • No spam, ever</p>
-        </div>
-        <a href="https://herovibes.substack.com/" class="btn" target="_blank" rel="noopener noreferrer">
-          Subscribe Now
-          <span class="btn-arrow">→</span>
-        </a>
-      </div>
     </div>
-  </div>
 
-  <script>
-    // ===== FOURTHWALL SCROLLBAR FIX =====
-    let lastHeight = 0;
-    let resizeTimer;
+    <script>
+        // ===== FOURTHWALL SCROLLBAR FIX (Definitive Version) [cite: 74] =====
+        let lastHeight = 0;
+        let resizeTimer;
 
-    /**
-     * Sends the current scrollHeight to the parent window if it has changed.
-     * This is the *only* function that should send a postMessage.
-     */
-    function sendHeight() {
-      const height = document.body.scrollHeight;
-      
-      // Only send message if height has *actually* changed
-      if (height !== lastHeight) {
-        lastHeight = height;
-        window.parent.postMessage({ frameHeight: height }, '*');
-      }
-    }
+        /**
+         * Sends the current scrollHeight to the parent window if it has changed. [cite: 75]
+         * This is the *only* function that should send a postMessage. [cite: 76]
+         */
+        function sendHeight() {
+            // Use scrollHeight for content height [cite: 77]
+            const height = document.body.scrollHeight;
+            
+            // Only send message if height has *actually* changed [cite: 78]
+            if (height !== lastHeight) {
+                lastHeight = height;
+                window.parent.postMessage({ frameHeight: height }, '*'); /* [cite: 79] */
+            }
+        }
 
-    /**
-     * A debounced version of sendHeight() to be called on content changes.
-     * This ensures we don't spam messages during rapid changes.
-     */
-    function scheduleHeightCheck() {
-        // Clear any pending checks
-        clearTimeout(resizeTimer);
-        // Schedule a new check
-        resizeTimer = setTimeout(sendHeight, 150);
-    }
+        /**
+         * A debounced version of sendHeight() to be called on content changes. [cite: 80]
+         * This ensures we don't spam messages during rapid changes.
+         */
+        function scheduleHeightCheck() {
+            // Clear any pending checks [cite: 82]
+            clearTimeout(resizeTimer);
+            // Schedule a new check after 150ms [cite: 83]
+            resizeTimer = setTimeout(sendHeight, 150);
+        }
 
-    // Send height on initial load (with a slight delay)
-    window.addEventListener('load', () => {
-        setTimeout(sendHeight, 100);
-    });
+        // Send height on initial load (with a slight delay) [cite: 84]
+        // This fixes the "Content Cut-Off" race condition. [cite: 65, 84]
+        window.addEventListener('load', () => {
+            setTimeout(sendHeight, 100);
+        });
 
-    // Send height on window resize (debounced)
-    window.addEventListener('resize', () => {
-        // Use scheduleHeightCheck for built-in debounce
-        scheduleHeightCheck();
-    });
-    
-    // ===== END OF SCROLLBAR FIX =====
-  </script>
+        // Send height on window resize (debounced) [cite: 85]
+        window.addEventListener('resize', () => {
+            // Use scheduleHeightCheck for built-in debounce [cite: 86]
+            scheduleHeightCheck();
+        });
+        // ===== END OF SCROLLBAR FIX =====
+    </script>
+
 </body>
 </html>
