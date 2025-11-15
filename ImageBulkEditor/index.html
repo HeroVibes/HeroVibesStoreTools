@@ -967,7 +967,7 @@
           updateImageInfo(imageData);
       });
       
-      // MOBILE FIX: Debounce filter slider updates to prevent constant cropper redrawing
+      // Filter slider updates
       card.querySelectorAll('.filter-slider').forEach(slider => {
           let filterTimeout;
           const updateFilter = (e) => {
@@ -999,7 +999,6 @@
          const img = document.getElementById(`img-${imageData.id}`);
         const ratio = getAspectRatio();
         
-        // MOBILE FIX: Disable most cropper interactions on mobile
         imageData.cropper = new Cropper(img, {
           aspectRatio: ratio,
           viewMode: 1,
@@ -1016,7 +1015,6 @@
           ready: function() {
               updateImagePreviewFilters(imageData);
               
-              // MOBILE FIX: Disable rotation/scaling events on mobile
               if (isMobileDevice) {
                   const container = this.cropper.container;
                   container.style.touchAction = 'pan-y';
@@ -1062,12 +1060,16 @@
       const imageData = images.find(img => img.id === id);
       if (!imageData || !imageData.cropper) return;
 
-      // MOBILE FIX: Use scale method correctly
+      // FLIP FIX: Get current scale values and invert them properly
+      const imageDataObj = imageData.cropper.getImageData();
+      
       if (direction === 'h') {
-        const currentScaleX = imageData.cropper.getData().scaleX || 1;
+        // Flip horizontally - invert scaleX
+        const currentScaleX = imageDataObj.scaleX !== undefined ? imageDataObj.scaleX : 1;
         imageData.cropper.scaleX(-currentScaleX);
       } else if (direction === 'v') {
-        const currentScaleY = imageData.cropper.getData().scaleY || 1;
+        // Flip vertically - invert scaleY
+        const currentScaleY = imageDataObj.scaleY !== undefined ? imageDataObj.scaleY : 1;
         imageData.cropper.scaleY(-currentScaleY);
       }
         
@@ -1092,7 +1094,7 @@
       document.getElementById(`saturate-${id}`).value = 100;
       document.getElementById(`brightness-val-${id}`).textContent = '100%';
       document.getElementById(`contrast-val-${id}`).textContent = '100%';
-      document.getElementById(`saturate-val-${id}`).textContent = '100%';
+      document.getElementById(`saturate-${id}`).textContent = '100%';
       
       imageData.processed = false;
       imageData.blob = null;
@@ -1178,7 +1180,6 @@
           imageData.blob = null;
           updateImageInfo(imageData);
           
-          // Re-apply filters after aspect ratio change
           setTimeout(() => updateImagePreviewFilters(imageData), 100);
         }
       });
@@ -1216,23 +1217,30 @@
             options.height = dimensions.height;
           }
 
+          // FILTER FIX: Get the cropped canvas WITHOUT filters first
           const croppedCanvas = imageData.cropper.getCroppedCanvas(options);
           
+          // FILTER FIX: Create a new canvas to apply filters manually
           const filterCanvas = document.createElement('canvas');
           filterCanvas.width = croppedCanvas.width;
           filterCanvas.height = croppedCanvas.height;
           const ctx = filterCanvas.getContext('2d');
           
+          // FILTER FIX: Build the filter string from stored filter values
           const f = imageData.filters;
           const perImageFilters = `brightness(${f.brightness}%) contrast(${f.contrast}%) saturate(${f.saturate}%)`;
           
+          // FILTER FIX: Combine with global filter if set
           if (currentGlobalFilter === 'none' || !currentGlobalFilter) {
             ctx.filter = perImageFilters;
           } else {
             ctx.filter = `${currentGlobalFilter} ${perImageFilters}`;
           }
           
+          // FILTER FIX: Draw the cropped image WITH filters applied
           ctx.drawImage(croppedCanvas, 0, 0);
+          
+          // Convert the filtered canvas to blob
           imageData.blob = await new Promise((resolve) => {
               filterCanvas.toBlob(
                 (blob) => resolve(blob),
