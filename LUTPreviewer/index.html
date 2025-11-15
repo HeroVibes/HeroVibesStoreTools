@@ -509,9 +509,13 @@
       };
     }
 
-    // ===== INTENSITY SLIDER =====
+    // ===== INTENSITY SLIDER - UPDATE VALUE ONLY =====
     document.getElementById('intensitySlider').addEventListener('input', function(e) {
       document.getElementById('intensityValue').textContent = e.target.value + '%';
+    });
+
+    // ===== INTENSITY SLIDER - APPLY ON RELEASE =====
+    document.getElementById('intensitySlider').addEventListener('change', function(e) {
       applyLUT();
     });
 
