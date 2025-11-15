@@ -1,1393 +1,572 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUT Previewer - HeroVibes</title>
-    <style>
-        /* ===== ROOT VARIABLES - DESIGN SYSTEM ===== */
-        :root {
-            --primary-bg: #191919;
-            --secondary-bg: #1F1F1F;
-            --hover-color: #323232;
-            --outline-color: #323232;
-            --accent-color: #87A9FF;
-            --primary-text: #D4D4D4;
-            --secondary-text: #8C8C8C;
-            --font-family: sans-serif;
-            --border-radius: 8px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUT Applicator</title>
+  <style>
+    :root {
+      --bg: #191919;
+      --card-bg: #1F1F1F;
+      --hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+    }
 
-        /* ===== GLOBAL RESET ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        body {
-            font-family: var(--font-family);
-            background: var(--primary-bg);
-            color: var(--primary-text);
-            /* min-height: 100vh; <-- REMOVED per iFrame fix instructions */
-            padding: 24px 16px;
-            overflow-x: hidden;
-        }
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: sans-serif;
+      padding: 24px 16px;
+    }
 
-        /* ===== MAIN CONTAINER ===== */
-        .tool-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: var(--secondary-bg);
-            border: 1px solid var(--outline-color);
-            border-radius: var(--border-radius);
-            padding: 24px 16px;
-        }
+    /* ===== MAIN CONTAINER ===== */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
 
-        /* ===== HEADER ===== */
-        .header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
+    /* ===== UPLOAD SECTION ===== */
+    .upload-section {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 16px;
+    }
 
-        .header h1 {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--primary-text);
-            margin-bottom: 8px;
-        }
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
 
-        .header p {
-            font-size: 12px;
-            color: var(--secondary-text);
-        }
+    .upload-grid {
+      display: grid;
+      gap: 16px;
+    }
 
-        /* ===== UPLOAD SECTION ===== */
-        .upload-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
+    @media (min-width: 640px) {
+      .upload-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
 
-        .upload-card {
-            position: relative;
-            background: var(--primary-bg);
-            border: 1px solid var(--outline-color);
-            border-radius: var(--border-radius);
-            padding: 24px 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
+    .upload-box {
+      background: var(--bg);
+      border: 2px dashed var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
 
-        .upload-card:hover {
-            background: var(--hover-color);
-            border-color: var(--accent-color);
-        }
+    .upload-box:hover {
+      border-color: var(--accent);
+      background: var(--hover);
+    }
 
-        .upload-card.dragover {
-            background: var(--hover-color);
-            border-color: var(--accent-color);
-            border-style: dashed;
-        }
+    .upload-box.has-file {
+      border-color: var(--accent);
+      border-style: solid;
+    }
 
-        .upload-card input[type="file"] {
-            display: none;
-        }
+    .upload-label {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: block;
+    }
 
-        .upload-icon {
-            font-size: 32px;
-            margin-bottom: 12px;
-            color: var(--accent-color);
-        }
+    .upload-info {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
 
-        .upload-card h3 {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 4px;
-            color: var(--primary-text);
-        }
+    .file-name {
+      font-size: 12px;
+      color: var(--accent);
+      margin-top: 8px;
+      word-break: break-word;
+    }
 
-        .upload-card p {
-            font-size: 12px;
-            color: var(--secondary-text);
-        }
+    input[type="file"] {
+      display: none;
+    }
 
-        /* ===== BUILT-IN LUTS ===== */
-        .builtin-luts {
-            background: var(--primary-bg);
-            border: 1px solid var(--outline-color);
-            border-radius: var(--border-radius);
-            padding: 24px 16px; /* <-- ADJUSTED from 16px */
-            margin-bottom: 24px;
-        }
+    /* ===== PREVIEW SECTION ===== */
+    .preview-section {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 16px;
+    }
 
-        .builtin-luts h3 {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            color: var(--primary-text);
-        }
+    .preview-container {
+      background: var(--bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: relative;
+    }
 
-        .lut-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 8px;
-        }
+    .preview-placeholder {
+      padding: 80px 16px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
 
-        .lut-preset {
-            position: relative;
-            background: var(--secondary-bg);
-            border: 1px solid var(--outline-color);
-            border-radius: var(--border-radius);
-            padding: 10px 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            font-size: 12px;
-            overflow: hidden;
-            color: #ffffff; /* preset button text color */
-        }
+    #previewCanvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
 
-        .lut-preset:hover {
-            background: var(--hover-color);
-            border-color: var(--accent-color);
-        }
+    /* ===== SLIDER SECTION ===== */
+    .slider-section {
+      margin-top: 16px;
+      display: none;
+    }
 
-        .lut-preset.active {
-            background: var(--accent-color);
-            color: #ffffff;
-            border-color: var(--accent-color);
-        }
+    .slider-section.active {
+      display: block;
+    }
 
-        /* Shimmer effect for preset buttons */
-        .lut-preset::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 75%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-            transform: skewX(-25deg);
-            transition: left 0.7s ease-in-out;
-        }
+    .slider-label {
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-        .lut-preset:hover::before {
-            left: 125%;
-        }
+    .slider-value {
+      color: var(--accent);
+      font-weight: bold;
+    }
 
-        /* ===== MAIN CONTENT AREA ===== */
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-            margin-bottom: 24px;
-        }
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: var(--bg);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
 
-        /* ===== IMAGE PREVIEW ===== */
-        .image-preview {
-            position: relative;
-            background: var(--primary-bg);
-            border: 1px solid var(--outline-color);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
 
-        .preview-placeholder {
-            text-align: center;
-            color: var(--secondary-text);
-            font-size: 12px; /* <-- ADJUSTED from 14px */
-        }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
 
-        .preview-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            max-height: 70vh;
-            object-fit: contain;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s ease;
+    }
 
-        .comparison-hint {
-            position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            color: var(--primary-text);
-            padding: 8px 16px;
-            border-radius: var(--border-radius);
-            font-size: 12px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
+    input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.2);
+    }
 
-        .image-preview:hover .comparison-hint {
-            opacity: 1;
-        }
+    /* ===== BUTTON ===== */
+    .btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      width: 100%;
+      margin-top: 16px;
+      transition: background 0.3s ease;
+    }
 
-        /* ===== DOWNLOAD BUTTON (REMOVED) ===== */
-        /* .download-button-container CSS removed */
-        /* .download-button CSS removed */
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
-        /* ===== CONTROLS ===== */
-        .controls {
-            background: var(--primary-bg);
-            border: 1px solid var(--outline-color);
-            border-radius: var(--border-radius);
-            padding: 24px 16px; /* <-- ADJUSTED from 16px */
-        }
+    .btn:not(:disabled)::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
 
-        .control-group {
-            margin-bottom: 16px;
-        }
+    .btn:not(:disabled):hover::before {
+      left: 125%;
+    }
 
-        .control-group:last-child {
-            margin-bottom: 0;
-        }
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
 
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
+    /* ===== STATUS MESSAGE ===== */
+    .status-message {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-top: 12px;
+      padding: 8px;
+      border-radius: var(--radius);
+      background: var(--bg);
+      display: none;
+    }
 
-        .control-label span {
-            font-size: 12px;
-            color: var(--secondary-text);
-        }
+    .status-message.show {
+      display: block;
+    }
 
-        .control-value {
-            font-size: 12px;
-            color: var(--accent-color);
-            font-weight: bold;
-        }
+    .status-message.error {
+      color: #ff6b6b;
+    }
 
-        input[type="range"] {
-            width: 100%;
-            height: 4px;
-            background: var(--hover-color);
-            border-radius: 2px;
-            outline: none;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            background: var(--accent-color);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            background: var(--accent-color);
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-
-        input[type="range"]::-moz-range-thumb:hover {
-            transform: scale(1.2);
-        }
-
-        /* ===== BUTTONS ===== */
-        .button-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-        }
-
-        .btn {
-            position: relative;
-            padding: 10px 16px;
-            border-radius: var(--border-radius);
-            background: var(--secondary-bg);
-            color: var(--primary-text);
-            border: 1px solid var(--outline-color);
-            cursor: pointer;
-            overflow: hidden;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn:not(:disabled):hover {
-            background: var(--hover-color);
-            border-color: var(--accent-color);
-        }
-
-        /* Shimmer effect */
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 75%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-            transform: skewX(-25deg);
-            transition: left 0.7s ease-in-out;
-        }
-
-        .btn:not(:disabled):hover::before {
-            left: 125%;
-        }
-
-        /* accessible focus - ADDED */
-        .btn:focus-visible, .lut-preset:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
-        }
-
-        .btn-primary {
-            background: var(--accent-color);
-            color: var(--primary-bg);
-            border-color: var(--accent-color);
-        }
-
-        .btn-primary:not(:disabled):hover {
-            background: #6B8FE8;
-            border-color: #6B8FE8;
-        }
-
-        /* ===== LOADING OVERLAY ===== */
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(25, 25, 25, 0.95);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-
-        .loading-overlay.active {
-            display: flex;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--outline-color);
-            border-top-color: var(--accent-color);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* ===== VERSION DISPLAY - ADDED ===== */
-        .version-display {
-            font-size: 10px;
-            color: var(--secondary-text);
-            text-align: right;
-            margin-top: 16px;
-            opacity: 0.5;
-            user-select: none;
-        }
-
-        /* ===== RESPONSIVE DESIGN ===== */
-        @media (min-width: 768px) {
-            body {
-                padding: 32px 24px;
-            }
-
-            .tool-container {
-                padding: 32px 24px;
-            }
-
-            .main-content {
-                grid-template-columns: 2fr 1fr;
-            }
-        }
-
-        @media (max-width: 767px) {
-            .lut-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            }
-
-            .button-group {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    .status-message.success {
+      color: #51cf66;
+    }
+  </style>
 </head>
 <body>
-    <div class="tool-container">
-        <div class="upload-section">
-            <label class="upload-card" id="imageUploadCard">
-                <input type="file" id="imageUpload" accept="image/*">
-                <div class="upload-icon">📸</div>
-                <h3>Upload Image</h3>
-                <p>Click or drag image here</p>
-            </label>
-
-            <label class="upload-card" id="lutUploadCard">
-                <input type="file" id="lutUpload" accept=".cube">
-                <div class="upload-icon">🎨</div>
-                <h3>Upload Custom LUT</h3>
-                <p>Click or drag .cube file here</p>
-            </label>
+  <div class="container">
+    <!-- ===== UPLOAD SECTION ===== -->
+    <div class="upload-section">
+      <div class="section-title">Upload Files</div>
+      <div class="upload-grid">
+        <!-- IMAGE UPLOAD -->
+        <div class="upload-box" id="imageUploadBox" onclick="document.getElementById('imageInput').click()">
+          <div class="upload-label">📷 Select Image</div>
+          <div class="upload-info">JPG, PNG, WebP</div>
+          <div class="file-name" id="imageName"></div>
         </div>
 
-        <div class="builtin-luts">
-            <h3>Built-in LUTs</h3>
-            <div class="lut-grid">
-                <button class="lut-preset" data-lut="none">None</button>
-                <button class="lut-preset" data-lut="warm">Warm Sunset</button>
-                <button class="lut-preset" data-lut="cool">Cool Blue</button>
-                <button class="lut-preset" data-lut="vintage">Vintage Film</button>
-                <button class="lut-preset" data-lut="cinematic">Cinematic</button>
-                <button class="lut-preset" data-lut="bw">Black & White</button>
-            </div>
+        <!-- LUT UPLOAD -->
+        <div class="upload-box" id="lutUploadBox" onclick="document.getElementById('lutInput').click()">
+          <div class="upload-label">🎨 Select LUT File</div>
+          <div class="upload-info">.cube format</div>
+          <div class="file-name" id="lutName"></div>
         </div>
+      </div>
 
-        <div class="main-content">
-            <div class="image-preview" id="imagePreview">
-                <div class="preview-placeholder">Upload an image to get started</div>
-                <div class="comparison-hint">Hold to see original</div>
-                <div class="loading-overlay" id="loadingOverlay">
-                    <div class="spinner"></div>
-                </div>
-            </div>
+      <input type="file" id="imageInput" accept="image/*">
+      <input type="file" id="lutInput" accept=".cube">
+    </div>
 
-            <div class="controls">
-                <div class="control-group">
-                    <div class="control-label">
-                        <span>LUT Strength</span>
-                        <span class="control-value" id="strengthValue">100%</span>
-                    </div>
-                    <input type="range" id="strengthSlider" min="0" max="100" value="100">
-                </div>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <span>Brightness</span>
-                        <span class="control-value" id="brightnessValue">0</span>
-                    </div>
-                    <input type="range" id="brightnessSlider" min="-50" max="50" value="0">
-                </div>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <span>Contrast</span>
-                        <span class="control-value" id="contrastValue">0</span>
-                    </div>
-                    <input type="range" id="contrastSlider" min="-50" max="50" value="0">
-                </div>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <span>Saturation</span>
-                        <span class="control-value" id="saturationValue">0</span>
-                    </div>
-                    <input type="range" id="saturationSlider" min="-100" max="100" value="0">
-                </div>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <span>Vibrance</span>
-                        <span class="control-value" id="vibranceValue">0</span>
-                    </div>
-                    <input type="range" id="vibranceSlider" min="-50" max="50" value="0">
-                </div>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <span>Blur</span>
-                        <span class="control-value" id="blurValue">0px</span>
-                    </div>
-                    <input type="range" id="blurSlider" min="0" max="20" value="0">
-                </div>
-            </div>
+    <!-- ===== PREVIEW SECTION ===== -->
+    <div class="preview-section">
+      <div class="section-title">Preview</div>
+      
+      <div class="preview-container">
+        <div class="preview-placeholder" id="placeholder">
+          Upload an image and LUT file to see the preview
         </div>
+        <canvas id="previewCanvas" style="display: none;"></canvas>
+      </div>
 
-        <div class="button-group">
-            <button class="btn" id="resetBtn">Reset All</button>
-            <button class="btn btn-primary" id="downloadBtn" disabled>Download Image</button>
+      <!-- ===== INTENSITY SLIDER ===== -->
+      <div class="slider-section" id="sliderSection">
+        <div class="slider-label">
+          <span>LUT Intensity</span>
+          <span class="slider-value" id="intensityValue">100%</span>
         </div>
+        <input type="range" id="intensitySlider" min="0" max="100" value="100">
+      </div>
 
-        <p class="version-display">V1.0.1</p>
-        
-    </div> <script>
-        // ===== LUT GENERATORS =====
-        // LUT Generation Functions
-        function generateWarmLUT() {
-            const size = 16;
-            const lut = [];
-            for (let b = 0; b < size; b++) {
-                for (let g = 0; g < size; g++) {
-                    for (let r = 0; r < size; r++) {
-                        const rn = r / (size - 1);
-                        const gn = g / (size - 1);
-                        const bn = b / (size - 1);
-                        lut.push([
-                            Math.min(1, rn * 1.1),
-                            Math.min(1, gn * 1.05),
-                            Math.max(0, bn * 0.9)
-                        ]);
-                    }
-                }
-            }
-            return { size, lut };
-        }
+      <button class="btn" id="downloadBtn" disabled>Download Image</button>
+      
+      <div class="status-message" id="statusMessage"></div>
+    </div>
+  </div>
 
-        function generateCoolLUT() {
-            const size = 16;
-            const lut = [];
-            for (let b = 0; b < size; b++) {
-                for (let g = 0; g < size; g++) {
-                    for (let r = 0; r < size; r++) {
-                        const rn = r / (size - 1);
-                        const gn = g / (size - 1);
-                        const bn = b / (size - 1);
-                        lut.push([
-                            Math.max(0, rn * 0.9),
-                            Math.min(1, gn * 1.05),
-                            Math.min(1, bn * 1.1)
-                        ]);
-                    }
-                }
-            }
-            return { size, lut };
-        }
+  <script>
+    // ===== GLOBAL VARIABLES =====
+    let originalImage = null;
+    let lutData = null;
+    let lutSize = 0;
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-        function generateVintageLUT() {
-            const size = 16;
-            const lut = [];
-            for (let b = 0; b < size; b++) {
-                for (let g = 0; g < size; g++) {
-                    for (let r = 0; r < size; r++) {
-                        const rn = r / (size - 1);
-                        const gn = g / (size - 1);
-                        const bn = b / (size - 1);
-                        lut.push([
-                            Math.min(1, rn * 1.1 + 0.1),
-                            Math.min(1, gn * 0.9),
-                            Math.max(0, bn * 0.7)
-                        ]);
-                    }
-                }
-            }
-            return { size, lut };
-        }
+    // ===== IMAGE UPLOAD HANDLER =====
+    document.getElementById('imageInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
 
-        function generateCinematicLUT() {
-            const size = 16;
-            const lut = [];
-            for (let b = 0; b < size; b++) {
-                for (let g = 0; g < size; g++) {
-                    for (let r = 0; r < size; r++) {
-                        const rn = r / (size - 1);
-                        const gn = g / (size - 1);
-                        const bn = b / (size - 1);
-                        lut.push([
-                            Math.pow(rn, 1.1) * 0.95 + 0.05,
-                            Math.pow(gn, 1.05) * 0.9 + 0.05,
-                            Math.pow(bn, 0.95) * 1.05
-                        ]);
-                    }
-                }
-            }
-            return { size, lut };
-        }
-
-        function generateBWLUT() {
-            const size = 16;
-            const lut = [];
-            for (let b = 0; b < size; b++) {
-                for (let g = 0; g < size; g++) {
-                    for (let r = 0; r < size; r++) {
-                        const rn = r / (size - 1);
-                        const gn = g / (size - 1);
-                        const bn = b / (size - 1);
-                        const gray = 0.299 * rn + 0.587 * gn + 0.114 * bn;
-                        lut.push([gray, gray, gray]);
-                    }
-                }
-            }
-            return { size, lut };
-        }
-
-        // ===== BUILT-IN LUTS =====
-        const BUILTIN_LUTS = {
-            warm: generateWarmLUT(),
-            cool: generateCoolLUT(),
-            vintage: generateVintageLUT(),
-            cinematic: generateCinematicLUT(),
-            bw: generateBWLUT()
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          originalImage = img;
+          document.getElementById('imageName').textContent = file.name;
+          document.getElementById('imageUploadBox').classList.add('has-file');
+          applyLUT();
+          scheduleHeightCheck();
         };
-        // ===== STATE =====
-        let originalImage = null;
-        let previewImage = null;
-        let currentLUT = null;
-        let isShowingOriginal = false;
-        const MAX_PREVIEW_SIZE = 1200;
-        // Maximum preview dimension in pixels
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
 
-        // ===== DOM ELEMENTS =====
-        const imageUpload = document.getElementById('imageUpload');
-        const lutUpload = document.getElementById('lutUpload');
-        const imageUploadCard = document.getElementById('imageUploadCard');
-        const lutUploadCard = document.getElementById('lutUploadCard');
-        const imagePreview = document.getElementById('imagePreview');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const resetBtn = document.getElementById('resetBtn');
+    // ===== LUT UPLOAD HANDLER =====
+    document.getElementById('lutInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
 
-        const strengthSlider = document.getElementById('strengthSlider');
-        const brightnessSlider = document.getElementById('brightnessSlider');
-        const contrastSlider = document.getElementById('contrastSlider');
-        const saturationSlider = document.getElementById('saturationSlider');
-        const vibranceSlider = document.getElementById('vibranceSlider');
-        const blurSlider = document.getElementById('blurSlider');
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        try {
+          const result = parseCubeLUT(event.target.result);
+          lutData = result.data;
+          lutSize = result.size;
+          document.getElementById('lutName').textContent = file.name;
+          document.getElementById('lutUploadBox').classList.add('has-file');
+          showStatus('LUT file loaded successfully', 'success');
+          applyLUT();
+          scheduleHeightCheck();
+        } catch (error) {
+          showStatus('Error parsing LUT file: ' + error.message, 'error');
+          lutData = null;
+          lutSize = 0;
+        }
+      };
+      reader.readAsText(file);
+    });
 
-        const strengthValue = document.getElementById('strengthValue');
-        const brightnessValue = document.getElementById('brightnessValue');
-        const contrastValue = document.getElementById('contrastValue');
-        const saturationValue = document.getElementById('saturationValue');
-        const vibranceValue = document.getElementById('vibranceValue');
-        const blurValue = document.getElementById('blurValue');
+    // ===== PARSE .CUBE LUT FILE =====
+    function parseCubeLUT(text) {
+      const lines = text.split('\n');
+      let size = 0;
+      const data = [];
+
+      for (let line of lines) {
+        line = line.trim();
         
-        // ===== IMAGE UPLOAD =====
-        imageUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) loadImage(file);
-        });
+        // Skip comments and empty lines
+        if (line.startsWith('#') || line.startsWith('TITLE') || line === '') continue;
         
-        lutUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) loadLUT(file);
-        });
-        
-        // ===== DRAG AND DROP =====
-        setupDragDrop(imageUploadCard, 'image');
-        setupDragDrop(lutUploadCard, 'lut');
-        
-        function setupDragDrop(element, type) {
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                element.addEventListener(eventName, preventDefaults, false);
-            });
-            ['dragenter', 'dragover'].forEach(eventName => {
-                element.addEventListener(eventName, () => {
-                    element.classList.add('dragover');
-                });
-            });
-            ['dragleave', 'drop'].forEach(eventName => {
-                element.addEventListener(eventName, () => {
-                    element.classList.remove('dragover');
-                });
-            });
-            element.addEventListener('drop', (e) => {
-                const file = e.dataTransfer.files[0];
-                if (file) {
-                    if (type === 'image') loadImage(file);
-                    if (type === 'lut') loadLUT(file);
-                }
-            });
+        // Get LUT size
+        if (line.startsWith('LUT_3D_SIZE')) {
+          size = parseInt(line.split(/\s+/)[1]);
+          continue;
         }
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
+        // Skip domain min/max
+        if (line.startsWith('DOMAIN_MIN') || line.startsWith('DOMAIN_MAX')) continue;
+
+        // Parse RGB values
+        const values = line.split(/\s+/).filter(v => v !== '');
+        if (values.length === 3) {
+          data.push({
+            r: parseFloat(values[0]),
+            g: parseFloat(values[1]),
+            b: parseFloat(values[2])
+          });
         }
-
-        // ===== CREATE PREVIEW IMAGE =====
-        function createPreviewImage(img) {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            // Calculate scale to fit within MAX_PREVIEW_SIZE
-            const scale = Math.min(1, MAX_PREVIEW_SIZE / Math.max(img.naturalWidth, img.naturalHeight));
-            canvas.width = Math.round(img.naturalWidth * scale);
-            canvas.height = Math.round(img.naturalHeight * scale);
-            
-            // Draw scaled version
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            
-            // Create new image from canvas
-            const previewImg = new Image();
-            previewImg.src = canvas.toDataURL();
-            return previewImg;
-        }
-
-        // ===== LOAD IMAGE =====
-        function loadImage(file) {
-            if (!file || !file.type.startsWith('image/')) {
-                alert('Please select a valid image file');
-                return;
-            }
-
-            loadingOverlay.classList.add('active');
-            const reader = new FileReader();
-            
-            reader.onerror = () => {
-                loadingOverlay.classList.remove('active');
-                alert('Error reading the image file. Please try again.');
-            };
-
-            reader.onload = (e) => {
-                const img = new Image();
-                
-                img.onerror = () => {
-                    loadingOverlay.classList.remove('active');
-                    alert('Error loading the image. Please try a different file.');
-                };
-                
-                img.onload = function() {
-                    originalImage = img;
-                    downloadBtn.disabled = false;
-
-                    // create preview and apply filters only after preview has loaded
-                    previewImage = createPreviewImage(img);
-                    previewImage.onload = function() {
-                        applyFilters(); // This will call scheduleHeightCheck via its callback
-                    };
-                };
-
-                img.src = e.target.result;
-            };
-
-            try {
-                reader.readAsDataURL(file);
-            } catch (error) {
-                loadingOverlay.classList.remove('active');
-                alert('Error reading the image file. Please try again.');
-            }
-        }
-
-        // ===== LOAD LUT =====
-        function loadLUT(file) {
-            loadingOverlay.classList.add('active');
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    currentLUT = parseCubeLUT(e.target.result);
-                    document.querySelectorAll('.lut-preset').forEach(btn => btn.classList.remove('active'));
-                    applyFilters(); // This will call scheduleHeightCheck
-                } catch (error) {
-                    alert('Error loading LUT file: ' + error.message);
-                } finally {
-                    loadingOverlay.classList.remove('active');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // ===== PARSE CUBE LUT =====
-        function parseCubeLUT(text) {
-            const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
-            let size = 0;
-            const lutLines = [];
-
-            for (const line of lines) {
-                if (line.toUpperCase().startsWith('LUT_3D_SIZE')) {
-                    size = parseInt(line.split(' ')[1]);
-                } else if (!line.includes('TITLE') && !line.includes('DOMAIN')) {
-                    lutLines.push(line);
-                }
-            }
-
-            if (size === 0) throw new Error('LUT_3D_SIZE not found');
-            
-            return {
-                size,
-                lut: lutLines.map(l => l.split(' ').map(Number))
-            };
-        }
-
-        // ===== APPLY LUT =====
-        function applyLUT(r, g, b, lut, size, strength) {
-            const max = size - 1;
-            const fr = r * max;
-            const fg = g * max;
-            const fb = b * max;
-            
-            const r0 = Math.floor(fr), r1 = Math.min(r0 + 1, max);
-            const g0 = Math.floor(fg), g1 = Math.min(g0 + 1, max);
-            const b0 = Math.floor(fb), b1 = Math.min(b0 + 1, max);
-            
-            const dr = fr - r0, dg = fg - g0, db = fb - b0;
-            
-            const idx = (rr, gg, bb) => rr + gg * size + bb * size * size;
-            const lerp = (a, b, t) => a + (b - a) * t;
-
-            const c000 = lut[idx(r0, g0, b0)];
-            const c001 = lut[idx(r0, g0, b1)];
-            const c010 = lut[idx(r0, g1, b0)];
-            const c011 = lut[idx(r0, g1, b1)];
-            const c100 = lut[idx(r1, g0, b0)];
-            const c101 = lut[idx(r1, g0, b1)];
-            const c110 = lut[idx(r1, g1, b0)];
-            const c111 = lut[idx(r1, g1, b1)];
-
-            const c00 = c000.map((v, i) => lerp(v, c100[i], dr));
-            const c01 = c001.map((v, i) => lerp(v, c101[i], dr));
-            const c10 = c010.map((v, i) => lerp(v, c110[i], dr));
-            const c11 = c011.map((v, i) => lerp(v, c111[i], dr));
-
-            const c0 = c00.map((v, i) => lerp(v, c10[i], dg));
-            const c1 = c01.map((v, i) => lerp(v, c11[i], dg));
-
-            const result = c0.map((v, i) => lerp(v, c1[i], db));
-            
-            return [
-                r + (result[0] - r) * strength,
-                g + (result[1] - g) * strength,
-                b + (result[2] - b) * strength
-            ];
-        }
-
-        // ===== HSL CONVERSIONS =====
-        function rgbToHsl(r, g, b) {
-            r /= 255; g /= 255; b /= 255;
-            const max = Math.max(r, g, b);
-            const min = Math.min(r, g, b);
-            let h, s;
-            let l = (max + min) / 2;
-            if (max === min) {
-                h = s = 0;
-            } else {
-                const d = max - min;
-                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                switch (max) {
-                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                    case g: h = (b - r) / d + 2; break;
-                    case b: h = (r - g) / d + 4; break;
-                }
-                h /= 6;
-            }
-            return [h, s, l];
-        }
-
-        function hslToRgb(h, s, l) {
-            let r, g, b;
-            if (s === 0) {
-                r = g = b = l;
-            } else {
-                const hue2rgb = (p, q, t) => {
-                    if (t < 0) t += 1;
-                    if (t > 1) t -= 1;
-                    if (t < 1 / 6) return p + (q - p) * 6 * t;
-                    if (t < 1 / 2) return q;
-                    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-                    return p;
-                };
-                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-                const p = 2 * l - q;
-                r = hue2rgb(p, q, h + 1 / 3);
-                g = hue2rgb(p, q, h);
-                b = hue2rgb(p, q, h - 1 / 3);
-            }
-            return [r * 255, g * 255, b * 255];
-        }
-
-        // ===== BLUR FUNCTION =====
-        function blurImageData(imageData, radius) {
-            if (radius < 1) return;
-            radius = Math.floor(radius);
-            const width = imageData.width;
-            const height = imageData.height;
-            const data = imageData.data;
-            const temp = new Uint8ClampedArray(data.length);
-
-            // Horizontal pass
-            for (let y = 0; y < height; y++) {
-                const offset = y * width * 4;
-                let rsum = 0, gsum = 0, bsum = 0, asum = 0;
-                // Initial sum with edge replication
-                for (let i = -radius; i <= radius; i++) {
-                    const xi = Math.max(0, Math.min(width - 1, i));
-                    const p = offset + xi * 4;
-                    rsum += data[p];
-                    gsum += data[p + 1];
-                    bsum += data[p + 2];
-                    asum += data[p + 3];
-                }
-                const kernelSize = 2 * radius + 1;
-                for (let x = 0; x < width; x++) {
-                    const idx = offset + x * 4;
-                    temp[idx] = rsum / kernelSize;
-                    temp[idx + 1] = gsum / kernelSize;
-                    temp[idx + 2] = bsum / kernelSize;
-                    temp[idx + 3] = asum / kernelSize;
-
-                    // Remove left
-                    const leftX = x - radius;
-                    const leftP = offset + Math.max(0, Math.min(width - 1, leftX)) * 4;
-                    rsum -= data[leftP];
-                    gsum -= data[leftP + 1];
-                    bsum -= data[leftP + 2];
-                    asum -= data[leftP + 3];
-
-                    // Add right
-                    const rightX = x + radius + 1;
-                    const rightP = offset + Math.max(0, Math.min(width - 1, rightX)) * 4;
-                    rsum += data[rightP];
-                    gsum += data[rightP + 1];
-                    bsum += data[rightP + 2];
-                    asum += data[rightP + 3];
-                }
-            }
-
-            data.set(temp);
-
-            // Vertical pass
-            for (let x = 0; x < width; x++) {
-                let rsum = 0, gsum = 0, bsum = 0, asum = 0;
-                // Initial sum with edge replication
-                for (let i = -radius; i <= radius; i++) {
-                    const yi = Math.max(0, Math.min(height - 1, i));
-                    const p = yi * width * 4 + x * 4;
-                    rsum += data[p];
-                    gsum += data[p + 1];
-                    bsum += data[p + 2];
-                    asum += data[p + 3];
-                }
-                const kernelSize = 2 * radius + 1;
-                for (let y = 0; y < height; y++) {
-                    const idx = y * width * 4 + x * 4;
-                    temp[idx] = rsum / kernelSize;
-                    temp[idx + 1] = gsum / kernelSize;
-                    temp[idx + 2] = bsum / kernelSize;
-                    temp[idx + 3] = asum / kernelSize;
-
-                    // Remove top
-                    const topY = y - radius;
-                    const topP = Math.max(0, Math.min(height - 1, topY)) * width * 4 + x * 4;
-                    rsum -= data[topP];
-                    gsum -= data[topP + 1];
-                    bsum -= data[topP + 2];
-                    asum -= data[topP + 3];
-
-                    // Add bottom
-                    const botY = y + radius + 1;
-                    const botP = Math.max(0, Math.min(height - 1, botY)) * width * 4 + x * 4;
-                    rsum += data[botP];
-                    gsum += data[botP + 1];
-                    bsum += data[botP + 2];
-                    asum += data[botP + 3];
-                }
-            }
-
-            data.set(temp);
-        }
-
-        // ===== PROCESS IMAGE DATA =====
-        function processImageData(imageData, lut, strength, brightness, contrast, saturation, vibrance, blurRadius) {
-            const data = imageData.data;
-            const brFactor = (100 + brightness) / 100;
-            const conFactor = (100 + contrast) / 100;
-            const satFactor = (100 + saturation) / 100;
-            const vibFactor = vibrance / 50; // -1 to 1
-
-            for (let i = 0; i < data.length; i += 4) {
-                let r = data[i] / 255;
-                let g = data[i + 1] / 255;
-                let b = data[i + 2] / 255;
-
-                // Apply LUT if present
-                if (lut) {
-                    [r, g, b] = applyLUT(r, g, b, lut.lut, lut.size, strength / 100);
-                }
-
-                // Apply brightness (multiply)
-                r = Math.max(0, Math.min(1, r * brFactor));
-                g = Math.max(0, Math.min(1, g * brFactor));
-                b = Math.max(0, Math.min(1, b * brFactor));
-
-                // Apply contrast
-                r = (((r - 0.5) * conFactor) + 0.5);
-                g = (((g - 0.5) * conFactor) + 0.5);
-                b = (((b - 0.5) * conFactor) + 0.5);
-                r = Math.max(0, Math.min(1, r));
-                g = Math.max(0, Math.min(1, g));
-                b = Math.max(0, Math.min(1, b));
-
-                // Apply saturation and vibrance in HSL
-                let [h, s, l] = rgbToHsl(data[i], data[i + 1], data[i + 2]);
-                s *= satFactor;
-                if (vibFactor > 0) {
-                    s += (1 - s) * vibFactor;
-                } else {
-                    s += s * vibFactor;
-                }
-                s = Math.max(0, Math.min(1, s));
-                [r, g, b] = hslToRgb(h, s, l);
-
-                data[i] = Math.round(r);
-                data[i + 1] = Math.round(g);
-                data[i + 2] = Math.round(b);
-            }
-
-            // Apply blur last
-            if (blurRadius > 0) {
-                blurImageData(imageData, blurRadius);
-            }
-        }
-
-        // ===== DOWNLOAD FULL RESOLUTION =====
-        function downloadFullResolution() {
-            if (!originalImage) return;
-            loadingOverlay.classList.add('active');
-
-            // Create canvas for high-quality export
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-
-            canvas.width = originalImage.naturalWidth;
-            canvas.height = originalImage.naturalHeight;
-            
-            // Draw original image
-            ctx.drawImage(originalImage, 0, 0);
-            
-            // Get image data
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-            // Process
-            processImageData(
-                imageData,
-                currentLUT,
-                parseInt(strengthSlider.value),
-                parseInt(brightnessSlider.value),
-                parseInt(contrastSlider.value),
-                parseInt(saturationSlider.value),
-                parseInt(vibranceSlider.value),
-                parseInt(blurSlider.value)
-            );
-
-            ctx.putImageData(imageData, 0, 0);
-            
-            // Download
-            canvas.toBlob((blob) => {
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.download = 'herovibes-lut-preview.png';
-                link.href = url;
-                link.click();
-                URL.revokeObjectURL(url);
-                loadingOverlay.classList.remove('active');
-            }, 'image/png');
-        }
-
-        // ===== APPLY FILTERS =====
-        function applyFilters() {
-            if (!originalImage) return;
-            if (!previewImage) return; // Don't run if preview isn't ready
-            
-            loadingOverlay.classList.add('active');
-
-            const img = document.querySelector('.preview-image');
-            if (img) img.remove();
-
-            const placeholder = document.querySelector('.preview-placeholder');
-            if (placeholder) placeholder.style.display = 'none';
-            
-            // Create canvas for preview
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            
-            canvas.width = previewImage.naturalWidth;
-            canvas.height = previewImage.naturalHeight;
-            
-            // Draw preview image
-            ctx.drawImage(previewImage, 0, 0);
-            
-            // Get image data
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-            // Calculate scaled blur radius
-            const scale = canvas.width / originalImage.naturalWidth;
-            const scaledBlur = parseInt(blurSlider.value) * scale;
-
-            // Process
-            processImageData(
-                imageData,
-                currentLUT,
-                parseInt(strengthSlider.value),
-                parseInt(brightnessSlider.value),
-                parseInt(contrastSlider.value),
-                parseInt(saturationSlider.value),
-                parseInt(vibranceSlider.value),
-                scaledBlur
-            );
-
-            ctx.putImageData(imageData, 0, 0);
-
-            // Create and display preview image
-            const newImg = document.createElement('img');
-            newImg.className = 'preview-image';
-            newImg.onload = () => {
-                loadingOverlay.classList.remove('active');
-                setupImageComparison(newImg);
-                scheduleHeightCheck(); // <-- ADDED per iFrame fix instructions
-            };
-            newImg.src = canvas.toDataURL();
-            imagePreview.insertBefore(newImg, loadingOverlay);
-        }
-
-        // ===== IMAGE COMPARISON =====
-        function setupImageComparison(img) {
-            const showOriginal = () => {
-                if (isShowingOriginal) return;
-                isShowingOriginal = true;
-                img.src = previewImage.src;
-            };
-
-            const showProcessed = () => {
-                if (!isShowingOriginal) return;
-                isShowingOriginal = false;
-                applyFilters();
-            };
-
-            // Mouse events
-            img.addEventListener('mousedown', showOriginal);
-            img.addEventListener('mouseup', showProcessed);
-            img.addEventListener('mouseleave', showProcessed);
-
-            // Touch events
-            let touchTimer = null;
-            img.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                touchTimer = setTimeout(showOriginal, 100);
-            }, { passive: false });
-            
-            img.addEventListener('touchend', () => {
-                clearTimeout(touchTimer);
-                showProcessed();
-            });
-            
-            img.addEventListener('touchcancel', () => {
-                clearTimeout(touchTimer);
-                showProcessed();
-            });
-        }
-
-        // ===== SLIDER UPDATES =====
-        strengthSlider.addEventListener('input', () => {
-            strengthValue.textContent = strengthSlider.value + '%';
-            applyFilters();
-        });
-        
-        brightnessSlider.addEventListener('input', () => {
-            brightnessValue.textContent = brightnessSlider.value;
-            applyFilters();
-        });
-        
-        contrastSlider.addEventListener('input', () => {
-            contrastValue.textContent = contrastSlider.value;
-            applyFilters();
-        });
-        
-        saturationSlider.addEventListener('input', () => {
-            saturationValue.textContent = saturationSlider.value;
-            applyFilters();
-        });
-        
-        vibranceSlider.addEventListener('input', () => {
-            vibranceValue.textContent = vibranceSlider.value;
-            applyFilters();
-        });
-        
-        blurSlider.addEventListener('input', () => {
-            blurValue.textContent = blurSlider.value + 'px';
-            applyFilters();
-        });
-        
-        // ===== BUILT-IN LUT PRESETS =====
-        document.querySelectorAll('.lut-preset').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const lutType = btn.dataset.lut;
-                
-                document.querySelectorAll('.lut-preset').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                if (lutType === 'none') {
-                    currentLUT = null;
-                } else {
-                    currentLUT = BUILTIN_LUTS[lutType];
-                }
-
-                applyFilters();
-            });
-        });
-        
-        // ===== RESET BUTTON =====
-        resetBtn.addEventListener('click', () => {
-            strengthSlider.value = 100;
-            brightnessSlider.value = 0;
-            contrastSlider.value = 0;
-            saturationSlider.value = 0;
-            vibranceSlider.value = 0;
-            blurSlider.value = 0;
-
-            strengthValue.textContent = '100%';
-            brightnessValue.textContent = '0';
-            contrastValue.textContent = '0';
-            saturationValue.textContent = '0';
-            vibranceValue.textContent = '0';
-            blurValue.textContent = '0px';
-
-            currentLUT = null;
-            document.querySelectorAll('.lut-preset').forEach(btn => btn.classList.remove('active'));
-
-            applyFilters();
-        });
-        
-        // ===== DOWNLOAD BUTTON =====
-        downloadBtn.addEventListener('click', () => {
-            if (!originalImage) {
-                alert('Please upload an image first');
-                return;
-            }
-
-            downloadFullResolution();
-        });
-        
-        // ===== TROUBLESHOOTING & DEBUGGING =====
-        // Console logging for debugging
-        console.log('🎨 HeroVibes LUT Previewer Initialized (V1.0.1)');
-        console.log('✅ Built-in LUTs loaded:', Object.keys(BUILTIN_LUTS));
-        
-        // Error handling for image loading
-        window.addEventListener('error', (e) => {
-            if (e.target.tagName === 'IMG') {
-                console.error('Image loading error:', e);
-                loadingOverlay.classList.remove('active');
-                alert('Failed to load image. Please try a different file.');
-            }
-        }, true);
-        
-        // Performance monitoring
-        let renderCount = 0;
-        const originalApplyFilters = applyFilters;
-        
-        applyFilters = function() {
-            renderCount++;
-            console.log('🔄 Render #' + renderCount);
-            originalApplyFilters();
-        };
-
-        // Mobile touch feedback
-        document.querySelectorAll('.btn, .lut-preset, .upload-card').forEach(el => {
-            el.addEventListener('touchstart', function() {
-                this.style.transform = 'scale(0.98)';
-            }, { passive: true });
-            el.addEventListener('touchend', function() {
-                this.style.transform = '';
-            }, { passive: true });
-        });
-        
-        // Prevent scroll on touch devices when interacting with sliders
-        document.querySelectorAll('input[type="range"]').forEach(slider => {
-            slider.addEventListener('touchstart', (e) => {
-                e.stopPropagation();
-            }, { passive: true });
-        });
-        
-        // Memory cleanup
-        window.addEventListener('beforeunload', () => {
-            if (originalImage) {
-                URL.revokeObjectURL(originalImage.src);
-            }
-            if (previewImage) {
-                URL.revokeObjectURL(previewImage.src);
-            }
-        });
-        
-        // Accessibility improvements
-        document.querySelectorAll('input[type="range"]').forEach(slider => {
-            slider.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                    setTimeout(() => {
-                        slider.dispatchEvent(new Event('input'));
-                    }, 0);
-                }
-            });
-        });
-        
-        // Initial state check
-        console.log('🔍 Initial state check:');
-        console.log('  - Image loaded:', !!originalImage);
-        console.log('  - LUT loaded:', !!currentLUT);
-        console.log('  - Download enabled:', !downloadBtn.disabled);
-
-
-        // ===== FOURTHWALL SCROLLBAR FIX =====
-        let lastHeight = 0;
-        let resizeTimer;
-
-        /**
-         * Sends the current scrollHeight to the parent window if it has changed.
-         * This is the *only* function that should send a postMessage.
-         */
-        function sendHeight() {
-          const height = document.body.scrollHeight;
-          
-          // Only send message if height has *actually* changed
-          if (height !== lastHeight) {
-            lastHeight = height;
-            window.parent.postMessage({ frameHeight: height }, '*');
-          }
-        }
-
-        /**
-         * A debounced version of sendHeight() to be called on content changes.
-         * This ensures we don't spam messages during rapid changes.
-         */
-        function scheduleHeightCheck() {
-            // Clear any pending checks
-            clearTimeout(resizeTimer);
-            // Schedule a new check
-            resizeTimer = setTimeout(sendHeight, 150);
-        }
-
-        // Send height on initial load (with a slight delay)
-        // This fixes the "Content Cut-Off" race condition.
-        window.addEventListener('load', () => {
-            setTimeout(sendHeight, 100);
-        });
-
-        // Send height on window resize (debounced)
-        window.addEventListener('resize', () => {
-            // Use scheduleHeightCheck for built-in debounce
-            scheduleHeightCheck();
-        });
-        
-        // ===== END OF SCROLLBAR FIX =====
-    </script>
+      }
+
+      if (size === 0 || data.length === 0) {
+        throw new Error('Invalid LUT file format');
+      }
+
+      return { data, size };
+    }
+
+    // ===== APPLY LUT TO IMAGE =====
+    function applyLUT() {
+      if (!originalImage || !lutData) {
+        return;
+      }
+
+      // Set canvas size to image size
+      canvas.width = originalImage.width;
+      canvas.height = originalImage.height;
+
+      // Draw original image
+      ctx.drawImage(originalImage, 0, 0);
+
+      // Get image data
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imageData.data;
+
+      // Get intensity
+      const intensity = parseInt(document.getElementById('intensitySlider').value) / 100;
+
+      // Apply LUT to each pixel
+      for (let i = 0; i < pixels.length; i += 4) {
+        const r = pixels[i] / 255;
+        const g = pixels[i + 1] / 255;
+        const b = pixels[i + 2] / 255;
+
+        // Lookup in LUT
+        const newColor = lookupLUT(r, g, b);
+
+        // Blend based on intensity
+        pixels[i] = Math.round(pixels[i] + (newColor.r * 255 - pixels[i]) * intensity);
+        pixels[i + 1] = Math.round(pixels[i + 1] + (newColor.g * 255 - pixels[i + 1]) * intensity);
+        pixels[i + 2] = Math.round(pixels[i + 2] + (newColor.b * 255 - pixels[i + 2]) * intensity);
+      }
+
+      // Put modified image data back
+      ctx.putImageData(imageData, 0, 0);
+
+      // Show canvas and hide placeholder
+      document.getElementById('placeholder').style.display = 'none';
+      canvas.style.display = 'block';
+      document.getElementById('sliderSection').classList.add('active');
+      document.getElementById('downloadBtn').disabled = false;
+
+      scheduleHeightCheck();
+    }
+
+    // ===== LOOKUP COLOR IN LUT =====
+    function lookupLUT(r, g, b) {
+      // Clamp values
+      r = Math.max(0, Math.min(1, r));
+      g = Math.max(0, Math.min(1, g));
+      b = Math.max(0, Math.min(1, b));
+
+      // Calculate position in LUT
+      const scale = lutSize - 1;
+      const rPos = r * scale;
+      const gPos = g * scale;
+      const bPos = b * scale;
+
+      // Get integer and fractional parts
+      const r0 = Math.floor(rPos);
+      const g0 = Math.floor(gPos);
+      const b0 = Math.floor(bPos);
+      const r1 = Math.min(r0 + 1, scale);
+      const g1 = Math.min(g0 + 1, scale);
+      const b1 = Math.min(b0 + 1, scale);
+
+      const rFrac = rPos - r0;
+      const gFrac = gPos - g0;
+      const bFrac = bPos - b0;
+
+      // Trilinear interpolation
+      const c000 = lutData[b0 * lutSize * lutSize + g0 * lutSize + r0];
+      const c001 = lutData[b0 * lutSize * lutSize + g0 * lutSize + r1];
+      const c010 = lutData[b0 * lutSize * lutSize + g1 * lutSize + r0];
+      const c011 = lutData[b0 * lutSize * lutSize + g1 * lutSize + r1];
+      const c100 = lutData[b1 * lutSize * lutSize + g0 * lutSize + r0];
+      const c101 = lutData[b1 * lutSize * lutSize + g0 * lutSize + r1];
+      const c110 = lutData[b1 * lutSize * lutSize + g1 * lutSize + r0];
+      const c111 = lutData[b1 * lutSize * lutSize + g1 * lutSize + r1];
+
+      const c00 = lerp(c000, c001, rFrac);
+      const c01 = lerp(c010, c011, rFrac);
+      const c10 = lerp(c100, c101, rFrac);
+      const c11 = lerp(c110, c111, rFrac);
+
+      const c0 = lerp(c00, c01, gFrac);
+      const c1 = lerp(c10, c11, gFrac);
+
+      return lerp(c0, c1, bFrac);
+    }
+
+    // ===== LINEAR INTERPOLATION =====
+    function lerp(a, b, t) {
+      return {
+        r: a.r + (b.r - a.r) * t,
+        g: a.g + (b.g - a.g) * t,
+        b: a.b + (b.b - a.b) * t
+      };
+    }
+
+    // ===== INTENSITY SLIDER =====
+    document.getElementById('intensitySlider').addEventListener('input', function(e) {
+      document.getElementById('intensityValue').textContent = e.target.value + '%';
+      applyLUT();
+    });
+
+    // ===== DOWNLOAD BUTTON =====
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'lut-applied-image.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showStatus('Image downloaded successfully', 'success');
+      });
+    });
+
+    // ===== STATUS MESSAGE =====
+    function showStatus(message, type) {
+      const statusEl = document.getElementById('statusMessage');
+      statusEl.textContent = message;
+      statusEl.className = 'status-message show ' + type;
+      
+      setTimeout(() => {
+        statusEl.classList.remove('show');
+      }, 3000);
+    }
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+      scheduleHeightCheck();
+    });
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
 </body>
 </html>
