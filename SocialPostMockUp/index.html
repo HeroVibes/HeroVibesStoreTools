@@ -775,7 +775,7 @@
         const previewDate = document.getElementById('preview-date');
 
         let currentProfileImage = null;
-        let currentMode = 'url'; // Start with 'url' mode
+        let currentMode = 'url';
 
         // Set today's date
         const today = new Date().toISOString().split('T')[0];
@@ -786,23 +786,21 @@
             btn.addEventListener('click', () => {
                 const targetTab = btn.dataset.tab;
                 
-                // Update buttons
                 tabBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 
-                // Update content
                 tabContents.forEach(content => {
                     content.classList.remove('active');
                 });
                 document.getElementById(targetTab).classList.add('active');
                 
-                // Update mode
                 currentMode = targetTab === 'url-tab' ? 'url' : 'custom';
                 
-                // Update preview if in custom mode
                 if (currentMode === 'custom') {
                     updateCustomPreview();
                 }
+                
+                scheduleHeightCheck();
             });
         });
 
@@ -810,8 +808,10 @@
         function showStatus(message, type = 'info') {
             statusMessage.textContent = message;
             statusMessage.className = `status-message ${type}`;
+            scheduleHeightCheck();
             setTimeout(() => {
                 statusMessage.className = 'status-message';
+                scheduleHeightCheck();
             }, 5000);
         }
 
@@ -959,6 +959,8 @@
             if (currentProfileImage) {
                 previewProfilePic.src = currentProfileImage;
             }
+            
+            scheduleHeightCheck();
         }
 
         // ===== APPLY CUSTOMIZATIONS =====
@@ -967,6 +969,7 @@
             tweetCard.classList.toggle('hide-likes', !showLikes.checked);
             tweetCard.classList.toggle('hide-retweets', !showRetweets.checked);
             tweetCard.classList.toggle('hide-date', !showDate.checked);
+            scheduleHeightCheck();
         }
 
         // ===== APPLY THEME =====
@@ -982,6 +985,7 @@
                 previewContainer.classList.remove('light-bg');
                 previewContainer.classList.add('dark-bg');
             }
+            scheduleHeightCheck();
         }
 
         // ===== PROFILE IMAGE UPLOAD =====
@@ -1075,3 +1079,59 @@
                 showStatus('Error generating image: ' + error.message, 'error');
                 downloadBtn.textContent = 'Download as PNG';
                 downloadBtn.disabled = false;
+            }
+        });
+
+        // ===== CUSTOMIZATION LISTENERS =====
+        showProfilePic.addEventListener('change', applyCustomizations);
+        showLikes.addEventListener('change', applyCustomizations);
+        showRetweets.addEventListener('change', applyCustomizations);
+        showDate.addEventListener('change', applyCustomizations);
+        themeLight.addEventListener('change', applyTheme);
+        themeDark.addEventListener('change', applyTheme);
+
+        // ===== ENTER KEY SUPPORT =====
+        tweetUrl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadBtn.click();
+            }
+        });
+
+        // ===== INITIALIZE =====
+        applyCustomizations();
+        applyTheme();
+    </script>
+
+    <script>
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+        setTimeout(sendHeight, 500);
+        setTimeout(sendHeight, 1000);
+    });
+
+    window.addEventListener('resize', () => {
+        scheduleHeightCheck();
+    });
+    
+    // ===== END OF SCROLLBAR FIX =====
+    </script>
+</body>
+</html>
