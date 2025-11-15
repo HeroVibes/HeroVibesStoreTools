@@ -212,6 +212,39 @@
             display: block;
         }
 
+        /* ===== LABEL WITH CHECKBOX ===== */
+        .label-with-checkbox {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .label-with-checkbox .input-label {
+            margin-bottom: 0;
+        }
+
+        .checkbox-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .checkbox-toggle input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #87A9FF;
+        }
+
+        .checkbox-toggle label {
+            font-size: 11px;
+            color: #8C8C8C;
+            cursor: pointer;
+            user-select: none;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -642,25 +675,12 @@
                 <!-- TAB SYSTEM -->
                 <div class="tab-container">
                     <div class="tab-buttons">
-                        <button class="tab-btn active" data-tab="url-tab">From URL</button>
-                        <button class="tab-btn" data-tab="custom-tab">Custom Tweet</button>
-                    </div>
-
-                    <!-- URL TAB CONTENT -->
-                    <div id="url-tab" class="tab-content active">
-                        <div class="input-group">
-                            <input 
-                                type="text" 
-                                id="tweet-url" 
-                                placeholder="Paste Tweet or X.com URL here..."
-                                autocomplete="off"
-                            >
-                            <button class="btn" id="load-tweet">Generate</button>
-                        </div>
+                        <button class="tab-btn active" data-tab="custom-tab">Custom Tweet</button>
+                        <button class="tab-btn" data-tab="url-tab">From URL</button>
                     </div>
 
                     <!-- CUSTOM TAB CONTENT -->
-                    <div id="custom-tab" class="tab-content">
+                    <div id="custom-tab" class="tab-content active">
                         <div class="input-group column">
                             <label class="input-label">Display Name</label>
                             <input 
@@ -686,11 +706,17 @@
                             <textarea 
                                 id="custom-text" 
                                 placeholder="Enter your tweet text here..."
-                            >This is your custom tweet! You can write anything you want here and it will appear in the preview below. Try adding @mentions and #hashtags!</textarea>
+                            >This is your custom tweet! You can write anything you want here and it will appear in the preview. Try adding @mentions and #hashtags!</textarea>
                         </div>
 
                         <div class="input-group column">
-                            <label class="input-label">Profile Picture</label>
+                            <div class="label-with-checkbox">
+                                <label class="input-label">Profile Picture</label>
+                                <div class="checkbox-toggle">
+                                    <input type="checkbox" id="show-profile-pic" checked>
+                                    <label for="show-profile-pic">Show</label>
+                                </div>
+                            </div>
                             <div class="file-upload-container">
                                 <label class="file-upload-btn">
                                     Choose Image
@@ -710,7 +736,13 @@
                             <label class="input-label">Engagement Stats</label>
                             <div class="stats-grid">
                                 <div class="input-group column" style="gap: 8px;">
-                                    <label class="input-label" style="margin: 0;">Retweets</label>
+                                    <div class="label-with-checkbox">
+                                        <label class="input-label" style="margin: 0;">Retweets</label>
+                                        <div class="checkbox-toggle">
+                                            <input type="checkbox" id="show-retweets" checked>
+                                            <label for="show-retweets">Show</label>
+                                        </div>
+                                    </div>
                                     <input 
                                         type="number" 
                                         id="custom-retweets" 
@@ -720,7 +752,13 @@
                                     >
                                 </div>
                                 <div class="input-group column" style="gap: 8px;">
-                                    <label class="input-label" style="margin: 0;">Likes</label>
+                                    <div class="label-with-checkbox">
+                                        <label class="input-label" style="margin: 0;">Likes</label>
+                                        <div class="checkbox-toggle">
+                                            <input type="checkbox" id="show-likes" checked>
+                                            <label for="show-likes">Show</label>
+                                        </div>
+                                    </div>
                                     <input 
                                         type="number" 
                                         id="custom-likes" 
@@ -730,7 +768,13 @@
                                     >
                                 </div>
                                 <div class="input-group column" style="gap: 8px;">
-                                    <label class="input-label" style="margin: 0;">Date</label>
+                                    <div class="label-with-checkbox">
+                                        <label class="input-label" style="margin: 0;">Date</label>
+                                        <div class="checkbox-toggle">
+                                            <input type="checkbox" id="show-date" checked>
+                                            <label for="show-date">Show</label>
+                                        </div>
+                                    </div>
                                     <input 
                                         type="date" 
                                         id="custom-date"
@@ -739,31 +783,24 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- CUSTOMIZATION OPTIONS -->
-                <div class="customization-section">
-                    <div class="section-header">Display Options</div>
-                    <div class="options-grid">
-                        <div class="option-item">
-                            <input type="checkbox" id="show-profile-pic" checked>
-                            <label for="show-profile-pic">Show Profile Picture</label>
-                        </div>
-                        <div class="option-item">
-                            <input type="checkbox" id="show-likes" checked>
-                            <label for="show-likes">Show Likes</label>
-                        </div>
-                        <div class="option-item">
-                            <input type="checkbox" id="show-retweets" checked>
-                            <label for="show-retweets">Show Retweets</label>
-                        </div>
-                        <div class="option-item">
-                            <input type="checkbox" id="show-date" checked>
-                            <label for="show-date">Show Date</label>
+                    <!-- URL TAB CONTENT -->
+                    <div id="url-tab" class="tab-content">
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                id="tweet-url" 
+                                placeholder="Paste Tweet or X.com URL here..."
+                                autocomplete="off"
+                            >
+                            <button class="btn" id="load-tweet">Generate</button>
                         </div>
                     </div>
+                </div>
 
-                    <div class="section-header" style="margin-top: 20px;">Theme</div>
+                <!-- APPEARANCE OPTIONS -->
+                <div class="customization-section">
+                    <div class="section-header">Appearance</div>
                     <div class="options-grid">
                         <div class="option-item">
                             <input type="radio" id="theme-light" name="theme" value="light" checked>
@@ -773,10 +810,6 @@
                             <input type="radio" id="theme-dark" name="theme" value="dark">
                             <label for="theme-dark">Dark Mode</label>
                         </div>
-                    </div>
-
-                    <div class="section-header" style="margin-top: 20px;">Download Options</div>
-                    <div class="options-grid">
                         <div class="option-item">
                             <input type="checkbox" id="rounded-corners">
                             <label for="rounded-corners">Rounded Corners (Transparent BG)</label>
@@ -808,7 +841,7 @@
                             </div>
                         </div>
                         <div class="tweet-text" id="preview-tweet-text">
-                            This is your custom tweet! You can write anything you want here and it will appear in the preview below. Try adding @mentions and #hashtags!
+                            This is your custom tweet! You can write anything you want here and it will appear in the preview. Try adding @mentions and #hashtags!
                         </div>
                         <div class="tweet-stats">
                             <span class="stat-item stat-retweets" id="preview-retweets">
@@ -871,7 +904,7 @@
         const previewDate = document.getElementById('preview-date');
 
         let currentProfileImage = null;
-        let currentMode = 'url';
+        let currentMode = 'custom';
 
         // Set today's date
         const today = new Date().toISOString().split('T')[0];
@@ -1163,7 +1196,6 @@
 
                 let bgColor = themeLight.checked ? '#FFFFFF' : '#192734';
                 
-                // If rounded corners is checked, use transparent background
                 if (roundedCorners.checked) {
                     bgColor = null;
                 }
