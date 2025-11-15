@@ -904,6 +904,22 @@
 
     // ========== INITIALIZE ==========
     update();
+
+    // Additional height checks for better mobile compatibility
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 300);
+    });
+
+    if (window.ResizeObserver) {
+      const observer = new ResizeObserver(() => {
+        scheduleHeightCheck();
+      });
+      observer.observe(document.body);
+    }
   </script>
 </body>
 </html>
