@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HeroVibes Newsletter Banner</title>
+  <title>HeroVibes Newsletter Banner (Large)</title>
   <style>
     /* ========================================
     DESIGN TOKENS (from Design Guide)
@@ -44,41 +44,20 @@
     }
 
     /* ========================================
-    NEWSLETTER BANNER STYLES
+    NEWSLETTER BANNER STYLES (LARGE)
     ========================================
     */
     #HV-NEWSLETTER-WRAPPER {
       background: var(--bg-secondary);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
-      padding: 24px;
-      max-width: 900px;
+      /* Increased padding for a larger feel */
+      padding: 40px; 
+      /* Increased max-width for a wider feel */
+      max-width: 1100px; 
       margin: 0 auto;
       position: relative;
       overflow: hidden;
-    }
-
-    /* "Premium" spotlight effect */
-    #HV-NEWSLETTER-WRAPPER::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      /* Use mouse position (from JS) or default to off-screen */
-      background: radial-gradient(
-        250px circle at var(--mouse-x, -250px) var(--mouse-y, -250px), 
-        var(--hover), 
-        transparent 70%
-      );
-      opacity: 0;
-      transition: opacity 0.3s ease-out;
-      z-index: 1;
-    }
-
-    #HV-NEWSLETTER-WRAPPER:hover::before {
-      opacity: 0.5;
     }
 
     #NEWSLETTER-BANNER {
@@ -86,43 +65,109 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap; /* For mobile stacking */
-      gap: 20px;
+      gap: 24px; /* Increased gap */
       position: relative;
-      z-index: 2; /* Content on top of glow effect */
+      z-index: 2; /* Content on top of animations */
     }
 
     #BANNER-CONTENT {
       flex: 1;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 20px; /* Increased gap */
       min-width: 250px;
     }
 
     #BANNER-ICON {
       flex-shrink: 0;
       color: var(--accent);
-      width: 40px; /* Made icon slightly larger */
-      height: 40px;
+      width: 48px; /* Made icon larger */
+      height: 48px;
     }
 
     #BANNER-TEXT h3 {
       margin: 0 0 4px 0;
       font-size: 20px; /* Header size from guide */
       font-weight: bold;
-      color: var(--text-primary); /* Changed from accent to primary text */
+      color: var(--text-primary);
     }
 
     #BANNER-TEXT p {
       margin: 0;
-      font-size: 12px; /* Text size from guide */
+      font-size: 14px; /* Increased text size slightly */
       color: var(--text-secondary);
       line-height: 1.5;
-      max-width: 600px; /* Prevents text from getting too long */
+      max-width: 650px; /* Prevents text from getting too long */
     }
 
     #BANNER-BUTTON-LINK {
       flex-shrink: 0;
+    }
+
+    /* ========================================
+    FLOATING EMOJI ANIMATION
+    ========================================
+    */
+    #ANIMATION-CONTAINER {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .floating-email {
+      position: absolute;
+      bottom: -40px; /* Start from below the card */
+      font-size: 20px;
+      color: var(--text-secondary);
+      animation: floatUp 12s infinite linear;
+      transform: translateY(0);
+      opacity: 0;
+    }
+    
+    .floating-email:nth-child(1) {
+      left: 10%;
+      animation-delay: 0s;
+      font-size: 22px;
+    }
+    .floating-email:nth-child(2) {
+      left: 30%;
+      animation-delay: 4s;
+      font-size: 16px;
+    }
+    .floating-email:nth-child(3) {
+      left: 50%;
+      animation-delay: 2s;
+    }
+    .floating-email:nth-child(4) {
+      left: 70%;
+      animation-delay: 7s;
+      font-size: 18px;
+    }
+    .floating-email:nth-child(5) {
+      left: 90%;
+      animation-delay: 5s;
+      font-size: 20px;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0);
+        opacity: 0;
+      }
+      20% {
+        opacity: 0.4;
+      }
+      80% {
+        opacity: 0.4;
+      }
+      100% {
+        transform: translateY(-300px); /* Float up */
+        opacity: 0;
+      }
     }
 
     /* ========================================
@@ -183,18 +228,28 @@
       }
       
       #HV-NEWSLETTER-WRAPPER {
-        padding: 20px 16px;
+        /* Revert to smaller padding on mobile */
+        padding: 24px 16px;
       }
 
       #NEWSLETTER-BANNER {
         flex-direction: column;
         text-align: center;
-        gap: 16px;
+        gap: 20px;
       }
 
       #BANNER-CONTENT {
         flex-direction: column;
         gap: 12px;
+      }
+      
+      #BANNER-ICON {
+        width: 40px;
+        height: 40px;
+      }
+      
+      #BANNER-TEXT p {
+        font-size: 12px; /* Revert to smaller text */
       }
 
       #BANNER-BUTTON-LINK {
@@ -204,12 +259,26 @@
       .btn {
         width: 100%;
       }
+      
+      /* Hide animation on mobile */
+      #ANIMATION-CONTAINER {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
 
   <div id="HV-NEWSLETTER-WRAPPER">
+    
+    <div id="ANIMATION-CONTAINER">
+      <span class="floating-email">✉️</span>
+      <span class="floating-email">✉️</span>
+      <span class="floating-email">✉️</span>
+      <span class="floating-email">✉️</span>
+      <span class="floating-email">✉️</span>
+    </div>
+    
     <div id="NEWSLETTER-BANNER">
       <div id="BANNER-CONTENT">
         <div id="BANNER-ICON">
@@ -236,68 +305,48 @@
 
   <script>
     /* ========================================
-    PREMIUM HOVER EFFECT
+    FOURTHWALL SCROLLBAR FIX
     ========================================
     */
-    const wrapper = document.getElementById('HV-NEWSLETTER-WRAPPER');
-    if (wrapper) {
-      wrapper.addEventListener('mousemove', e => {
-        const rect = wrapper.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        wrapper.style.setProperty('--mouse-x', `${x}px`);
-        wrapper.style.setProperty('--mouse-y', `${y}px`);
-      });
-      
-      wrapper.addEventListener('mouseleave', () => {
-        wrapper.style.setProperty('--mouse-x', `-250px`);
-        wrapper.style.setProperty('--mouse-y', `-250px`);
-      });
-    }
-
-    /* ========================================
-    FOURTHWALL SCROLLBAR FIX [cite: 32]
-    ========================================
-    */
-    let lastHeight = 0; [cite: 32]
-    let resizeTimer; [cite: 32]
+    let lastHeight = 0;
+    let resizeTimer;
 
     /**
-     * Sends the current scrollHeight to the parent window if it has changed. [cite: 33]
-     * This is the *only* function that should send a postMessage. [cite: 33]
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
      */
     function sendHeight() {
-      const height = document.body.scrollHeight; [cite: 34]
-      // Only send message if height has *actually* changed [cite: 35]
+      const height = document.body.scrollHeight;
+      // Only send message if height has *actually* changed
       if (height !== lastHeight) {
-        lastHeight = height; [cite: 35]
-        window.parent.postMessage({ frameHeight: height }, '*'); [cite: 36]
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
     /**
-     * A debounced version of sendHeight() to be called on content changes. [cite: 37]
-     * This ensures we don't spam messages during rapid changes. [cite: 37]
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
      */
     function scheduleHeightCheck() {
-      // Clear any pending checks [cite: 38]
-      clearTimeout(resizeTimer); [cite: 38]
-      // Schedule a new check [cite: 39]
-      resizeTimer = setTimeout(sendHeight, 150); [cite: 39]
+      // Clear any pending checks
+      clearTimeout(resizeTimer);
+      // Schedule a new check
+      resizeTimer = setTimeout(sendHeight, 150);
     }
 
-    // Send height on initial load (with a slight delay) [cite: 40]
+    // Send height on initial load (with a slight delay)
     window.addEventListener('load', () => {
-      setTimeout(sendHeight, 100); [cite: 40]
+      setTimeout(sendHeight, 100);
     });
 
-    // Send height on window resize (debounced) [cite: 41]
+    // Send height on window resize (debounced)
     window.addEventListener('resize', () => {
-      // Use scheduleHeightCheck for built-in debounce [cite: 41]
-      scheduleHeightCheck(); [cite: 41]
+      // Use scheduleHeightCheck for built-in debounce
+      scheduleHeightCheck();
     });
     
-    // ===== END OF SCROLLBAR FIX ===== [cite: 42]
+    // ===== END OF SCROLLBAR FIX =====
   </script>
 </body>
 </html>
