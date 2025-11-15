@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stream Deck Bulk Icon Maker</title>
+  <title>Stream Deck Icon Builder</title>
   <style>
     :root {
       --bg: #191919;
@@ -29,19 +29,35 @@
       padding: 24px 16px;
     }
 
-    /* ===== MAIN CONTAINER ===== */
     .container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
     }
 
-    /* ===== SEARCH & CONTROLS SECTION ===== */
-    .controls-section {
+    /* ===== SECTION HEADERS ===== */
+    .section-header {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--outline);
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    /* ===== LEFT COLUMN: ICON LIBRARY ===== */
+    .icon-library {
       background: var(--card-bg);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
       padding: 24px 16px;
-      margin-bottom: 16px;
     }
 
     .search-wrapper {
@@ -69,91 +85,46 @@
       color: var(--text-secondary);
     }
 
-    .controls-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .control-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .control-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      white-space: nowrap;
-    }
-
-    .size-input {
-      width: 70px;
-      background: var(--bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      color: var(--text-primary);
-      padding: 8px 12px;
-      font-size: 12px;
-      text-align: center;
-    }
-
-    .color-input {
-      width: 50px;
-      height: 36px;
-      background: var(--bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      cursor: pointer;
-    }
-
-    /* ===== SELECTION INFO BAR ===== */
-    .selection-bar {
-      background: var(--card-bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      padding: 12px 16px;
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .selection-info {
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-
-    .selection-count {
-      color: var(--accent);
-      font-weight: bold;
-    }
-
-    /* ===== ICON GRID ===== */
     .icon-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 8px;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .icon-grid::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .icon-grid::-webkit-scrollbar-track {
+      background: var(--bg);
+      border-radius: 4px;
+    }
+
+    .icon-grid::-webkit-scrollbar-thumb {
+      background: var(--outline);
+      border-radius: 4px;
+    }
+
+    .icon-grid::-webkit-scrollbar-thumb:hover {
+      background: var(--hover);
     }
 
     .icon-card {
-      background: var(--card-bg);
+      background: var(--bg);
       border: 2px solid var(--outline);
       border-radius: var(--radius);
-      padding: 16px;
+      padding: 12px;
       cursor: pointer;
       transition: all 0.2s;
-      position: relative;
       aspect-ratio: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .icon-card:hover {
@@ -166,35 +137,184 @@
       background: var(--hover);
     }
 
-    .icon-card.selected::after {
-      content: '✓';
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 20px;
-      height: 20px;
-      background: var(--accent);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      color: var(--bg);
-      font-weight: bold;
-    }
-
     .icon-preview {
-      width: 48px;
-      height: 48px;
+      width: 36px;
+      height: 36px;
       filter: brightness(0) invert(1);
     }
 
     .icon-name {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-secondary);
       text-align: center;
       word-break: break-word;
-      line-height: 1.3;
+      line-height: 1.2;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* ===== RIGHT COLUMN: CUSTOMIZATION PANEL ===== */
+    .customization-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .preview-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .preview-canvas-wrapper {
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .control-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .control-input {
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .control-input:focus {
+      border-color: var(--accent);
+    }
+
+    .color-picker-group {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .color-input {
+      width: 60px;
+      height: 38px;
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .range-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .range-input {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background: var(--bg);
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .range-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .range-input::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+
+    .range-value {
+      min-width: 40px;
+      text-align: right;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    select.control-input {
+      cursor: pointer;
+    }
+
+    .texture-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .texture-option {
+      aspect-ratio: 1;
+      border: 2px solid var(--outline);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .texture-option:hover {
+      border-color: var(--hover);
+    }
+
+    .texture-option.selected {
+      border-color: var(--accent);
+    }
+
+    .texture-none {
+      background: linear-gradient(45deg, var(--bg) 25%, var(--outline) 25%, var(--outline) 50%, var(--bg) 50%, var(--bg) 75%, var(--outline) 75%);
+      background-size: 8px 8px;
     }
 
     /* ===== BUTTONS ===== */
@@ -210,6 +330,7 @@
       font-size: 14px;
       font-family: sans-serif;
       transition: all 0.2s;
+      text-align: center;
     }
 
     .btn::before {
@@ -245,93 +366,236 @@
     }
 
     .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* ===== SELECTION BAR ===== */
+    .selection-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .selection-info {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .selection-count {
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .selection-actions {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
     }
 
-    /* ===== EMPTY STATE ===== */
-    .empty-state {
-      text-align: center;
-      padding: 48px 16px;
-      color: var(--text-secondary);
-      font-size: 14px;
+    /* ===== MOBILE OPTIMIZATION ===== */
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .customization-panel {
+        order: -1;
+      }
+
+      .icon-grid {
+        max-height: 400px;
+      }
     }
 
-    /* ===== MOBILE OPTIMIZATION ===== */
     @media (max-width: 640px) {
       body {
         padding: 16px 12px;
       }
 
-      .icon-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 8px;
-      }
-
-      .controls-section {
+      .icon-library,
+      .customization-panel {
         padding: 16px 12px;
       }
 
-      .controls-row {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .control-group {
-        justify-content: space-between;
-      }
-
-      .selection-bar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .btn-group {
-        flex-direction: column;
-      }
-
-      .btn {
-        width: 100%;
-      }
-    }
-
-    @media (max-width: 400px) {
       .icon-grid {
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        max-height: 300px;
       }
 
       .icon-preview {
-        width: 36px;
-        height: 36px;
+        width: 28px;
+        height: 28px;
+      }
+
+      .texture-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .btn-group {
+        grid-template-columns: 1fr;
+      }
+
+      .selection-actions {
+        width: 100%;
+      }
+
+      .selection-actions .btn {
+        flex: 1;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- ===== SEARCH & CONTROLS ===== -->
-    <div class="controls-section">
-      <div class="search-wrapper">
-        <input 
-          type="text" 
-          id="search-input" 
-          class="search-input" 
-          placeholder="Search icons by name or keyword..."
-        >
+    <!-- ===== MAIN LAYOUT ===== -->
+    <div class="main-layout">
+      <!-- ===== LEFT: ICON LIBRARY ===== -->
+      <div class="icon-library">
+        <div class="section-header">Icon Library</div>
+        <div class="search-wrapper">
+          <input 
+            type="text" 
+            id="search-input" 
+            class="search-input" 
+            placeholder="Search icons..."
+          >
+        </div>
+        <div id="icon-grid" class="icon-grid"></div>
+        <div id="empty-state" class="empty-state" style="display: none;">
+          No icons found matching your search.
+        </div>
       </div>
-      <div class="controls-row">
-        <div class="control-group">
-          <label class="control-label" for="icon-size">Size (px):</label>
-          <input type="number" id="icon-size" class="size-input" value="512" min="64" max="2048" step="64">
+
+      <!-- ===== RIGHT: CUSTOMIZATION PANEL ===== -->
+      <div class="customization-panel">
+        <div class="section-header">Customize Icon</div>
+        
+        <!-- ===== PREVIEW ===== -->
+        <div class="preview-section">
+          <div class="preview-canvas-wrapper">
+            <canvas id="preview-canvas" class="preview-canvas" width="256" height="256"></canvas>
+          </div>
         </div>
-        <div class="control-group">
-          <label class="control-label" for="bg-color">Background:</label>
-          <input type="color" id="bg-color" class="color-input" value="#000000">
+
+        <!-- ===== SIZE CONTROL ===== -->
+        <div class="control-section">
+          <div class="control-group">
+            <label class="control-label">Output Size (px)</label>
+            <select id="size-select" class="control-input">
+              <option value="72">72 × 72</option>
+              <option value="144">144 × 144</option>
+              <option value="256" selected>256 × 256</option>
+              <option value="512">512 × 512</option>
+              <option value="1024">1024 × 1024</option>
+            </select>
+          </div>
         </div>
-        <div class="control-group">
-          <label class="control-label" for="icon-color">Icon Color:</label>
-          <input type="color" id="icon-color" class="color-input" value="#ffffff">
+
+        <!-- ===== BACKGROUND CONTROLS ===== -->
+        <div class="control-section">
+          <div class="control-group">
+            <label class="control-label">Background Type</label>
+            <select id="bg-type" class="control-input">
+              <option value="solid">Solid Color</option>
+              <option value="gradient">Gradient</option>
+            </select>
+          </div>
+
+          <div id="solid-color-controls">
+            <div class="control-group">
+              <label class="control-label">Background Color</label>
+              <div class="color-picker-group">
+                <input type="text" id="bg-color-text" class="control-input" value="#000000">
+                <input type="color" id="bg-color" class="color-input" value="#000000">
+              </div>
+            </div>
+          </div>
+
+          <div id="gradient-controls" style="display: none;">
+            <div class="control-group">
+              <label class="control-label">Gradient Color 1</label>
+              <div class="color-picker-group">
+                <input type="text" id="grad-color1-text" class="control-input" value="#1a1a2e">
+                <input type="color" id="grad-color1" class="color-input" value="#1a1a2e">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Gradient Color 2</label>
+              <div class="color-picker-group">
+                <input type="text" id="grad-color2-text" class="control-input" value="#16213e">
+                <input type="color" id="grad-color2" class="color-input" value="#16213e">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Gradient Angle</label>
+              <div class="range-group">
+                <input type="range" id="grad-angle" class="range-input" min="0" max="360" value="135">
+                <span class="range-value" id="grad-angle-value">135°</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== ICON CONTROLS ===== -->
+        <div class="control-section">
+          <div class="control-group">
+            <label class="control-label">Icon Color</label>
+            <div class="color-picker-group">
+              <input type="text" id="icon-color-text" class="control-input" value="#FFFFFF">
+              <input type="color" id="icon-color" class="color-input" value="#FFFFFF">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Icon Size</label>
+            <div class="range-group">
+              <input type="range" id="icon-scale" class="range-input" min="30" max="90" value="60">
+              <span class="range-value" id="icon-scale-value">60%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== TEXTURE OVERLAY ===== -->
+        <div class="control-section">
+          <div class="control-group">
+            <label class="control-label">Texture Overlay</label>
+            <div class="texture-grid" id="texture-grid">
+              <div class="texture-option texture-none selected" data-texture="none"></div>
+            </div>
+          </div>
+
+          <div class="control-group" id="texture-opacity-group" style="display: none;">
+            <label class="control-label">Texture Opacity</label>
+            <div class="range-group">
+              <input type="range" id="texture-opacity" class="range-input" min="0" max="100" value="20">
+              <span class="range-value" id="texture-opacity-value">20%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== CORNER ROUNDING ===== -->
+        <div class="control-section">
+          <div class="control-group">
+            <label class="control-label">Corner Radius</label>
+            <div class="range-group">
+              <input type="range" id="corner-radius" class="range-input" min="0" max="50" value="16">
+              <span class="range-value" id="corner-radius-value">16%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== ACTION BUTTONS ===== -->
+        <div class="btn-group">
+          <button class="btn" id="add-to-batch-btn" disabled>Add to Batch</button>
+          <button class="btn btn-primary" id="download-single-btn" disabled>Download</button>
         </div>
       </div>
     </div>
@@ -339,23 +603,17 @@
     <!-- ===== SELECTION BAR ===== -->
     <div class="selection-bar">
       <div class="selection-info">
-        <span class="selection-count" id="selection-count">0</span> icons selected
+        <span class="selection-count" id="selection-count">0</span> icons in batch
       </div>
-      <div class="btn-group">
-        <button class="btn" id="select-all-btn">Select All</button>
-        <button class="btn" id="clear-selection-btn">Clear Selection</button>
-        <button class="btn btn-primary" id="download-btn" disabled>Download Selected</button>
+      <div class="selection-actions">
+        <button class="btn" id="clear-batch-btn">Clear Batch</button>
+        <button class="btn btn-primary" id="download-batch-btn" disabled>Download Batch (.zip)</button>
       </div>
-    </div>
-
-    <!-- ===== ICON GRID ===== -->
-    <div id="icon-grid" class="icon-grid"></div>
-
-    <!-- ===== EMPTY STATE ===== -->
-    <div id="empty-state" class="empty-state" style="display: none;">
-      No icons found matching your search.
     </div>
   </div>
+
+  <!-- Include JSZip library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <script>
     // ===== ICON DATABASE =====
@@ -390,24 +648,84 @@
       { name: 'YouTube', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/youtube.svg', keywords: ['youtube', 'video', 'streaming', 'google', 'content', 'creator'] }
     ];
 
-    // ===== STATE MANAGEMENT =====
-    let selectedIcons = new Set();
+    // ===== TEXTURE DATABASE =====
+    const textures = [
+      { name: 'Noise', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiLz48L3N2Zz4=' },
+      { name: 'Dots', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9IiNmZmYiLz48L3N2Zz4=' },
+      { name: 'Grid', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDBoNDB2MVYwek0wIDBoMXY0MEgweiIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iLjEiLz48L3N2Zz4=' }
+    ];
+
+    // ===== STATE =====
+    let currentIcon = null;
+    let selectedIconElement = null;
     let filteredIcons = [...icons];
+    let batchIcons = [];
+    let loadedTextures = {};
+
+    // ===== SETTINGS STATE =====
+    const settings = {
+      size: 256,
+      bgType: 'solid',
+      bgColor: '#000000',
+      gradColor1: '#1a1a2e',
+      gradColor2: '#16213e',
+      gradAngle: 135,
+      iconColor: '#FFFFFF',
+      iconScale: 60,
+      texture: 'none',
+      textureOpacity: 20,
+      cornerRadius: 16
+    };
 
     // ===== DOM ELEMENTS =====
     const searchInput = document.getElementById('search-input');
     const iconGrid = document.getElementById('icon-grid');
     const emptyState = document.getElementById('empty-state');
+    const previewCanvas = document.getElementById('preview-canvas');
+    const ctx = previewCanvas.getContext('2d');
+
+    // Controls
+    const sizeSelect = document.getElementById('size-select');
+    const bgType = document.getElementById('bg-type');
+    const bgColorText = document.getElementById('bg-color-text');
+    const bgColor = document.getElementById('bg-color');
+    const gradColor1Text = document.getElementById('grad-color1-text');
+    const gradColor1 = document.getElementById('grad-color1');
+    const gradColor2Text = document.getElementById('grad-color2-text');
+    const gradColor2 = document.getElementById('grad-color2');
+    const gradAngle = document.getElementById('grad-angle');
+    const gradAngleValue = document.getElementById('grad-angle-value');
+    const iconColorText = document.getElementById('icon-color-text');
+    const iconColor = document.getElementById('icon-color');
+    const iconScale = document.getElementById('icon-scale');
+    const iconScaleValue = document.getElementById('icon-scale-value');
+    const textureGrid = document.getElementById('texture-grid');
+    const textureOpacity = document.getElementById('texture-opacity');
+    const textureOpacityValue = document.getElementById('texture-opacity-value');
+    const textureOpacityGroup = document.getElementById('texture-opacity-group');
+    const cornerRadius = document.getElementById('corner-radius');
+    const cornerRadiusValue = document.getElementById('corner-radius-value');
+    const solidColorControls = document.getElementById('solid-color-controls');
+    const gradientControls = document.getElementById('gradient-controls');
+
+    // Buttons
+    const addToBatchBtn = document.getElementById('add-to-batch-btn');
+    const downloadSingleBtn = document.getElementById('download-single-btn');
+    const clearBatchBtn = document.getElementById('clear-batch-btn');
+    const downloadBatchBtn = document.getElementById('download-batch-btn');
     const selectionCount = document.getElementById('selection-count');
-    const selectAllBtn = document.getElementById('select-all-btn');
-    const clearSelectionBtn = document.getElementById('clear-selection-btn');
-    const downloadBtn = document.getElementById('download-btn');
-    const iconSizeInput = document.getElementById('icon-size');
-    const bgColorInput = document.getElementById('bg-color');
-    const iconColorInput = document.getElementById('icon-color');
+
+    // ===== INITIALIZE =====
+    function init() {
+      renderIconGrid();
+      renderTextureGrid();
+      setupEventListeners();
+      updatePreview();
+      preloadTextures();
+    }
 
     // ===== RENDER ICON GRID =====
-    function renderIcons() {
+    function renderIconGrid() {
       iconGrid.innerHTML = '';
       
       if (filteredIcons.length === 0) {
@@ -419,134 +737,151 @@
       iconGrid.style.display = 'grid';
       emptyState.style.display = 'none';
 
-      filteredIcons.forEach((icon, index) => {
+      filteredIcons.forEach(icon => {
         const card = document.createElement('div');
         card.className = 'icon-card';
-        if (selectedIcons.has(icon.url)) {
-          card.classList.add('selected');
-        }
-        
         card.innerHTML = `
           <img src="${icon.url}" alt="${icon.name}" class="icon-preview">
           <div class="icon-name">${icon.name}</div>
         `;
         
-        card.addEventListener('click', () => toggleIconSelection(icon.url, card));
+        card.addEventListener('click', () => selectIcon(icon, card));
         iconGrid.appendChild(card);
       });
 
       scheduleHeightCheck();
     }
 
-    // ===== TOGGLE ICON SELECTION =====
-    function toggleIconSelection(url, card) {
-      if (selectedIcons.has(url)) {
-        selectedIcons.delete(url);
-        card.classList.remove('selected');
-      } else {
-        selectedIcons.add(url);
-        card.classList.add('selected');
-      }
-      updateSelectionUI();
-    }
-
-    // ===== UPDATE SELECTION UI =====
-    function updateSelectionUI() {
-      selectionCount.textContent = selectedIcons.size;
-      downloadBtn.disabled = selectedIcons.size === 0;
-      scheduleHeightCheck();
-    }
-
-    // ===== SEARCH FUNCTIONALITY =====
-    searchInput.addEventListener('input', (e) => {
-      const searchTerm = e.target.value.toLowerCase().trim();
-      
-      if (searchTerm === '') {
-        filteredIcons = [...icons];
-      } else {
-        filteredIcons = icons.filter(icon => 
-          icon.name.toLowerCase().includes(searchTerm) ||
-          icon.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm))
-        );
-      }
-      
-      renderIcons();
-    });
-
-    // ===== SELECT ALL =====
-    selectAllBtn.addEventListener('click', () => {
-      filteredIcons.forEach(icon => selectedIcons.add(icon.url));
-      renderIcons();
-      updateSelectionUI();
-    });
-
-    // ===== CLEAR SELECTION =====
-    clearSelectionBtn.addEventListener('click', () => {
-      selectedIcons.clear();
-      renderIcons();
-      updateSelectionUI();
-    });
-
-    // ===== DOWNLOAD FUNCTIONALITY =====
-    downloadBtn.addEventListener('click', async () => {
-      if (selectedIcons.size === 0) return;
-
-      const size = parseInt(iconSizeInput.value);
-      const bgColor = bgColorInput.value;
-      const iconColor = iconColorInput.value;
-
-      downloadBtn.disabled = true;
-      downloadBtn.textContent = 'Generating...';
-
-      try {
-        for (const iconUrl of selectedIcons) {
-          const icon = icons.find(i => i.url === iconUrl);
-          await generateAndDownloadIcon(icon, size, bgColor, iconColor);
-          await sleep(100); // Small delay between downloads
-        }
+    // ===== RENDER TEXTURE GRID =====
+    function renderTextureGrid() {
+      textures.forEach(texture => {
+        const option = document.createElement('div');
+        option.className = 'texture-option';
+        option.dataset.texture = texture.name.toLowerCase();
+        option.style.backgroundImage = `url(${texture.url})`;
+        option.title = texture.name;
         
-        downloadBtn.textContent = 'Download Complete!';
-        setTimeout(() => {
-          downloadBtn.textContent = 'Download Selected';
-          downloadBtn.disabled = false;
-        }, 2000);
-      } catch (error) {
-        console.error('Download error:', error);
-        downloadBtn.textContent = 'Error - Try Again';
-        setTimeout(() => {
-          downloadBtn.textContent = 'Download Selected';
-          downloadBtn.disabled = false;
-        }, 2000);
-      }
-    });
+        option.addEventListener('click', () => selectTexture(texture.name.toLowerCase(), option));
+        textureGrid.appendChild(option);
+      });
+    }
 
-    // ===== GENERATE AND DOWNLOAD ICON =====
-    async function generateAndDownloadIcon(icon, size, bgColor, iconColor) {
+    // ===== SELECT ICON =====
+    function selectIcon(icon, cardElement) {
+      currentIcon = icon;
+      
+      // Update visual selection
+      if (selectedIconElement) {
+        selectedIconElement.classList.remove('selected');
+      }
+      cardElement.classList.add('selected');
+      selectedIconElement = cardElement;
+
+      // Enable buttons
+      addToBatchBtn.disabled = false;
+      downloadSingleBtn.disabled = false;
+
+      updatePreview();
+    }
+
+    // ===== SELECT TEXTURE =====
+    function selectTexture(textureName, element) {
+      settings.texture = textureName;
+      
+      document.querySelectorAll('.texture-option').forEach(opt => {
+        opt.classList.remove('selected');
+      });
+      element.classList.add('selected');
+
+      textureOpacityGroup.style.display = textureName === 'none' ? 'none' : 'flex';
+      
+      updatePreview();
+    }
+
+    // ===== PRELOAD TEXTURES =====
+    async function preloadTextures() {
+      for (const texture of textures) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        await new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+          img.src = texture.url;
+        });
+        loadedTextures[texture.name.toLowerCase()] = img;
+      }
+    }
+
+    // ===== UPDATE PREVIEW =====
+    async function updatePreview() {
+      if (!currentIcon) {
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(0, 0, 256, 256);
+        ctx.fillStyle = '#666';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Select an icon', 128, 128);
+        return;
+      }
+
+      const size = 256;
+      const radiusPx = (size * settings.cornerRadius) / 100;
+
+      // Draw background with corner radius
+      ctx.clearRect(0, 0, size, size);
+      
+      // Create rounded rectangle path
+      ctx.beginPath();
+      ctx.moveTo(radiusPx, 0);
+      ctx.lineTo(size - radiusPx, 0);
+      ctx.quadraticCurveTo(size, 0, size, radiusPx);
+      ctx.lineTo(size, size - radiusPx);
+      ctx.quadraticCurveTo(size, size, size - radiusPx, size);
+      ctx.lineTo(radiusPx, size);
+      ctx.quadraticCurveTo(0, size, 0, size - radiusPx);
+      ctx.lineTo(0, radiusPx);
+      ctx.quadraticCurveTo(0, 0, radiusPx, 0);
+      ctx.closePath();
+      ctx.clip();
+
+      // Draw background
+      if (settings.bgType === 'solid') {
+        ctx.fillStyle = settings.bgColor;
+        ctx.fillRect(0, 0, size, size);
+      } else {
+        const angle = (settings.gradAngle * Math.PI) / 180;
+        const x1 = size / 2 - Math.cos(angle) * size / 2;
+        const y1 = size / 2 - Math.sin(angle) * size / 2;
+        const x2 = size / 2 + Math.cos(angle) * size / 2;
+        const y2 = size / 2 + Math.sin(angle) * size / 2;
+        
+        const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+        gradient.addColorStop(0, settings.gradColor1);
+        gradient.addColorStop(1, settings.gradColor2);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, size, size);
+      }
+
+      // Draw texture overlay
+      if (settings.texture !== 'none' && loadedTextures[settings.texture]) {
+        ctx.globalAlpha = settings.textureOpacity / 100;
+        const pattern = ctx.createPattern(loadedTextures[settings.texture], 'repeat');
+        ctx.fillStyle = pattern;
+        ctx.fillRect(0, 0, size, size);
+        ctx.globalAlpha = 1;
+      }
+
+      // Draw icon
       try {
-        // Fetch SVG content
-        const response = await fetch(icon.url);
+        const response = await fetch(currentIcon.url);
         const svgText = await response.text();
         
-        // Create canvas
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        
-        // Fill background
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, size, size);
-        
-        // Modify SVG to change color
-        let modifiedSvg = svgText.replace(/fill="[^"]*"/g, `fill="${iconColor}"`);
-        modifiedSvg = modifiedSvg.replace(/stroke="[^"]*"/g, `stroke="${iconColor}"`);
-        
-        // Add fill attribute to svg tag if not present
+        let modifiedSvg = svgText.replace(/fill="[^"]*"/g, `fill="${settings.iconColor}"`);
+        modifiedSvg = modifiedSvg.replace(/stroke="[^"]*"/g, `stroke="${settings.iconColor}"`);
         if (!modifiedSvg.includes('fill=')) {
-          modifiedSvg = modifiedSvg.replace('<svg', `<svg fill="${iconColor}"`);
+          modifiedSvg = modifiedSvg.replace('<svg', `<svg fill="${settings.iconColor}"`);
         }
         
-        // Create image from SVG
         const img = new Image();
         const svgBlob = new Blob([modifiedSvg], { type: 'image/svg+xml' });
         const url = URL.createObjectURL(svgBlob);
@@ -557,38 +892,298 @@
           img.src = url;
         });
         
-        // Calculate padding (10% on each side)
-        const padding = size * 0.1;
-        const iconSize = size - (padding * 2);
+        const iconSize = (size * settings.iconScale) / 100;
+        const iconX = (size - iconSize) / 2;
+        const iconY = (size - iconSize) / 2;
         
-        // Draw centered icon
-        ctx.drawImage(img, padding, padding, iconSize, iconSize);
-        
-        // Convert to PNG and download
-        canvas.toBlob((blob) => {
-          const downloadUrl = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = `${icon.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${size}px.png`;
-          a.click();
-          URL.revokeObjectURL(downloadUrl);
-        }, 'image/png');
-        
+        ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
         URL.revokeObjectURL(url);
       } catch (error) {
-        console.error(`Error generating icon for ${icon.name}:`, error);
-        throw error;
+        console.error('Error drawing icon:', error);
       }
     }
 
-    // ===== UTILITY FUNCTION =====
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+    // ===== GENERATE ICON =====
+    async function generateIcon(icon, outputSize) {
+      const canvas = document.createElement('canvas');
+      canvas.width = outputSize;
+      canvas.height = outputSize;
+      const ctx = canvas.getContext('2d');
+      
+      const radiusPx = (outputSize * settings.cornerRadius) / 100;
+
+      // Create rounded rectangle path
+      ctx.beginPath();
+      ctx.moveTo(radiusPx, 0);
+      ctx.lineTo(outputSize - radiusPx, 0);
+      ctx.quadraticCurveTo(outputSize, 0, outputSize, radiusPx);
+      ctx.lineTo(outputSize, outputSize - radiusPx);
+      ctx.quadraticCurveTo(outputSize, outputSize, outputSize - radiusPx, outputSize);
+      ctx.lineTo(radiusPx, outputSize);
+      ctx.quadraticCurveTo(0, outputSize, 0, outputSize - radiusPx);
+      ctx.lineTo(0, radiusPx);
+      ctx.quadraticCurveTo(0, 0, radiusPx, 0);
+      ctx.closePath();
+      ctx.clip();
+
+      // Draw background
+      if (settings.bgType === 'solid') {
+        ctx.fillStyle = settings.bgColor;
+        ctx.fillRect(0, 0, outputSize, outputSize);
+      } else {
+        const angle = (settings.gradAngle * Math.PI) / 180;
+        const x1 = outputSize / 2 - Math.cos(angle) * outputSize / 2;
+        const y1 = outputSize / 2 - Math.sin(angle) * outputSize / 2;
+        const x2 = outputSize / 2 + Math.cos(angle) * outputSize / 2;
+        const y2 = outputSize / 2 + Math.sin(angle) * outputSize / 2;
+        
+        const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+        gradient.addColorStop(0, settings.gradColor1);
+        gradient.addColorStop(1, settings.gradColor2);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, outputSize, outputSize);
+      }
+
+      // Draw texture overlay
+      if (settings.texture !== 'none' && loadedTextures[settings.texture]) {
+        ctx.globalAlpha = settings.textureOpacity / 100;
+        const pattern = ctx.createPattern(loadedTextures[settings.texture], 'repeat');
+        ctx.fillStyle = pattern;
+        ctx.fillRect(0, 0, outputSize, outputSize);
+        ctx.globalAlpha = 1;
+      }
+
+      // Draw icon
+      const response = await fetch(icon.url);
+      const svgText = await response.text();
+      
+      let modifiedSvg = svgText.replace(/fill="[^"]*"/g, `fill="${settings.iconColor}"`);
+      modifiedSvg = modifiedSvg.replace(/stroke="[^"]*"/g, `stroke="${settings.iconColor}"`);
+      if (!modifiedSvg.includes('fill=')) {
+        modifiedSvg = modifiedSvg.replace('<svg', `<svg fill="${settings.iconColor}"`);
+      }
+      
+      const img = new Image();
+      const svgBlob = new Blob([modifiedSvg], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(svgBlob);
+      
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = url;
+      });
+      
+      const iconSize = (outputSize * settings.iconScale) / 100;
+      const iconX = (outputSize - iconSize) / 2;
+      const iconY = (outputSize - iconSize) / 2;
+      
+      ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
+      URL.revokeObjectURL(url);
+
+      return canvas;
     }
 
-    // ===== INITIALIZE =====
-    renderIcons();
-    updateSelectionUI();
+    // ===== DOWNLOAD SINGLE ICON =====
+    async function downloadSingle() {
+      if (!currentIcon) return;
+
+      downloadSingleBtn.disabled = true;
+      downloadSingleBtn.textContent = 'Generating...';
+
+      try {
+        const canvas = await generateIcon(currentIcon, settings.size);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${currentIcon.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${settings.size}px.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        downloadSingleBtn.textContent = 'Downloaded!';
+        setTimeout(() => {
+          downloadSingleBtn.textContent = 'Download';
+          downloadSingleBtn.disabled = false;
+        }, 1500);
+      } catch (error) {
+        console.error('Download error:', error);
+        downloadSingleBtn.textContent = 'Error';
+        setTimeout(() => {
+          downloadSingleBtn.textContent = 'Download';
+          downloadSingleBtn.disabled = false;
+        }, 1500);
+      }
+    }
+
+    // ===== ADD TO BATCH =====
+    function addToBatch() {
+      if (!currentIcon) return;
+
+      const batchItem = {
+        icon: currentIcon,
+        settings: {...settings}
+      };
+
+      batchIcons.push(batchItem);
+      updateBatchUI();
+
+      addToBatchBtn.textContent = 'Added!';
+      setTimeout(() => {
+        addToBatchBtn.textContent = 'Add to Batch';
+      }, 1000);
+    }
+
+    // ===== UPDATE BATCH UI =====
+    function updateBatchUI() {
+      selectionCount.textContent = batchIcons.length;
+      downloadBatchBtn.disabled = batchIcons.length === 0;
+      scheduleHeightCheck();
+    }
+
+    // ===== CLEAR BATCH =====
+    function clearBatch() {
+      batchIcons = [];
+      updateBatchUI();
+    }
+
+    // ===== DOWNLOAD BATCH =====
+    async function downloadBatch() {
+      if (batchIcons.length === 0) return;
+
+      downloadBatchBtn.disabled = true;
+      downloadBatchBtn.textContent = `Generating 0/${batchIcons.length}...`;
+
+      try {
+        const zip = new JSZip();
+
+        for (let i = 0; i < batchIcons.length; i++) {
+          const item = batchIcons[i];
+          
+          // Temporarily apply settings
+          const originalSettings = {...settings};
+          Object.assign(settings, item.settings);
+          
+          const canvas = await generateIcon(item.icon, item.settings.size);
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+          
+          const fileName = `${item.icon.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${item.settings.size}px.png`;
+          zip.file(fileName, blob);
+          
+          // Restore settings
+          Object.assign(settings, originalSettings);
+          
+          downloadBatchBtn.textContent = `Generating ${i + 1}/${batchIcons.length}...`;
+        }
+
+        downloadBatchBtn.textContent = 'Creating ZIP...';
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(zipBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `stream-deck-icons-${Date.now()}.zip`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        downloadBatchBtn.textContent = 'Downloaded!';
+        setTimeout(() => {
+          downloadBatchBtn.textContent = 'Download Batch (.zip)';
+          downloadBatchBtn.disabled = false;
+        }, 2000);
+      } catch (error) {
+        console.error('Batch download error:', error);
+        downloadBatchBtn.textContent = 'Error';
+        setTimeout(() => {
+          downloadBatchBtn.textContent = 'Download Batch (.zip)';
+          downloadBatchBtn.disabled = false;
+        }, 2000);
+      }
+    }
+
+    // ===== SETUP EVENT LISTENERS =====
+    function setupEventListeners() {
+      // Search
+      searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        filteredIcons = searchTerm === '' ? [...icons] : 
+          icons.filter(icon => 
+            icon.name.toLowerCase().includes(searchTerm) ||
+            icon.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm))
+          );
+        renderIconGrid();
+      });
+
+      // Size
+      sizeSelect.addEventListener('change', (e) => {
+        settings.size = parseInt(e.target.value);
+      });
+
+      // Background type
+      bgType.addEventListener('change', (e) => {
+        settings.bgType = e.target.value;
+        solidColorControls.style.display = e.target.value === 'solid' ? 'block' : 'none';
+        gradientControls.style.display = e.target.value === 'gradient' ? 'block' : 'none';
+        updatePreview();
+      });
+
+      // Background color
+      const syncColorInputs = (colorPicker, textInput, settingKey) => {
+        colorPicker.addEventListener('input', (e) => {
+          settings[settingKey] = e.target.value;
+          textInput.value = e.target.value;
+          updatePreview();
+        });
+        textInput.addEventListener('input', (e) => {
+          const value = e.target.value;
+          if (/^#[0-9A-F]{6}$/i.test(value)) {
+            settings[settingKey] = value;
+            colorPicker.value = value;
+            updatePreview();
+          }
+        });
+      };
+
+      syncColorInputs(bgColor, bgColorText, 'bgColor');
+      syncColorInputs(gradColor1, gradColor1Text, 'gradColor1');
+      syncColorInputs(gradColor2, gradColor2Text, 'gradColor2');
+      syncColorInputs(iconColor, iconColorText, 'iconColor');
+
+      // Gradient angle
+      gradAngle.addEventListener('input', (e) => {
+        settings.gradAngle = parseInt(e.target.value);
+        gradAngleValue.textContent = settings.gradAngle + '°';
+        updatePreview();
+      });
+
+      // Icon scale
+      iconScale.addEventListener('input', (e) => {
+        settings.iconScale = parseInt(e.target.value);
+        iconScaleValue.textContent = settings.iconScale + '%';
+        updatePreview();
+      });
+
+      // Texture opacity
+      textureOpacity.addEventListener('input', (e) => {
+        settings.textureOpacity = parseInt(e.target.value);
+        textureOpacityValue.textContent = settings.textureOpacity + '%';
+        updatePreview();
+      });
+
+      // Corner radius
+      cornerRadius.addEventListener('input', (e) => {
+        settings.cornerRadius = parseInt(e.target.value);
+        cornerRadiusValue.textContent = settings.cornerRadius + '%';
+        updatePreview();
+      });
+
+      // Buttons
+      downloadSingleBtn.addEventListener('click', downloadSingle);
+      addToBatchBtn.addEventListener('click', addToBatch);
+      clearBatchBtn.addEventListener('click', clearBatch);
+      downloadBatchBtn.addEventListener('click', downloadBatch);
+    }
+
+    // ===== INITIALIZE APP =====
+    init();
 
     // ===== FOURTHWALL SCROLLBAR FIX =====
     let lastHeight = 0;
