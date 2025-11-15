@@ -166,7 +166,6 @@
             width: 100%;
         }
         
-        /* FIX: Added margin-top to push button down from version tag */
         .control-group-first {
             margin-top: 16px;
         }
@@ -428,7 +427,7 @@
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238C8C8C' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238C8C8C' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708 .708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 12px center;
             padding-right: 40px;
@@ -473,7 +472,6 @@
                 gap: 24px; 
             }
             
-            /* FIX: Adjust first control group margin on mobile */
             .control-group-first {
                 margin-top: 12px;
             }
@@ -642,7 +640,7 @@
     </div>
 
     <canvas id="render-canvas" style="display: none;"></canvas>
-    <canvas id="temp-canvas" style="display: none;"></canvas>
+    <canvas id="temp-canvas" style="display: none;"></Cavas>
 
     <script>
         // ===== APP LOGIC =====
@@ -685,7 +683,7 @@
             brightness: 100,
             saturation: 100,
             vignette: 0,
-            grain: 0, // FIX: Default grain state to 0
+            grain: 0, 
             texture: 'none',
             backgroundColor: '#000000',
             textureParams: {
@@ -954,10 +952,14 @@
             tempCtx.drawImage(canvas, 0, 0);
             ctx.clearRect(0, 0, w, h);
             
-            // FIX: Dampen saturation for render to better match CSS preview
-            const renderSaturation = state.saturation * 0.9;
-            const renderBrightness = state.brightness;
+            // ===== START OF RENDER FIX =====
+            // Adjust render values to better match CSS preview
+            // The download is often darker (higher contrast) and more saturated
+            // than the live preview. These adjustments compensate for that.
+            const renderSaturation = state.saturation * 0.75; // Aggressively reduce saturation
+            const renderBrightness = state.brightness * 1.05; // Slightly boost brightness
             ctx.filter = `brightness(${renderBrightness}%) saturate(${renderSaturation}%)`;
+            // ===== END OF RENDER FIX =====
             
             ctx.drawImage(tempCanvas, 0, 0);
             
@@ -969,7 +971,6 @@
 
             // 6. Draw Grain
             if(state.grain > 0) {
-                // FIX: Removed / 2 to make stronger. Increased density / 20 -> / 10
                 ctx.fillStyle = `rgba(0,0,0,${state.grain})`;
                 for (let i = 0; i < (w * h) / 10; i++) {
                     ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
@@ -978,7 +979,6 @@
 
             // 7. Draw Texture
             if (state.texture === 'noise') {
-                // FIX: Increased density / 10 -> / 5
                 ctx.fillStyle = `rgba(0,0,0,${state.textureParams.noise.opacity})`;
                 for (let i = 0; i < (w * h) / 5; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
             }
@@ -1046,7 +1046,6 @@
                     o.classList.add('active');
                     state.texture = o.dataset.texture;
                     
-                    // FIX: Link texture buttons to grain slider
                     if (state.texture === 'noise') {
                         grainSlider.value = 50;
                     } else { // 'none'
