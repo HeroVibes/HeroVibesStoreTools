@@ -673,16 +673,22 @@
             background: var(--bg-primary);
             border: 1px solid var(--outline);
             border-radius: var(--radius);
-            padding: 16px;
+            padding: 12px;
+        }
+
+        @media (max-width: 640px) {
+            .content-wrapper {
+                padding: 10px;
+            }
         }
 
         .content-grid {
             display: none;
             grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
+            gap: 10px;
             max-height: 400px;
             overflow-y: auto;
-            padding: 4px;
+            padding: 2px;
         }
 
         .content-grid.active {
@@ -694,13 +700,6 @@
                 grid-template-columns: repeat(3, 1fr);
                 gap: 8px;
                 max-height: 350px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .content-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 6px;
             }
         }
 
@@ -739,16 +738,15 @@
             border-radius: var(--radius);
             cursor: pointer;
             transition: all 0.3s ease;
-            padding: 8px;
+            padding: 10px 6px;
             position: relative;
             overflow: hidden;
-            min-height: 80px;
         }
 
         @media (max-width: 640px) {
             .grid-item {
-                padding: 6px;
-                min-height: 70px;
+                padding: 8px 4px;
+                border-width: 1.5px;
             }
         }
 
@@ -781,29 +779,24 @@
         }
 
         .grid-item i {
-            font-size: 28px;
+            font-size: 32px;
             color: var(--text-primary);
             margin-bottom: 6px;
             z-index: 1;
+            line-height: 1;
         }
 
         @media (max-width: 640px) {
             .grid-item i {
-                font-size: 24px;
+                font-size: 26px;
                 margin-bottom: 4px;
             }
         }
 
-        @media (max-width: 480px) {
-            .grid-item i {
-                font-size: 20px;
-                margin-bottom: 2px;
-            }
-        }
-
         .grid-item img {
-            max-width: 45%;
-            max-height: 45%;
+            width: 50%;
+            height: auto;
+            max-height: 50%;
             object-fit: contain;
             margin-bottom: 6px;
             z-index: 1;
@@ -811,8 +804,8 @@
 
         @media (max-width: 640px) {
             .grid-item img {
-                max-width: 40%;
-                max-height: 40%;
+                width: 45%;
+                max-height: 45%;
                 margin-bottom: 4px;
             }
         }
@@ -822,7 +815,7 @@
             color: var(--text-secondary);
             text-align: center;
             z-index: 1;
-            line-height: 1.2;
+            line-height: 1.3;
             word-break: break-word;
             max-width: 100%;
             overflow: hidden;
@@ -835,13 +828,8 @@
         @media (max-width: 640px) {
             .icon-name {
                 font-size: 8px;
+                line-height: 1.2;
                 -webkit-line-clamp: 1;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .icon-name {
-                font-size: 7px;
             }
         }
 
@@ -850,10 +838,10 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
             color: var(--text-primary);
             font-size: 9px;
-            padding: 6px 4px 4px;
+            padding: 8px 4px 4px;
             text-align: center;
             font-weight: 600;
             line-height: 1.2;
@@ -862,25 +850,25 @@
         @media (max-width: 640px) {
             .background-name-overlay {
                 font-size: 8px;
-                padding: 4px 2px 2px;
+                padding: 6px 3px 3px;
             }
         }
 
         /* ===== UPLOAD AREA ===== */
         .upload-area {
             background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
-            border: 2px dashed var(--success);
+            border: 2px dashed var(--success) !important;
             position: relative;
         }
 
         .upload-area:hover {
             background: rgba(76, 175, 80, 0.15);
-            border-color: #5cb85f;
+            border-color: #5cb85f !important;
         }
 
         .upload-area label {
             color: var(--success);
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -890,7 +878,7 @@
 
         @media (max-width: 640px) {
             .upload-area label {
-                font-size: 9px;
+                font-size: 10px;
             }
         }
 
@@ -1771,6 +1759,8 @@
                 } else if (item.type === 'custom-svg') {
                     const img = document.createElement('img');
                     img.alt = item.name;
+                    img.style.width = '50%';
+                    img.style.height = 'auto';
                     try {
                         const whiteSvgImage = await renderSvgIcon(item.src, '#FFFFFF');
                         img.src = whiteSvgImage.src;
@@ -1842,7 +1832,7 @@
                     latestSelectedIconId = item.id;
                 }
                 updateSelectedCount();
-            } else if (type ==='background') {
+            } else if (type === 'background') {
                 clearSelection(bgContent.querySelectorAll('.grid-item:not(.upload-area)'));
                 element.classList.add('selected');
                 selectedBackgroundId = item.id;
