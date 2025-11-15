@@ -115,10 +115,10 @@
 
     @keyframes pulseGlow {
       0%, 100% {
-        box-shadow: 0 0 10px rgba(135, 169, 255, 0.3);
+        box-shadow: 0 0 5px rgba(135, 169, 255, 0.3);
       }
       50% {
-        box-shadow: 0 0 20px rgba(135, 169, 255, 0.6);
+        box-shadow: 0 0 10px rgba(135, 169, 255, 0.6);
       }
     }
 
@@ -176,7 +176,7 @@
       box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
     }
 
-    [.hv-password-generator .btn-icon {
+    .hv-password-generator .btn-icon {
       flex: 0 0 48px;
       display: flex;
       align-items: center;
@@ -441,11 +441,37 @@
     /* ========== MOBILE OPTIMIZATIONS ========== */
     @media (max-width: 480px) {
       .hv-password-generator {
-        padding: 12px 6px;
+        padding: 8px 0;
       }
 
       .hv-password-generator .container {
-        padding: 20px 12px;
+        padding: 16px 8px;
+      }
+
+      .hv-password-generator .action-buttons {
+        gap: 4px;
+      }
+
+      .hv-password-generator .btn {
+        padding: 10px 8px;
+        font-size: 11px;
+      }
+
+      .hv-password-generator .btn-icon {
+        flex: 0 0 40px;
+      }
+
+      .hv-password-generator #password {
+        padding: 12px 8px;
+        font-size: 12px;
+      }
+
+      .hv-password-generator #excludeChars {
+        padding: 8px 8px;
+      }
+
+      .hv-password-generator .generate-btn {
+        padding: 12px 8px;
       }
 
       .hv-password-generator .options-grid {
@@ -453,14 +479,18 @@
         gap: 8px;
       }
 
-      .hv-password-generator #password {
-        font-size: 12px;
-        padding: 12px;
+      .hv-password-generator input[type="range"]::-webkit-slider-thumb {
+        width: 14px;
+        height: 14px;
       }
 
-      .hv-password-generator .btn {
-        font-size: 11px;
-        padding: 10px 12px;
+      .hv-password-generator input[type="range"]::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+      }
+
+      .hv-password-generator .version {
+        right: 8px;
       }
     }
 
@@ -480,7 +510,7 @@
   <div class="hv-password-generator">
     <div class="container">
     <!-- ========== VERSION NUMBER ========== -->
-    <div class="version">v1.0.3</div>
+    <div class="version">v1.0.2</div>
 
     <!-- ========== PASSWORD DISPLAY AREA ========== -->
     <div class="password-wrapper">
@@ -493,7 +523,7 @@
         Hide
       </button>
       <button class="btn btn-icon" id="copyPassword" type="button" aria-label="Copy password to clipboard">
-        Copy
+        ⧉
       </button>
     </div>
 
@@ -582,30 +612,45 @@
     let lastHeight = 0;
     let resizeTimer;
 
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
     function sendHeight() {
       const height = document.body.scrollHeight;
+      
+      // Only send message if height has *actually* changed
       if (height !== lastHeight) {
         lastHeight = height;
         window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
     function scheduleHeightCheck() {
+        // Clear any pending checks
         clearTimeout(resizeTimer);
+        // Schedule a new check
         resizeTimer = setTimeout(sendHeight, 150);
     }
 
+    // Send height on initial load (with a slight delay)
     window.addEventListener('load', () => {
         setTimeout(sendHeight, 100);
     });
 
+    // Send height on window resize (debounced)
     window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
         scheduleHeightCheck();
     });
     
     // ===== END OF SCROLLBAR FIX =====
 
-    // DOM ELEMENTS
+    // ========== DOM ELEMENTS ==========
     const passwordField = document.getElementById('password');
     const lengthRange = document.getElementById('lengthRange');
     const lengthValue = document.getElementById('lengthValue');
@@ -628,26 +673,32 @@
       document.getElementById('bar4')
     ];
 
-    // CHARACTER SETS
+    // ========== CHARACTER SETS ==========
     const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
     const NUMBERS = '0123456789';
     const SYMBOLS = '!@#$%^&*()-_=+[]{};:,.<>?/\\|`~';
 
+    // Syllable patterns for pronounceable passwords
     const CONSONANTS = 'bcdfghjklmnprstvwxyz';
     const VOWELS = 'aeiou';
     const PRONOUNCEABLE_SYMBOLS = '!@#$%';
 
+    // ========== STATE ==========
     let showPassword = true;
 
+    // ========== ENTROPY CALCULATION ==========
     function calculateEntropy(password, charsetSize) {
-      if (!password || password.includes('Warning')) return 0;
+      if (!password || password.includes('⚠️')) return 0;
+      // Entropy = log2(possibilities^length)
+      // = length * log2(possibilities)
       const entropy = password.length * Math.log2(charsetSize);
       return Math.round(entropy);
     }
 
+    // ========== STRENGTH CALCULATION ==========
     function calculateStrength(password) {
-      if (!password || password.includes('Warning')) return 0;
+      if (!password || password.includes('⚠️')) return 0;
 
       let score = 0;
       const hasUpper = /[A-Z]/.test(password);
@@ -660,6 +711,7 @@
       if (hasNumber) score++;
       if (hasSymbol) score++;
 
+      // Length bonus
       const length = password.length;
       if (length >= 16 && score === 4) return 4;
       if (length >= 12 && score >= 3) return 3;
@@ -668,6 +720,7 @@
       return 0;
     }
 
+    // ========== UPDATE STRENGTH INDICATOR ==========
     function updateStrength(password, charsetSize) {
       const strength = calculateStrength(password);
       const colors = [
@@ -686,6 +739,7 @@
         }
       });
 
+      // Update text label
       if (strength === 0) {
         strengthText.textContent = 'No password generated';
         strengthText.style.color = 'var(--secondary-text)';
@@ -693,10 +747,13 @@
       } else {
         strengthText.textContent = labels[strength - 1];
         strengthText.style.color = colors[strength - 1];
+        
+        // Display entropy
         const entropy = calculateEntropy(password, charsetSize);
         entropyText.textContent = `${entropy} bits`;
       }
 
+      // Rainbow border for strongest passwords
       if (strength === 4) {
         passwordField.classList.add('rainbow-border');
       } else {
@@ -704,13 +761,16 @@
       }
     }
 
+    // ========== PRONOUNCEABLE PASSWORD GENERATION ==========
     function generatePronounceable(length) {
       let password = '';
       const array = new Uint32Array(Math.ceil(length * 1.5));
       crypto.getRandomValues(array);
       let arrayIndex = 0;
 
+      // Build syllables (consonant-vowel pairs)
       while (password.length < length) {
+        // Add consonant
         if (password.length < length) {
           const consonant = CONSONANTS[array[arrayIndex++] % CONSONANTS.length];
           password += includeUppercase.checked && (array[arrayIndex] % 3 === 0) 
@@ -718,21 +778,26 @@
             : consonant;
         }
 
+        // Add vowel
         if (password.length < length) {
           password += VOWELS[array[arrayIndex++] % VOWELS.length];
         }
 
+        // Occasionally add a number
         if (includeNumbers.checked && password.length < length && array[arrayIndex++] % 4 === 0) {
           password += NUMBERS[array[arrayIndex++] % NUMBERS.length];
         }
 
+        // Occasionally add a symbol (at syllable boundaries for easier typing)
         if (includeSymbols.checked && password.length < length && array[arrayIndex++] % 6 === 0) {
           password += PRONOUNCEABLE_SYMBOLS[array[arrayIndex++] % PRONOUNCEABLE_SYMBOLS.length];
         }
       }
 
+      // Trim to exact length
       password = password.substring(0, length);
 
+      // Calculate charset size for pronounceable mode
       let charsetSize = CONSONANTS.length + VOWELS.length;
       if (includeNumbers.checked) charsetSize += NUMBERS.length;
       if (includeSymbols.checked) charsetSize += PRONOUNCEABLE_SYMBOLS.length;
@@ -740,9 +805,11 @@
       return { password, charsetSize };
     }
 
+    // ========== PASSWORD GENERATION ==========
     function generatePassword() {
       const length = parseInt(lengthRange.value);
 
+      // Check if pronounceable mode is enabled
       if (pronounceableMode.checked) {
         const result = generatePronounceable(length);
         passwordField.value = result.password;
@@ -751,6 +818,7 @@
         return;
       }
 
+      // Standard random generation
       let chars = '';
       const excluded = new Set(excludeChars.value.split(''));
 
@@ -759,15 +827,17 @@
       if (includeNumbers.checked) chars += NUMBERS;
       if (includeSymbols.checked) chars += SYMBOLS;
 
+      // Filter out excluded characters
       chars = [...chars].filter(c => !excluded.has(c)).join('');
 
       if (!chars.length) {
-        passwordField.value = 'Warning No valid characters selected';
+        passwordField.value = '⚠️ No valid characters selected';
         updateStrength('', 0);
         scheduleHeightCheck();
         return;
       }
 
+      // Use crypto.getRandomValues for better randomness
       let password = '';
       const array = new Uint32Array(length);
       crypto.getRandomValues(array);
@@ -781,6 +851,7 @@
       scheduleHeightCheck();
     }
 
+    // ========== UPDATE SLIDER GRADIENT ==========
     function updateSliderGradient() {
       const val = parseInt(lengthRange.value);
       const min = parseInt(lengthRange.min);
@@ -790,12 +861,14 @@
       lengthRange.style.background = `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${percent}%, var(--outline-color) ${percent}%, var(--outline-color) 100%)`;
     }
 
+    // ========== UPDATE FUNCTION ==========
     function update() {
       lengthValue.textContent = lengthRange.value;
       updateSliderGradient();
       generatePassword();
     }
 
+    // ========== EVENT LISTENERS ==========
     lengthRange.addEventListener('input', update);
     includeUppercase.addEventListener('change', update);
     includeLowercase.addEventListener('change', update);
@@ -805,18 +878,23 @@
     generateBtn.addEventListener('click', generatePassword);
     pronounceableMode.addEventListener('change', update);
 
+    // ========== KEYBOARD SHORTCUTS ==========
     document.addEventListener('keydown', (e) => {
+      // Check if we're focused on an input field (exclude shortcut behavior)
       const isInputFocused = document.activeElement === excludeChars;
       
+      // Ctrl/Cmd + G to generate
       if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
         e.preventDefault();
         generatePassword();
       }
       
+      // Ctrl/Cmd + C when password field is focused
       if ((e.ctrlKey || e.metaKey) && e.key === 'c' && document.activeElement === passwordField) {
+        // Let default copy behavior work, but show our feedback
         setTimeout(() => {
           const originalText = copyPassword.textContent;
-          copyPassword.textContent = 'Copied';
+          copyPassword.textContent = '✓';
           copyPassword.classList.add('copied');
           
           setTimeout(() => {
@@ -826,12 +904,14 @@
         }, 10);
       }
 
+      // Enter key to generate (if not in an input field)
       if (e.key === 'Enter' && !isInputFocused) {
         e.preventDefault();
         generatePassword();
       }
     });
 
+    // Toggle visibility
     toggleVisibility.addEventListener('click', () => {
       showPassword = !showPassword;
       passwordField.type = showPassword ? 'text' : 'password';
@@ -839,11 +919,12 @@
       scheduleHeightCheck();
     });
 
+    // Copy to clipboard
     copyPassword.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(passwordField.value);
         const originalText = copyPassword.textContent;
-        copyPassword.textContent = 'Copied';
+        copyPassword.textContent = '✓';
         copyPassword.classList.add('copied');
         
         setTimeout(() => {
@@ -853,12 +934,23 @@
         }, 2000);
       } catch (err) {
         console.error('Failed to copy:', err);
+        // Fallback for older browsers
         passwordField.select();
         document.execCommand('copy');
       }
     });
 
+    // ========== INITIALIZE ==========
     update();
+
+    // Additional height checks for better mobile compatibility
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 300);
+    });
 
     if (window.ResizeObserver) {
       const observer = new ResizeObserver(() => {
