@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>HeroVibes Newsletter Banner</title>
     <style>
-        /* DESIGN TOKENS [cite: 19, 26] */
+        /* DESIGN TOKENS */
         :root {
             --bg: #191919;
             --card-bg: #1F1F1F;
-            --btn-bg: #1F1F1F; /* Button uses card-bg */
+            --btn-bg: #1F1F1F;
             --hover: #323232;
             --outline: #323232;
             --accent: #87A9FF;
@@ -21,10 +21,9 @@
         /* RESET & BODY STYLES */
         body {
             margin: 0;
-            padding: 24px 16px; /* Default Padding  */
+            padding: 24px 16px; /* Default Padding */
             background: var(--bg);
-            font-family: system-ui, sans-serif; /* Sans-Serif Font  */
-            /* min-height: 100vh; REMOVED to prevent "Failure to Shrink" bug [cite: 55] */
+            font-family: system-ui, sans-serif; /* Sans-Serif Font */
         }
 
         /* BANNER STYLES */
@@ -48,14 +47,14 @@
 
         #BANNER-TEXT h3 {
             margin: 0 0 4px 0;
-            font-size: 20px; /* Header Font Size  */
+            font-size: 20px; /* Header Font Size */
             font-weight: bold;
             color: var(--text-primary);
         }
 
         #BANNER-TEXT p {
             margin: 0;
-            font-size: 12px; /* Text Font Size  */
+            font-size: 12px; /* Text Font Size */
             color: var(--text-secondary);
             line-height: 1.5;
         }
@@ -64,25 +63,24 @@
             flex-shrink: 0; /* Prevents button from shrinking */
         }
 
-        /* BUTTON STYLE (Based on template ) */
+        /* BUTTON STYLE */
         .btn {
-            /* Copied from template */
             position: relative;
             padding: 10px 16px;
             border-radius: var(--radius);
             background: var(--btn-bg);
             color: var(--text-primary);
-            border: 1px solid rgba(255, 255, 255, 0.06); /* [cite: 28] */
+            border: 1px solid rgba(255, 255, 255, 0.06);
             cursor: pointer;
             overflow: hidden;
-            font-size: 14px; /* Title Font Size  */
+            font-size: 14px; /* Title Font Size */
             font-weight: bold;
-            text-decoration: none; /* Added for <a> tag */
-            display: inline-block; /* Added for <a> tag */
+            text-decoration: none;
+            display: inline-block;
             transition: background-color 0.2s ease;
         }
         
-        /* Shimmer effect [cite: 29] */
+        /* Shimmer effect */
         .btn::before {
             content: '';
             position: absolute;
@@ -100,16 +98,16 @@
         }
 
         .btn:hover::before {
-            left: 125%; /* [cite: 30] */
+            left: 125%;
         }
 
-        /* Accessible focus [cite: 31] */
+        /* Accessible focus */
         .btn:focus-visible {
             outline: none;
             box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
         }
 
-        /* MOBILE OPTIMISATION  */
+        /* MOBILE OPTIMISATION */
         @media (max-width: 600px) {
             body {
                 padding: 16px; /* Reduce padding slightly on small screens */
@@ -150,45 +148,43 @@
     </div>
 
     <script>
-        // ===== FOURTHWALL SCROLLBAR FIX (Definitive Version) [cite: 74] =====
+        // ===== FOURTHWALL SCROLLBAR FIX =====
         let lastHeight = 0;
         let resizeTimer;
 
         /**
-         * Sends the current scrollHeight to the parent window if it has changed. [cite: 75]
-         * This is the *only* function that should send a postMessage. [cite: 76]
+         * Sends the current scrollHeight to the parent window if it has changed.
+         * This is the *only* function that should send a postMessage.
          */
         function sendHeight() {
-            // Use scrollHeight for content height [cite: 77]
             const height = document.body.scrollHeight;
             
-            // Only send message if height has *actually* changed [cite: 78]
+            // Only send message if height has *actually* changed
             if (height !== lastHeight) {
                 lastHeight = height;
-                window.parent.postMessage({ frameHeight: height }, '*'); /* [cite: 79] */
+                window.parent.postMessage({ frameHeight: height }, '*');
             }
         }
 
         /**
-         * A debounced version of sendHeight() to be called on content changes. [cite: 80]
+         * A debounced version of sendHeight() to be called on content changes.
          * This ensures we don't spam messages during rapid changes.
          */
         function scheduleHeightCheck() {
-            // Clear any pending checks [cite: 82]
+            // Clear any pending checks
             clearTimeout(resizeTimer);
-            // Schedule a new check after 150ms [cite: 83]
+            // Schedule a new check
             resizeTimer = setTimeout(sendHeight, 150);
         }
 
-        // Send height on initial load (with a slight delay) [cite: 84]
-        // This fixes the "Content Cut-Off" race condition. [cite: 65, 84]
+        // Send height on initial load (with a slight delay)
         window.addEventListener('load', () => {
             setTimeout(sendHeight, 100);
         });
 
-        // Send height on window resize (debounced) [cite: 85]
+        // Send height on window resize (debounced)
         window.addEventListener('resize', () => {
-            // Use scheduleHeightCheck for built-in debounce [cite: 86]
+            // Use scheduleHeightCheck for built-in debounce
             scheduleHeightCheck();
         });
         // ===== END OF SCROLLBAR FIX =====
