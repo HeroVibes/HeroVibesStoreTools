@@ -593,7 +593,7 @@
       cropEnabled: false,
       cropRect: { x: 0, y: 0, width: 0, height: 0 },
       generatedGif: null,
-      lastDraggedHandle: null // Track which handle was last dragged
+      lastDraggedHandle: null
     };
 
     // ===== DOM ELEMENTS =====
@@ -761,7 +761,7 @@
       function startDrag(e, type) {
         isDragging = true;
         dragType = type;
-        state.lastDraggedHandle = type; // Track which handle is being dragged
+        state.lastDraggedHandle = type;
         startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
         startLeft = parseFloat(timelineSelection.style.left);
         startWidth = parseFloat(timelineSelection.style.width);
@@ -1097,6 +1097,8 @@
 
     async function generateGif() {
       return new Promise((resolve, reject) => {
+        console.log('🎨 GIF generation started');
+        
         try {
           console.log('🖼️ Setting up canvas...');
           const canvas = document.createElement('canvas');
@@ -1123,8 +1125,15 @@
 
           canvas.width = width;
           canvas.height = height;
+          console.log('Canvas dimensions set:', canvas.width, 'x', canvas.height);
 
           const qualityMap = { 1: 20, 2: 10, 3: 1 };
+          
+          console.log('⚙️ Checking GIF library...');
+          if (typeof GIF === 'undefined') {
+            throw new Error('GIF library not loaded');
+          }
+          console.log('✅ GIF library is loaded');
           
           console.log('⚙️ Initializing GIF encoder...');
           const gif = new GIF({
@@ -1132,8 +1141,10 @@
             quality: qualityMap[state.quality],
             width: width,
             height: height,
-            workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
+            workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js',
+            debug: true
           });
+          console.log('✅ GIF encoder initialized');
 
           const adjustedDuration = state.trimDuration / state.speed;
           const frameCount = Math.ceil(state.fps * adjustedDuration);
@@ -1145,26 +1156,77 @@
             frameDelay
           });
           
+          const frames = [];
           let currentFrame = 0;
+          let seekTimeout = null;
 
-          function captureFrame() {
+          // Set up GIF events BEFORE starting capture
+          gif.on('finished', (blob) => {
+            console.log('🎉 GIF finished event fired!', {
+              size: (blob.size / 1024).toFixed(2) + ' KB'
+            });
+            state.generatedGif = blob;
+            const url = URL.createObjectURL(blob);
+            outputGif.src = url;
+            
+            const sizeKB = (blob.size / 1024).toFixed(2);
+            outputInfo.textContent = `Size: ${sizeKB} KB | ${width}x${height}px | ${state.fps} FPS`;
+            
+            console.log('Resolving promise...');
+            resolve();
+          });
+
+          gif.on('progress', (p) => {
+            const percent = Math.round(p * 100);
+            progressText.textContent = `Encoding GIF... ${percent}%`;
+            progressFill.style.width = percent + '%';
+            console.log('🔄 Encoding progress:', percent + '%');
+          });
+
+          gif.on('abort', () => {
+            console.error('⚠️ GIF rendering aborted');
+            reject(new Error('GIF rendering was aborted'));
+          });
+
+          gif.on('start', () => {
+            console.log('▶️ GIF rendering started');
+          });
+
+          function captureNextFrame() {
             if (currentFrame >= frameCount) {
-              console.log('🎨 All frames captured, starting render...');
+              console.log('🎨 All frames captured (', frames.length, '), calling gif.render()...');
+              
+              // Add all captured frames
+              frames.forEach((frameData, idx) => {
+                console.log(`Adding frame ${idx + 1}/${frames.length}`);
+                gif.addFrame(frameData.imageData, { delay: frameDelay, copy: true });
+              });
+              
+              console.log('All frames added, calling render...');
               gif.render();
+              console.log('Render called, waiting for finished event...');
               return;
             }
 
             const progress = currentFrame / frameCount;
             const videoTime = state.startTime + (progress * state.trimDuration);
             
-            console.log(`📸 Capturing frame ${currentFrame + 1}/${frameCount} at ${videoTime.toFixed(2)}s`);
+            console.log(`📸 Seeking to frame ${currentFrame + 1}/${frameCount} at time ${videoTime.toFixed(2)}s`);
             
-            videoPreview.currentTime = videoTime;
-            
+            // Clear any existing timeout
+            if (seekTimeout) {
+              clearTimeout(seekTimeout);
+            }
+
+            // Set up one-time seeked event
             const seekedHandler = () => {
+              console.log(`✓ Seeked to ${videoPreview.currentTime.toFixed(2)}s`);
+              
               try {
+                // Clear the rect
                 ctx.clearRect(0, 0, width, height);
                 
+                // Draw the frame
                 if (state.cropEnabled) {
                   ctx.drawImage(
                     videoPreview,
@@ -1176,16 +1238,22 @@
                   ctx.drawImage(videoPreview, 0, 0, width, height);
                 }
 
-                gif.addFrame(canvas, { delay: frameDelay, copy: true });
-                console.log(`✅ Frame ${currentFrame + 1} added`);
+                // Capture the image data
+                const imageData = ctx.getImageData(0, 0, width, height);
+                frames.push({ imageData, videoTime });
+                
+                console.log(`✅ Frame ${currentFrame + 1} captured and stored`);
 
                 currentFrame++;
                 const progressPercent = (currentFrame / frameCount) * 100;
                 progressFill.style.width = progressPercent + '%';
                 progressText.textContent = `Processing frame ${currentFrame} of ${frameCount}`;
 
+                // Remove this specific handler
                 videoPreview.removeEventListener('seeked', seekedHandler);
-                setTimeout(captureFrame, 10);
+                
+                // Continue to next frame
+                setTimeout(captureNextFrame, 50);
               } catch (err) {
                 console.error('❌ Error capturing frame:', err);
                 videoPreview.removeEventListener('seeked', seekedHandler);
@@ -1193,38 +1261,26 @@
               }
             };
 
+            // Add the seeked listener
             videoPreview.addEventListener('seeked', seekedHandler);
+            
+            // Seek to the time
+            videoPreview.currentTime = videoTime;
+            
+            // Safety timeout in case seeked never fires
+            seekTimeout = setTimeout(() => {
+              console.warn('⚠️ Seek timeout, removing handler and trying next frame');
+              videoPreview.removeEventListener('seeked', seekedHandler);
+              currentFrame++;
+              captureNextFrame();
+            }, 2000);
           }
 
-          gif.on('finished', (blob) => {
-            console.log('🎉 GIF rendering complete!', {
-              size: (blob.size / 1024).toFixed(2) + ' KB'
-            });
-            state.generatedGif = blob;
-            const url = URL.createObjectURL(blob);
-            outputGif.src = url;
-            
-            const sizeKB = (blob.size / 1024).toFixed(2);
-            outputInfo.textContent = `Size: ${sizeKB} KB | ${width}x${height}px | ${state.fps} FPS`;
-            
-            resolve();
-          });
-
-          gif.on('progress', (p) => {
-            const percent = Math.round(p * 100);
-            progressText.textContent = `Encoding GIF... ${percent}%`;
-            console.log('🔄 Encoding progress:', percent + '%');
-          });
-
-          gif.on('abort', () => {
-            console.error('⚠️ GIF rendering aborted');
-            reject(new Error('GIF rendering was aborted'));
-          });
-
           console.log('🚀 Starting frame capture...');
-          captureFrame();
+          captureNextFrame();
+          
         } catch (err) {
-          console.error('❌ Error in generateGif:', err);
+          console.error('❌ Error in generateGif setup:', err);
           reject(err);
         }
       });
