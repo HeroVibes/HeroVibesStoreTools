@@ -577,7 +577,7 @@
 
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gifshot@latest/dist/gifshot.min.js"></script>
   <script>
     // ===== STATE MANAGEMENT =====
     let state = {
@@ -766,7 +766,6 @@
         startLeft = parseFloat(timelineSelection.style.left);
         startWidth = parseFloat(timelineSelection.style.width);
         e.preventDefault();
-        console.log('🖱️ Timeline drag started:', type);
       }
 
       function doDrag(e) {
@@ -816,7 +815,6 @@
       }
 
       function endDrag() {
-        console.log('🖱️ Timeline drag ended');
         isDragging = false;
         dragType = null;
       }
@@ -852,7 +850,7 @@
       durationTimeSpan.textContent = state.trimDuration.toFixed(1) + 's';
       endTimeSpan.textContent = state.endTime.toFixed(1) + 's';
 
-      // UPDATE VIDEO PREVIEW - Show start time when dragging left handle, end time when dragging right handle
+      // UPDATE VIDEO PREVIEW
       if (!state.cropEnabled) {
         if (state.lastDraggedHandle === 'left' || state.lastDraggedHandle === 'selection') {
           videoPreview.currentTime = state.startTime;
@@ -1065,16 +1063,7 @@
     // ===== GIF CONVERSION =====
     convertBtn.addEventListener('click', async () => {
       console.log('🎬 Starting GIF conversion...');
-      console.log('Settings:', {
-        startTime: state.startTime,
-        endTime: state.endTime,
-        duration: state.trimDuration,
-        fps: state.fps,
-        quality: state.quality,
-        speed: state.speed,
-        cropEnabled: state.cropEnabled
-      });
-
+      
       controlsCard.style.display = 'none';
       progressSection.style.display = 'block';
       scheduleHeightCheck();
@@ -1096,23 +1085,20 @@
     });
 
     async function generateGif() {
-      return new Promise((resolve, reject) => {
-        console.log('🎨 GIF generation started');
+      return new Promise(async (resolve, reject) => {
+        console.log('🎨 GIF generation started with gifshot library');
         
         try {
-          console.log('🖼️ Setting up canvas...');
           const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
           let width, height;
           if (state.cropEnabled) {
             width = Math.round(state.cropRect.width);
             height = Math.round(state.cropRect.height);
-            console.log('✂️ Cropping enabled:', { width, height });
           } else {
             width = videoPreview.videoWidth;
             height = videoPreview.videoHeight;
-            console.log('📐 Using full video dimensions:', { width, height });
           }
 
           const maxDimension = 600;
@@ -1120,113 +1106,70 @@
             const scale = maxDimension / Math.max(width, height);
             width = Math.round(width * scale);
             height = Math.round(height * scale);
-            console.log('📏 Scaled down to:', { width, height });
           }
 
           canvas.width = width;
           canvas.height = height;
-          console.log('Canvas dimensions set:', canvas.width, 'x', canvas.height);
-
-          const qualityMap = { 1: 20, 2: 10, 3: 1 };
-          
-          console.log('⚙️ Checking GIF library...');
-          if (typeof GIF === 'undefined') {
-            throw new Error('GIF library not loaded');
-          }
-          console.log('✅ GIF library is loaded');
-          
-          console.log('⚙️ Initializing GIF encoder...');
-          const gif = new GIF({
-            workers: 2,
-            quality: qualityMap[state.quality],
-            width: width,
-            height: height,
-            workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js',
-            debug: true
-          });
-          console.log('✅ GIF encoder initialized');
 
           const adjustedDuration = state.trimDuration / state.speed;
           const frameCount = Math.ceil(state.fps * adjustedDuration);
-          const frameDelay = Math.round((1000 / state.fps) * state.speed);
+          const interval = 1 / state.fps;
           
-          console.log('📊 Frame calculation:', {
-            adjustedDuration,
-            frameCount,
-            frameDelay
-          });
+          console.log('📊 Capturing', frameCount, 'frames at', state.fps, 'fps');
           
-          const frames = [];
+          const images = [];
           let currentFrame = 0;
-          let seekTimeout = null;
 
-          // Set up GIF events BEFORE starting capture
-          gif.on('finished', (blob) => {
-            console.log('🎉 GIF finished event fired!', {
-              size: (blob.size / 1024).toFixed(2) + ' KB'
-            });
-            state.generatedGif = blob;
-            const url = URL.createObjectURL(blob);
-            outputGif.src = url;
-            
-            const sizeKB = (blob.size / 1024).toFixed(2);
-            outputInfo.textContent = `Size: ${sizeKB} KB | ${width}x${height}px | ${state.fps} FPS`;
-            
-            console.log('Resolving promise...');
-            resolve();
-          });
-
-          gif.on('progress', (p) => {
-            const percent = Math.round(p * 100);
-            progressText.textContent = `Encoding GIF... ${percent}%`;
-            progressFill.style.width = percent + '%';
-            console.log('🔄 Encoding progress:', percent + '%');
-          });
-
-          gif.on('abort', () => {
-            console.error('⚠️ GIF rendering aborted');
-            reject(new Error('GIF rendering was aborted'));
-          });
-
-          gif.on('start', () => {
-            console.log('▶️ GIF rendering started');
-          });
-
-          function captureNextFrame() {
+          async function captureFrame() {
             if (currentFrame >= frameCount) {
-              console.log('🎨 All frames captured (', frames.length, '), calling gif.render()...');
+              console.log('✅ All frames captured, creating GIF...');
               
-              // Add all captured frames
-              frames.forEach((frameData, idx) => {
-                console.log(`Adding frame ${idx + 1}/${frames.length}`);
-                gif.addFrame(frameData.imageData, { delay: frameDelay, copy: true });
+              // Create GIF using gifshot
+              gifshot.createGIF({
+                images: images,
+                gifWidth: width,
+                gifHeight: height,
+                interval: interval / state.speed,
+                numFrames: frameCount,
+                frameDuration: 1,
+                sampleInterval: state.quality === 1 ? 20 : (state.quality === 2 ? 10 : 5)
+              }, function(obj) {
+                if (!obj.error) {
+                  console.log('🎉 GIF created successfully!');
+                  
+                  // Convert base64 to blob
+                  fetch(obj.image)
+                    .then(res => res.blob())
+                    .then(blob => {
+                      state.generatedGif = blob;
+                      outputGif.src = obj.image;
+                      
+                      const sizeKB = (blob.size / 1024).toFixed(2);
+                      outputInfo.textContent = `Size: ${sizeKB} KB | ${width}x${height}px | ${state.fps} FPS`;
+                      
+                      resolve();
+                    })
+                    .catch(reject);
+                } else {
+                  console.error('❌ gifshot error:', obj.error);
+                  reject(new Error(obj.error));
+                }
               });
               
-              console.log('All frames added, calling render...');
-              gif.render();
-              console.log('Render called, waiting for finished event...');
               return;
             }
 
             const progress = currentFrame / frameCount;
             const videoTime = state.startTime + (progress * state.trimDuration);
             
-            console.log(`📸 Seeking to frame ${currentFrame + 1}/${frameCount} at time ${videoTime.toFixed(2)}s`);
+            videoPreview.currentTime = videoTime;
             
-            // Clear any existing timeout
-            if (seekTimeout) {
-              clearTimeout(seekTimeout);
-            }
-
-            // Set up one-time seeked event
-            const seekedHandler = () => {
-              console.log(`✓ Seeked to ${videoPreview.currentTime.toFixed(2)}s`);
-              
-              try {
-                // Clear the rect
+            await new Promise(res => {
+              const seekHandler = () => {
+                videoPreview.removeEventListener('seeked', seekHandler);
+                
                 ctx.clearRect(0, 0, width, height);
                 
-                // Draw the frame
                 if (state.cropEnabled) {
                   ctx.drawImage(
                     videoPreview,
@@ -1237,50 +1180,27 @@
                 } else {
                   ctx.drawImage(videoPreview, 0, 0, width, height);
                 }
-
-                // Capture the image data
-                const imageData = ctx.getImageData(0, 0, width, height);
-                frames.push({ imageData, videoTime });
                 
-                console.log(`✅ Frame ${currentFrame + 1} captured and stored`);
-
+                images.push(canvas.toDataURL('image/png'));
+                
                 currentFrame++;
                 const progressPercent = (currentFrame / frameCount) * 100;
                 progressFill.style.width = progressPercent + '%';
                 progressText.textContent = `Processing frame ${currentFrame} of ${frameCount}`;
-
-                // Remove this specific handler
-                videoPreview.removeEventListener('seeked', seekedHandler);
                 
-                // Continue to next frame
-                setTimeout(captureNextFrame, 50);
-              } catch (err) {
-                console.error('❌ Error capturing frame:', err);
-                videoPreview.removeEventListener('seeked', seekedHandler);
-                reject(err);
-              }
-            };
-
-            // Add the seeked listener
-            videoPreview.addEventListener('seeked', seekedHandler);
+                res();
+              };
+              
+              videoPreview.addEventListener('seeked', seekHandler);
+            });
             
-            // Seek to the time
-            videoPreview.currentTime = videoTime;
-            
-            // Safety timeout in case seeked never fires
-            seekTimeout = setTimeout(() => {
-              console.warn('⚠️ Seek timeout, removing handler and trying next frame');
-              videoPreview.removeEventListener('seeked', seekedHandler);
-              currentFrame++;
-              captureNextFrame();
-            }, 2000);
+            await captureFrame();
           }
 
-          console.log('🚀 Starting frame capture...');
-          captureNextFrame();
+          await captureFrame();
           
         } catch (err) {
-          console.error('❌ Error in generateGif setup:', err);
+          console.error('❌ Error in generateGif:', err);
           reject(err);
         }
       });
