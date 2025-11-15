@@ -80,14 +80,26 @@
             filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
         }
 
-        #wheelCanvas {
+        .wheel-wrapper {
+            position: relative;
             width: 100%;
             height: 100%;
             max-width: 450px;
             max-height: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #wheelCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
             cursor: pointer;
             transition: opacity 0.2s;
+            touch-action: none;
+            will-change: transform;
         }
 
         #wheelCanvas:hover {
@@ -237,7 +249,7 @@
             text-align: center;
             font-family: sans-serif;
             transition: border-color 0.2s, background 0.2s;
-            -moz-appearance: textfield; /* Remove arrows in Firefox */
+            -moz-appearance: textfield;
         }
 
         .segment-input-group input[type="number"]:focus {
@@ -246,7 +258,7 @@
             background: var(--hover-color);
         }
 
-        /* Remove number input arrows (Chrome, Safari) */
+        /* Remove number input arrows */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -395,6 +407,10 @@
             .segment-input-group input[type="number"] {
                 width: 50px;
             }
+
+            .wheel-container {
+                padding: 16px;
+            }
         }
     </style>
 </head>
@@ -405,7 +421,9 @@
     <div class="wheel-section">
         <div class="wheel-container">
             <div class="wheel-pointer"></div>
-            <canvas id="wheelCanvas" width="450" height="450"></canvas>
+            <div class="wheel-wrapper">
+                <canvas id="wheelCanvas"></canvas>
+            </div>
         </div>
         
         <div class="result-card">
@@ -463,10 +481,28 @@ document.addEventListener('DOMContentLoaded', () => {
     tickSound.volume = 0.3;
     winSound.volume = 0.5;
 
+    // ===== CANVAS SETUP FOR HIGH-DPI =====
+    const wheelWrapper = canvas.parentElement;
+    let canvasSize = 450;
+    
+    const setupCanvas = () => {
+        const rect = wheelWrapper.getBoundingClientRect();
+        const size = Math.min(rect.width, rect.height);
+        canvasSize = size;
+        
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+        canvas.style.width = size + 'px';
+        canvas.style.height = size + 'px';
+        ctx.scale(dpr, dpr);
+    };
+
     // ===== STATE VARIABLES =====
     let segments = [];
     let isSpinning = false;
     let nextSegmentNumber = 5;
+    let currentRotation = 0;
     
     const colors = [
         "#F94144", "#F3722C", "#F8961E", "#F9C74F", 
@@ -520,13 +556,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===== DRAW WHEEL =====
-    const drawWheel = () => {
+    const drawWheel = (rotation = currentRotation) => {
+        const centerX = canvasSize / 2;
+        const centerY = canvasSize / 2;
+        const radius = (canvasSize / 2) - 10;
         const totalPercentage = segments.reduce((sum, seg) => sum + seg.percentage, 0);
         
+        ctx.clearRect(0, 0, canvasSize, canvasSize);
+        
         if (totalPercentage <= 0 || segments.length === 0) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
-            ctx.arc(225, 225, 220, 0, 2 * Math.PI);
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
             ctx.fillStyle = '#2A2A2A';
             ctx.fill();
             ctx.strokeStyle = '#3A3A3A';
@@ -536,20 +576,24 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.font = '16px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('Add segments to begin', 225, 225);
+            ctx.fillText('Add segments to begin', centerX, centerY);
             return;
         }
 
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(rotation);
+        ctx.translate(-centerX, -centerY);
+
         let currentAngle = 0;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         segments.forEach((segment, index) => {
             const segmentAngle = (segment.percentage / totalPercentage) * 2 * Math.PI;
             
             // Draw segment
             ctx.beginPath();
-            ctx.moveTo(225, 225);
-            ctx.arc(225, 225, 220, currentAngle, currentAngle + segmentAngle);
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + segmentAngle);
             ctx.closePath();
             ctx.fillStyle = colors[index % colors.length];
             ctx.fill();
@@ -559,12 +603,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Draw text
             ctx.save();
-            ctx.translate(225, 225);
+            ctx.translate(centerX, centerY);
             ctx.rotate(currentAngle + segmentAngle / 2);
             ctx.textAlign = 'right';
             ctx.fillStyle = '#FFF';
             
-            const baseFontSize = 16;
+            const baseFontSize = Math.max(12, canvasSize / 28);
             const charLimit = 12;
             let fontSize = baseFontSize;
 
@@ -577,15 +621,17 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.textBaseline = 'middle';
             ctx.shadowColor = "rgba(0,0,0,0.8)";
             ctx.shadowBlur = 4;
-            ctx.fillText(segment.text, 195, 0);
+            ctx.fillText(segment.text, radius * 0.85, 0);
             ctx.restore();
 
             currentAngle += segmentAngle;
         });
 
+        ctx.restore();
+
         // Draw center circle
         ctx.beginPath();
-        ctx.arc(225, 225, 30, 0, 2 * Math.PI);
+        ctx.arc(centerX, centerY, canvasSize / 15, 0, 2 * Math.PI);
         ctx.fillStyle = '#1F1F1F';
         ctx.fill();
         ctx.strokeStyle = '#87A9FF';
@@ -613,16 +659,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        let currentAngle = 0;
+        let segmentAngleStart = 0;
         let stopAngle = 0;
         for (const segment of segments) {
             const segmentAngle = (segment.percentage / totalPercentage) * (2 * Math.PI);
             if (segment === winningSegment) {
                 const randomPointInSegment = (Math.random() * 0.8 + 0.1) * segmentAngle;
-                stopAngle = currentAngle + randomPointInSegment;
+                stopAngle = segmentAngleStart + randomPointInSegment;
                 break;
             }
-            currentAngle += segmentAngle;
+            segmentAngleStart += segmentAngle;
         }
 
         const targetRotation = (2 * Math.PI) - stopAngle - (Math.PI / 2);
@@ -631,6 +677,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalRotation = extraSpins + targetRotation;
         
         let lastTickAngle = 0;
+        const startRotation = currentRotation;
         let start = null;
 
         const animate = (timestamp) => {
@@ -638,21 +685,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const progress = timestamp - start;
             
             const easedProgress = 1 - Math.pow(1 - Math.min(progress / spinDuration, 1), 4);
-            const currentRotation = easedProgress * totalRotation;
+            const animRotation = easedProgress * totalRotation;
 
             const tickAngleIncrement = (2 * Math.PI) / segments.length;
-            if (currentRotation > lastTickAngle + tickAngleIncrement) {
+            if (animRotation > lastTickAngle + tickAngleIncrement) {
                 tickSound.currentTime = 0;
                 tickSound.play().catch(() => {});
                 lastTickAngle += tickAngleIncrement;
             }
 
-            canvas.style.transform = `rotate(${currentRotation}rad)`;
+            currentRotation = startRotation + animRotation;
+            drawWheel(currentRotation);
 
             if (progress < spinDuration) {
                 requestAnimationFrame(animate);
             } else {
-                canvas.style.transform = `rotate(${totalRotation}rad)`;
+                currentRotation = startRotation + totalRotation;
+                drawWheel(currentRotation);
                 isSpinning = false;
                 resultDisplay.innerText = winningSegment.text;
                 winSound.play().catch(() => {});
@@ -766,7 +815,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.history.replaceState(null, '', window.location.pathname);
         createInitialSegments();
         resultDisplay.innerText = 'Click wheel to spin';
-        canvas.style.transform = 'rotate(0rad)';
+        currentRotation = 0;
+        drawWheel();
         scheduleHeightCheck();
     };
 
@@ -789,7 +839,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Handle window resize
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            setupCanvas();
+            drawWheel();
+            scheduleHeightCheck();
+        }, 100);
+    });
+
     // ===== INITIALIZATION =====
+    setupCanvas();
+    
     if (!loadFromURL()) {
         createInitialSegments();
     }
