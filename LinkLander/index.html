@@ -7,637 +7,637 @@
   <style>
     /* ===== ROOT VARIABLES ===== */
     :root {
-      --bg-primary: #191919; [cite: 96]
-      --bg-secondary: #1F1F1F; [cite: 96]
-      --bg-hover: #323232; [cite: 96]
-      --outline: #323232; [cite: 96]
-      --accent: #87A9FF; [cite: 96]
-      --text-primary: #D4D4D4; [cite: 96]
-      --text-secondary: #8C8C8C; [cite: 96]
-      --radius: 12px; [cite: 96]
-      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); [cite: 96]
+      --bg-primary: #191919;
+      --bg-secondary: #1F1F1F;
+      --bg-hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 12px;
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* ===== GLOBAL STYLES ===== */
     * {
-      margin: 0; [cite: 98]
-      padding: 0; [cite: 98]
-      box-sizing: border-box; [cite: 98]
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      background: var(--bg-primary); [cite: 99]
-      color: var(--text-primary); [cite: 99]
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; [cite: 99]
-      line-height: 1.5; [cite: 99]
-      -webkit-font-smoothing: antialiased; [cite: 99]
-      padding-bottom: 40px; [cite: 99]
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 40px;
     }
 
     /* ===== CONTAINER ===== */
     .container {
-      max-width: 680px; [cite: 103]
-      margin: 0 auto; [cite: 103]
-      padding: 24px 16px; [cite: 103]
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 24px 16px;
     }
 
     /* ===== PROFILE SECTION ===== */
     .profile-section {
-      text-align: center; [cite: 104]
-      margin-bottom: 32px; [cite: 104]
-      animation: fadeInDown 0.6s ease-out; [cite: 104]
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fadeInDown 0.6s ease-out;
     }
 
     .profile-image {
-      width: 120px; [cite: 105]
-      height: 120px; [cite: 105]
-      border-radius: 50%; [cite: 105]
-      border: 3px solid var(--accent); [cite: 105]
-      margin: 0 auto 16px; [cite: 105]
-      background: var(--bg-secondary); [cite: 105]
-      overflow: hidden; [cite: 105]
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3); [cite: 106]
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      margin: 0 auto 16px;
+      background: var(--bg-secondary);
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
     }
 
     .profile-image img {
-      width: 100%; [cite: 107]
-      height: 100%; [cite: 107]
-      object-fit: cover; [cite: 107]
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .profile-handle {
-      font-size: 20px; [cite: 108]
-      font-weight: bold; [cite: 108]
-      margin-bottom: 8px; [cite: 108]
-      color: var(--text-primary); [cite: 108]
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: var(--text-primary);
     }
 
     .profile-bio {
-      font-size: 14px; [cite: 109]
-      color: var(--text-secondary); [cite: 109]
-      margin-bottom: 12px; [cite: 109]
-      max-width: 500px; [cite: 109]
-      margin-left: auto; [cite: 109]
-      margin-right: auto; [cite: 109]
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .profile-meta {
-      display: flex; [cite: 110]
-      gap: 16px; [cite: 110]
-      justify-content: center; [cite: 110]
-      flex-wrap: wrap; [cite: 110]
-      font-size: 12px; [cite: 110]
-      color: var(--text-secondary); [cite: 110]
-      margin-bottom: 20px; [cite: 111]
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
     }
 
     .profile-meta-item {
-      display: flex; [cite: 112]
-      align-items: center; [cite: 112]
-      gap: 4px; [cite: 112]
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .profile-meta-item a {
-      color: var(--text-secondary); [cite: 113]
-      text-decoration: none; [cite: 113]
-      transition: color var(--transition); [cite: 113]
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color var(--transition);
     }
 
     .profile-meta-item a:hover {
-      color: var(--accent); [cite: 114]
+      color: var(--accent);
     }
 
     /* ===== QUICK LINKS ROW ===== */
     .quick-links {
-      display: flex; [cite: 115]
-      gap: 12px; [cite: 115]
-      justify-content: center; [cite: 115]
-      flex-wrap: wrap; [cite: 115]
-      margin-bottom: 32px; [cite: 115]
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
     }
 
     .quick-link {
-      width: 48px; [cite: 116]
-      height: 48px; [cite: 116]
-      background: var(--bg-secondary); [cite: 116]
-      border: 1px solid var(--outline); [cite: 116]
-      border-radius: 50%; [cite: 116]
-      display: flex; [cite: 116]
-      align-items: center; [cite: 116]
-      justify-content: center; [cite: 116]
-      cursor: pointer; [cite: 116]
-      transition: all var(--transition); [cite: 117]
-      position: relative; [cite: 117]
-      overflow: hidden; [cite: 117]
-      text-decoration: none; [cite: 117]
+      width: 48px;
+      height: 48px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
     }
 
     .quick-link:hover {
-      background: var(--bg-hover); [cite: 118]
-      transform: translateY(-4px) scale(1.05); [cite: 118]
-      border-color: var(--accent); [cite: 118]
+      background: var(--bg-hover);
+      transform: translateY(-4px) scale(1.05);
+      border-color: var(--accent);
     }
 
     .quick-link::before {
-      content: ''; [cite: 119]
-      position: absolute; [cite: 119]
-      top: 50%; [cite: 119]
-      left: 50%; [cite: 119]
-      width: 0; [cite: 119]
-      height: 0; [cite: 119]
-      border-radius: 50%; [cite: 119]
-      background: rgba(135, 169, 255, 0.1); [cite: 119]
-      transform: translate(-50%, -50%); [cite: 119]
-      transition: width 0.4s, height 0.4s; [cite: 120]
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(135, 169, 255, 0.1);
+      transform: translate(-50%, -50%);
+      transition: width 0.4s, height 0.4s;
     }
 
     .quick-link:hover::before {
-      width: 100%; [cite: 121]
-      height: 100%; [cite: 121]
+      width: 100%;
+      height: 100%;
     }
 
     .quick-link svg {
-      width: 20px; [cite: 122]
-      height: 20px; [cite: 122]
-      fill: var(--text-primary); [cite: 122]
-      z-index: 1; [cite: 122]
-      transition: fill var(--transition); [cite: 122]
+      width: 20px;
+      height: 20px;
+      fill: var(--text-primary);
+      z-index: 1;
+      transition: fill var(--transition);
     }
 
     .quick-link:hover svg {
-      fill: var(--accent); [cite: 123]
+      fill: var(--accent);
     }
 
     /* ===== CARD BASE STYLES ===== */
     .card {
-      background: var(--bg-secondary); [cite: 124]
-      border: 1px solid var(--outline); [cite: 124]
-      border-radius: var(--radius); [cite: 124]
-      padding: 16px; [cite: 124]
-      margin-bottom: 16px; [cite: 124]
-      cursor: pointer; [cite: 124]
-      transition: all var(--transition); [cite: 124]
-      position: relative; [cite: 124]
-      overflow: hidden; [cite: 124]
-      text-decoration: none; [cite: 125]
-      display: block; [cite: 125]
-      color: inherit; [cite: 125]
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      display: block;
+      color: inherit;
     }
 
     .card:hover {
-      transform: translateY(-2px); [cite: 126]
-      border-color: var(--accent); [cite: 126]
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2); [cite: 126]
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     }
 
     /* Shimmer effect on hover */
     .card::before {
-      content: ''; [cite: 127]
-      position: absolute; [cite: 127]
-      top: 0; [cite: 127]
-      left: -100%; [cite: 127]
-      width: 50%; [cite: 127]
-      height: 100%; [cite: 127]
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); [cite: 127]
-      transform: skewX(-25deg); [cite: 127]
-      transition: left 0.7s ease-in-out; [cite: 128]
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
     }
 
     .card:hover::before {
-      left: 125%; [cite: 129]
+      left: 125%;
     }
 
     /* ===== CONSISTENT TITLE & DESCRIPTION SIZES ===== */
     .card-title {
-      font-size: 14px; [cite: 130]
-      font-weight: 600; [cite: 130]
-      margin-bottom: 6px; [cite: 130]
-      display: flex; [cite: 130]
-      align-items: center; [cite: 130]
-      gap: 8px; [cite: 130]
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .card-icon {
-      font-size: 18px; [cite: 131]
-      flex-shrink: 0; [cite: 131]
-      display: flex; [cite: 131]
-      align-items: center; [cite: 131]
-      justify-content: center; [cite: 132]
+      font-size: 18px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .card-icon img,
     .card-icon svg {
-      width: 18px; [cite: 133]
-      height: 18px; [cite: 133]
-      display: block; [cite: 133]
+      width: 18px;
+      height: 18px;
+      display: block;
     }
 
     .card-description {
-      font-size: 12px; [cite: 134]
-      color: var(--text-secondary); [cite: 134]
-      line-height: 1.4; [cite: 134]
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
     }
 
     /* ===== LARGE FEATURE CARD ===== */
     .card-large {
-      padding: 32px 20px; [cite: 135]
-      background: linear-gradient(135deg, var(--bg-secondary) 0%, #252525 100%); [cite: 135]
+      padding: 32px 20px;
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, #252525 100%);
     }
 
     /* ===== YOUTUBE CHANNELS GRID ===== */
     .youtube-channels {
-      padding: 20px 16px; [cite: 136]
+      padding: 20px 16px;
     }
 
     .youtube-channels .card-title {
-      margin-bottom: 16px; [cite: 137]
-      justify-content: center; [cite: 137]
+      margin-bottom: 16px;
+      justify-content: center;
     }
 
     .channels-grid {
-      display: grid; [cite: 138]
-      grid-template-columns: repeat(3, 1fr); [cite: 138]
-      gap: 12px; [cite: 138]
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
     }
 
     .channel-item {
-      background: var(--bg-primary); [cite: 139]
-      border: 2px solid var(--outline); [cite: 139]
-      border-radius: 8px; [cite: 139]
-      padding: 12px; [cite: 139]
-      text-align: center; [cite: 139]
-      transition: all var(--transition); [cite: 139]
-      cursor: pointer; [cite: 139]
-      text-decoration: none; [cite: 139]
-      color: inherit; [cite: 139]
-      display: block; [cite: 139]
+      background: var(--bg-primary);
+      border: 2px solid var(--outline);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      transition: all var(--transition);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
     }
 
     .channel-item:hover {
-      transform: translateY(-4px); [cite: 141]
+      transform: translateY(-4px);
     }
 
     /* YouTube Channel Colors - Only on Hover */
-    .channel-item.gaming:hover { border-color: #FFD700; [cite: 142]
-      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3); } [cite: 142]
-    .channel-item.tech:hover { border-color: #4A9EFF; [cite: 143]
-      box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3); } [cite: 143]
-    .channel-item.vlogs:hover { border-color: #4AFF88; [cite: 144]
-      box-shadow: 0 4px 12px rgba(74, 255, 136, 0.3); } [cite: 144]
-    .channel-item.live:hover { border-color: #A64AFF; [cite: 145]
-      box-shadow: 0 4px 12px rgba(166, 74, 255, 0.3); } [cite: 145]
-    .channel-item.movies:hover { border-color: #FF4A4A; [cite: 146]
-      box-shadow: 0 4px 12px rgba(255, 74, 74, 0.3); } [cite: 146]
-    .channel-item.news:hover { border-color: #FFFFFF; [cite: 147]
-      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3); } [cite: 147]
+    .channel-item.gaming:hover { border-color: #FFD700;
+      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3); }
+    .channel-item.tech:hover { border-color: #4A9EFF;
+      box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3); }
+    .channel-item.vlogs:hover { border-color: #4AFF88;
+      box-shadow: 0 4px 12px rgba(74, 255, 136, 0.3); }
+    .channel-item.live:hover { border-color: #A64AFF;
+      box-shadow: 0 4px 12px rgba(166, 74, 255, 0.3); }
+    .channel-item.movies:hover { border-color: #FF4A4A;
+      box-shadow: 0 4px 12px rgba(255, 74, 74, 0.3); }
+    .channel-item.news:hover { border-color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3); }
 
     .channel-thumb {
-      font-size: 32px; [cite: 148]
-      margin-bottom: 8px; [cite: 148]
+      font-size: 32px;
+      margin-bottom: 8px;
     }
 
     .channel-category {
-      font-size: 10px; [cite: 149]
-      color: var(--text-secondary); [cite: 149]
-      margin-bottom: 2px; [cite: 149]
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
     }
 
     .channel-name {
-      font-size: 12px; [cite: 150]
-      font-weight: 600; [cite: 150]
-      color: var(--text-primary); [cite: 150]
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     /* ===== AFFILIATE CARD (Special Glow) ===== */
     .card-affiliate {
-      background: linear-gradient(135deg, #1a1f2e 0%, var(--bg-secondary) 100%); [cite: 151]
-      border: 1px solid var(--accent); [cite: 151]
-      position: relative; [cite: 151]
+      background: linear-gradient(135deg, #1a1f2e 0%, var(--bg-secondary) 100%);
+      border: 1px solid var(--accent);
+      position: relative;
     }
 
     .card-affiliate::after {
-      content: '✨'; [cite: 152]
-      position: absolute; [cite: 152]
-      top: 16px; [cite: 152]
-      right: 16px; [cite: 152]
-      font-size: 20px; [cite: 152]
-      animation: sparkle 3s infinite; [cite: 152]
+      content: '✨';
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 20px;
+      animation: sparkle 3s infinite;
     }
 
     @keyframes sparkle {
-      0%, 100% { opacity: 0.4; transform: scale(1) rotate(0deg); [cite: 154]
-      } [cite: 154]
-      50% { opacity: 1; transform: scale(1.2) rotate(180deg); [cite: 155]
-      } [cite: 155]
+      0%, 100% { opacity: 0.4; transform: scale(1) rotate(0deg);
+      }
+      50% { opacity: 1; transform: scale(1.2) rotate(180deg);
+      }
     }
 
     /* ===== FREE TOOL CARD (Enhanced with Fixed Height) ===== */
     .free-tool-wrapper {
-      position: relative; [cite: 156]
-      margin-bottom: 16px; [cite: 156]
+      position: relative;
+      margin-bottom: 16px;
     }
 
     .free-tool-label {
-      background: var(--accent); [cite: 157]
-      color: var(--bg-primary); [cite: 157]
-      font-size: 10px; [cite: 157]
-      font-weight: 700; [cite: 157]
-      letter-spacing: 0.5px; [cite: 157]
-      padding: 4px 12px; [cite: 157]
-      border-radius: 0 6px 0 0; [cite: 157]
-      display: inline-block; [cite: 157]
-      margin-bottom: 0; [cite: 157]
-      position: relative; [cite: 157]
-      z-index: 2; [cite: 157]
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 4px 12px;
+      border-radius: 0 6px 0 0;
+      display: inline-block;
+      margin-bottom: 0;
+      position: relative;
+      z-index: 2;
     }
 
     .card-free-tool {
-      background: linear-gradient(135deg, #1f1a2e 0%, var(--bg-secondary) 100%); [cite: 159]
-      position: relative; [cite: 159]
-      border: 2px solid var(--accent); [cite: 159]
-      box-shadow: 0 0 20px rgba(135, 169, 255, 0.15); [cite: 159]
-      height: 120px; [cite: 159]
-      display: flex; [cite: 159]
-      flex-direction: column; [cite: 159]
-      justify-content: center; [cite: 159]
-      border-radius: 0 var(--radius) var(--radius) var(--radius); [cite: 160]
-      margin-top: 0; [cite: 160]
+      background: linear-gradient(135deg, #1f1a2e 0%, var(--bg-secondary) 100%);
+      position: relative;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 20px rgba(135, 169, 255, 0.15);
+      height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-radius: 0 var(--radius) var(--radius) var(--radius);
+      margin-top: 0;
     }
 
     .card-free-tool::after {
-      content: '🎁'; [cite: 161]
-      position: absolute; [cite: 161]
-      top: 16px; [cite: 161]
-      right: 16px; [cite: 161]
-      font-size: 24px; [cite: 161]
-      animation: bounce 2s infinite; [cite: 161]
+      content: '🎁';
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 24px;
+      animation: bounce 2s infinite;
     }
 
     @keyframes bounce {
-      0%, 100% { transform: translateY(0); [cite: 163]
-      } [cite: 163]
-      50% { transform: translateY(-8px); [cite: 164]
-      } [cite: 164]
+      0%, 100% { transform: translateY(0);
+      }
+      50% { transform: translateY(-8px);
+      }
     }
 
     .tool-content {
-      min-height: 52px; [cite: 165]
+      min-height: 52px;
     }
 
     .tool-transition {
-      animation: toolFade 0.5s ease-in-out; [cite: 166]
+      animation: toolFade 0.5s ease-in-out;
     }
 
     @keyframes toolFade {
-      0% { opacity: 0; transform: translateY(10px); [cite: 167]
-      } [cite: 167]
-      100% { opacity: 1; transform: translateY(0); [cite: 168]
-      } [cite: 168]
+      0% { opacity: 0; transform: translateY(10px);
+      }
+      100% { opacity: 1; transform: translateY(0);
+      }
     }
 
     /* ===== TWO COLUMN LAYOUT (Always Side by Side) ===== */
     .two-column {
-      display: grid; [cite: 169]
-      grid-template-columns: repeat(2, 1fr); [cite: 169]
-      gap: 12px; [cite: 169]
-      margin-bottom: 16px; [cite: 169]
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
     }
 
     .two-column .card {
-      margin-bottom: 0; [cite: 170]
+      margin-bottom: 0;
     }
 
     /* ===== MEDIA KIT CARD (Blue Gradient) ===== */
     .card-media-kit {
-      background: linear-gradient(135deg, #1a1f2e 0%, var(--bg-secondary) 100%); [cite: 171]
-      border: 1px solid rgba(74, 158, 255, 0.3); [cite: 171]
+      background: linear-gradient(135deg, #1a1f2e 0%, var(--bg-secondary) 100%);
+      border: 1px solid rgba(74, 158, 255, 0.3);
     }
 
     .card-media-kit:hover {
-      border-color: #4A9EFF; [cite: 172]
+      border-color: #4A9EFF;
     }
 
     /* ===== 12BOOM GRID ===== */
     .news-grid {
-      display: grid; [cite: 173]
-      grid-template-columns: repeat(3, 1fr); [cite: 173]
-      gap: 12px; [cite: 173]
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
     }
 
     .news-item {
-      background: var(--bg-primary); [cite: 174]
-      border: 1px solid var(--outline); [cite: 174]
-      border-radius: 8px; [cite: 174]
-      padding: 12px; [cite: 174]
-      text-align: center; [cite: 174]
-      transition: all var(--transition); [cite: 174]
-      cursor: pointer; [cite: 174]
-      text-decoration: none; [cite: 174]
-      color: inherit; [cite: 174]
-      display: block; [cite: 175]
+      background: var(--bg-primary);
+      border: 1px solid var(--outline);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      transition: all var(--transition);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
     }
 
     .news-item:hover {
-      border-color: var(--accent); [cite: 176]
-      transform: translateY(-4px); [cite: 176]
+      border-color: var(--accent);
+      transform: translateY(-4px);
     }
 
     .news-icon {
-      font-size: 24px; [cite: 177]
-      margin-bottom: 8px; [cite: 177]
-      display: flex; [cite: 177]
-      align-items: center; [cite: 177]
-      justify-content: center; [cite: 177]
+      font-size: 24px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .news-icon svg {
-      width: 24px; [cite: 178]
-      height: 24px; [cite: 178]
-      fill: var(--text-primary); [cite: 178]
+      width: 24px;
+      height: 24px;
+      fill: var(--text-primary);
     }
 
     .news-label {
-      font-size: 10px; [cite: 179]
-      color: var(--text-secondary); [cite: 179]
-      margin-bottom: 2px; [cite: 179]
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
     }
 
     .news-name {
-      font-size: 11px; [cite: 180]
-      font-weight: 600; [cite: 180]
-      color: var(--text-primary); [cite: 180]
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     /* ===== ONLYFANS CARD ===== */
     .card-onlyfans {
-      background: linear-gradient(135deg, #2a1a2e 0%, var(--bg-secondary) 100%); [cite: 181]
-      border: 2px solid #FF69B4; [cite: 181]
-      animation: subtlePulse 3s infinite; [cite: 181]
+      background: linear-gradient(135deg, #2a1a2e 0%, var(--bg-secondary) 100%);
+      border: 2px solid #FF69B4;
+      animation: subtlePulse 3s infinite;
     }
 
     @keyframes subtlePulse {
-      0%, 100% { box-shadow: 0 0 10px rgba(255, 105, 180, 0.2); [cite: 182]
-      } [cite: 182]
-      50% { box-shadow: 0 0 20px rgba(255, 105, 180, 0.4); [cite: 183]
-      } [cite: 183]
+      0%, 100% { box-shadow: 0 0 10px rgba(255, 105, 180, 0.2);
+      }
+      50% { box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+      }
     }
 
     /* ===== MODAL ===== */
     .modal {
-      display: none; [cite: 184]
-      position: fixed; [cite: 184]
-      top: 0; [cite: 184]
-      left: 0; [cite: 184]
-      width: 100%; [cite: 184]
-      height: 100%; [cite: 184]
-      background: rgba(0,0,0,0.9); [cite: 184]
-      z-index: 9999; [cite: 184]
-      align-items: center; [cite: 184]
-      justify-content: center; [cite: 184]
-      padding: 20px; [cite: 184]
-      animation: fadeIn 0.3s; [cite: 185]
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.3s;
     }
 
     .modal.active {
-      display: flex; [cite: 186]
+      display: flex;
     }
 
     .modal-content {
-      max-width: 90%; [cite: 187]
-      max-height: 90%; [cite: 187]
-      position: relative; [cite: 187]
-      animation: scaleIn 0.3s; [cite: 187]
+      max-width: 90%;
+      max-height: 90%;
+      position: relative;
+      animation: scaleIn 0.3s;
     }
 
     .modal-image {
-      max-width: 100%; [cite: 188]
-      max-height: 80vh; [cite: 188]
-      border-radius: var(--radius); [cite: 188]
+      max-width: 100%;
+      max-height: 80vh;
+      border-radius: var(--radius);
     }
 
     .modal-actions {
-      display: flex; [cite: 189]
-      gap: 12px; [cite: 189]
-      justify-content: center; [cite: 189]
-      margin-top: 16px; [cite: 189]
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 16px;
     }
 
     .modal-btn {
-      padding: 10px 16px; [cite: 190]
-      background: var(--bg-secondary); [cite: 190]
-      border: 1px solid var(--outline); [cite: 190]
-      border-radius: 8px; [cite: 190]
-      color: var(--text-primary); [cite: 190]
-      cursor: pointer; [cite: 190]
-      font-size: 14px; [cite: 190]
-      transition: all var(--transition); [cite: 191]
+      padding: 10px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: 8px;
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 14px;
+      transition: all var(--transition);
     }
 
     .modal-btn:hover {
-      background: var(--bg-hover); [cite: 192]
-      border-color: var(--accent); [cite: 192]
+      background: var(--bg-hover);
+      border-color: var(--accent);
     }
 
     .modal-close {
-      position: absolute; [cite: 193]
-      top: -40px; [cite: 193]
-      right: 0; [cite: 193]
-      background: none; [cite: 193]
-      border: none; [cite: 193]
-      color: white; [cite: 193]
-      font-size: 32px; [cite: 193]
-      cursor: pointer; [cite: 193]
-      padding: 0; [cite: 193]
-      line-height: 1; [cite: 193]
+      position: absolute;
+      top: -40px;
+      right: 0;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 32px;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
     }
 
     /* ===== ANIMATIONS ===== */
     @keyframes fadeIn {
-      from { opacity: 0; [cite: 195]
-      } [cite: 195]
-      to { opacity: 1; [cite: 196]
-      } [cite: 196]
+      from { opacity: 0;
+      }
+      to { opacity: 1;
+      }
     }
 
     @keyframes fadeInDown {
       from {
-        opacity: 0; [cite: 197]
-        transform: translateY(-20px); [cite: 197]
+        opacity: 0;
+        transform: translateY(-20px);
       }
       to {
-        opacity: 1; [cite: 198]
-        transform: translateY(0); [cite: 198]
+        opacity: 1;
+        transform: translateY(0);
       }
     }
 
     @keyframes scaleIn {
       from {
-        opacity: 0; [cite: 199]
-        transform: scale(0.9); [cite: 199]
+        opacity: 0;
+        transform: scale(0.9);
       }
       to {
-        opacity: 1; [cite: 200]
-        transform: scale(1); [cite: 200]
+        opacity: 1;
+        transform: scale(1);
       }
     }
 
     /* ===== MOBILE OPTIMIZATIONS ===== */
     @media (max-width: 640px) {
       .container {
-        padding: 16px 12px; [cite: 201]
+        padding: 16px 12px;
       }
 
       .profile-image {
-        width: 100px; [cite: 202]
-        height: 100px; [cite: 202]
+        width: 100px;
+        height: 100px;
       }
 
       .profile-handle {
-        font-size: 18px; [cite: 203]
+        font-size: 18px;
       }
 
       .card {
-        padding: 16px 12px; [cite: 204]
+        padding: 16px 12px;
       }
 
       .card-large {
-        padding: 24px 16px; [cite: 205]
+        padding: 24px 16px;
       }
 
       .quick-link {
-        width: 44px; [cite: 206]
-        height: 44px; [cite: 206]
+        width: 44px;
+        height: 44px;
       }
 
       .quick-link svg {
-        width: 18px; [cite: 207]
-        height: 18px; [cite: 207]
+        width: 18px;
+        height: 18px;
       }
 
       .channels-grid {
-        grid-template-columns: repeat(2, 1fr); [cite: 208]
+        grid-template-columns: repeat(2, 1fr);
       }
 
       .news-grid {
-        grid-template-columns: repeat(2, 1fr); [cite: 209]
+        grid-template-columns: repeat(2, 1fr);
       }
 
       /* Keep two-column layout on mobile */
       .two-column {
-        grid-template-columns: repeat(2, 1fr); [cite: 210]
-        gap: 8px; [cite: 210]
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
       }
 
       .two-column .card {
-        padding: 14px 10px; [cite: 211]
+        padding: 14px 10px;
       }
 
       .two-column .card-title {
-        font-size: 13px; [cite: 212]
+        font-size: 13px;
       }
 
       .two-column .card-description {
-        font-size: 10px; [cite: 213]
+        font-size: 10px;
       }
     }
 
@@ -645,15 +645,15 @@
     .card:focus-visible,
     .quick-link:focus-visible,
     .modal-btn:focus-visible {
-      outline: 2px solid var(--accent); [cite: 214]
-      outline-offset: 2px; [cite: 214]
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
     @media (prefers-reduced-motion: reduce) {
       * {
-        animation-duration: 0.01ms !important; [cite: 215]
-        animation-iteration-count: 1 !important; [cite: 215]
-        transition-duration: 0.01ms !important; [cite: 215]
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
@@ -670,7 +670,7 @@
       <p class="profile-bio">Content Creator, Editor, Father</p>
       <div class="profile-meta">
         <span class="profile-meta-item">
-          <a href="mailto:contact.herovibes@gmail.com">📧 contact.herovibes@gmail.com</a> [cite: 216]
+          <a href="mailto:contact.herovibes@gmail.com">📧 contact.herovibes@gmail.com</a>
         </span>
         <span class="profile-meta-item">📍 London, UK</span>
       </div>
@@ -680,21 +680,21 @@
       <a href="mailto:contact.herovibes@gmail.com" class="quick-link" aria-label="Email" title="Email">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
       </a>
-      <a href="https://discord.com/users/1098967082026160198" class="quick-link" aria-label="Discord" title="Discord"> [cite: 217]
+      <a href="https://discord.com/users/1098967082026160198" class="quick-link" aria-label="Discord" title="Discord">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 
-0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/></svg> [cite: 218]
+0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/></svg>
       </a>
       <a href="https://twitter.com/HeroVibesYT" class="quick-link" aria-label="X (Twitter)" title="X (Twitter)">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       </a>
-      <a href="https://www.instagram.com/herovibesyt/" class="quick-link" aria-label="Instagram" title="Instagram"> [cite: 219]
+      <a href="https://www.instagram.com/herovibesyt/" class="quick-link" aria-label="Instagram" title="Instagram">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 
-5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3z"/></svg> [cite: 220]
+5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3z"/></svg>
       </a>
       <a href="https://www.tiktok.com/@herovibesyt" class="quick-link" aria-label="TikTok" title="TikTok">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16.6 5.82s.51.5 0 0A4.278 4.278 0 0 1 15.54 3h-3.09v12.4a2.592 2.592 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6c0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64c0 3.33 2.76 5.7 5.69 5.7c3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48z"/></svg>
       </a>
-    </div> [cite: 221]
+    </div>
 
     <a href="https://herovibes.store/" class="card card-large" target="_blank" rel="noopener">
       <div class="card-title">
@@ -703,7 +703,7 @@
       </div>
       <div class="card-description">
         50+ Free Tools for Creators, Video Editing Presets, Animations, Apparel & More
-      </div> [cite: 222]
+      </div>
     </a>
 
     <a href="https://elgato.sjv.io/aOey2Q" class="card card-affiliate" target="_blank" rel="noopener">
@@ -715,7 +715,7 @@
       </div>
       <div class="card-description">
         Premium tech for creators (Use Code: HERO)
-      </div> [cite: 223]
+      </div>
     </a>
 
     <div class="card youtube-channels">
@@ -723,7 +723,7 @@
         <span class="card-icon">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
             <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83 1.48 1.73 1.73.47.13 1.33.22 2.65.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
-          </svg> [cite: 224]
+          </svg>
         </span>
         YouTube Channels
       </div>
@@ -733,7 +733,7 @@
           <div class="channel-category">Gaming</div>
           <div class="channel-name">HeroVibes</div>
         </a>
-        <a href="https://www.youtube.com/@HeroVisionYT" class="channel-item tech" target="_blank" rel="noopener"> [cite: 225]
+        <a href="https://www.youtube.com/@HeroVisionYT" class="channel-item tech" target="_blank" rel="noopener">
           <div class="channel-thumb">💻</div>
           <div class="channel-category">Tech</div>
           <div class="channel-name">HeroVision</div>
@@ -743,7 +743,7 @@
           <div class="channel-category">Vlogs</div>
           <div class="channel-name">HeroVlogs</div>
         </a>
-        <a href="https://www.youtube.com/@HeroVibesExtra" class="channel-item live" target="_blank" rel="noopener"> [cite: 226]
+        <a href="https://www.youtube.com/@HeroVibesExtra" class="channel-item live" target="_blank" rel="noopener">
           <div class="channel-thumb">🎯</div>
           <div class="channel-category">Live Gaming</div>
           <div class="channel-name">HeroVibes Extra</div>
@@ -752,7 +752,7 @@
           <div class="channel-thumb">🎬</div>
           <div class="channel-category">Movies</div>
           <div class="channel-name">HeroVerse</div>
-        </a> [cite: 227]
+        </a>
         <a href="https://www.youtube.com/@12BoomNews" class="channel-item news" target="_blank" rel="noopener">
           <div class="channel-thumb">📰</div>
           <div class="channel-category">News</div>
@@ -763,12 +763,12 @@
 
     <a href="https://herovibes.substack.com/" class="card card-large" target="_blank" rel="noopener">
       <div class="card-title">
-        <span class="card-icon">💌</span> [cite: 228]
+        <span class="card-icon">💌</span>
         Newsletter + 3,000+ Assets
       </div>
       <div class="card-description">
         Weekly gaming, tech & entertainment news, deals, free games and 3,000+ creator assets.
-      </div> [cite: 229]
+      </div>
     </a>
 
     <a href="https://discord.gg/PfTKAubHqS" class="card" target="_blank" rel="noopener">
@@ -776,8 +776,8 @@
         <span class="card-icon">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
             <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 
-0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/> [cite: 230]
-          </svg> [cite: 231]
+0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
+          </svg>
         </span>
         Join Discord Community
       </div>
@@ -788,7 +788,7 @@
 
     <div class="two-column">
       <a href="https://firecut.ai/?ref=hero" class="card card-affiliate" target="_blank" rel="noopener">
-        <div class="card-title"> [cite: 232]
+        <div class="card-title">
           <span class="card-icon">✂️</span>
           FireCut AI
         </div>
@@ -799,7 +799,7 @@
       <a href="https://www.theorysabers.com/" class="card card-affiliate" target="_blank" rel="noopener">
         <div class="card-title">
           <span class="card-icon">⚔️</span>
-          Theory Sabers [cite: 233]
+          Theory Sabers
         </div>
         <div class="card-description">
           Premium Lightsabers (Save 10% - Code: HERO)
@@ -810,7 +810,7 @@
     <div class="free-tool-wrapper">
       <span class="free-tool-label">FREE TOOLS</span>
       <a href="#" class="card card-free-tool" id="freeToolCard" target="_blank" rel="noopener">
-        <div class="tool-content"> [cite: 234]
+        <div class="tool-content">
           <div class="card-title">
             <span class="card-icon">🎁</span>
             <span id="toolName">Free Tool</span>
@@ -818,7 +818,7 @@
           <div class="card-description" id="toolDesc">
             Discover a new free tool
           </div>
-        </div> [cite: 235]
+        </div>
       </a>
     </div>
 
@@ -828,7 +828,7 @@
           <span class="card-icon">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
               <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 
-3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/> [cite: 236]
+3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
             </svg>
           </span>
           Watch Live on Twitch
@@ -839,12 +839,12 @@
       </a>
       <a href="https://www.youtube.com/@HeroVibesExtra" class="card" target="_blank" rel="noopener">
         <div class="card-title">
-          <span class="card-icon"> [cite: 237]
+          <span class="card-icon">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
               <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83 1.48 1.73 1.73.47.13 1.33.22 2.65.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
             </svg>
           </span>
-          Watch Live on YouTube [cite: 238]
+          Watch Live on YouTube
         </div>
         <div class="card-description">
           Gaming livestreams
@@ -856,7 +856,7 @@
       <div class="card-title">
         <span class="card-icon">
           <svg viewBox="0 0 24 
-24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"> [cite: 239]
+24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
             <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
           </svg>
         </span>
@@ -864,7 +864,7 @@
       </div>
       <div class="card-description">
         An overview of our channels stats, demographics & collabs.
-      </div> [cite: 240]
+      </div>
     </div>
 
     <div class="card youtube-channels">
@@ -874,16 +874,16 @@
             <path d="M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H4V5h16v14zM6 10h2v7H6zm3-3h2v10H9zm3 6h2v4h-2zm3-3h2v7h-2z"/>
           </svg>
         </span>
-        12Boom - Daily News & Written Articles [cite: 241]
+        12Boom - Daily News & Written Articles
       </div>
       <div class="news-grid">
         <a href="https://12boom.com/" class="news-item" target="_blank" rel="noopener">
           <div class="news-icon">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2m-5.15 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56M14.34 14H9.66c-.1-.66-.16-1.32-.16-2 0-.68.06-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 
-2M12 19.96c-.83-1.2-1.5-2.53-1.91-3.96h3.82c-.41 1.43-1.08 2.76-1.91 3.96M8 8H5.08A7.923 7.923 0 0 1 9.4 4.44C8.8 5.55 8.35 6.75 8 8m-2.92 8H8c.35 1.25.8 2.45 1.4 3.56A8.008 8.008 0 0 1 5.08 16m-.82-2C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2M12 4.03c.83 1.2 1.5 2.54 1.91 3.97h-3.82c.41-1.43 1.08-2.77 1.91-3.97M18.92 8h-2.95a15.65 15.65 0 0 0-1.38-3.56c1.84.63 3.37 1.9 4.33 3.56M12 2C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2z"/> [cite: 242]
+2M12 19.96c-.83-1.2-1.5-2.53-1.91-3.96h3.82c-.41 1.43-1.08 2.76-1.91 3.96M8 8H5.08A7.923 7.923 0 0 1 9.4 4.44C8.8 5.55 8.35 6.75 8 8m-2.92 8H8c.35 1.25.8 2.45 1.4 3.56A8.008 8.008 0 0 1 5.08 16m-.82-2C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2M12 4.03c.83 1.2 1.5 2.54 1.91 3.97h-3.82c.41-1.43 1.08-2.77 1.91-3.97M18.92 8h-2.95a15.65 15.65 0 0 0-1.38-3.56c1.84.63 3.37 1.9 4.33 3.56M12 2C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2z"/>
             </svg>
-          </div> [cite: 243]
+          </div>
           <div class="news-label">Website</div>
           <div class="news-name">Articles</div>
         </a>
@@ -891,7 +891,7 @@
           <div class="news-icon">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 
-0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83 1.48 1.73 1.73.47.13 1.33.22 2.65.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/> [cite: 244]
+0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83 1.48 1.73 1.73.47.13 1.33.22 2.65.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
             </svg>
           </div>
           <div class="news-label">YouTube</div>
@@ -899,21 +899,21 @@
         </a>
         <a href="https://www.tiktok.com/@12boomnews?lang=en" class="news-item" target="_blank" rel="noopener">
           <div class="news-icon">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> [cite: 245]
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M16.6 5.82s.51.5 0 0A4.278 4.278 0 0 1 15.54 3h-3.09v12.4a2.592 2.592 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6c0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64c0 3.33 2.76 5.7 5.69 5.7c3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48z"/>
             </svg>
           </div>
           <div class="news-label">TikTok</div>
           <div class="news-name">12Boom</div>
-        </a> [cite: 246]
+        </a>
         <a href="https://www.instagram.com/12BoomNews" class="news-item" target="_blank" rel="noopener">
           <div class="news-icon">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 
-3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3z"/> [cite: 247]
+3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3z"/>
             </svg>
           </div>
-          <div class="news-label">Instagram</div> [cite: 248]
+          <div class="news-label">Instagram</div>
           <div class="news-name">12Boom</div>
         </a>
         <a href="https://x.com/12BoomNews" class="news-item" target="_blank" rel="noopener">
@@ -921,7 +921,7 @@
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
             </svg>
-          </div> [cite: 249]
+          </div>
           <div class="news-label">X (Twitter)</div>
           <div class="news-name">12Boom</div>
         </a>
@@ -929,7 +929,7 @@
           <div class="news-icon">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2.04C6.5 2.04 2 6.53 
-2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z"/> [cite: 250]
+2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z"/>
             </svg>
           </div>
           <div class="news-label">Facebook</div>
@@ -938,7 +938,6 @@
       </div>
     </div>
 
-    [cite: 251]
     <a href="https://twitter.com/HeroVibesYT" class="card" target="_blank" rel="noopener">
       <div class="card-title">
         <span class="card-icon">
@@ -947,7 +946,7 @@
           </svg>
         </span>
         Follow on X (Twitter)
-      </div> [cite: 252]
+      </div>
       <div class="card-description">
         Daily creator tips, memes & a behind-the-scenes experience
       </div>
@@ -958,7 +957,7 @@
         <span class="card-icon">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
             <path d="M16.6 5.82s.51.5 0 0A4.278 4.278 0 0 1 
-15.54 3h-3.09v12.4a2.592 2.592 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6c0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64c0 3.33 2.76 5.7 5.69 5.7c3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48z"/> [cite: 253]
+15.54 3h-3.09v12.4a2.592 2.592 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6c0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64c0 3.33 2.76 5.7 5.69 5.7c3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48z"/>
           </svg>
         </span>
         TikTok
@@ -968,18 +967,18 @@
       </div>
     </a>
 
-    <a href="https://www.instagram.com/herovibesyt/" class="card" target="_blank" rel="noopener"> [cite: 254]
+    <a href="https://www.instagram.com/herovibesyt/" class="card" target="_blank" rel="noopener">
       <div class="card-title">
         <span class="card-icon">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
             <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 
-1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3z"/> [cite: 255]
+1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3z"/>
           </svg>
         </span>
         Instagram
       </div>
       <div class="card-description">
-        Tech & gaming short-form content, photos, BTS & personal stories [cite: 256]
+        Tech & gaming short-form content, photos, BTS & personal stories
       </div>
     </a>
 
@@ -990,7 +989,7 @@
       </div>
       <div class="card-description">
         You've reached the bottom of the page.
-        Here's what you were really looking for... [cite: 257]
+        Here's what you were really looking for...
       </div>
     </a>
 
@@ -1008,206 +1007,218 @@
   </div>
 
   <script>
-    // ===== FREE TOOL ROTATOR =====
-    const tools = [
-      { 
-        name: 'Event Calendar', 
-        desc: 'Never miss another release date or event, sync with your own calendar.',
-        url: 'https://herovibes.store/pages/calendar'
-      },
-      { 
-        name: 'Bulk Image Editor', 
-        desc: 'Instantly crop, compress and convert your images.', [cite: 259]
-        url: 'https://herovibes.store/pages/image-editor'
-      },
-      { 
-        name: 'Markers to Timestamps', 
-        desc: 'Convert your Premiere or Davinci markers to YT Timestamps in seconds.',
-        url: 'https://herovibes.store/pages/markers-to-timestamps'
-      },
-      { 
-        name: 'Media Kit Maker', 
-        desc: 'Generate your own brand media kit in under a minute.', [cite: 260]
-        url: 'https://herovibes.store/pages/media-kit-maker'
-      },
-      { 
-        name: 'QR Code Generator', 
-        desc: 'Create your own custom QR codes with unique colours, backgrounds and more.',
-        url: 'https://herovibes.store/pages/qr-generator'
-      },
-      { 
-        name: 'Steganography Embedder', [cite: 261]
-        desc: 'Stash a secret password or message inside of an image - no coding required.', [cite: 261]
-        url: 'https://herovibes.store/pages/steganography-password-creator'
-      },
-      { 
-        name: 'Stream Deck Icon Maker', 
-        desc: 'Batch-create icons for the Elgato Stream Deck that fit with your aesthetic.',
-        url: 'https://herovibes.store/pages/stream-deck-icon-maker'
-      },
-      { 
-        name: 'Thumbnail Downloader', [cite: 262]
-        desc: 'Grab any thumbnail from any YouTube video - all you need is a link!', [cite: 262]
-        url: 'https://herovibes.store/pages/thumbnail-downloader'
-      },
-      { 
-        name: 'Whiteboard', 
-        desc: 'Organise your images, code, links and more in-browser with a virtual whiteboard.',
-        url: 'https://herovibes.store/pages/whiteboard'
-      }, [cite: 263]
-      { 
-        name: 'Writer\'s Toolkit', 
-        desc: 'A simple writing tool that bulk-replaces words, removes AI characters and converts to/from markdown.',
-        url: 'https://herovibes.store/pages/writers-toolkit'
-      }
-    ];
-    let currentToolIndex = 0; [cite: 264]
-    const freeToolCard = document.getElementById('freeToolCard'); [cite: 264]
-    const toolName = document.getElementById('toolName'); [cite: 264]
-    const toolDesc = document.getElementById('toolDesc'); [cite: 264]
-
-    function rotateTool() { [cite: 265]
-      // Add fade animation
-      toolName.classList.add('tool-transition'); [cite: 265]
-      toolDesc.classList.add('tool-transition'); [cite: 265]
-      // Change tool
-      const tool = tools[currentToolIndex]; [cite: 266]
-      toolName.textContent = tool.name; [cite: 266]
-      toolDesc.textContent = tool.desc; [cite: 266]
-      freeToolCard.href = tool.url; [cite: 267]
-      
-      // Remove animation class after completion
-      setTimeout(() => {
-        toolName.classList.remove('tool-transition'); [cite: 267]
-        toolDesc.classList.remove('tool-transition'); [cite: 267]
-      }, 500); [cite: 267]
-      // Cycle to next tool
-      currentToolIndex = (currentToolIndex + 1) % tools.length; [cite: 268]
-    }
-
-    // Initialize first tool
-    rotateTool(); [cite: 269]
-    // Rotate every 6 seconds
-    setInterval(rotateTool, 6000); [cite: 270]
-
-    // ===== MEDIA KIT MODAL =====
-    const mediaCard = document.getElementById('mediaCard'); [cite: 271]
-    const mediaModal = document.getElementById('mediaModal'); [cite: 271]
-    const modalClose = document.getElementById('modalClose'); [cite: 272]
-    const downloadBtn = document.getElementById('downloadBtn'); [cite: 272]
-    const shareBtn = document.getElementById('shareBtn'); [cite: 272]
-    const modalImage = document.getElementById('modalImage'); [cite: 272]
-
-    mediaCard.addEventListener('click', (e) => { [cite: 273]
-      e.preventDefault(); [cite: 273]
-      mediaModal.classList.add('active'); [cite: 273]
-      document.body.style.overflow = 'hidden'; [cite: 273]
-    });
-
-    modalClose.addEventListener('click', () => { [cite: 274]
-      mediaModal.classList.remove('active'); [cite: 274]
-      document.body.style.overflow = 'auto'; [cite: 274]
-    });
-
-    mediaModal.addEventListener('click', (e) => { [cite: 275]
-      if (e.target === mediaModal) { [cite: 275]
-        mediaModal.classList.remove('active'); [cite: 275]
-        document.body.style.overflow = 'auto'; [cite: 275]
-      }
-    });
-
-    downloadBtn.addEventListener('click', () => { [cite: 276]
-      const link = document.createElement('a'); [cite: 276]
-      link.href = modalImage.src; [cite: 276]
-      link.download = 'HeroVibes-MediaKit.jpg'; [cite: 276]
-      link.click(); [cite: 276]
-    });
-
-    shareBtn.addEventListener('click', async () => { [cite: 277]
-      if (navigator.share) { [cite: 277]
-        try {
-          await navigator.share({ [cite: 277]
-            title: 'HeroVibes Media Kit', [cite: 277]
-            text: 'Check out HeroVibes Media Kit - Channel stats, demographics & collaboration info', [cite: 277]
-            url: window.location.href [cite: 277]
-          });
-        } catch (err) { [cite: 278]
-          if (err.name !== 'AbortError') { [cite: 278]
-            fallbackShare(); [cite: 278]
-          }
-        }
-      } else {
-        fallbackShare(); [cite: 278]
-      }
-    });
-
-    function fallbackShare() { [cite: 279]
-      navigator.clipboard.writeText(window.location.href); [cite: 279]
-      const originalText = shareBtn.textContent; [cite: 279]
-      shareBtn.textContent = '✓ Copied!'; [cite: 279]
-      setTimeout(() => { [cite: 280]
-        shareBtn.textContent = originalText; [cite: 280]
-      }, 2000); [cite: 280]
-    }
-
-    // ===== ESCAPE KEY TO CLOSE MODAL =====
-    document.addEventListener('keydown', (e) => { [cite: 281]
-      if (e.key === 'Escape' && mediaModal.classList.contains('active')) { [cite: 281]
-        mediaModal.classList.remove('active'); [cite: 281]
-        document.body.style.overflow = 'auto'; [cite: 281]
-      }
-    });
-
-    // ===== CONSOLE LOGGING =====
-    console.log('✅ HeroVibes LinkTree loaded successfully'); [cite: 282]
-    console.log('🎁 Free tool rotator active - cycling through', tools.length, 'tools'); [cite: 283]
-    console.log('📱 Mobile optimization active'); [cite: 283]
-    console.log('🎨 All animations initialized'); [cite: 283]
-
-    // ===== FOURTHWALL SCROLLBAR FIX =====
-    // This is the script from your instructions, added to fix the height.
-    let lastHeight = 0; [cite: 74]
-    let resizeTimer; [cite: 74]
+    // ===== FOURTHWALL SCROLLBAR FIX (DEFINED FIRST) =====
+    let lastHeight = 0;
+    let resizeTimer;
 
     /**
      * Sends the current scrollHeight to the parent window if it has changed.
-     * This is the *only* function that should send a postMessage. [cite: 76]
      */
     function sendHeight() {
-      // Use scrollHeight for content height
-      const height = document.body.scrollHeight; [cite: 78]
-      
-      // Only send message if height has *actually* changed 
-      if (height !== lastHeight) { [cite: 79]
-        lastHeight = height; [cite: 79]
-        window.parent.postMessage({ frameHeight: height }, '*'); [cite: 79]
+      const height = document.body.scrollHeight;
+      // Only send message if height has *actually* changed
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
     /**
      * A debounced version of sendHeight() to be called on content changes.
-     * This ensures we don't spam messages during rapid changes. [cite: 80]
      */
     function scheduleHeightCheck() {
         // Clear any pending checks
-        clearTimeout(resizeTimer); [cite: 82]
-        // Schedule a new check after 150ms
-        resizeTimer = setTimeout(sendHeight, 150); [cite: 83]
+        clearTimeout(resizeTimer);
+        // Schedule a new check
+        resizeTimer = setTimeout(sendHeight, 150);
     }
 
     // Send height on initial load (with a slight delay)
-    // This fixes the "Content Cut-Off" race condition. [cite: 84]
     window.addEventListener('load', () => {
-        setTimeout(sendHeight, 100); [cite: 84]
+        setTimeout(sendHeight, 100);
     });
 
     // Send height on window resize (debounced)
-    window.addEventListener('resize', () => { [cite: 85]
-        // Use scheduleHeightCheck for built-in debounce
-        scheduleHeightCheck(); [cite: 86]
+    window.addEventListener('resize', () => {
+        scheduleHeightCheck();
     });
-    
     // ===== END OF SCROLLBAR FIX =====
+
+
+    // ===== ORIGINAL LANDER SCRIPT =====
+    // We wrap everything in a DOMContentLoaded to ensure elements exist
+    // and to ensure scheduleHeightCheck() is defined.
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // ===== FREE TOOL ROTATOR =====
+      const tools = [
+        { 
+          name: 'Event Calendar', 
+          desc: 'Never miss another release date or event, sync with your own calendar.',
+          url: 'https://herovibes.store/pages/calendar'
+        },
+        { 
+          name: 'Bulk Image Editor', 
+          desc: 'Instantly crop, compress and convert your images.',
+          url: 'https://herovibes.store/pages/image-editor'
+        },
+        { 
+          name: 'Markers to Timestamps', 
+          desc: 'Convert your Premiere or Davinci markers to YT Timestamps in seconds.',
+          url: 'https://herovibes.store/pages/markers-to-timestamps'
+        },
+        { 
+          name: 'Media Kit Maker', 
+          desc: 'Generate your own brand media kit in under a minute.',
+          url: 'https://herovibes.store/pages/media-kit-maker'
+        },
+        { 
+          name: 'QR Code Generator', 
+          desc: 'Create your own custom QR codes with unique colours, backgrounds and more.',
+          url: 'https://herovibes.store/pages/qr-generator'
+        },
+        { 
+          name: 'Steganography Embedder', 
+          desc: 'Stash a secret password or message inside of an image - no coding required.',
+          url: 'https://herovibes.store/pages/steganography-password-creator'
+        },
+        { 
+          name: 'Stream Deck Icon Maker', 
+          desc: 'Batch-create icons for the Elgato Stream Deck that fit with your aesthetic.',
+          url: 'https://herovibes.store/pages/stream-deck-icon-maker'
+        },
+        { 
+          name: 'Thumbnail Downloader', 
+          desc: 'Grab any thumbnail from any YouTube video - all you need is a link!',
+          url: 'https://herovibes.store/pages/thumbnail-downloader'
+        },
+        { 
+          name: 'Whiteboard', 
+          desc: 'Organise your images, code, links and more in-browser with a virtual whiteboard.',
+          url: 'https://herovibes.store/pages/whiteboard'
+        },
+        { 
+          name: 'Writer\'s Toolkit', 
+          desc: 'A simple writing tool that bulk-replaces words, removes AI characters and converts to/from markdown.',
+          url: 'https://herovibes.store/pages/writers-toolkit'
+        }
+      ];
+      let currentToolIndex = 0;
+      const freeToolCard = document.getElementById('freeToolCard');
+      const toolName = document.getElementById('toolName');
+      const toolDesc = document.getElementById('toolDesc');
+
+      function rotateTool() {
+        // Add fade animation
+        toolName.classList.add('tool-transition');
+        toolDesc.classList.add('tool-transition');
+        
+        // Change tool
+        const tool = tools[currentToolIndex];
+        toolName.textContent = tool.name;
+        toolDesc.textContent = tool.desc;
+        freeToolCard.href = tool.url;
+        
+        // Remove animation class after completion
+        setTimeout(() => {
+          toolName.classList.remove('tool-transition');
+          toolDesc.classList.remove('tool-transition');
+        }, 500);
+
+        // Cycle to next tool
+        currentToolIndex = (currentToolIndex + 1) % tools.length;
+        
+        // SCROLLBAR FIX: Notify parent of potential height change
+        scheduleHeightCheck();
+      }
+
+      // Initialize first tool
+      rotateTool();
+      // Rotate every 6 seconds
+      setInterval(rotateTool, 6000);
+
+      // ===== MEDIA KIT MODAL =====
+      const mediaCard = document.getElementById('mediaCard');
+      const mediaModal = document.getElementById('mediaModal');
+      const modalClose = document.getElementById('modalClose');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const shareBtn = document.getElementById('shareBtn');
+      const modalImage = document.getElementById('modalImage');
+
+      mediaCard.addEventListener('click', (e) => {
+        e.preventDefault();
+        mediaModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        // SCROLLBAR FIX: Notify parent of height change
+        scheduleHeightCheck();
+      });
+
+      modalClose.addEventListener('click', () => {
+        mediaModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        // SCROLLBAR FIX: Notify parent of height change
+        scheduleHeightCheck();
+      });
+
+      mediaModal.addEventListener('click', (e) => {
+        if (e.target === mediaModal) {
+          mediaModal.classList.remove('active');
+          document.body.style.overflow = 'auto';
+          // SCROLLBAR FIX: Notify parent of height change
+          scheduleHeightCheck();
+        }
+      });
+
+      downloadBtn.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.href = modalImage.src;
+        link.download = 'HeroVibes-MediaKit.jpg';
+        link.click();
+      });
+
+      shareBtn.addEventListener('click', async () => {
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: 'HeroVibes Media Kit',
+              text: 'Check out HeroVibes Media Kit - Channel stats, demographics & collaboration info',
+              url: window.location.href
+            });
+          } catch (err) {
+            if (err.name !== 'AbortError') {
+              fallbackShare();
+            }
+          }
+        } else {
+          fallbackShare();
+        }
+      });
+
+      function fallbackShare() {
+        navigator.clipboard.writeText(window.location.href);
+        const originalText = shareBtn.textContent;
+        shareBtn.textContent = '✓ Copied!';
+        setTimeout(() => {
+          shareBtn.textContent = originalText;
+        }, 2000);
+      }
+
+      // ===== ESCAPE KEY TO CLOSE MODAL =====
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mediaModal.classList.contains('active')) {
+          mediaModal.classList.remove('active');
+          document.body.style.overflow = 'auto';
+          // SCROLLBAR FIX: Notify parent of height change
+          scheduleHeightCheck();
+        }
+      });
+
+      // ===== CONSOLE LOGGING =====
+      console.log('✅ HeroVibes LinkTree loaded successfully');
+      console.log('🎁 Free tool rotator active - cycling through', tools.length, 'tools');
+      console.log('📱 Mobile optimization active');
+      console.log('🎨 All animations initialized');
+    });
   </script>
 
 </body>
