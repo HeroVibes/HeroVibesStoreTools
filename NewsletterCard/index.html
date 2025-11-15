@@ -1,194 +1,303 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>HeroVibes Newsletter Banner</title>
-    <style>
-        /* DESIGN TOKENS */
-        :root {
-            --bg: #191919;
-            --card-bg: #1F1F1F;
-            --btn-bg: #1F1F1F;
-            --hover: #323232;
-            --outline: #323232;
-            --accent: #87A9FF;
-            --text-primary: #D4D4D4;
-            --text-secondary: #8C8C8C;
-            --radius: 8px;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HeroVibes Newsletter Banner</title>
+  <style>
+    /* ========================================
+    DESIGN TOKENS (from Design Guide)
+    ========================================
+    */
+    :root {
+      /* Backgrounds */
+      --bg-primary: #191919;
+      --bg-secondary: #1F1F1F;
+      
+      /* Interaction */
+      --hover: #323232;
+      --outline: #323232;
+      
+      /* Accents & Text */
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      
+      /* Sizing */
+      --radius: 8px;
+    }
 
-        /* RESET & BODY STYLES */
-        body {
-            margin: 0;
-            padding: 24px 16px; /* Default Padding */
-            background: var(--bg);
-            font-family: system-ui, sans-serif; /* Sans-Serif Font */
-        }
+    /* ========================================
+    BASE STYLES
+    ========================================
+    */
+    * {
+      box-sizing: border-box;
+    }
 
-        /* BANNER STYLES */
-        #NEWSLETTER-BANNER {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap; /* For mobile stacking */
-            gap: 16px;
-            
-            background: var(--card-bg);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            padding: 24px;
-        }
+    body {
+      background: var(--bg-primary);
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      /* Default padding for the tool body */
+      padding: 24px 16px;
+    }
 
-        #BANNER-TEXT {
-            flex: 1;
-            min-width: 250px; /* Prevents text from getting too squished */
-        }
+    /* ========================================
+    NEWSLETTER BANNER STYLES
+    ========================================
+    */
+    #HV-NEWSLETTER-WRAPPER {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
 
-        #BANNER-TEXT h3 {
-            margin: 0 0 4px 0;
-            font-size: 20px; /* Header Font Size */
-            font-weight: bold;
-            color: var(--text-primary);
-        }
+    /* "Premium" spotlight effect */
+    #HV-NEWSLETTER-WRAPPER::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* Use mouse position (from JS) or default to off-screen */
+      background: radial-gradient(
+        250px circle at var(--mouse-x, -250px) var(--mouse-y, -250px), 
+        var(--hover), 
+        transparent 70%
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease-out;
+      z-index: 1;
+    }
 
-        #BANNER-TEXT p {
-            margin: 0;
-            font-size: 12px; /* Text Font Size */
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
+    #HV-NEWSLETTER-WRAPPER:hover::before {
+      opacity: 0.5;
+    }
 
-        #BANNER-BUTTON-LINK {
-            flex-shrink: 0; /* Prevents button from shrinking */
-        }
+    #NEWSLETTER-BANNER {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap; /* For mobile stacking */
+      gap: 20px;
+      position: relative;
+      z-index: 2; /* Content on top of glow effect */
+    }
 
-        /* BUTTON STYLE */
-        .btn {
-            position: relative;
-            padding: 10px 16px;
-            border-radius: var(--radius);
-            background: var(--btn-bg);
-            color: var(--text-primary);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            cursor: pointer;
-            overflow: hidden;
-            font-size: 14px; /* Title Font Size */
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-            transition: background-color 0.2s ease;
-        }
-        
-        /* Shimmer effect */
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 75%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-            transform: skewX(-25deg);
-            transition: left 0.7s ease-in-out;
-        }
+    #BANNER-CONTENT {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 250px;
+    }
 
-        .btn:hover {
-            background: var(--hover);
-        }
+    #BANNER-ICON {
+      flex-shrink: 0;
+      color: var(--accent);
+      width: 40px; /* Made icon slightly larger */
+      height: 40px;
+    }
 
-        .btn:hover::before {
-            left: 125%;
-        }
+    #BANNER-TEXT h3 {
+      margin: 0 0 4px 0;
+      font-size: 20px; /* Header size from guide */
+      font-weight: bold;
+      color: var(--text-primary); /* Changed from accent to primary text */
+    }
 
-        /* Accessible focus */
-        .btn:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
-        }
+    #BANNER-TEXT p {
+      margin: 0;
+      font-size: 12px; /* Text size from guide */
+      color: var(--text-secondary);
+      line-height: 1.5;
+      max-width: 600px; /* Prevents text from getting too long */
+    }
 
-        /* MOBILE OPTIMISATION */
-        @media (max-width: 600px) {
-            body {
-                padding: 16px; /* Reduce padding slightly on small screens */
-            }
-            
-            #NEWSLETTER-BANNER {
-                flex-direction: column; /* Stack vertically */
-                text-align: center;
-                padding: 16px;
-            }
+    #BANNER-BUTTON-LINK {
+      flex-shrink: 0;
+    }
 
-            #BANNER-BUTTON-LINK {
-                width: 100%; /* Make button full-width */
-            }
-            
-            .btn {
-                width: 100%; /* Make button full-width */
-                box-sizing: border-box; /* Include padding in width */
-            }
-        }
-    </style>
+    /* ========================================
+    DEFAULT BUTTON TEMPLATE
+    ========================================
+    */
+    .btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius); /* 8px radius from guide */
+      background: var(--bg-primary); /* Use primary BG for button */
+      color: var(--text-primary);
+      border: 1px solid var(--outline); /* Use outline color for border */
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px; /* Title size from guide */
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-block;
+      transition: background-color 0.2s ease;
+    }
+
+    /* Shimmer effect */
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .btn:hover {
+      background: var(--hover);
+    }
+    
+    .btn:hover::before {
+      left: 125%;
+    }
+
+    /* Accessible focus */
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+    }
+
+    /* ========================================
+    MOBILE OPTIMISATION
+    ========================================
+    */
+    @media (max-width: 680px) {
+      body {
+        /* Adjust body padding for mobile */
+        padding: 16px;
+      }
+      
+      #HV-NEWSLETTER-WRAPPER {
+        padding: 20px 16px;
+      }
+
+      #NEWSLETTER-BANNER {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+      }
+
+      #BANNER-CONTENT {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      #BANNER-BUTTON-LINK {
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
 
+  <div id="HV-NEWSLETTER-WRAPPER">
     <div id="NEWSLETTER-BANNER">
+      <div id="BANNER-CONTENT">
+        <div id="BANNER-ICON">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
+            <path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
+          </svg>
+        </div>
         <div id="BANNER-TEXT">
-            <h3>Get The Creator Workspace</h3>
-            <p>Weekly news, 3000+ free assets, Amazon deals, free games & more!</p>
+          <h3>Subscribe to the Newsletter</h3>
+          <p>Get 3,000+ free assets, weekly news (gaming, tech & entertainment), Amazon deals, giveaways & more. Delivered free every Monday!</p>
         </div>
-        <div id="BANNER-BUTTON-LINK">
-            <a href="https://herovibes.substack.com/" 
-               class="btn" 
-               target="_blank" 
-               rel="noopener noreferrer">
-                Subscribe For Free
-            </a>
-        </div>
+      </div>
+      <div id="BANNER-BUTTON-LINK">
+        <a href="https://herovibes.substack.com/" 
+           class="btn" 
+           target="_blank" 
+           rel="noopener noreferrer">
+           Subscribe For Free →
+        </a>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // ===== FOURTHWALL SCROLLBAR FIX =====
-        let lastHeight = 0;
-        let resizeTimer;
+  <script>
+    /* ========================================
+    PREMIUM HOVER EFFECT
+    ========================================
+    */
+    const wrapper = document.getElementById('HV-NEWSLETTER-WRAPPER');
+    if (wrapper) {
+      wrapper.addEventListener('mousemove', e => {
+        const rect = wrapper.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        wrapper.style.setProperty('--mouse-x', `${x}px`);
+        wrapper.style.setProperty('--mouse-y', `${y}px`);
+      });
+      
+      wrapper.addEventListener('mouseleave', () => {
+        wrapper.style.setProperty('--mouse-x', `-250px`);
+        wrapper.style.setProperty('--mouse-y', `-250px`);
+      });
+    }
 
-        /**
-         * Sends the current scrollHeight to the parent window if it has changed.
-         * This is the *only* function that should send a postMessage.
-         */
-        function sendHeight() {
-            const height = document.body.scrollHeight;
-            
-            // Only send message if height has *actually* changed
-            if (height !== lastHeight) {
-                lastHeight = height;
-                window.parent.postMessage({ frameHeight: height }, '*');
-            }
-        }
+    /* ========================================
+    FOURTHWALL SCROLLBAR FIX [cite: 32]
+    ========================================
+    */
+    let lastHeight = 0; [cite: 32]
+    let resizeTimer; [cite: 32]
 
-        /**
-         * A debounced version of sendHeight() to be called on content changes.
-         * This ensures we don't spam messages during rapid changes.
-         */
-        function scheduleHeightCheck() {
-            // Clear any pending checks
-            clearTimeout(resizeTimer);
-            // Schedule a new check
-            resizeTimer = setTimeout(sendHeight, 150);
-        }
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed. [cite: 33]
+     * This is the *only* function that should send a postMessage. [cite: 33]
+     */
+    function sendHeight() {
+      const height = document.body.scrollHeight; [cite: 34]
+      // Only send message if height has *actually* changed [cite: 35]
+      if (height !== lastHeight) {
+        lastHeight = height; [cite: 35]
+        window.parent.postMessage({ frameHeight: height }, '*'); [cite: 36]
+      }
+    }
 
-        // Send height on initial load (with a slight delay)
-        window.addEventListener('load', () => {
-            setTimeout(sendHeight, 100);
-        });
+    /**
+     * A debounced version of sendHeight() to be called on content changes. [cite: 37]
+     * This ensures we don't spam messages during rapid changes. [cite: 37]
+     */
+    function scheduleHeightCheck() {
+      // Clear any pending checks [cite: 38]
+      clearTimeout(resizeTimer); [cite: 38]
+      // Schedule a new check [cite: 39]
+      resizeTimer = setTimeout(sendHeight, 150); [cite: 39]
+    }
 
-        // Send height on window resize (debounced)
-        window.addEventListener('resize', () => {
-            // Use scheduleHeightCheck for built-in debounce
-            scheduleHeightCheck();
-        });
-        // ===== END OF SCROLLBAR FIX =====
-    </script>
+    // Send height on initial load (with a slight delay) [cite: 40]
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100); [cite: 40]
+    });
 
+    // Send height on window resize (debounced) [cite: 41]
+    window.addEventListener('resize', () => {
+      // Use scheduleHeightCheck for built-in debounce [cite: 41]
+      scheduleHeightCheck(); [cite: 41]
+    });
+    
+    // ===== END OF SCROLLBAR FIX ===== [cite: 42]
+  </script>
 </body>
 </html>
