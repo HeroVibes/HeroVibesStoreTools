@@ -34,7 +34,6 @@
       font-family: sans-serif;
       background: var(--bg-primary);
       color: var(--text-primary);
-      /* min-height: 100vh; <-- REMOVED this line to fix "Failure to Shrink" bug */
       padding: 24px 16px;
     }
 
@@ -691,7 +690,7 @@
        POPUP / MODAL
        ============================================ */
     .popup {
-      position: fixed; /* This matches the fix instructions */
+      position: fixed;
       display: none;
       top: 0;
       left: 0;
@@ -968,8 +967,7 @@
           Menu
         </button>
         <div class="menu-content">
-     
-           <div class="menu-item" id="reset-button">
+          <div class="menu-item" id="reset-button">
             <span>Reset to Default</span>
             <i class="fas fa-redo"></i>
           </div>
@@ -979,8 +977,7 @@
       <div class="menu-dropdown" id="effects-dropdown">
         <button class="menu-button">
           <i class="fas fa-magic"></i>
-   
-           Effects
+          Effects
         </button>
         <div class="menu-content">
           <div class="menu-item" id="reverse-toggle">
@@ -989,8 +986,7 @@
           </div>
           <div class="menu-item" id="reverb-toggle">
             <span>Reverb</span>
-    
-             <div class="toggle-indicator" id="reverb-indicator"></div>
+            <div class="toggle-indicator" id="reverb-indicator"></div>
           </div>
         </div>
       </div>
@@ -1001,14 +997,13 @@
 
       <button class="stop-button" id="stop-all-button" title="Stop All Sounds">
         <div class="stop-icon"></div>
- 
-       </button>
+      </button>
 
       <button class="help-button" id="help-button" title="Help & Tips">
         <i class="fas fa-question"></i>
       </button>
       
-      <span class="version-display">V1.0.0</span>
+      <span class="version-display">V1.0.1</span>
     </div>
 
     <div id="recorder-container">
@@ -1016,8 +1011,7 @@
         <button class="recorder-control-button" id="recorder-start-button">
           <i class="fas fa-circle"></i>
           <span>Start Recording</span>
-   
-         </button>
+        </button>
         <button class="recorder-control-button" id="recorder-stop-button" style="display:none;">
           <i class="fas fa-stop"></i>
           <span>Stop Recording</span>
@@ -1027,8 +1021,7 @@
           <span>Enable Mic</span>
         </button>
         <button class="recorder-control-button" id="recorder-playback-button" style="display:none;">
- 
-           <i class="fas fa-play"></i>
+          <i class="fas fa-play"></i>
           <span>Play Recording</span>
         </button>
         <button class="recorder-control-button" id="recorder-download-button" style="display:none;">
@@ -1038,8 +1031,7 @@
       </div>
       <div class="recorder-status">
         <span id="recorder-status-text">Ready to record</span>
-    
-         <span class="recorder-timer" id="recorder-timer">0:00</span>
+        <span class="recorder-timer" id="recorder-timer">0:00</span>
       </div>
     </div>
 
@@ -1053,8 +1045,7 @@
       <button class="close-popup" title="Close">&times;</button>
       <h3>Set Hotkey</h3>
       <p class="popup-description">Press a key combination (e.g., Ctrl + S, Cmd + Shift + A).</p>
-      <p class="popup-note">Note: Hotkeys only 
-work when this browser tab is active.</p>
+      <p class="popup-note">Note: Hotkeys only work when this browser tab is active.</p>
       <div id="hotkey-display" class="hotkey-display">
         <span id="current-hotkey-text">No hotkey set</span>
         <span class="hotkey-prompt">(Click to set new)</span>
@@ -1067,25 +1058,19 @@ work when this browser tab is active.</p>
   </div>
 
   <div id="help-popup" class="popup">
-    <div 
- class="popup-content">
+    <div class="popup-content">
       <button class="close-popup" title="Close">&times;</button>
       <h3>Soundboard Help & Tips</h3>
       <ul class="help-list">
-        <li><strong>Keyboard Shortcuts:</strong> Assign hotkeys to any sound by clicking the keyboard icon.
- Use key combinations like Cmd+Shift+1 for quick access!</li>
-        <li><strong>Drag & Drop:</strong> Click and drag any sound card to reorder your soundboard.
- You can also drag audio files from your computer directly onto cards!</li>
-        <li><strong>Privacy First:</strong> Everything runs locally in your browser.
- Your audio files never leave your device and aren't uploaded anywhere.</li>
-        <li><strong>Recording:</strong> Click the record button to capture your soundboard performance.
- Optionally enable microphone to add your voice. Download as MP3!</li>
+        <li><strong>Keyboard Shortcuts:</strong> Assign hotkeys to any sound by clicking the keyboard icon. Use key combinations like Cmd+Shift+1 for quick access!</li>
+        <li><strong>Drag & Drop:</strong> Click and drag any sound card to reorder your soundboard. You can also drag audio files from your computer directly onto cards!</li>
+        <li><strong>Privacy First:</strong> Everything runs locally in your browser. Your audio files never leave your device and aren't uploaded anywhere.</li>
+        <li><strong>Recording:</strong> Click the record button to capture your soundboard performance. Optionally enable microphone to add your voice. Download as MP3!</li>
         <li><strong>Reverse Effect:</strong> Enable Reverse mode from the Effects menu to play all sounds backwards for creative effects.</li>
         <li><strong>Reverb Effect:</strong> Add a professional reverb effect to all your sounds from the Effects menu.</li>
         <li><strong>Volume Control:</strong> Hover over the volume icon to access individual volume sliders for each sound.</li>
         <li><strong>Custom Names:</strong> Click on any sound name to rename it for better organization.</li>
-   
-       </ul>
+      </ul>
     </div>
   </div>
 
@@ -1128,12 +1113,11 @@ work when this browser tab is active.</p>
     let recordingStartTime = 0;
     let recordingTimerInterval = null;
     let recordedBlob = null;
-    let playbackAudio = null; // Track playback audio separately
+    let playbackAudio = null;
 
     const DEFAULT_STARTING_CARDS = 9;
     const MAX_SOUND_NAME_LENGTH = 15;
     const GLOW_COLORS = ['#87A9FF', '#51CF66', '#FFD43B', '#FF6B6B', '#9775FA'];
-    // Musical note frequencies (C major scale)
     const NOTE_FREQUENCIES = [
       { note: 'C4', freq: 261.63 },
       { note: 'D4', freq: 293.66 },
@@ -1142,14 +1126,12 @@ work when this browser tab is active.</p>
       { note: 'G4', freq: 392.00 },
       { note: 'A4', freq: 440.00 },
       { note: 'B4', freq: 493.88 },
-      { note: 'C5', freq: 
- 523.25 },
+      { note: 'C5', freq: 523.25 },
       { note: 'D5', freq: 587.33 }
     ];
     /* ============================================
        MENU FUNCTIONALITY
        ============================================ */
-    // Menu dropdown toggle
     document.querySelectorAll('.menu-dropdown').forEach(dropdown => {
       const button = dropdown.querySelector('.menu-button');
       button.addEventListener('click', (e) => {
@@ -1158,27 +1140,25 @@ work when this browser tab is active.</p>
           if (d !== dropdown) d.classList.remove('active');
         });
         dropdown.classList.toggle('active');
-    
       });
     });
 
-    // Close dropdowns when clicking outside
     document.addEventListener('click', () => {
       document.querySelectorAll('.menu-dropdown').forEach(d => d.classList.remove('active'));
     });
-    // Reset button
+
     document.getElementById('reset-button').addEventListener('click', () => {
       stopAllSounds();
       initializeSoundboardFresh();
       document.querySelectorAll('.menu-dropdown').forEach(d => d.classList.remove('active'));
     });
-    // Reverse toggle
+
     document.getElementById('reverse-toggle').addEventListener('click', (e) => {
       e.stopPropagation();
       reverseEnabled = !reverseEnabled;
       document.getElementById('reverse-indicator').classList.toggle('active', reverseEnabled);
     });
-    // Reverb toggle
+
     document.getElementById('reverb-toggle').addEventListener('click', (e) => {
       e.stopPropagation();
       reverbEnabled = !reverbEnabled;
@@ -1188,23 +1168,23 @@ work when this browser tab is active.</p>
         initializeAudioContext();
       }
     });
-    // Record toggle button
+
     recordToggleButton.addEventListener('click', () => {
       const recorderContainer = document.getElementById('recorder-container');
       recorderContainer.classList.toggle('active');
-      scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+      scheduleHeightCheck();
     });
-    // Stop all sounds button
+
     stopAllButton.addEventListener('click', () => {
       stopAllSounds();
     });
-    // Help button
+
     helpButton.addEventListener('click', () => {
       helpPopup.style.display = 'flex';
-      scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+      scheduleHeightCheck();
     });
+
     function stopAllSounds() {
-      // Stop soundboard audio
       playingAudioInstances.forEach(audio => {
         if (audio && audio.stop) {
           try { audio.stop(); } catch(e) {}
@@ -1212,13 +1192,11 @@ work when this browser tab is active.</p>
       });
       playingAudioInstances = [];
       
-      // Stop playback audio
       if (playbackAudio && !playbackAudio.paused) {
         playbackAudio.pause();
         playbackAudio.currentTime = 0;
         playbackAudio = null;
         
-        // Reset playback button
         const playbackButton = document.getElementById('recorder-playback-button');
         playbackButton.classList.remove('playing');
         playbackButton.querySelector('i').className = 'fas fa-play';
@@ -1245,10 +1223,23 @@ work when this browser tab is active.</p>
     recorderMicToggle.addEventListener('click', toggleMicrophone);
     recorderPlaybackButton.addEventListener('click', togglePlayback);
     recorderDownloadButton.addEventListener('click', downloadRecording);
+
     async function toggleMicrophone() {
       if (!micEnabled) {
         try {
-          micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          // #FIX_MIC_MOBILE - Enhanced constraints for better mobile compatibility
+          const constraints = {
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              // These help with iOS compatibility
+              sampleRate: 44100,
+              channelCount: 1
+            }
+          };
+          
+          micStream = await navigator.mediaDevices.getUserMedia(constraints);
           micEnabled = true;
           recorderMicToggle.classList.add('mic-active');
           recorderMicToggle.querySelector('i').className = 'fas fa-microphone';
@@ -1256,7 +1247,18 @@ work when this browser tab is active.</p>
           recorderStatusText.textContent = 'Microphone enabled';
         } catch (error) {
           console.error('Error accessing microphone:', error);
-          recorderStatusText.textContent = 'Error: Could not access microphone';
+          let errorMessage = 'Error: Could not access microphone';
+          
+          // #FIX_MIC_MOBILE - Provide specific error messages for iOS
+          if (error.name === 'NotAllowedError') {
+            errorMessage = 'Microphone access denied. Please allow in browser settings.';
+          } else if (error.name === 'NotFoundError') {
+            errorMessage = 'No microphone found on this device.';
+          } else if (error.name === 'NotSupportedError') {
+            errorMessage = 'Microphone not supported in this browser.';
+          }
+          
+          recorderStatusText.textContent = errorMessage;
         }
       } else {
         if (micStream) {
@@ -1277,27 +1279,22 @@ work when this browser tab is active.</p>
       }
 
       try {
-        // Create a mixer node that combines all audio sources
         const mixerNode = audioContext.createGain();
         mixerNode.gain.value = 1.0;
         
-        // Create recording destination
         recordingDestination = audioContext.createMediaStreamDestination();
-        // Connect the mixer to the recording destination
         mixerNode.connect(recordingDestination);
-        // Connect the master gain (soundboard audio) to the mixer
         masterGainNode.connect(mixerNode);
-        // If mic is enabled, create a separate gain node and connect to mixer
+        
         if (micEnabled && micStream) {
           const micSource = audioContext.createMediaStreamSource(micStream);
           micGainNode = audioContext.createGain();
-          micGainNode.gain.value = 1.0; // Adjust mic volume if needed
+          micGainNode.gain.value = 1.0;
           
           micSource.connect(micGainNode);
           micGainNode.connect(mixerNode);
         }
         
-        // Start MediaRecorder
         mediaRecorder = new MediaRecorder(recordingDestination.stream);
         recordedChunks = [];
         
@@ -1309,7 +1306,6 @@ work when this browser tab is active.</p>
         
         mediaRecorder.onstop = async () => {
           const webmBlob = new Blob(recordedChunks, { type: 'audio/webm' });
-          // Convert to MP3
           recorderStatusText.textContent = 'Converting to MP3...';
           recordedBlob = await convertToMP3(webmBlob);
           
@@ -1318,7 +1314,7 @@ work when this browser tab is active.</p>
           recorderPlaybackButton.classList.add('has-recording');
           recorderDownloadButton.classList.add('has-recording');
           recorderStatusText.textContent = 'Recording saved';
-          // Disconnect mixer after recording
+          
           masterGainNode.disconnect(mixerNode);
           if (micGainNode) {
             micGainNode.disconnect(mixerNode);
@@ -1328,14 +1324,13 @@ work when this browser tab is active.</p>
         mediaRecorder.start();
         isRecording = true;
         recordingStartTime = Date.now();
-        // UI updates
+        
         recorderStartButton.style.display = 'none';
         recorderStopButton.style.display = 'inline-flex';
         recorderStopButton.classList.add('recording');
         recorderStatusText.textContent = 'Recording...';
         recordToggleButton.classList.add('recording');
         
-        // Start timer
         recordingTimerInterval = setInterval(updateRecordingTimer, 100);
       } catch (error) {
         console.error('Error starting recording:', error);
@@ -1348,13 +1343,11 @@ work when this browser tab is active.</p>
         mediaRecorder.stop();
         isRecording = false;
         
-        // UI updates
         recorderStopButton.style.display = 'none';
         recorderStartButton.style.display = 'inline-flex';
         recorderStopButton.classList.remove('recording');
         recordToggleButton.classList.remove('recording');
         
-        // Stop timer
         clearInterval(recordingTimerInterval);
       }
     }
@@ -1368,7 +1361,7 @@ work when this browser tab is active.</p>
 
     function togglePlayback() {
       if (!recordedBlob) return;
-      // If currently playing, stop it
+      
       if (playbackAudio && !playbackAudio.paused) {
         playbackAudio.pause();
         playbackAudio.currentTime = 0;
@@ -1379,7 +1372,6 @@ work when this browser tab is active.</p>
         recorderPlaybackButton.querySelector('span').textContent = 'Play Recording';
         recorderStatusText.textContent = 'Playback stopped';
       } else {
-        // Start playing
         const url = URL.createObjectURL(recordedBlob);
         playbackAudio = new Audio(url);
         
@@ -1388,6 +1380,7 @@ work when this browser tab is active.</p>
         recorderPlaybackButton.querySelector('i').className = 'fas fa-stop';
         recorderPlaybackButton.querySelector('span').textContent = 'Stop Playback';
         recorderStatusText.textContent = 'Playing recording...';
+        
         playbackAudio.onended = () => {
           recorderPlaybackButton.classList.remove('playing');
           recorderPlaybackButton.querySelector('i').className = 'fas fa-play';
@@ -1399,23 +1392,19 @@ work when this browser tab is active.</p>
     }
 
     async function convertToMP3(webmBlob) {
-      // Decode WebM to raw audio data
       const arrayBuffer = await webmBlob.arrayBuffer();
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
       
-      // Get audio data
       const channels = audioBuffer.numberOfChannels;
       const sampleRate = audioBuffer.sampleRate;
-      const samples = audioBuffer.getChannelData(0); // Mono for simplicity
+      const samples = audioBuffer.getChannelData(0);
       
-      // Convert to 16-bit PCM
       const buffer = new Int16Array(samples.length);
       for (let i = 0; i < samples.length; i++) {
         const s = Math.max(-1, Math.min(1, samples[i]));
         buffer[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
       }
       
-      // Encode to MP3
       const mp3encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
       const mp3Data = [];
       const sampleBlockSize = 1152;
@@ -1452,7 +1441,7 @@ work when this browser tab is active.</p>
        ============================================ */
     function initializeAudioContext() {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      // Create master gain node for all soundboard audio
+      
       masterGainNode = audioContext.createGain();
       masterGainNode.gain.value = 1.0;
       masterGainNode.connect(audioContext.destination);
@@ -1481,6 +1470,7 @@ work when this browser tab is active.</p>
         audioBuffer.length,
         audioBuffer.sampleRate
       );
+      
       for (let channel = 0; channel < numberOfChannels; channel++) {
         const channelData = audioBuffer.getChannelData(channel);
         const reversedData = reversedBuffer.getChannelData(channel);
@@ -1498,16 +1488,14 @@ work when this browser tab is active.</p>
         initializeAudioContext();
       }
       
-      // Fetch and decode audio
       const response = await fetch(audioSrc);
       const arrayBuffer = await response.arrayBuffer();
       let audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-      // Apply reverse effect if enabled
+      
       if (reverseEnabled) {
         audioBuffer = await reverseAudioBuffer(audioBuffer);
       }
       
-      // Create buffer source
       const source = audioContext.createBufferSource();
       source.buffer = audioBuffer;
       
@@ -1515,6 +1503,7 @@ work when this browser tab is active.</p>
       gainNode.gain.value = volume;
       
       source.connect(gainNode);
+      
       if (reverbEnabled) {
         const dryGain = audioContext.createGain();
         const wetGain = audioContext.createGain();
@@ -1531,7 +1520,7 @@ work when this browser tab is active.</p>
       }
       
       source.start(0);
-      // Track for stop all functionality
+      
       playingAudioInstances.push(source);
       source.onended = () => {
         const index = playingAudioInstances.indexOf(source);
@@ -1561,6 +1550,7 @@ work when this browser tab is active.</p>
       
       offlineOscillator.start(0);
       offlineOscillator.stop(duration);
+      
       return offlineContext.startRendering().then(buffer => {
         return audioBufferToWav(buffer);
       });
@@ -1587,8 +1577,10 @@ work when this browser tab is active.</p>
       setUint16(16);
       setUint32(0x61746164);
       setUint32(length - pos - 4);
+      
       for (let i = 0; i < buffer.numberOfChannels; i++)
         channels.push(buffer.getChannelData(i));
+      
       while (pos < length) {
         for (let i = 0; i < buffer.numberOfChannels; i++) {
           let sample = Math.max(-1, Math.min(1, channels[i][offset]));
@@ -1692,6 +1684,7 @@ work when this browser tab is active.</p>
       
       const dropCardId = dropCard.dataset.cardId;
       if (dropCardId === draggedCardId) return;
+      
       const draggedIndex = soundboardData.findIndex(card => card.id === draggedCardId);
       const dropIndex = soundboardData.findIndex(card => card.id === dropCardId);
       if (draggedIndex === -1 || dropIndex === -1) return;
@@ -1772,7 +1765,8 @@ work when this browser tab is active.</p>
       isRecordingHotkey = false;
       currentRecordedHotkey = { key: null, ctrlKey: false, shiftKey: false, altKey: false, metaKey: false };
       hotkeyPopup.style.display = 'flex';
-      scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+      scheduleHeightCheck();
+      
       setTimeout(() => {
         if (!isRecordingHotkey) {
           hotkeyDisplay.click();
@@ -1788,6 +1782,7 @@ work when this browser tab is active.</p>
         currentRecordedHotkey = { key: null, ctrlKey: false, shiftKey: false, altKey: false, metaKey: false };
       }
     });
+
     hotkeyConfirmButton.addEventListener('click', () => {
       if (activeCardId && currentRecordedHotkey.key) {
         const cardData = getCardData(activeCardId);
@@ -1795,14 +1790,12 @@ work when this browser tab is active.</p>
         soundboardData.forEach(data => {
           if (data.id !== activeCardId && data.hotkey &&
               data.hotkey.key.toLowerCase() === currentRecordedHotkey.key.toLowerCase() &&
-        
               data.hotkey.shiftKey === currentRecordedHotkey.shiftKey &&
               data.hotkey.altKey === currentRecordedHotkey.altKey &&
               data.hotkey.metaKey === currentRecordedHotkey.metaKey) {
             data.hotkey = null;
             const oldCardHotkeyButton = document.querySelector(`[data-card-id="${data.id}"] [data-action="hotkey"]`);
             if (oldCardHotkeyButton) oldCardHotkeyButton.title = 'Set Hotkey';
-          
           }
         });
         
@@ -1813,10 +1806,11 @@ work when this browser tab is active.</p>
       } else if (activeCardId) {
         currentHotkeyText.textContent = 'No hotkey set (Not saved)';
       }
+      
       setTimeout(() => {
         hotkeyPopup.style.display = 'none';
         isRecordingHotkey = false;
-        scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+        scheduleHeightCheck();
       }, 1000);
     });
 
@@ -1829,13 +1823,14 @@ work when this browser tab is active.</p>
         const hotkeyButton = document.querySelector(`[data-card-id="${activeCardId}"] [data-action="hotkey"]`);
         if (hotkeyButton) hotkeyButton.title = 'Set Hotkey';
       }
+      
       setTimeout(() => {
-       
-         hotkeyPopup.style.display = 'none';
+        hotkeyPopup.style.display = 'none';
         isRecordingHotkey = false;
-        scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+        scheduleHeightCheck();
       }, 1000);
     });
+
     /* ============================================
        HOTKEY TRIGGER & KEYBOARD EVENTS
        ============================================ */
@@ -1848,8 +1843,7 @@ work when this browser tab is active.</p>
         if (['Control', 'Shift', 'Alt', 'Meta'].includes(event.key)) {
           return;
         }
-   
-           
+        
         currentRecordedHotkey = {
           key: event.key,
           ctrlKey: event.ctrlKey,
@@ -1860,8 +1854,7 @@ work when this browser tab is active.</p>
         currentHotkeyText.textContent = formatHotkey(currentRecordedHotkey);
 
         setTimeout(() => {
-  
-           if (isRecordingHotkey) {
+          if (isRecordingHotkey) {
             hotkeyConfirmButton.click();
           }
         }, 500);
@@ -1869,6 +1862,7 @@ work when this browser tab is active.</p>
         triggerSoundboardHotkeys(event);
       }
     });
+
     function triggerSoundboardHotkeys(event) {
       soundboardData.forEach(cardData => {
         if (cardData.hotkey) {
@@ -1877,15 +1871,13 @@ work when this browser tab is active.</p>
               event.ctrlKey === h.ctrlKey &&
               event.shiftKey === h.shiftKey &&
               event.altKey === h.altKey &&
-  
-               event.metaKey === h.metaKey) {
+              event.metaKey === h.metaKey) {
             event.preventDefault();
             
             const cardElement = document.querySelector(`[data-card-id="${cardData.id}"]`);
             if (cardElement && cardElement.audio && cardElement.audio.src) {
               playAudioWithEffects(cardElement.audio.src, cardElement.audio.volume);
-             
-   
+              
               cardElement.style.setProperty('--glow-color', getRandomGlowColor());
               cardElement.classList.add('active-hotkey');
               setTimeout(() => cardElement.classList.remove('active-hotkey'), 300);
@@ -1903,25 +1895,28 @@ work when this browser tab is active.</p>
         hotkeyPopup.style.display = 'none';
         helpPopup.style.display = 'none';
         isRecordingHotkey = false;
-        scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+        scheduleHeightCheck();
       });
     });
+
     window.addEventListener('click', (e) => {
       if (e.target === hotkeyPopup) {
         hotkeyPopup.style.display = 'none';
         isRecordingHotkey = false;
-        scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+        scheduleHeightCheck();
       }
       if (e.target === helpPopup) {
         helpPopup.style.display = 'none';
-        scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+        scheduleHeightCheck();
       }
     });
+
     /* ============================================
        SOUND CARD CREATION
        ============================================ */
     function createSoundCardElement(cardData, isAddButton = false) {
       const card = document.createElement('div');
+      
       if (isAddButton) {
         card.className = 'sound-card add-card';
         card.innerHTML = `
@@ -1937,8 +1932,7 @@ work when this browser tab is active.</p>
             hotkey: null,
             volume: 1.0,
             isMuted: false,
-   
-             isPreset: false
+            isPreset: false
           };
           soundboardData.push(newCardData);
           renderSoundboard();
@@ -1963,6 +1957,7 @@ work when this browser tab is active.</p>
       card.addEventListener('dragover', handleFileDragOver);
       card.addEventListener('dragleave', handleFileDragLeave);
       card.addEventListener('drop', handleFileDrop);
+
       card.innerHTML = `
         <div class="play-button-wrapper">
           <button class="play-circle" data-action="play">
@@ -1972,8 +1967,7 @@ work when this browser tab is active.</p>
         <div class="card-controls">
           <button class="control-button" data-action="upload" title="Upload Sound">
             <i class="fas fa-upload"></i>
-        
-           </button>
+          </button>
           <button class="control-button" data-action="hotkey" title="${cardData.hotkey ? 'Hotkey: ' + formatHotkey(cardData.hotkey) : 'Set Hotkey'}">
             <i class="fas fa-keyboard"></i>
           </button>
@@ -1981,13 +1975,11 @@ work when this browser tab is active.</p>
             <i class="fas fa-trash-alt"></i>
           </button>
           <div class="volume-control-wrapper">
-   
-             <button class="control-button volume-button ${cardData.isMuted ? 'muted' : ''}" data-action="volume" title="Volume">
+            <button class="control-button volume-button ${cardData.isMuted ? 'muted' : ''}" data-action="volume" title="Volume">
               <i class="fas ${cardData.isMuted ? 'fa-volume-mute' : 'fa-volume-up'}"></i>
             </button>
             <div class="volume-slider-popup-background">
-              <input type="range" class="volume-slider" min="0" max="1" step="0.01" value="${cardData.volume ||
- 1.0}">
+              <input type="range" class="volume-slider" min="0" max="1" step="0.01" value="${cardData.volume || 1.0}">
             </div>
           </div>
         </div>
@@ -1995,11 +1987,10 @@ work when this browser tab is active.</p>
           <span class="sound-name-display">${cardData.name || 'Unnamed Sound'}</span>
           <input type="text" class="name-edit-input" maxlength="${MAX_SOUND_NAME_LENGTH}" placeholder="Sound Name" style="display:none;">
         </div>
-        <input type="file" class="upload-input" accept="audio/*" style="display:none;">
+        <input type="file" class="upload-input" accept="audio/*,audio/mpeg,audio/mp3,audio/wav,audio/ogg,.mp3,.wav,.ogg,.m4a" style="display:none;">
       `;
 
-     
-       /* PLAY BUTTON */
+      /* PLAY BUTTON */
       const playBtn = card.querySelector('[data-action="play"]');
       playBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2009,8 +2000,7 @@ work when this browser tab is active.</p>
           card.style.setProperty('--glow-color', getRandomGlowColor());
           card.classList.add('playing');
           setTimeout(() => card.classList.remove('playing'), 300);
-     
-         } else {
+        } else {
           alert('Upload a sound first.');
         }
       });
@@ -2018,10 +2008,12 @@ work when this browser tab is active.</p>
       /* UPLOAD BUTTON */
       const uploadBtn = card.querySelector('[data-action="upload"]');
       const uploadInput = card.querySelector('.upload-input');
+      
       uploadBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         uploadInput.click();
       });
+      
       uploadInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -2030,19 +2022,21 @@ work when this browser tab is active.</p>
             card.audio.src = e.target.result;
             cardData.audioSrc = e.target.result;
             cardData.isPreset = false;
-      
-             uploadBtn.classList.add('uploaded');
+            
+            uploadBtn.classList.add('uploaded');
             uploadBtn.title = file.name;
           };
           reader.readAsDataURL(file);
         }
       });
+
       /* HOTKEY BUTTON */
       const hotkeyBtn = card.querySelector('[data-action="hotkey"]');
       hotkeyBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         openHotkeyPopup(cardData.id);
       });
+
       /* DELETE BUTTON */
       const deleteBtn = card.querySelector('[data-action="delete"]');
       deleteBtn.addEventListener('click', (e) => {
@@ -2054,6 +2048,7 @@ work when this browser tab is active.</p>
           renderSoundboard();
         }, 200);
       });
+
       /* VOLUME CONTROL */
       const volumeButton = card.querySelector('.volume-button');
       const volumeIcon = volumeButton.querySelector('i');
@@ -2091,6 +2086,7 @@ work when this browser tab is active.</p>
         card.audio.muted = false;
         updateVolumeIcon(newVolume, false);
       });
+
       volumeButton.addEventListener('click', (e) => {
         e.stopPropagation();
         if (card.audio.muted) {
@@ -2100,17 +2096,18 @@ work when this browser tab is active.</p>
           card.audio.volume = cardData.volume > 0 ? cardData.volume : 0.5;
           volumeSlider.value = card.audio.volume;
           updateVolumeIcon(card.audio.volume, false);
-  
-         } else {
+        } else {
           card.audio.muted = true;
           card.dataset.isMuted = 'true';
           cardData.isMuted = true;
           updateVolumeIcon(0, true);
         }
       });
+
       /* SOUND NAME EDITING */
       const soundNameDisplay = card.querySelector('.sound-name-display');
       const nameEditInput = card.querySelector('.name-edit-input');
+      
       soundNameDisplay.addEventListener('click', (e) => {
         e.stopPropagation();
         soundNameDisplay.style.display = 'none';
@@ -2119,20 +2116,24 @@ work when this browser tab is active.</p>
         nameEditInput.focus();
         nameEditInput.select();
       });
+      
       nameEditInput.addEventListener('blur', () => {
         cardData.name = nameEditInput.value.trim().substring(0, MAX_SOUND_NAME_LENGTH) || 'Unnamed Sound';
         soundNameDisplay.textContent = cardData.name;
         nameEditInput.style.display = 'none';
         soundNameDisplay.style.display = 'block';
       });
+      
       nameEditInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
           nameEditInput.blur();
         }
       });
+      
       nameEditInput.addEventListener('click', (e) => {
         e.stopPropagation();
       });
+
       if (cardData.audioSrc && !cardData.isPreset) {
         uploadBtn.classList.add('uploaded');
         uploadBtn.title = 'Sound Loaded';
@@ -2146,13 +2147,16 @@ work when this browser tab is active.</p>
        ============================================ */
     function renderSoundboard() {
       soundCardsWrapper.innerHTML = '';
+      
       soundboardData.forEach(cardData => {
         const cardElement = createSoundCardElement(cardData);
         soundCardsWrapper.appendChild(cardElement);
       });
+      
       const addCard = createSoundCardElement(null, true);
       soundCardsWrapper.appendChild(addCard);
-      scheduleHeightCheck(); // <-- ADDED FOR SCROLLBAR FIX
+      
+      scheduleHeightCheck();
     }
 
     /* ============================================
@@ -2160,6 +2164,7 @@ work when this browser tab is active.</p>
        ============================================ */
     async function initializeSoundboardFresh() {
       soundboardData = [];
+      
       for (let i = 0; i < DEFAULT_STARTING_CARDS; i++) {
         const hotkeyKey = (i + 1).toString();
         const defaultHotkey = {
@@ -2169,8 +2174,10 @@ work when this browser tab is active.</p>
           altKey: false,
           metaKey: false
         };
+        
         const noteData = NOTE_FREQUENCIES[i % NOTE_FREQUENCIES.length];
         const audioUrl = await generateToneAudio(noteData.freq);
+        
         soundboardData.push({
           id: generateUniqueId(),
           audioSrc: audioUrl,
@@ -2190,45 +2197,29 @@ work when this browser tab is active.</p>
        ============================================ */
     initializeSoundboardFresh();
 
-    // ===== FOURTHWALL SCROLLBAR FIX V3 (Definitive) =====
+    // ===== FOURTHWALL SCROLLBAR FIX =====
     let lastHeight = 0;
     let resizeTimer;
 
-    /**
-     * Sends the current scrollHeight to the parent window if it has changed.
-     * This is the *only* function that should send a postMessage.
-     */
     function sendHeight() {
-      // Use scrollHeight for content height
       const height = document.body.scrollHeight;
       
-      // Only send message if height has *actually* changed 
       if (height !== lastHeight) {
         lastHeight = height;
         window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
-    /**
-     * A debounced version of sendHeight() to be called on content changes.
-     * This ensures we don't spam messages during rapid changes.
-     */
     function scheduleHeightCheck() {
-        // Clear any pending checks
         clearTimeout(resizeTimer);
-        // Schedule a new check after 150ms
         resizeTimer = setTimeout(sendHeight, 150);
     }
 
-    // Send height on initial load (with a slight delay)
-    // This fixes the "Content Cut-Off" race condition.
     window.addEventListener('load', () => {
         setTimeout(sendHeight, 100);
     });
 
-    // Send height on window resize (debounced)
     window.addEventListener('resize', () => {
-        // Use scheduleHeightCheck for built-in debounce
         scheduleHeightCheck();
     });
     // ===== END OF SCROLLBAR FIX =====
