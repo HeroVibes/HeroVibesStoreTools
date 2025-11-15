@@ -1,1220 +1,523 @@
-html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<style>
-		:root {
-			--bg: #191919;
-			--card-bg: #1F1F1F;
-			--hover: #323232;
-			--outline: #323232;
-			--accent: #87A9FF;
-			--text-primary: #D4D4D4;
-			--text-secondary: #8C8C8C;
-			--radius: 8px;
-			--blur-strength: 120px;
-			--vignette-opacity: 0;
-			--grain-opacity: 0.1;
-		}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blurry Wallpaper Generator</title>
+  <style>
+    :root {
+      --bg: #191919;
+      --card-bg: #1F1F1F;
+      --hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+    }
 
-		/* ANIMATIONS */
-		@keyframes pulse-once {
-			0% { transform: scale(1); }
-			50% { transform: scale(1.03); }
-			100% { transform: scale(1); }
-		}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-		*, *::before, *::after {
-			box-sizing: border-box;
-		}
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: var(--bg);
+      font-family: sans-serif;
+      color: var(--text-primary);
+    }
 
-		html, body {
-			margin: 0;
-			padding: 0;
-			height: auto;
-			min-height: 0; 
-			overflow: visible;
-			background: var(--bg);
-		}
+    /* ===== MAIN CONTAINER ===== */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
 
-		body {
-			font-family: sans-serif;
-			color: var(--text-primary);
-			padding: 24px 16px;
-			width: 100%;
-			display: block;
-		}
+    /* ===== CONTROLS SECTION ===== */
+    .controls {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 16px;
+    }
 
-		#app-container {
-			max-width: 1200px;
-			margin: 0 auto;
-			display: flex;
-			gap: 24px;
-			flex-wrap: wrap;
-			width: 100%;
-			align-items: flex-start;
-		}
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
 
-		#preview-section {
-			flex: 1;
-			min-width: 300px;
-			background: var(--card-bg);
-			border: 1px solid var(--outline);
-			border-radius: var(--radius);
-			padding: 16px;
-			width: 100%;
-		}
+    .control-group:last-child {
+      margin-bottom: 0;
+    }
 
-		#wallpaper-preview {
-			width: 100%;
-			aspect-ratio: 16 / 9; /* Default, will be changed by JS */
-			position: relative;
-			overflow: hidden;
-			background: #000;
-			border-radius: var(--radius);
-		}
+    .control-label {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
 
-		#wallpaper-preview.is-vertical {
-			max-width: 350px;
-			margin-left: auto;
-			margin-right: auto;
-		}
+    .toggle-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
-		#texture-overlay, #vignette-overlay, #grain-overlay {
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			pointer-events: none;
-			z-index: 2;
-		}
+    /* ===== TOGGLE BUTTONS ===== */
+    .toggle-btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      font-family: sans-serif;
+      transition: background 0.2s ease, border-color 0.2s ease;
+      flex: 1;
+      min-width: 100px;
+    }
 
-		#vignette-overlay {
-			background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.8) 100%);
-			opacity: var(--vignette-opacity);
-		}
+    .toggle-btn.active {
+      background: var(--hover);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
 
-		#grain-overlay {
-			background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuODUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIxIi8+PC9zdmc+");
-			background-size: 100px 100px;
-			opacity: var(--grain-opacity);
-			mix-blend-mode: overlay;
-		}
+    .toggle-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
 
-		.color-blob {
-			position: absolute;
-			border-radius: 50%;
-			filter: blur(var(--blur-strength));
-			transition: all 0.3s ease;
-			z-index: 1;
-			cursor: move;
-			touch-action: none; 
-		}
-		
-		.preview-actions {
-			margin-top: 16px;
-		}
-		.action-row {
-			display: flex;
-			gap: 16px;
-			align-items: flex-end;
-		}
-		#resolution-control {
-			flex: 1;
-			gap: 8px;
-		}
-		.preview-actions #download-btn {
-			flex-basis: 160px;
-			flex-shrink: 0;
-		}
+    .toggle-btn:hover::before {
+      left: 125%;
+    }
 
-		#controls {
-			position: relative;
-			flex: 1;
-			min-width: 300px;
-			max-width: 450px;
-			background: var(--card-bg);
-			border: 1px solid var(--outline);
-			border-radius: var(--radius);
-			padding: 24px 16px;
-			display: flex;
-			flex-direction: column;
-			gap: 24px;
-			width: 100%;
-		}
+    .toggle-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
 
-		#version-tag {
-			position: absolute;
-			top: 8px;
-			right: 12px;
-			font-size: 10px;
-			color: var(--text-secondary);
-			font-weight: 600;
-			background: rgba(50,50,50,0.5);
-			padding: 2px 6px;
-			border-radius: 4px;
-			pointer-events: none;
-			z-index: 10;
-		}
+    /* ===== ACTION BUTTONS ===== */
+    .btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      font-family: sans-serif;
+      width: 100%;
+      transition: background 0.2s ease;
+    }
 
-		.control-group {
-			display: flex;
-			flex-direction: column;
-			gap: 12px;
-			width: 100%;
-		}
-		
-		.control-group-first {
-			margin-top: 16px;
-		}
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
 
-		.control-group-row {
-			display: flex;
-			gap: 16px;
-			width: 100%;
-		}
-		.control-group-row > .control-group {
-			flex: 1;
-			min-width: 120px;
-			gap: 12px;
-		}
+    .btn:hover::before {
+      left: 125%;
+    }
 
-		.control-label {
-			font-size: 14px;
-			font-weight: 600;
-			color: var(--text-primary);
-			display: flex;
-			align-items: center;
-		}
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
 
-		.control-sublabel {
-			font-size: 12px;
-			color: var(--text-secondary);
-			margin-top: -8px;
-		}
+    .btn-primary {
+      background: var(--accent);
+      color: #191919;
+      font-weight: bold;
+    }
 
-		#color-grid {
-			display: grid;
-			grid-template-columns: repeat(8, 1fr);
-			gap: 8px;
-			width: 100%;
-		}
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
 
-		.color-picker-wrapper {
-			position: relative;
-			width: 100%;
-			aspect-ratio: 1;
-		}
+    /* ===== PREVIEW SECTION ===== */
+    .preview-section {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 16px;
+    }
 
-		.color-picker {
-			width: 100%;
-			height: 100%;
-			border: 2px solid var(--outline);
-			border-radius: 6px;
-			cursor: pointer;
-			transition: all 0.2s ease;
-			background: transparent;
-			padding: 0;
-			-webkit-appearance: none;
-			-moz-appearance: none;
-			appearance: none;
-		}
-		
-		.color-picker::-webkit-color-swatch-wrapper {
-			padding: 0;
-		}
-		.color-picker::-webkit-color-swatch {
-			border: none;
-			border-radius: 4px;
-		}
-		.color-picker::-moz-color-swatch {
-			border: none;
-			border-radius: 4px;
-		}
+    .preview-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      text-align: center;
+    }
 
-		.color-picker:hover {
-			border-color: var(--accent);
-			transform: scale(1.05);
-		}
+    .preview-container {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--bg);
+      border: 1px solid var(--outline);
+    }
 
-		.slider-wrapper {
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
-			width: 100%;
-		}
+    .preview-container.vertical {
+      aspect-ratio: 9/16;
+      max-height: 500px;
+      margin: 0 auto;
+    }
 
-		.slider-header {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-		}
+    #preview-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
 
-		.slider-value {
-			font-size: 12px;
-			color: var(--accent);
-			font-weight: 600;
-		}
+    /* ===== CHECKBOX TOGGLE ===== */
+    .checkbox-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
 
-		input[type="range"] {
-			width: 100%;
-			height: 6px;
-			background: var(--outline);
-			border-radius: 3px;
-			outline: none;
-			-webkit-appearance: none;
-			appearance: none;
-			transition: all 0.2s ease;
-		}
-		input[type="range"]:focus-visible {
-			 box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
-		}
-		input[type="range"]::-webkit-slider-thumb {
-			-webkit-appearance: none;
-			appearance: none;
-			width: 16px;
-			height: 16px;
-			background: var(--accent);
-			cursor: pointer;
-			border-radius: 50%;
-			transition: all 0.2s ease;
-		}
-		input[type="range"]::-webkit-slider-thumb:hover {
-			transform: scale(1.1);
-		}
-		input[type="range"]::-moz-range-thumb {
-			width: 16px;
-			height: 16px;
-			background: var(--accent);
-			cursor: pointer;
-			border-radius: 50%;
-			border: none;
-		}
-		 input[type="range"]::-moz-range-thumb:hover {
-			transform: scale(1.1);
-		}
+    .checkbox-toggle input {
+      appearance: none;
+      width: 44px;
+      height: 24px;
+      background: var(--bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
 
-		.texture-grid, .theme-grid {
-			display: grid;
-			grid-template-columns: repeat(3, 1fr);
-			gap: 8px;
-			width: 100%;
-		}
-		
-		.texture-grid {
-			 grid-template-columns: repeat(2, 1fr);
-		}
+    .checkbox-toggle input::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--text-secondary);
+      top: 2px;
+      left: 2px;
+      transition: left 0.3s ease, background 0.3s ease;
+    }
 
-		.texture-option, .theme-option {
-			padding: 8px 12px;
-			background: var(--bg);
-			border: 1px solid var(--outline);
-			border-radius: var(--radius);
-			cursor: pointer;
-			font-size: 12px;
-			text-align: center;
-			transition: all 0.2s ease;
-			color: var(--text-primary);
-			font-weight: 600;
-		}
+    .checkbox-toggle input:checked {
+      background: var(--accent);
+    }
 
-		.texture-option:hover, .theme-option:hover {
-			background: var(--hover);
-		}
+    .checkbox-toggle input:checked::before {
+      left: 22px;
+      background: #191919;
+    }
 
-		.texture-option.active, .theme-option.active {
-			background: var(--accent);
-			color: #191919;
-			border-color: var(--accent);
-		}
-		
-		.theme-option:focus-visible,
-		.texture-option:focus-visible {
-			outline: none;
-			box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
-		}
+    .checkbox-toggle span {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
 
-		.theme-option:active, .texture-option:active {
-			transform: scale(0.96);
-			transition: transform 0.1s ease;
-		}
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 600px) {
+      body {
+        padding: 16px 12px;
+      }
 
-		.button-group {
-			display: flex;
-			gap: 12px;
-			margin-top: 8px;
-			width: 100%;
-		}
+      .button-grid {
+        grid-template-columns: 1fr;
+      }
 
-		.btn {
-			position: relative;
-			flex: 1;
-			padding: 12px 16px;
-			border-radius: var(--radius);
-			background: var(--card-bg);
-			color: var(--text-primary);
-			border: 1px solid rgba(255,255,255,0.06);
-			cursor: pointer;
-			overflow: hidden;
-			font-size: 14px;
-			font-weight: 600;
-			transition: all 0.2s ease;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-		}
+      .toggle-group {
+        flex-direction: column;
+      }
 
-		.btn::before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: -100%;
-			width: 75%;
-			height: 100%;
-			background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-			transform: skewX(-25deg);
-			transition: left 0.7s ease-in-out;
-		}
+      .toggle-btn {
+        width: 100%;
+      }
 
-		.btn:hover::before {
-			left: 125%;
-		}
-		
-		.btn:hover {
-			background: var(--hover);
-		}
-		
-		.btn:focus-visible{
-			outline: none;
-			box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
-		}
-
-		.btn-primary {
-			background: var(--accent);
-			color: #191919;
-			border-color: var(--accent);
-		}
-		
-		.btn-primary:disabled {
-			background: var(--hover);
-			color: var(--text-secondary);
-			cursor: wait;
-		}
-		
-		.btn-primary:disabled::before {
-			display: none;
-		}
-
-		.btn-primary:hover {
-			background: #9BB8FF;
-		}
-
-		.btn-random {
-			background: var(--accent);
-			color: #191919;
-			border-color: var(--accent);
-			width: 100%;
-			font-size: 16px;
-		}
-		.btn-random:hover {
-			background: #9BB8FF;
-		}
-		.btn-random:active {
-			animation: pulse-once 0.3s ease-out;
-		}
-
-
-		#resolution-select {
-			padding: 12px;
-			background: var(--bg);
-			border: 1px solid var(--outline);
-			border-radius: var(--radius);
-			color: var(--text-primary);
-			font-size: 14px;
-			width: 100%;
-			-webkit-appearance: none;
-			-moz-appearance: none;
-			appearance: none;
-			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238C8C8C' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708 .708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
-			background-repeat: no-repeat;
-			background-position: right 12px center;
-			padding-right: 40px;
-			height: 47.6px;
-		}
-		
-		#resolution-select:focus-visible {
-			 outline: none;
-			 border-color: var(--accent);
-			 box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
-		}
-
-		@media (max-width: 768px) {
-			body {
-				 padding: 16px 8px;
-			}
-		
-			#app-container {
-				gap: 16px;
-				flex-direction: column;
-			}
-
-			#controls, #preview-section {
-				max-width: 100%;
-				padding: 16px;
-			}
-			
-			#controls {
-				gap: 20px;
-			}
-			
-			.action-row {
-				flex-direction: column;
-				align-items: stretch;
-			}
-			.preview-actions #download-btn {
-				flex-basis: auto;
-			}
-
-			.control-group-row {
-				flex-direction: column;
-				gap: 24px; 
-			}
-			
-			.control-group-first {
-				margin-top: 12px;
-			}
-
-			#color-grid {
-				grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-				gap: 12px;
-			}
-
-			.texture-grid, .theme-grid {
-				grid-template-columns: repeat(2, 1fr);
-			}
-
-			#version-tag {
-				font-size: 9px;
-				top: 6px;
-				right: 10px;
-			}
-			
-			.button-group {
-				flex-direction: column;
-			}
-			
-			#wallpaper-preview.is-vertical {
-				 max-width: 250px;
-			}
-		}
-	</style>
+      .preview-container.vertical {
+        max-height: 400px;
+      }
+    }
+  </style>
 </head>
 <body>
-	
-	<div id="app-container">
-		
-		<div id="preview-section">
-			<div id="wallpaper-preview">
-				<div id="grain-overlay"></div>
-				<div id="texture-overlay"></div>
-				<div id="vignette-overlay"></div>
-			</div>
-			
-			<div class="preview-actions">
-				<div class="action-row">
-					<div class="control-group" id="resolution-control">
-						<label for="resolution-select" class="control-label">Resolution</label>
-						<select id="resolution-select">
-							<option value="1920x1080">Full HD (1920x1080)</option>
-							<option value="1080x1920">Mobile (1080x1920)</option>
-						</select>
-					</div>
-					<button class="btn btn-primary" id="download-btn">Download</button>
-				</div>
-			</div>
-
-		</div>
-
-		<div id="controls">
-			<div id="version-tag">V1.0.0</div>
-
-			<div class="control-group control-group-first">
-				<button class="btn btn-random" id="random-btn">Randomize</button>
-			</div>
-
-			<div class="control-group">
-				<div class="control-label">Themes</div>
-				<div class="theme-grid">
-					<div class="theme-option" data-theme="random" tabindex="0">Random</div>
-					<div class="theme-option" data-theme="neon" tabindex="0">Neon</div>
-					<div class="theme-option" data-theme="pastel" tabindex="0">Pastel</div>
-					<div class="theme-option" data-theme="earth" tabindex="0">Earth</div>
-					<div class="theme-option" data-theme="fire" tabindex="0">Fire</div>
-					<div class="theme-option" data-theme="ocean" tabindex="0">Ocean</div>
-				</div>
-			</div>
-
-			<div class="control-group">
-				<div class="control-label">Colors</div>
-				<div class="control-sublabel">Click to change, drag in preview to position</div>
-				<div id="color-grid"></div>
-				<div class="button-group">
-					<button class="btn" id="add-blob-btn">Add Blob</button>
-					<button class="btn" id="remove-blob-btn">Remove Blob</button>
-				</div>
-			</div>
-
-			<div class="control-group">
-				<div class="control-label">Background Color</div>
-				<div class="color-picker-wrapper" style="width: 60px;">
-					<input type="color" class="color-picker" id="bg-color-picker">
-				</div>
-			</div>
-			
-			<div class="control-group-row">
-				<div class="control-group">
-					<div class="slider-wrapper">
-						<div class="slider-header">
-							<label for="blur-slider" class="control-label">Blur</label>
-							<div class="slider-value" id="blur-value">120px</div>
-						</div>
-						<input type="range" id="blur-slider" min="30" max="300" value="120" aria-labelledby="blur-value">
-					</div>
-				</div>
-				<div class="control-group">
-					<div class="slider-wrapper">
-						<div class="slider-header">
-							<label for="size-slider" class="control-label">Size</label>
-							<div class="slider-value" id="size-value">100%</div>
-						</div>
-						<input type="range" id="size-slider" min="50" max="200" value="100" aria-labelledby="size-value">
-					</div>
-				</div>
-			</div>
-
-			<div class="control-group-row">
-				<div class="control-group">
-					<div class="slider-wrapper">
-						<div class="slider-header">
-							<label for="brightness-slider" class="control-label">Brightness</label>
-							<div class="slider-value" id="brightness-value">100%</div>
-						</div>
-						<input type="range" id="brightness-slider" min="50" max="150" value="100" aria-labelledby="brightness-value">
-					</div>
-				</div>
-				<div class="control-group">
-					<div class="slider-wrapper">
-						<div class="slider-header">
-							<label for="saturation-slider" class="control-label">Saturation</label>
-							<div class="slider-value" id="saturation-value">100%</div>
-						</div>
-						<input type="range" id="saturation-slider" min="0" max="200" value="100" aria-labelledby="saturation-value">
-					</div>
-				</div>
-			</div>
-
-			 <div class="control-group-row">
-				<div class="control-group">
-					<div class="slider-wrapper">
-						<div class="slider-header">
-							<label for="vignette-slider" class="control-label">Vignette</label>
-							<div class="slider-value" id="vignette-value">0%</div>
-						</div>
-						<input type="range" id="vignette-slider" min="0" max="100" value="0" aria-labelledby="vignette-value">
-					</div>
-				</div>
-				<div class="control-group">
-					<div class="slider-wrapper">
-						<div class="slider-header">
-							<label for="grain-slider" class="control-label">Grain</label>
-							<div class="slider-value" id="grain-value">0%</div>
-						</div>
-						<input type="range" id="grain-slider" min="0" max="50" value="0" aria-labelledby="grain-value">
-					</div>
-				</div>
-			</div>
-
-			<div class="control-group">
-				<div class="control-label">Texture Overlay</div>
-				<div class="texture-grid">
-					<div class="texture-option active" data-texture="none" tabindex="0">None</div>
-					<div class="texture-option" data-texture="noise" tabindex="0">Noise</div>
-				</div>
-			</div>
-
-		</div>
-	</div>
-
-	<canvas id="render-canvas" style="display: none;"></canvas>
-	<script>
-		// ===== APP LOGIC =====
-		
-		// DOM Elements
-		const preview = document.getElementById('wallpaper-preview');
-		const textureOverlay = document.getElementById('texture-overlay');
-		const vignetteOverlay = document.getElementById('vignette-overlay');
-		const grainOverlay = document.getElementById('grain-overlay');
-		const colorGrid = document.getElementById('color-grid');
-		const bgColorPicker = document.getElementById('bg-color-picker');
-		const blurSlider = document.getElementById('blur-slider');
-		const sizeSlider = document.getElementById('size-slider');
-		const brightnessSlider = document.getElementById('brightness-slider');
-		const saturationSlider = document.getElementById('saturation-slider');
-		const vignetteSlider = document.getElementById('vignette-slider');
-		const grainSlider = document.getElementById('grain-slider');
-		const blurValue = document.getElementById('blur-value');
-		const sizeValue = document.getElementById('size-value');
-		const brightnessValue = document.getElementById('brightness-value');
-		const saturationValue = document.getElementById('saturation-value');
-		const vignetteValue = document.getElementById('vignette-value');
-		const grainValue = document.getElementById('grain-value');
-		const textureOptions = document.querySelectorAll('.texture-option');
-		const themeOptions = document.querySelectorAll('.theme-option');
-		const addBlobBtn = document.getElementById('add-blob-btn');
-		const removeBlobBtn = document.getElementById('remove-blob-btn');
-		const randomBtn = document.getElementById('random-btn');
-		const downloadBtn = document.getElementById('download-btn');
-		const resolutionSelect = document.getElementById('resolution-select');
-		const canvas = document.getElementById('render-canvas');
-		const ctx = canvas.getContext('2d');
-		
-		// **MODIFICATION:** tempCanvas and tempCtx are no longer needed
-		// const tempCanvas = document.getElementById('temp-canvas');
-		// const tempCtx = tempCanvas.getContext('2d');
-
-		// App State
-		const state = {
-			blobs: [],
-			sizeMultiplier: 1,
-			brightness: 100,
-			saturation: 100,
-			vignette: 0,
-			grain: 0,
-			texture: 'none',
-			backgroundColor: '#000000',
-			textureParams: {
-				noise: { opacity: 0.1 }
-			},
-			maxBlobs: 10,
-			minBlobs: 1
-		};
-
-		// Utilities
-		const hslToHex = (h, s, l) => {
-			l /= 100;
-			const a = s * Math.min(l, 1 - l) / 100;
-			const f = n => {
-				const k = (n + h / 30) % 12;
-				const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-				return Math.round(255 * color).toString(16).padStart(2, '0');
-			};
-			return `#${f(0)}${f(8)}${f(4)}`;
-		};
-
-		const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-		const generateRandomColor = () => hslToHex(randomInt(0, 360), randomInt(60, 90), randomInt(40, 70));
-
-		const generateRandomBackgroundColor = () => {
-			const roll = Math.random();
-			if (roll < 0.4) return '#000000';
-			if (roll < 0.8) return '#FFFFFF';
-			return hslToHex(randomInt(0, 360), randomInt(10, 20), Math.random() > 0.5 ? randomInt(0, 15) : randomInt(85, 100));
-		};
-
-		// Texture randomization
-		function randomizeTextureParams() {
-			// This function is kept in case you want to add other textures later,
-			// but the 'noise' opacity is no longer used.
-			state.textureParams.noise.opacity = randomInt(8, 20) / 100;
-		}
-
-		// Blob management
-		function createBlob(id) {
-			const blob = document.createElement('div');
-			blob.className = 'color-blob';
-			blob.id = id;
-			preview.appendChild(blob);
-
-			const wrapper = document.createElement('div');
-			wrapper.className = 'color-picker-wrapper';
-			const picker = document.createElement('input');
-			picker.type = 'color';
-			picker.className = 'color-picker';
-			picker.id = `${id}-color`;
-			wrapper.appendChild(picker);
-			colorGrid.appendChild(wrapper);
-
-			makeDraggable(blob);
-			return { blob, picker };
-		}
-
-		function addBlob() {
-			if (state.blobs.length >= state.maxBlobs) return;
-			const id = `blob${state.blobs.length + 1}`;
-			const { blob, picker } = createBlob(id);
-			const blobState = {
-				id,
-				color: generateRandomColor(),
-				x: randomInt(-20, 80),
-				y: randomInt(-20, 80),
-				baseSize: randomInt(200, 500)
-			};
-			state.blobs.push(blobState);
-			picker.value = blobState.color;
-			picker.addEventListener('input', e => {
-				blobState.color = e.target.value;
-				updatePreview();
-			});
-			updatePreview();
-		}
-
-		function removeBlob() {
-			if (state.blobs.length <= state.minBlobs) return;
-			const removed = state.blobs.pop();
-			const blob = document.getElementById(removed.id);
-			if (blob) blob.remove();
-			const wrapper = colorGrid.lastElementChild;
-			if (wrapper) wrapper.remove();
-			updatePreview();
-		}
-
-		// Dragging logic
-		function makeDraggable(el) {
-			let dragging = false, startX, startY, initX, initY;
-
-			const down = e => {
-				dragging = true;
-				startX = e.clientX;
-				startY = e.clientY;
-				initX = parseFloat(el.style.left) || 0;
-				initY = parseFloat(el.style.top) || 0;
-				el.style.transition = 'none';
-				el.style.cursor = 'grabbing';
-				document.body.style.cursor = 'grabbing';
-				e.preventDefault();
-			};
-
-			const move = e => {
-				if (!dragging) return;
-				e.preventDefault();
-				
-				const dx = (e.clientX - startX) / preview.clientWidth * 100;
-				const dy = (e.clientY - startY) / preview.clientHeight * 100;
-				const x = initX + dx;
-				const y = initY + dy;
-				el.style.left = `${x}%`;
-				el.style.top = `${y}%`;
-				const bs = state.blobs.find(b => b.id === el.id);
-				if (bs) { bs.x = x; bs.y = y; }
-			};
-
-			const up = () => {
-				if (dragging) {
-					dragging = false;
-					el.style.transition = 'all 0.3s ease';
-					el.style.cursor = 'move';
-					document.body.style.cursor = 'default';
-					updatePreview();
-				}
-			};
-
-			el.addEventListener('pointerdown', down);
-			document.addEventListener('pointermove', move);
-			document.addEventListener('pointerup', up);
-		}
-
-
-		// Main preview update function
-		function updatePreview() {
-			document.documentElement.style.setProperty('--blur-strength', `${blurSlider.value}px`);
-			blurValue.textContent = `${blurSlider.value}px`;
-			sizeValue.textContent = `${sizeSlider.value}%`;
-			brightnessValue.textContent = `${brightnessSlider.value}%`;
-			saturationValue.textContent = `${saturationSlider.value}%`;
-			vignetteValue.textContent = `${vignetteSlider.value}%`;
-			grainValue.textContent = `${grainSlider.value}%`;
-
-			state.sizeMultiplier = sizeSlider.value / 100;
-			state.brightness = brightnessSlider.value;
-			state.saturation = saturationSlider.value;
-			state.vignette = vignetteSlider.value / 100;
-			state.grain = grainSlider.value / 100;
-
-			document.documentElement.style.setProperty('--vignette-opacity', state.vignette);
-			document.documentElement.style.setProperty('--grain-opacity', state.grain);
-
-			preview.style.backgroundColor = state.backgroundColor;
-			preview.style.filter = `brightness(${state.brightness}%) saturate(${state.saturation}%)`;
-
-			state.blobs.forEach(bs => {
-				const el = document.getElementById(bs.id);
-				if (!el) return;
-				const size = bs.baseSize * state.sizeMultiplier;
-				el.style.backgroundColor = bs.color;
-				el.style.left = `${bs.x}%`;
-				el.style.top = `${bs.y}%`;
-				el.style.width = `${size}px`;
-				el.style.height = `${size}px`;
-				const p = document.getElementById(`${bs.id}-color`);
-				if (p) p.value = bs.color;
-			});
-
-			applyTexture();
-			
-			if (typeof scheduleHeightCheck === 'function') {
-				scheduleHeightCheck();
-			}
-		}
-
-		function applyTexture() {
-			textureOverlay.style.backgroundImage = 'none';
-			textureOverlay.style.backdropFilter = 'none';
-			textureOverlay.style.opacity = 1;
-			textureOverlay.style.mixBlendMode = 'normal';
-
-			// **FIX:** Removed the 'noise' texture logic from here.
-			// The #grain-overlay (controlled by the grain slider) is now
-			// the only source for noise in the preview, matching the download.
-		}
-
-		// Themes logic
-		function applyTheme(theme) {
-			let colors = [];
-			switch (theme) {
-				case 'neon': colors = ['#FF00FF', '#00FFFF', '#FFFF00', '#FF0000', '#00FF00']; state.backgroundColor = '#000000'; break;
-				case 'pastel': colors = ['#FFD3E0', '#D3FFEB', '#D3E0FF', '#FFEBD3', '#E0D3FF']; state.backgroundColor = '#FFFFFF'; break;
-				case 'earth': colors = ['#4E7D3E', '#8B4513', '#228B22', '#556B2F', '#A0522D']; state.backgroundColor = '#F5F5DC'; break;
-				case 'fire': colors = ['#FF4500', '#FF8C00', '#FFD700', '#FF0000', '#FFA500']; state.backgroundColor = '#000000'; break;
-				case 'ocean': colors = ['#00BFFF', '#20B2AA', '#4682B4', '#5F9EA0', '#87CEEB']; state.backgroundColor = '#FFFFFF'; break;
-				default:
-					for (let i = 0; i < state.blobs.length; i++) colors.push(generateRandomColor());
-					state.backgroundColor = generateRandomBackgroundColor();
-			}
-			state.blobs.forEach((b, i) => b.color = colors[i % colors.length]);
-			bgColorPicker.value = state.backgroundColor;
-			updatePreview();
-		}
-
-		function randomizeState(theme = 'random') {
-			state.blobs.forEach(b => {
-				b.x = randomInt(-20, 80);
-				b.y = randomInt(-20, 80);
-				b.baseSize = randomInt(200, 500);
-			});
-			
-			themeOptions.forEach(t => t.classList.remove('active'));
-			const activeTheme = document.querySelector(`.theme-option[data-theme="${theme}"]`) || themeOptions[0];
-			activeTheme.classList.add('active');
-
-			applyTheme(theme);
-			blurSlider.value = randomInt(80, 200);
-			sizeSlider.value = randomInt(80, 120);
-			brightnessSlider.value = randomInt(90, 110);
-			saturationSlider.value = randomInt(80, 120);
-			
-			randomizeTextureParams();
-			updatePreview();
-		}
-
-		// ===== START OF IOS/1080p RENDER FIX =====
-
-		// --- Helper: RGB to HSL ---
-		function rgbToHsl(r, g, b) {
-			r /= 255; g /= 255; b /= 255;
-			let max = Math.max(r, g, b), min = Math.min(r, g, b);
-			let h, s, l = (max + min) / 2;
-			if (max == min) {
-				h = s = 0; // achromatic
-			} else {
-				let d = max - min;
-				s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-				switch (max) {
-					case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-					case g: h = (b - r) / d + 2; break;
-					case b: h = (r - g) / d + 4; break;
-				}
-				h /= 6;
-			}
-			return [h, s, l];
-		}
-
-		// --- Helper: HSL to RGB ---
-		function hslToRgb(h, s, l) {
-			let r, g, b;
-			if (s == 0) {
-				r = g = b = l; // achromatic
-			} else {
-				function hue2rgb(p, q, t) {
-					if (t < 0) t += 1;
-					if (t > 1) t -= 1;
-					if (t < 1/6) return p + (q - p) * 6 * t;
-					if (t < 1/2) return q;
-					if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-					return p;
-				}
-				let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-				let p = 2 * l - q;
-				r = hue2rgb(p, q, h + 1/3);
-				g = hue2rgb(p, q, h);
-				b = hue2rgb(p, q, h - 1/3);
-			}
-			return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-		}
-		
-		// --- Helper: Clamp a value ---
-		function clamp(value) {
-			return Math.max(0, Math.min(value, 255));
-		}
-
-		// --- **MODIFIED** Download Function (No Temp Canvas) ---
-		async function downloadImage() {
-			downloadBtn.disabled = true;
-			downloadBtn.textContent = "Rendering...";
-
-			// Use setTimeout to allow UI to update *before* the heavy render starts
-			setTimeout(async () => {
-				const [w, h] = resolutionSelect.value.split('x').map(Number);
-				canvas.width = w; canvas.height = h;
-				
-				// **MODIFICATION:** No tempCanvas setup needed
-
-				// 1. Fill background (on main canvas)
-				ctx.fillStyle = state.backgroundColor;
-				ctx.fillRect(0, 0, w, h);
-
-				// 2. Prep scale and BLUR-ONLY filter
-				const rect = preview.getBoundingClientRect();
-				const scaleX = w / rect.width;
-				const scaleY = h / rect.height;
-				const blur = blurSlider.value * Math.min(scaleX, scaleY);
-				ctx.filter = `blur(${blur}px)`;
-
-				// 3. Draw blurred blobs (on main canvas)
-				state.blobs.forEach(b => {
-					ctx.fillStyle = b.color;
-					ctx.beginPath();
-					const diameter = b.baseSize * state.sizeMultiplier * Math.min(scaleX, scaleY);
-					const radius = diameter / 2;
-					const x_percent = (b.x / 100) * w;
-					const y_percent = (b.y / 100) * h;
-					const centerX = x_percent + radius;
-					const centerY = y_percent + radius;
-					ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-					ctx.fill();
-				});
-				
-				// 4. IMPORTANT: Reset filter
-				ctx.filter = 'none';
-
-				// 5. ******** THE IOS FIX ********
-				// Await a new timeout(0). This pauses execution, returns
-				// control to the browser, and lets the GPU finish the
-				// async blur operation before we try to read the pixels.
-				await new Promise(resolve => setTimeout(resolve, 0));
-				// *******************************
-
-				// 6. **MODIFICATION:** Get pixel data from the *main canvas*
-				let imageData;
-				try {
-					imageData = ctx.getImageData(0, 0, w, h);
-				} catch (e) {
-					console.error("Failed to get image data:", e);
-					downloadBtn.disabled = false;
-					downloadBtn.textContent = "Error";
-					return; // Stop if we can't get data
-				}
-				
-				let data = imageData.data;
-				
-				const brightness = state.brightness / 100;
-				const saturation = state.saturation / 100;
-
-				// 7. Manually loop over all pixels to apply brightness/saturation
-				for (let i = 0; i < data.length; i += 4) {
-					let r = data[i];
-					let g = data[i + 1];
-					let b = data[i + 2];
-
-					// --- Apply Brightness ---
-					r = r * brightness;
-					g = g * brightness;
-					b = b * brightness;
-
-					// --- Apply Saturation ---
-					let hsl = rgbToHsl(r, g, b);
-					hsl[1] = hsl[1] * saturation; // Adjust saturation
-					let rgb = hslToRgb(hsl[0], hsl[1], hsl[2]);
-					
-					data[i] = clamp(rgb[0]);
-					data[i + 1] = clamp(rgb[1]);
-					data[i + 2] = clamp(rgb[2]);
-				}
-
-				// 8. Write the modified pixel data back to the main canvas
-				ctx.putImageData(imageData, 0, 0);
-
-				// 9. Draw Grain (now on the final filtered image)
-				if(state.grain > 0) {
-					const grainAmount = Math.floor((w * h) * (state.grain * 0.5));
-					for (let i = 0; i < grainAmount; i++) {
-						const x = Math.random() * w;
-						const y = Math.random() * h;
-						const opacity = Math.random() * 0.15; // Vary opacity
-						ctx.fillStyle = `rgba(0,0,0,${opacity})`;
-						ctx.fillRect(x, y, 1, 1);
-					}
-				}
-
-				// 10. **FIX:** Removed the redundant 'texture' block.
-
-				// 11. Draw Vignette
-				if (state.vignette > 0) {
-					const grad = ctx.createRadialGradient(w/2, h/2, Math.max(w,h) * 0.3, w/2, h/2, Math.max(w, h) * 0.9);
-					grad.addColorStop(0, 'rgba(0,0,0,0)');
-					grad.addColorStop(1, `rgba(0,0,0,${state.vignette * 0.8})`);
-					ctx.fillStyle = grad;
-					ctx.fillRect(0, 0, w, h);
-				}
-
-				// 12. Create JPG
-				const a = document.createElement('a');
-				a.download = `blurry-wallpaper-${resolutionSelect.value}.jpg`;
-				a.href = canvas.toDataURL('image/jpeg', 0.95); // 95% quality
-				a.click();
-				a.remove();
-				
-				// 13. FIX: Reset button state
-				downloadBtn.disabled = false;
-				downloadBtn.textContent = "Download";
-			}, 50); // 50ms delay to let UI update
-		}
-		// ===== END OF IOS/1080p RENDER FIX =====
-		
-		
-		function updateAspectRatio() {
-			const [w, h] = resolutionSelect.value.split('x').map(Number);
-			preview.style.aspectRatio = `${w} / ${h}`;
-			
-			if (w < h) {
-				preview.classList.add('is-vertical');
-			} else {
-				preview.classList.remove('is-vertical');
-			}
-
-			if (typeof scheduleHeightCheck === 'function') {
-				scheduleHeightCheck();
-			}
-		}
-		
-		// Accessibility for keyboard users
-		function handleGridKeyPress(e) {
-			if (e.key === 'Enter' || e.key === ' ') {
-				e.preventDefault();
-				e.target.click();
-			}
-		}
-
-		// Initial setup
-		function init() {
-			for (let i = 0; i < 5; i++) addBlob();
-			randomizeState('random');
-			bgColorPicker.value = state.backgroundColor;
-			updateAspectRatio(); // Set initial aspect ratio
-			updatePreview(); // Run preview update to set initial 0% grain text
-
-			addBlobBtn.onclick = addBlob;
-			removeBlobBtn.onclick = removeBlob;
-			randomBtn.onclick = () => randomizeState('random');
-			downloadBtn.onclick = downloadImage;
-			bgColorPicker.oninput = e => { state.backgroundColor = e.target.value; updatePreview(); };
-			resolutionSelect.onchange = updateAspectRatio; // Add listener
-
-			[blurSlider, sizeSlider, brightnessSlider, saturationSlider, vignetteSlider, grainSlider].forEach(s => s.oninput = updatePreview);
-
-			textureOptions.forEach(o => {
-				o.onclick = () => {
-					textureOptions.forEach(t => t.classList.remove('active'));
-					o.classList.add('active');
-					state.texture = o.dataset.texture;
-					
-					// This now just acts as a preset for the grain slider
-					if (state.texture === 'noise') {
-						grainSlider.value = 50;
-					} else { // 'none'
-						grainSlider.value = 0;
-					}
-
-					randomizeTextureParams(); // No longer does much, but safe to keep
-					updatePreview(); // This will read the new grainSlider.value
-				};
-				o.onkeydown = handleGridKeyPress;
-			});
-
-			themeOptions.forEach(o => {
-				 o.onclick = () => {
-					 themeOptions.forEach(t => t.classList.remove('active'));
-					 o.classList.add('active');
-					 randomizeState(o.dataset.theme);
-				 };
-				 o.onkeydown = handleGridKeyPress;
-			});
-			
-			themeOptions[0].classList.add('active');
-		}
-
-		init();
-		
-		// ===== END OF APP LOGIC =====
-	</script>
-
-	<script>
-	// ===== FOURTHWALL SCROLLBAR FIX =====
-	let lastHeight = 0;
-	let resizeTimer;
-
-	/**
-	 * Sends the current scrollHeight to the parent window if it has changed.
-	 * This is the *only* function that should send a postMessage.
-	 */
-	function sendHeight() {
-	 // Use scrollHeight for content height
-	 const height = document.body.scrollHeight;
-	 
-	 // Only send message if height has *actually* changed 
-	 if (height !== lastHeight) {
-	  lastHeight = height;
-	  window.parent.postMessage({ frameHeight: height }, '*');
-	 }
-	}
-
-	/**
-	 * A debounced version of sendHeight() to be called on content changes.
-	 * This ensures we don't spam messages during rapid changes.
-	 */
-	function scheduleHeightCheck() {
-		// Clear any pending checks
-		clearTimeout(resizeTimer);
-		// Schedule a new check after 150ms
-		resizeTimer = setTimeout(sendHeight, 150);
-	}
-
-	// Send height on initial load (with a slight delay)
-	// This fixes the "Content Cut-Off" race condition.
-	window.addEventListener('load', () => { 
-		setTimeout(sendHeight, 100);
-	});
-
-	// Send height on window resize (debounced)
-	window.addEventListener('resize', () => {
-		// Use scheduleHeightCheck for built-in debounce
-		scheduleHeightCheck();
-	});
-	
-	// ===== END OF SCROLLBAR FIX =====
-	</script>
+  <div class="container">
+    <!-- ===== CONTROLS ===== -->
+    <div class="controls">
+      <div class="control-group">
+        <div class="control-label">Orientation</div>
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-orientation="horizontal">Horizontal (4K)</button>
+          <button class="toggle-btn" data-orientation="vertical">Vertical (4K)</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="checkbox-toggle">
+          <input type="checkbox" id="noise-toggle">
+          <span>Add Noise/Grain</span>
+        </label>
+      </div>
+
+      <div class="control-group">
+        <div class="button-grid">
+          <button class="btn" id="randomize-btn">Randomize Colors</button>
+          <button class="btn btn-primary" id="download-btn">Download 4K</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PREVIEW ===== -->
+    <div class="preview-section">
+      <div class="preview-label">Preview (scaled down for display)</div>
+      <div class="preview-container" id="preview-container">
+        <canvas id="preview-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== WALLPAPER GENERATOR STATE =====
+    let orientation = 'horizontal';
+    let noiseEnabled = false;
+    let currentColors = [];
+
+    const previewCanvas = document.getElementById('preview-canvas');
+    const previewCtx = previewCanvas.getContext('2d', { willReadFrequently: true });
+    const previewContainer = document.getElementById('preview-container');
+
+    // ===== ORIENTATION TOGGLES =====
+    document.querySelectorAll('[data-orientation]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-orientation]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        orientation = btn.dataset.orientation;
+        
+        if (orientation === 'vertical') {
+          previewContainer.classList.add('vertical');
+        } else {
+          previewContainer.classList.remove('vertical');
+        }
+        
+        generateWallpaper();
+      });
+    });
+
+    // ===== NOISE TOGGLE =====
+    document.getElementById('noise-toggle').addEventListener('change', (e) => {
+      noiseEnabled = e.target.checked;
+      generateWallpaper();
+    });
+
+    // ===== RANDOMIZE BUTTON =====
+    document.getElementById('randomize-btn').addEventListener('click', () => {
+      generateWallpaper();
+    });
+
+    // ===== DOWNLOAD BUTTON =====
+    document.getElementById('download-btn').addEventListener('click', () => {
+      downloadWallpaper();
+    });
+
+    // ===== GENERATE RANDOM COLORS =====
+    function generateRandomColors() {
+      const numColors = Math.floor(Math.random() * 3) + 3; // 3-5 colors
+      const colors = [];
+      
+      for (let i = 0; i < numColors; i++) {
+        const hue = Math.random() * 360;
+        const saturation = Math.random() * 40 + 40; // 40-80%
+        const lightness = Math.random() * 30 + 35; // 35-65%
+        colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+      }
+      
+      return colors;
+    }
+
+    // ===== APPLY NOISE/GRAIN =====
+    function applyNoise(ctx, width, height) {
+      const imageData = ctx.getImageData(0, 0, width, height);
+      const data = imageData.data;
+      
+      const noiseIntensity = 25;
+      
+      for (let i = 0; i < data.length; i += 4) {
+        const noise = (Math.random() - 0.5) * noiseIntensity;
+        data[i] += noise;     // R
+        data[i + 1] += noise; // G
+        data[i + 2] += noise; // B
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+    }
+
+    // ===== GENERATE WALLPAPER =====
+    function generateWallpaper() {
+      currentColors = generateRandomColors();
+      
+      // Preview dimensions (scaled down)
+      const previewWidth = previewCanvas.offsetWidth * 2 || 800;
+      const previewHeight = previewCanvas.offsetHeight * 2 || 450;
+      
+      previewCanvas.width = previewWidth;
+      previewCanvas.height = previewHeight;
+      
+      // Create gradient
+      const gradient = previewCtx.createLinearGradient(
+        0, 0,
+        previewWidth, previewHeight
+      );
+      
+      currentColors.forEach((color, index) => {
+        gradient.addColorStop(index / (currentColors.length - 1), color);
+      });
+      
+      previewCtx.fillStyle = gradient;
+      previewCtx.fillRect(0, 0, previewWidth, previewHeight);
+      
+      // Apply blur effect using shadow blur
+      previewCtx.shadowBlur = 100;
+      previewCtx.shadowColor = currentColors[0];
+      
+      // Draw multiple overlapping circles for blur effect
+      for (let i = 0; i < 20; i++) {
+        const x = Math.random() * previewWidth;
+        const y = Math.random() * previewHeight;
+        const radius = Math.random() * 300 + 200;
+        const colorIndex = Math.floor(Math.random() * currentColors.length);
+        
+        previewCtx.fillStyle = currentColors[colorIndex];
+        previewCtx.globalAlpha = 0.3;
+        previewCtx.beginPath();
+        previewCtx.arc(x, y, radius, 0, Math.PI * 2);
+        previewCtx.fill();
+      }
+      
+      previewCtx.globalAlpha = 1;
+      previewCtx.shadowBlur = 0;
+      
+      if (noiseEnabled) {
+        applyNoise(previewCtx, previewWidth, previewHeight);
+      }
+    }
+
+    // ===== DOWNLOAD 4K WALLPAPER =====
+    function downloadWallpaper() {
+      const downloadCanvas = document.createElement('canvas');
+      const downloadCtx = downloadCanvas.getContext('2d', { willReadFrequently: true });
+      
+      // 4K dimensions
+      const width = orientation === 'horizontal' ? 3840 : 2160;
+      const height = orientation === 'horizontal' ? 2160 : 3840;
+      
+      downloadCanvas.width = width;
+      downloadCanvas.height = height;
+      
+      // Create gradient
+      const gradient = downloadCtx.createLinearGradient(0, 0, width, height);
+      
+      currentColors.forEach((color, index) => {
+        gradient.addColorStop(index / (currentColors.length - 1), color);
+      });
+      
+      downloadCtx.fillStyle = gradient;
+      downloadCtx.fillRect(0, 0, width, height);
+      
+      // Apply blur effect
+      downloadCtx.shadowBlur = 200;
+      downloadCtx.shadowColor = currentColors[0];
+      
+      // Draw overlapping circles for blur
+      for (let i = 0; i < 40; i++) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const radius = Math.random() * 600 + 400;
+        const colorIndex = Math.floor(Math.random() * currentColors.length);
+        
+        downloadCtx.fillStyle = currentColors[colorIndex];
+        downloadCtx.globalAlpha = 0.3;
+        downloadCtx.beginPath();
+        downloadCtx.arc(x, y, radius, 0, Math.PI * 2);
+        downloadCtx.fill();
+      }
+      
+      downloadCtx.globalAlpha = 1;
+      downloadCtx.shadowBlur = 0;
+      
+      if (noiseEnabled) {
+        applyNoise(downloadCtx, width, height);
+      }
+      
+      // Download
+      downloadCanvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `wallpaper-4k-${orientation}-${Date.now()}.png`;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    }
+
+    // ===== INITIALIZE =====
+    generateWallpaper();
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+      scheduleHeightCheck();
+    });
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
 </body>
 </html>
