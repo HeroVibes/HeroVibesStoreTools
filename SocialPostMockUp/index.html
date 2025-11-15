@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tweet to Picture Generator</title>
+    <style>
+        /* ===== GLOBAL STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #191919;
+            font-family: sans-serif;
+            padding: 24px 16px;
+            color: #D4D4D4;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* ===== INPUT SECTION ===== */
+        .input-section {
+            background: #1F1F1F;
+            border: 1px solid #323232;
+            border-radius: 8px;
+            padding: 24px 16px;
+            margin-bottom: 16px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .input-group input {
+            flex: 1;
+            background: #191919;
+            border: 1px solid #323232;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: #D4D4D4;
+            font-size: 14px;
+            font-family: sans-serif;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #87A9FF;
+        }
+
+        .input-group input::placeholder {
+            color: #8C8C8C;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            position: relative;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: #1F1F1F;
+            color: #D4D4D4;
+            border: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px;
+            font-family: sans-serif;
+            white-space: nowrap;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
+        }
+
+        .btn:hover::before {
+            left: 125%;
+        }
+
+        .btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn:disabled::before {
+            display: none;
+        }
+
+        /* ===== CUSTOMIZATION OPTIONS ===== */
+        .customization-section {
+            background: #1F1F1F;
+            border: 1px solid #323232;
+            border-radius: 8px;
+            padding: 24px 16px;
+            margin-bottom: 16px;
+        }
+
+        .section-header {
+            font-size: 14px;
+            font-weight: bold;
+            color: #D4D4D4;
+            margin-bottom: 16px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .option-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #87A9FF;
+        }
+
+        .option-item label {
+            font-size: 12px;
+            color: #D4D4D4;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* ===== PREVIEW AREA ===== */
+        .preview-section {
+            background: #1F1F1F;
+            border: 1px solid #323232;
+            border-radius: 8px;
+            padding: 24px 16px;
+            margin-bottom: 16px;
+        }
+
+        .preview-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            padding: 20px;
+        }
+
+        /* ===== TWEET CARD ===== */
+        #tweet-card {
+            max-width: 600px;
+            width: 100%;
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .profile-pic {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #E1E8ED;
+            flex-shrink: 0;
+        }
+
+        .author-info {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .author-name {
+            font-size: 15px;
+            font-weight: bold;
+            color: #14171A;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .author-username {
+            font-size: 15px;
+            color: #657786;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tweet-text {
+            font-size: 23px;
+            line-height: 1.4;
+            color: #14171A;
+            word-wrap: break-word;
+            margin-bottom: 12px;
+            white-space: pre-wrap;
+        }
+
+        .tweet-mention,
+        .tweet-hashtag {
+            color: #1DA1F2;
+        }
+
+        .tweet-stats {
+            display: flex;
+            gap: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #E1E8ED;
+            font-size: 15px;
+        }
+
+        .stat-item {
+            color: #657786;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #14171A;
+        }
+
+        /* ===== VISIBILITY TOGGLES ===== */
+        .hide-profile-pic .profile-pic {
+            display: none;
+        }
+
+        .hide-likes .stat-likes {
+            display: none;
+        }
+
+        .hide-retweets .stat-retweets {
+            display: none;
+        }
+
+        .hide-date .stat-date {
+            display: none;
+        }
+
+        /* ===== DOWNLOAD SECTION ===== */
+        .download-section {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        /* ===== STATUS MESSAGE ===== */
+        .status-message {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .status-message.error {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            color: #FF3B30;
+            display: block;
+        }
+
+        .status-message.success {
+            background: rgba(52, 199, 89, 0.1);
+            border: 1px solid rgba(52, 199, 89, 0.3);
+            color: #34C759;
+            display: block;
+        }
+
+        .status-message.info {
+            background: rgba(135, 169, 255, 0.1);
+            border: 1px solid rgba(135, 169, 255, 0.3);
+            color: #87A9FF;
+            display: block;
+        }
+
+        /* ===== LOADING STATE ===== */
+        .loading {
+            text-align: center;
+            color: #8C8C8C;
+            font-size: 14px;
+        }
+
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            body {
+                padding: 16px 12px;
+            }
+
+            .input-section,
+            .customization-section,
+            .preview-section {
+                padding: 16px 12px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            #tweet-card {
+                padding: 16px;
+            }
+
+            .tweet-text {
+                font-size: 18px;
+            }
+
+            .tweet-stats {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .download-section {
+                flex-direction: column;
+            }
+
+            .download-section .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- STATUS MESSAGE -->
+        <div id="status-message" class="status-message"></div>
+
+        <!-- INPUT SECTION -->
+        <div class="input-section">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="tweet-url" 
+                    placeholder="Paste Tweet or X.com URL here..."
+                    autocomplete="off"
+                >
+                <button class="btn" id="load-tweet">Generate</button>
+            </div>
+        </div>
+
+        <!-- CUSTOMIZATION OPTIONS -->
+        <div class="customization-section">
+            <div class="section-header">Customization Options</div>
+            <div class="options-grid">
+                <div class="option-item">
+                    <input type="checkbox" id="show-profile-pic" checked>
+                    <label for="show-profile-pic">Show Profile Picture</label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="show-likes" checked>
+                    <label for="show-likes">Show Likes</label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="show-retweets" checked>
+                    <label for="show-retweets">Show Retweets</label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="show-date" checked>
+                    <label for="show-date">Show Date</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- PREVIEW AREA -->
+        <div class="preview-section">
+            <div class="preview-container">
+                <div id="tweet-card">
+                    <div class="card-header">
+                        <img 
+                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%23E1E8ED' width='48' height='48'/%3E%3C/svg%3E" 
+                            alt="Profile" 
+                            class="profile-pic" 
+                            id="preview-profile-pic"
+                            crossorigin="anonymous"
+                        >
+                        <div class="author-info">
+                            <div class="author-name" id="preview-author-name">Example User</div>
+                            <div class="author-username" id="preview-author-username">@exampleuser</div>
+                        </div>
+                    </div>
+                    <div class="tweet-text" id="preview-tweet-text">
+                        This is an example tweet to show how the generator works. Paste a tweet URL above and click Generate to get started!
+                    </div>
+                    <div class="tweet-stats">
+                        <span class="stat-item stat-retweets" id="preview-retweets">
+                            <span class="stat-value">123</span> Retweets
+                        </span>
+                        <span class="stat-item stat-likes" id="preview-likes">
+                            <span class="stat-value">456</span> Likes
+                        </span>
+                        <span class="stat-item stat-date" id="preview-date">
+                            <span class="stat-value">Nov 15, 2025</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DOWNLOAD SECTION -->
+        <div class="download-section">
+            <button class="btn" id="download-image">Download as PNG</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script>
+        // ===== ELEMENT REFERENCES =====
+        const loadBtn = document.getElementById('load-tweet');
+        const downloadBtn = document.getElementById('download-image');
+        const tweetCard = document.getElementById('tweet-card');
+        const tweetUrl = document.getElementById('tweet-url');
+        const statusMessage = document.getElementById('status-message');
+        
+        const showProfilePic = document.getElementById('show-profile-pic');
+        const showLikes = document.getElementById('show-likes');
+        const showRetweets = document.getElementById('show-retweets');
+        const showDate = document.getElementById('show-date');
+
+        const previewProfilePic = document.getElementById('preview-profile-pic');
+        const previewAuthorName = document.getElementById('preview-author-name');
+        const previewAuthorUsername = document.getElementById('preview-author-username');
+        const previewTweetText = document.getElementById('preview-tweet-text');
+        const previewRetweets = document.getElementById('preview-retweets');
+        const previewLikes = document.getElementById('preview-likes');
+        const previewDate = document.getElementById('preview-date');
+
+        let currentTweetData = null;
+
+        // ===== STATUS DISPLAY =====
+        function showStatus(message, type = 'info') {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            setTimeout(() => {
+                statusMessage.className = 'status-message';
+            }, 5000);
+        }
+
+        // ===== EXTRACT TWEET ID =====
+        function extractTweetId(url) {
+            const match = url.match(/(?:twitter\.com|x\.com)\/[^\/]+\/status\/(\d+)/);
+            return match ? match[1] : null;
+        }
+
+        // ===== CONVERT IMAGE TO BASE64 (CORS FIX) =====
+        function imageToBase64(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = () => {
+                    // Fallback to placeholder on error
+                    resolve("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%23E1E8ED' width='48' height='48'/%3E%3C/svg%3E");
+                };
+                img.src = url;
+            });
+        }
+
+        // ===== FETCH TWEET DATA =====
+        async function fetchTweetData(tweetId) {
+            // Create mock data with realistic values
+            const mockData = {
+                author_name: "Tweet User",
+                author_username: "@tweetuser",
+                profile_image_url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%231DA1F2' width='48' height='48'/%3E%3Ctext x='24' y='32' text-anchor='middle' fill='white' font-size='20' font-family='sans-serif' font-weight='bold'%3ETU%3C/text%3E%3C/svg%3E",
+                text: `This is a tweet from ID ${tweetId}. Since we can't access the Twitter API directly, this is mock data. You can customize how this appears using the options above!`,
+                likes: Math.floor(Math.random() * 10000),
+                retweets: Math.floor(Math.random() * 2000),
+                date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+                url: `https://twitter.com/user/status/${tweetId}`
+            };
+
+            // Attempt to use oEmbed API for basic data
+            try {
+                const corsProxy = 'https://api.allorigins.win/raw?url=';
+                const oEmbedUrl = `https://publish.twitter.com/oembed?url=https://twitter.com/anyuser/status/${tweetId}`;
+                const response = await fetch(corsProxy + encodeURIComponent(oEmbedUrl));
+                
+                if (response.ok) {
+                    const oEmbedData = await response.json();
+                    
+                    // Extract data from oEmbed HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = oEmbedData.html || '';
+                    
+                    const tweetTextElem = tempDiv.querySelector('p');
+                    if (tweetTextElem) {
+                        mockData.text = tweetTextElem.innerText || tweetTextElem.textContent;
+                    }
+                    
+                    if (oEmbedData.author_name) {
+                        mockData.author_name = oEmbedData.author_name;
+                    }
+                    
+                    if (oEmbedData.author_url) {
+                        const usernameMatch = oEmbedData.author_url.match(/(?:twitter\.com|x\.com)\/([^\/]+)/);
+                        if (usernameMatch) {
+                            mockData.author_username = `@${usernameMatch[1]}`;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.warn('Could not fetch oEmbed data:', error);
+            }
+
+            return mockData;
+        }
+
+        // ===== ESCAPE HTML =====
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ===== FORMAT TWEET TEXT =====
+        function formatTweetText(text) {
+            return text
+                .replace(/@(\w+)/g, '<span class="tweet-mention">@$1</span>')
+                .replace(/#(\w+)/g, '<span class="tweet-hashtag">#$1</span>');
+        }
+
+        // ===== UPDATE TWEET CARD CONTENT =====
+        async function updateTweetCardContent(data) {
+            if (!data) return;
+
+            // Convert profile image to base64 to avoid CORS issues
+            if (data.profile_image_url && !data.profile_image_url.startsWith('data:')) {
+                try {
+                    const base64Image = await imageToBase64(data.profile_image_url);
+                    previewProfilePic.src = base64Image;
+                } catch (error) {
+                    previewProfilePic.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%23E1E8ED' width='48' height='48'/%3E%3C/svg%3E";
+                }
+            } else {
+                previewProfilePic.src = data.profile_image_url;
+            }
+
+            previewAuthorName.textContent = data.author_name;
+            previewAuthorUsername.textContent = data.author_username;
+            previewTweetText.innerHTML = formatTweetText(escapeHtml(data.text));
+            
+            previewRetweets.innerHTML = `<span class="stat-value">${data.retweets.toLocaleString()}</span> Retweets`;
+            previewLikes.innerHTML = `<span class="stat-value">${data.likes.toLocaleString()}</span> Likes`;
+            previewDate.innerHTML = `<span class="stat-value">${data.date}</span>`;
+        }
+
+        // ===== APPLY CUSTOMIZATIONS =====
+        function applyCustomizations() {
+            tweetCard.classList.toggle('hide-profile-pic', !showProfilePic.checked);
+            tweetCard.classList.toggle('hide-likes', !showLikes.checked);
+            tweetCard.classList.toggle('hide-retweets', !showRetweets.checked);
+            tweetCard.classList.toggle('hide-date', !showDate.checked);
+        }
+
+        // ===== LOAD TWEET =====
+        loadBtn.addEventListener('click', async () => {
+            const urlInput = tweetUrl.value.trim();
+            
+            if (!urlInput || (!urlInput.includes('twitter.com') && !urlInput.includes('x.com'))) {
+                showStatus('Please enter a valid Tweet URL from twitter.com or x.com', 'error');
+                return;
+            }
+
+            const tweetId = extractTweetId(urlInput);
+            if (!tweetId) {
+                showStatus('Could not extract Tweet ID from URL', 'error');
+                return;
+            }
+
+            try {
+                loadBtn.disabled = true;
+                loadBtn.textContent = 'Loading...';
+                showStatus('Fetching tweet data...', 'info');
+
+                currentTweetData = await fetchTweetData(tweetId);
+                await updateTweetCardContent(currentTweetData);
+                applyCustomizations();
+                
+                showStatus('Tweet loaded successfully! Customize and download below.', 'success');
+                loadBtn.textContent = 'Generate';
+                loadBtn.disabled = false;
+            } catch (error) {
+                showStatus('Error loading tweet: ' + error.message, 'error');
+                loadBtn.textContent = 'Generate';
+                loadBtn.disabled = false;
+            }
+        });
+
+        // ===== DOWNLOAD IMAGE =====
+        downloadBtn.addEventListener('click', async () => {
+            try {
+                downloadBtn.disabled = true;
+                downloadBtn.textContent = 'Generating...';
+                showStatus('Generating image...', 'info');
+
+                // Wait a moment for any pending renders
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const canvas = await html2canvas(tweetCard, {
+                    scale: 3,
+                    backgroundColor: '#FFFFFF',
+                    useCORS: true,
+                    allowTaint: false,
+                    logging: false,
+                    imageTimeout: 0,
+                    removeContainer: true
+                });
+
+                const link = document.createElement('a');
+                const timestamp = new Date().getTime();
+                link.download = `tweet-${timestamp}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                showStatus('Image downloaded successfully!', 'success');
+                downloadBtn.textContent = 'Download as PNG';
+                downloadBtn.disabled = false;
+            } catch (error) {
+                showStatus('Error generating image: ' + error.message, 'error');
+                downloadBtn.textContent = 'Download as PNG';
+                downloadBtn.disabled = false;
+            }
+        });
+
+        // ===== CUSTOMIZATION LISTENERS =====
+        showProfilePic.addEventListener('change', applyCustomizations);
+        showLikes.addEventListener('change', applyCustomizations);
+        showRetweets.addEventListener('change', applyCustomizations);
+        showDate.addEventListener('change', applyCustomizations);
+
+        // ===== ENTER KEY SUPPORT =====
+        tweetUrl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadBtn.click();
+            }
+        });
+
+        // ===== INITIALIZE =====
+        applyCustomizations();
+    </script>
+
+    <script>
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+        scheduleHeightCheck();
+    });
+    
+    // ===== END OF SCROLLBAR FIX =====
+    </script>
+</body>
+</html>
