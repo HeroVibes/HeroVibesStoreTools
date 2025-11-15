@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blurry Wallpaper Generator</title>
     <style>
         :root {
             --bg: #191919;
@@ -57,7 +56,6 @@
             align-items: flex-start;
         }
 
-        /* PREVIEW SECTION */
         #preview-section {
             flex: 1;
             min-width: 300px;
@@ -70,7 +68,7 @@
 
         #wallpaper-preview {
             width: 100%;
-            aspect-ratio: 16 / 9;
+            aspect-ratio: 16 / 9; /* Default, will be changed by JS */
             position: relative;
             overflow: hidden;
             background: #000;
@@ -112,9 +110,7 @@
             transition: all 0.3s ease;
             z-index: 1;
             cursor: move;
-            will-change: transform;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
+            touch-action: none; /* <-- FIX-1: Prevents browser scroll conflict on mobile */
         }
         
         .preview-actions {
@@ -134,7 +130,6 @@
             flex-shrink: 0;
         }
 
-        /* CONTROLS SECTION */
         #controls {
             position: relative;
             flex: 1;
@@ -144,7 +139,6 @@
             border: 1px solid var(--outline);
             border-radius: var(--radius);
             padding: 24px 16px;
-            padding-top: 48px;
             display: flex;
             flex-direction: column;
             gap: 24px;
@@ -153,7 +147,7 @@
 
         #version-tag {
             position: absolute;
-            top: 12px;
+            top: 8px;
             right: 12px;
             font-size: 10px;
             color: var(--text-secondary);
@@ -197,7 +191,6 @@
             margin-top: -8px;
         }
 
-        /* COLOR GRID */
         #color-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -242,7 +235,6 @@
             transform: scale(1.05);
         }
 
-        /* SLIDERS */
         .slider-wrapper {
             display: flex;
             flex-direction: column;
@@ -300,7 +292,6 @@
             transform: scale(1.1);
         }
 
-        /* TEXTURE AND THEME GRIDS */
         .texture-grid, .theme-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -346,7 +337,6 @@
             transition: transform 0.1s ease;
         }
 
-        /* BUTTONS */
         .button-group {
             display: flex;
             gap: 12px;
@@ -421,7 +411,7 @@
             animation: pulse-once 0.3s ease-out;
         }
 
-        /* RESOLUTION SELECT */
+
         #resolution-select {
             padding: 12px;
             background: var(--bg);
@@ -446,26 +436,6 @@
              box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
         }
 
-        /* HIDDEN RENDER CANVAS */
-        #render-container {
-            position: fixed;
-            top: -999999px;
-            left: -999999px;
-            width: 4000px;
-            height: 4000px;
-            overflow: hidden;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        #render-preview {
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: #000;
-        }
-
-        /* MOBILE STYLES */
         @media (max-width: 768px) {
             body {
                  padding: 16px 8px;
@@ -483,7 +453,6 @@
             
             #controls {
                 gap: 20px;
-                padding-top: 48px;
             }
             
             .action-row {
@@ -510,7 +479,7 @@
 
             #version-tag {
                 font-size: 9px;
-                top: 12px;
+                top: 6px;
                 right: 10px;
             }
             
@@ -521,12 +490,6 @@
             #wallpaper-preview.is-vertical {
                  max-width: 250px;
             }
-            
-            /* Mobile-specific blur optimization */
-            .color-blob {
-                transform: translateZ(0);
-                -webkit-transform: translateZ(0);
-            }
         }
     </style>
 </head>
@@ -534,7 +497,6 @@
     
     <div id="app-container">
         
-        <!-- PREVIEW SECTION -->
         <div id="preview-section">
             <div id="wallpaper-preview">
                 <div id="grain-overlay"></div>
@@ -559,9 +521,8 @@
 
         </div>
 
-        <!-- CONTROLS SECTION -->
         <div id="controls">
-            <div id="version-tag">V1.0.2</div>
+            <div id="version-tag">V1.0.3</div>
 
             <div class="control-group">
                 <button class="btn btn-random" id="random-btn">Randomize</button>
@@ -670,17 +631,13 @@
         </div>
     </div>
 
-    <!-- HIDDEN RENDER CONTAINER -->
-    <div id="render-container">
-        <div id="render-preview"></div>
-    </div>
-
     <canvas id="render-canvas" style="display: none;"></canvas>
+    <canvas id="temp-canvas" style="display: none;"></canvas>
 
     <script>
         // ===== APP LOGIC =====
         
-        // DOM ELEMENTS
+        // DOM Elements
         const preview = document.getElementById('wallpaper-preview');
         const textureOverlay = document.getElementById('texture-overlay');
         const vignetteOverlay = document.getElementById('vignette-overlay');
@@ -706,11 +663,12 @@
         const randomBtn = document.getElementById('random-btn');
         const downloadBtn = document.getElementById('download-btn');
         const resolutionSelect = document.getElementById('resolution-select');
-        const renderPreview = document.getElementById('render-preview');
         const canvas = document.getElementById('render-canvas');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const ctx = canvas.getContext('2d');
+        const tempCanvas = document.getElementById('temp-canvas');
+        const tempCtx = tempCanvas.getContext('2d');
 
-        // APP STATE
+        // App State
         const state = {
             blobs: [],
             sizeMultiplier: 1,
@@ -727,7 +685,7 @@
             minBlobs: 1
         };
 
-        // UTILITIES
+        // Utilities
         const hslToHex = (h, s, l) => {
             l /= 100;
             const a = s * Math.min(l, 1 - l) / 100;
@@ -750,12 +708,12 @@
             return hslToHex(randomInt(0, 360), randomInt(10, 20), Math.random() > 0.5 ? randomInt(0, 15) : randomInt(85, 100));
         };
 
-        // TEXTURE RANDOMIZATION
+        // Texture randomization
         function randomizeTextureParams() {
             state.textureParams.noise.opacity = randomInt(8, 20) / 100;
         }
 
-        // BLOB MANAGEMENT
+        // Blob management
         function createBlob(id) {
             const blob = document.createElement('div');
             blob.className = 'color-blob';
@@ -805,38 +763,36 @@
             updatePreview();
         }
 
-        // DRAGGING LOGIC
+        // ===== START OF JS FIX (UI) =====
+        // Dragging logic
         function makeDraggable(el) {
             let dragging = false, startX, startY, initX, initY;
 
             const down = e => {
                 dragging = true;
-                const clientX = e.clientX || (e.touches?.[0]?.clientX);
-                const clientY = e.clientY || (e.touches?.[0]?.clientY);
-                if (clientX === undefined) return;
-                startX = clientX;
-                startY = clientY;
+                startX = e.clientX; // Simplified: PointerEvents always have clientX/Y
+                startY = e.clientY;
                 initX = parseFloat(el.style.left) || 0;
                 initY = parseFloat(el.style.top) || 0;
                 el.style.transition = 'none';
                 el.style.cursor = 'grabbing';
+                document.body.style.cursor = 'grabbing'; // Optional: show grabbing cursor on whole page
                 e.preventDefault();
             };
 
             const move = e => {
                 if (!dragging) return;
-                const clientX = e.clientX || (e.touches?.[0]?.clientX);
-                const clientY = e.clientY || (e.touches?.[0]?.clientY);
-                if (clientX === undefined) return;
-                const dx = (clientX - startX) / preview.clientWidth * 100;
-                const dy = (clientY - startY) / preview.clientHeight * 100;
+                e.preventDefault(); // Only prevent default if we are actively dragging
+                
+                const dx = (e.clientX - startX) / preview.clientWidth * 100; // Simplified
+                const dy = (e.clientY - startY) / preview.clientHeight * 100; // Simplified
                 const x = initX + dx;
                 const y = initY + dy;
                 el.style.left = `${x}%`;
                 el.style.top = `${y}%`;
                 const bs = state.blobs.find(b => b.id === el.id);
                 if (bs) { bs.x = x; bs.y = y; }
-                e.preventDefault();
+                // No updatePreview() here for performance, only on 'up'
             };
 
             const up = () => {
@@ -844,19 +800,19 @@
                     dragging = false;
                     el.style.transition = 'all 0.3s ease';
                     el.style.cursor = 'move';
-                    updatePreview();
+                    document.body.style.cursor = 'default'; // Reset body cursor
+                    updatePreview(); // Update preview once drag is finished
                 }
             };
 
             el.addEventListener('pointerdown', down);
-            el.addEventListener('touchstart', down, { passive: false });
             document.addEventListener('pointermove', move);
-            document.addEventListener('touchmove', move, { passive: false });
             document.addEventListener('pointerup', up);
-            document.addEventListener('touchend', up);
         }
+        // ===== END OF JS FIX (UI) =====
 
-        // MAIN PREVIEW UPDATE FUNCTION
+
+        // Main preview update function
         function updatePreview() {
             document.documentElement.style.setProperty('--blur-strength', `${blurSlider.value}px`);
             blurValue.textContent = `${blurSlider.value}px`;
@@ -898,7 +854,6 @@
             }
         }
 
-        // TEXTURE APPLICATION
         function applyTexture() {
             textureOverlay.style.backgroundImage = 'none';
             textureOverlay.style.backdropFilter = 'none';
@@ -913,7 +868,7 @@
             }
         }
 
-        // THEMES LOGIC
+        // Themes logic
         function applyTheme(theme) {
             let colors = [];
             switch (theme) {
@@ -952,121 +907,98 @@
             updatePreview();
         }
 
-        // DOWNLOAD LOGIC - USING HTML2CANVAS APPROACH
+        // Download logic
         async function downloadImage() {
-            try {
-                const [w, h] = resolutionSelect.value.split('x').map(Number);
+            const [w, h] = resolutionSelect.value.split('x').map(Number);
+            canvas.width = w; canvas.height = h;
+            tempCanvas.width = w; tempCanvas.height = h;
+
+            // 1. Fill background
+            ctx.fillStyle = state.backgroundColor;
+            ctx.fillRect(0, 0, w, h);
+
+            // 2. Prep scale and BLUR-ONLY filter
+            const rect = preview.getBoundingClientRect();
+            const scaleX = w / rect.width;
+            const scaleY = h / rect.height;
+            const blur = blurSlider.value * Math.min(scaleX, scaleY);
+            ctx.filter = `blur(${blur}px)`;
+
+            // 3. Draw blurred blobs (FIXED)
+            state.blobs.forEach(b => {
+                ctx.fillStyle = b.color;
+                ctx.beginPath();
                 
-                // Clone the preview structure
-                renderPreview.innerHTML = preview.innerHTML;
-                renderPreview.style.width = `${w}px`;
-                renderPreview.style.height = `${h}px`;
-                renderPreview.style.position = 'absolute';
-                renderPreview.style.backgroundColor = state.backgroundColor;
-                renderPreview.style.filter = `brightness(${state.brightness}%) saturate(${state.saturation}%)`;
-                renderPreview.style.overflow = 'hidden';
+                // === BUG FIX ===
+                // Calculate diameter and radius based on scaled size
+                const diameter = b.baseSize * state.sizeMultiplier * Math.min(scaleX, scaleY);
+                const radius = diameter / 2;
+                
+                // Calculate top-left corner in pixels
+                const x_percent = (b.x / 100) * w;
+                const y_percent = (b.y / 100) * h;
+                
+                // Calculate center for arc
+                const centerX = x_percent + radius;
+                const centerY = y_percent + radius;
 
-                // Calculate scale factor
-                const rect = preview.getBoundingClientRect();
-                const scaleX = w / rect.width;
-                const scaleY = h / rect.height;
-                const scale = Math.min(scaleX, scaleY);
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                // === END BUG FIX ===
+                
+                ctx.fill();
+            });
 
-                // Update all blobs in render preview
-                const renderBlobs = renderPreview.querySelectorAll('.color-blob');
-                renderBlobs.forEach((blob, idx) => {
-                    const bs = state.blobs[idx];
-                    if (!bs) return;
-                    
-                    const size = bs.baseSize * state.sizeMultiplier * scale;
-                    const blur = blurSlider.value * scale;
-                    
-                    blob.style.backgroundColor = bs.color;
-                    blob.style.left = `${bs.x}%`;
-                    blob.style.top = `${bs.y}%`;
-                    blob.style.width = `${size}px`;
-                    blob.style.height = `${size}px`;
-                    blob.style.filter = `blur(${blur}px)`;
-                    blob.style.position = 'absolute';
-                    blob.style.borderRadius = '50%';
-                });
+            // 4. Reset filter
+            ctx.filter = 'none';
 
-                // Update overlays
-                const renderGrain = renderPreview.querySelector('#grain-overlay');
-                const renderTexture = renderPreview.querySelector('#texture-overlay');
-                const renderVignette = renderPreview.querySelector('#vignette-overlay');
+            // 5. Apply brightness/saturation to the *entire image*
+            tempCtx.drawImage(canvas, 0, 0);
+            ctx.clearRect(0, 0, w, h);
+            ctx.filter = `brightness(${state.brightness}%) saturate(${state.saturation}%)`;
+            ctx.drawImage(tempCanvas, 0, 0);
+            
+            
+            // ===== START OF RENDERER FIX =====
+            // Force the GPU to sync and 'bake' the filter operation
+            // This fixes missing filters on mobile browsers.
+            var data = ctx.getImageData(0, 0, 1, 1);
+            data = null; // Release memory
+            // ===== END OF RENDERER FIX =====
 
-                if (renderGrain) {
-                    renderGrain.style.opacity = state.grain;
+            
+            ctx.filter = 'none';
+
+            // 6. Draw Grain
+            if(state.grain > 0) {
+                ctx.fillStyle = `rgba(0,0,0,${state.grain / 2})`;
+                for (let i = 0; i < (w * h) / 20; i++) {
+                    ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
                 }
-
-                if (renderVignette) {
-                    renderVignette.style.opacity = state.vignette;
-                }
-
-                if (renderTexture && state.texture === 'noise') {
-                    renderTexture.style.backgroundImage = textureOverlay.style.backgroundImage;
-                    renderTexture.style.backgroundSize = '100px 100px';
-                    renderTexture.style.opacity = state.textureParams.noise.opacity;
-                    renderTexture.style.mixBlendMode = 'overlay';
-                }
-
-                // Wait for render
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                // Set canvas size
-                canvas.width = w;
-                canvas.height = h;
-
-                // Use html2canvas-like approach - draw to canvas using foreignObject in SVG
-                const data = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
-                        <foreignObject width="100%" height="100%">
-                            <div xmlns="http://www.w3.org/1999/xhtml" style="width:${w}px;height:${h}px;">
-                                ${renderPreview.outerHTML}
-                            </div>
-                        </foreignObject>
-                    </svg>
-                `;
-
-                const img = new Image();
-                const blob = new Blob([data], { type: 'image/svg+xml' });
-                const url = URL.createObjectURL(blob);
-
-                img.onload = () => {
-                    ctx.drawImage(img, 0, 0);
-                    URL.revokeObjectURL(url);
-
-                    // Download
-                    canvas.toBlob(downloadBlob => {
-                        const downloadUrl = URL.createObjectURL(downloadBlob);
-                        const a = document.createElement('a');
-                        a.download = `blurry-wallpaper-${resolutionSelect.value}.jpg`;
-                        a.href = downloadUrl;
-                        a.click();
-                        
-                        setTimeout(() => {
-                            URL.revokeObjectURL(downloadUrl);
-                            a.remove();
-                        }, 100);
-                    }, 'image/jpeg', 0.95);
-                };
-
-                img.onerror = () => {
-                    console.error('SVG rendering failed');
-                    alert('Download failed. Please try again.');
-                    URL.revokeObjectURL(url);
-                };
-
-                img.src = url;
-
-            } catch (error) {
-                console.error('Download failed:', error);
-                alert('Download failed. Please try again.');
             }
+
+            // 7. Draw Texture
+            if (state.texture === 'noise') {
+                ctx.fillStyle = `rgba(0,0,0,${state.textureParams.noise.opacity})`;
+                for (let i = 0; i < (w * h) / 10; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
+            }
+
+            // 8. Draw Vignette
+            if (state.vignette > 0) {
+                const grad = ctx.createRadialGradient(w/2, h/2, Math.max(w,h) * 0.3, w/2, h/2, Math.max(w, h) * 0.9);
+                grad.addColorStop(0, 'rgba(0,0,0,0)');
+                grad.addColorStop(1, `rgba(0,0,0,${state.vignette * 0.8})`);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            // 9. Create JPG
+            const a = document.createElement('a');
+            a.download = `blurry-wallpaper-${resolutionSelect.value}.jpg`;
+            a.href = canvas.toDataURL('image/jpeg', 0.95); // 95% quality
+            a.click();
+            a.remove();
         }
         
-        // ASPECT RATIO UPDATE
         function updateAspectRatio() {
             const [w, h] = resolutionSelect.value.split('x').map(Number);
             preview.style.aspectRatio = `${w} / ${h}`;
@@ -1082,7 +1014,7 @@
             }
         }
         
-        // ACCESSIBILITY FOR KEYBOARD USERS
+        // Accessibility for keyboard users
         function handleGridKeyPress(e) {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -1090,19 +1022,19 @@
             }
         }
 
-        // INITIAL SETUP
+        // Initial setup
         function init() {
             for (let i = 0; i < 5; i++) addBlob();
             randomizeState('random');
             bgColorPicker.value = state.backgroundColor;
-            updateAspectRatio();
+            updateAspectRatio(); // Set initial aspect ratio
 
             addBlobBtn.onclick = addBlob;
             removeBlobBtn.onclick = removeBlob;
             randomBtn.onclick = () => randomizeState('random');
             downloadBtn.onclick = downloadImage;
             bgColorPicker.oninput = e => { state.backgroundColor = e.target.value; updatePreview(); };
-            resolutionSelect.onchange = updateAspectRatio;
+            resolutionSelect.onchange = updateAspectRatio; // Add listener
 
             [blurSlider, sizeSlider, brightnessSlider, saturationSlider, vignetteSlider, grainSlider].forEach(s => s.oninput = updatePreview);
 
@@ -1144,26 +1076,42 @@
     let lastHeight = 0;
     let resizeTimer;
 
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
     function sendHeight() {
+      // Use scrollHeight for content height
       const height = document.body.scrollHeight;
       
+      // Only send message if height has *actually* changed 
       if (height !== lastHeight) {
         lastHeight = height;
         window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
     function scheduleHeightCheck() {
+        // Clear any pending checks
         clearTimeout(resizeTimer);
+        // Schedule a new check after 150ms
         resizeTimer = setTimeout(sendHeight, 150);
     }
 
-    window.addEventListener('load', () => {
+    // Send height on initial load (with a slight delay)
+    // This fixes the "Content Cut-Off" race condition.
+    window.addEventListener('load', ()_ => {
         setTimeout(sendHeight, 100);
         setTimeout(sendHeight, 300); 
     });
 
+    // Send height on window resize (debounced)
     window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
         scheduleHeightCheck();
     });
     
