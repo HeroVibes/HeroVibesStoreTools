@@ -558,34 +558,12 @@
     // Send height on initial load (with a slight delay)
     window.addEventListener('load', () => {
         setTimeout(sendHeight, 100);
-        // Extra height check after fonts and images load
-        setTimeout(sendHeight, 300);
-        setTimeout(sendHeight, 600);
     });
 
     // Send height on window resize (debounced)
     window.addEventListener('resize', () => {
         // Use scheduleHeightCheck for built-in debounce
         scheduleHeightCheck();
-    });
-    
-    // Monitor for any DOM changes that might affect height
-    const observer = new MutationObserver(() => {
-        scheduleHeightCheck();
-    });
-    
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true
-    });
-    
-    // Also check height when images load (if any)
-    window.addEventListener('DOMContentLoaded', () => {
-        const images = document.querySelectorAll('img');
-        images.forEach(img => {
-            img.addEventListener('load', scheduleHeightCheck);
-        });
     });
     
     // ===== END OF SCROLLBAR FIX =====
