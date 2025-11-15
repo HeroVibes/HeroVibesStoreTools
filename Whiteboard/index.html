@@ -16,11 +16,11 @@
             --secondary-text: #8C8C8C;
             --radius: 8px;
             --card-note: #e6b628;
-            --card-image: #31a414;
-            --card-link: #2e4e79;
+            --card-image: #ff5f57;
+            --card-link: #4a9eff;
             --card-youtube: #9c06bb;
-            --card-code: #f92672;
-            --card-audio: #ff6b35;
+            --card-code: #28c840;
+            --card-audio: #9c06bb;
             --bottom-glow: rgba(135,169,255,0.3);
             --delete-red: #ff5f57;
         }
@@ -333,6 +333,7 @@
         }
 
         .card-header {
+            min-height: 32px;
             height: 32px;
             cursor: grab;
             border-bottom: 1px solid var(--outline-color);
@@ -343,6 +344,7 @@
             border-radius: var(--radius) var(--radius) 0 0;
             position: relative;
             touch-action: none;
+            flex-shrink: 0;
         }
 
         .card-header:active {
@@ -357,6 +359,7 @@
             color: var(--secondary-text);
             cursor: text;
             transition: color 0.2s;
+            white-space: nowrap;
         }
 
         .card-type-label[contenteditable="true"] {
@@ -375,7 +378,7 @@
         .card-image .card-header { border-left: 4px solid var(--card-image); }
         .card-link .card-header { border-left: 4px solid var(--card-link); }
         .card-youtube .card-header { border-left: 4px solid var(--card-youtube); }
-        .card-code .card-header { border-left: 4px solid var(--card-code); background: #1e1e1e; }
+        .card-code .card-header { border-left: 4px solid var(--card-code); }
         .card-audio .card-header { border-left: 4px solid var(--card-audio); }
 
         /* ===== RESIZE HANDLE ===== */
@@ -383,8 +386,8 @@
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             cursor: nesw-resize;
             z-index: 10;
             touch-action: none;
@@ -393,12 +396,12 @@
         .resize-handle::before {
             content: '';
             position: absolute;
-            bottom: 2px;
-            left: 2px;
+            bottom: 3px;
+            left: 3px;
             width: 0;
             height: 0;
             border-style: solid;
-            border-width: 0 0 12px 12px;
+            border-width: 12px 0 0 12px;
             border-color: transparent transparent transparent var(--secondary-text);
             opacity: 0.4;
             transition: opacity 0.2s;
@@ -430,7 +433,7 @@
 
         .card-code .card-body {
             padding: 0;
-            background: #272822;
+            background: #1e1e1e;
         }
 
         .card-text-content {
@@ -480,11 +483,77 @@
 
         .card-audio-content {
             width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .card-audio-content audio {
+        /* CUSTOM AUDIO PLAYER */
+        .custom-audio-player {
             width: 100%;
-            outline: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .play-pause-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: var(--card-audio);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .play-pause-btn:hover {
+            transform: scale(1.05);
+            background: #8205a1;
+        }
+
+        .play-pause-btn:active {
+            transform: scale(0.95);
+        }
+
+        .play-pause-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            height: 6px;
+            background: var(--hover-color);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--card-audio);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .time-display {
+            font-size: 11px;
+            color: var(--secondary-text);
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .card-code-content {
@@ -494,7 +563,7 @@
             overflow: auto !important;
             padding: 16px;
             scrollbar-width: thin;
-            scrollbar-color: #5f5f5f #272822;
+            scrollbar-color: #5f5f5f #1e1e1e;
             -webkit-user-select: text;
             -moz-user-select: text;
             -ms-user-select: text;
@@ -513,7 +582,7 @@
 
         .code-editor {
             flex-grow: 1;
-            background: #272822;
+            background: #1e1e1e;
             color: #f8f8f2;
             border: none;
             resize: none;
@@ -534,7 +603,7 @@
         }
 
         .card-code-content::-webkit-scrollbar-track {
-            background: #272822;
+            background: #1e1e1e;
         }
 
         .card-code-content::-webkit-scrollbar-thumb {
@@ -564,6 +633,7 @@
             border-top: 1px solid var(--outline-color);
             background: var(--hover-color);
             border-radius: 0 0 var(--radius) var(--radius);
+            flex-shrink: 0;
         }
 
         .card-btn {
@@ -794,12 +864,12 @@
             }
 
             .resize-handle {
-                width: 24px;
-                height: 24px;
+                width: 28px;
+                height: 28px;
             }
 
             .resize-handle::before {
-                border-width: 0 0 14px 14px;
+                border-width: 14px 0 0 14px;
             }
         }
 
@@ -823,6 +893,7 @@
             }
 
             .card-header {
+                min-height: 28px;
                 height: 28px;
             }
 
@@ -895,7 +966,7 @@
                 <li><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg> Copy to clipboard</li>
                 <li><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Delete card</li>
             </ul>
-            <p class="version">Version 1.2.0</p>
+            <p class="version">Version 1.3.0</p>
             <button id="close-help" class="btn">Got it!</button>
         </div>
     </div>
@@ -950,7 +1021,8 @@
                 tick: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
                 x: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
                 link: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>',
-                play: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
+                play: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
+                pause: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>',
                 download: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>'
             };
 
@@ -1106,6 +1178,13 @@
                 return labels[type] || type;
             };
 
+            const formatTime = (seconds) => {
+                if (isNaN(seconds)) return '0:00';
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            };
+
             const createCardData = (data) => {
                 const currentPage = getCurrentPage();
                 if (!currentPage) return;
@@ -1172,7 +1251,22 @@
                         contentHtml = `<pre class="card-code-content"><code class="language-javascript">${escapeHtml(cardData.content)}</code></pre>`;
                         break;
                     case 'audio':
-                        contentHtml = `<div class="card-audio-content"><audio controls src="${cardData.content}"></audio></div>`;
+                        contentHtml = `
+                            <div class="card-audio-content">
+                                <div class="custom-audio-player">
+                                    <div class="audio-controls">
+                                        <button class="play-pause-btn" type="button">
+                                            ${icons.play}
+                                        </button>
+                                        <div class="progress-container">
+                                            <div class="progress-bar"></div>
+                                        </div>
+                                        <span class="time-display">0:00</span>
+                                    </div>
+                                </div>
+                                <audio src="${cardData.content}" preload="metadata"></audio>
+                            </div>
+                        `;
                         break;
                 }
                 
@@ -1191,6 +1285,51 @@
                 `;
                 
                 canvas.appendChild(card);
+                
+                // CUSTOM AUDIO PLAYER SETUP
+                if (cardData.type === 'audio') {
+                    const audioElement = card.querySelector('audio');
+                    const playPauseBtn = card.querySelector('.play-pause-btn');
+                    const progressBar = card.querySelector('.progress-bar');
+                    const progressContainer = card.querySelector('.progress-container');
+                    const timeDisplay = card.querySelector('.time-display');
+                    
+                    let isPlaying = false;
+                    
+                    audioElement.addEventListener('loadedmetadata', () => {
+                        timeDisplay.textContent = formatTime(audioElement.duration);
+                    });
+                    
+                    audioElement.addEventListener('timeupdate', () => {
+                        const progress = (audioElement.currentTime / audioElement.duration) * 100;
+                        progressBar.style.width = `${progress}%`;
+                        timeDisplay.textContent = formatTime(audioElement.duration - audioElement.currentTime);
+                    });
+                    
+                    audioElement.addEventListener('ended', () => {
+                        isPlaying = false;
+                        playPauseBtn.innerHTML = icons.play;
+                        progressBar.style.width = '0%';
+                        timeDisplay.textContent = formatTime(audioElement.duration);
+                    });
+                    
+                    playPauseBtn.addEventListener('click', () => {
+                        if (isPlaying) {
+                            audioElement.pause();
+                            playPauseBtn.innerHTML = icons.play;
+                        } else {
+                            audioElement.play();
+                            playPauseBtn.innerHTML = icons.pause;
+                        }
+                        isPlaying = !isPlaying;
+                    });
+                    
+                    progressContainer.addEventListener('click', (e) => {
+                        const rect = progressContainer.getBoundingClientRect();
+                        const pos = (e.clientX - rect.left) / rect.width;
+                        audioElement.currentTime = pos * audioElement.duration;
+                    });
+                }
                 
                 // LABEL EDITING
                 const label = card.querySelector('.card-type-label');
