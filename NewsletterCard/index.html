@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HeroVibes Newsletter Banner (Wrapper Fix)</title>
+  <title>HeroVibes Newsletter Banner (Unique ID Fix)</title>
   <style>
     /* ========================================
     DESIGN TOKENS (from Design Guide)
@@ -38,16 +38,11 @@
     body {
       background: var(--bg-primary);
       font-family: system-ui, sans-serif;
-      /* IFRAME FIX: Remove all padding/margin from body.
-         Height calculation will be based on the wrapper.
-      */
       margin: 0;
-      padding: 0;
-    }
-    
-    /* IFRAME FIX: New wrapper to contain all tool padding */
-    #TOOL-BODY-WRAPPER {
-      padding: 24px 16px; /* Default tool padding  */
+      /* IFRAME FIX: Apply default padding directly to the body
+         to ensure 'scrollHeight' is calculated correctly.
+      */
+      padding: 24px 16px; 
     }
 
     /* ========================================
@@ -60,7 +55,7 @@
       border-radius: var(--radius);
       padding: 60px; 
       max-width: 1400px; 
-      /* Now uses '0 auto' for margin as padding is on parent */
+      /* IFRAME FIX: Margin is now horizontal-only */
       margin: 0 auto; 
       position: relative;
       overflow: hidden;
@@ -134,50 +129,21 @@
       opacity: 0;
     }
     
-    .floating-email:nth-child(1) {
-      left: 10%;
-      animation-delay: 0s;
-      font-size: 22px;
-    }
-    .floating-email:nth-child(2) {
-      left: 30%;
-      animation-delay: 4s;
-      font-size: 16px;
-    }
-    .floating-email:nth-child(3) {
-      left: 50%;
-      animation-delay: 2s;
-    }
-    .floating-email:nth-child(4) {
-      left: 70%;
-      animation-delay: 7s;
-      font-size: 18px;
-    }
-    .floating-email:nth-child(5) {
-      left: 90%;
-      animation-delay: 5s;
-      font-size: 20px;
-    }
+    .floating-email:nth-child(1) { left: 10%; animation-delay: 0s; font-size: 22px; }
+    .floating-email:nth-child(2) { left: 30%; animation-delay: 4s; font-size: 16px; }
+    .floating-email:nth-child(3) { left: 50%; animation-delay: 2s; }
+    .floating-email:nth-child(4) { left: 70%; animation-delay: 7s; font-size: 18px; }
+    .floating-email:nth-child(5) { left: 90%; animation-delay: 5s; font-size: 20px; }
 
     @keyframes floatUp {
-      0% {
-        transform: translateY(0);
-        opacity: 0;
-      }
-      20% {
-        opacity: 0.4;
-      }
-      80% {
-        opacity: 0.4;
-      }
-      100% {
-        transform: translateY(-400px); 
-        opacity: 0;
-      }
+      0%   { transform: translateY(0); opacity: 0; }
+      20%  { opacity: 0.4; }
+      80%  { opacity: 0.4; }
+      100% { transform: translateY(-400px); opacity: 0; }
     }
 
     /* ========================================
-    DEFAULT BUTTON TEMPLATE [cite: 25-31]
+    DEFAULT BUTTON TEMPLATE
     ========================================
     */
     .btn {
@@ -196,7 +162,6 @@
       transition: background-color 0.2s ease;
     }
 
-    /* Shimmer effect [cite: 29-30] */
     .btn::before {
       content: '';
       position: absolute;
@@ -209,15 +174,8 @@
       transition: left 0.7s ease-in-out;
     }
 
-    .btn:hover {
-      background: var(--hover);
-    }
-    
-    .btn:hover::before {
-      left: 125%;
-    }
-
-    /* Accessible focus */
+    .btn:hover { background: var(--hover); }
+    .btn:hover::before { left: 125%; }
     .btn:focus-visible {
       outline: none;
       box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
@@ -228,9 +186,8 @@
     ========================================
     */
     @media (max-width: 680px) {
-      /* IFRAME FIX: Adjust wrapper padding for mobile */
-      #TOOL-BODY-WRAPPER {
-        padding: 16px;
+      body {
+        padding: 16px; /* Mobile body padding */
       }
       
       #HV-NEWSLETTER-WRAPPER {
@@ -248,111 +205,83 @@
         gap: 12px;
       }
       
-      #BANNER-ICON {
-        width: 40px;
-        height: 40px;
-      }
-      
-      #BANNER-TEXT p {
-        font-size: 12px; 
-      }
-
-      #BANNER-BUTTON-LINK {
-        width: 100%;
-      }
-
-      .btn {
-        width: 100%;
-      }
-      
-      #ANIMATION-CONTAINER {
-        display: none;
-      }
+      #BANNER-ICON { width: 40px; height: 40px; }
+      #BANNER-TEXT p { font-size: 12px; }
+      #BANNER-BUTTON-LINK { width: 100%; }
+      .btn { width: 100%; }
+      #ANIMATION-CONTAINER { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <div id="TOOL-BODY-WRAPPER">
-    <div id="HV-NEWSLETTER-WRAPPER">
+  <div id="HV-NEWSLETTER-WRAPPER">
     
-      <div id="ANIMATION-CONTAINER">
-        <span class="floating-email">✉️</span>
-        <span class="floating-email">✉️</span>
-        <span class="floating-email">✉️</span>
-        <span class="floating-email">✉️</span>
-        <span class="floating-email">✉️</span>
+    <div id="ANIMATION-CONTAINER">
+      <span class="floating-email">✉️</span>
+      <span class="floating-email">✉️</span>
+      <span class="floating-email">✉️</span>
+      <span class="floating-email">✉️</span>
+      <span class="floating-email">✉️</span>
+    </div>
+    
+    <div id="NEWSLETTER-BANNER">
+      <div id="BANNER-CONTENT">
+        <div id="BANNER-ICON">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
+            <path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
+          </svg>
+        </div>
+        <div id="BANNER-TEXT">
+          <h3>Subscribe to the Newsletter</h3>
+          <p>Get 3,000+ free assets, weekly news (gaming, tech & entertainment), Amazon deals, giveaways & more. Delivered free every Monday!</p>
+        </div>
       </div>
-      
-      <div id="NEWSLETTER-BANNER">
-        <div id="BANNER-CONTENT">
-          <div id="BANNER-ICON">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
-              <path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
-            </svg>
-          </div>
-          <div id="BANNER-TEXT">
-            <h3>Subscribe to the Newsletter</h3>
-            <p>Get 3,000+ free assets, weekly news (gaming, tech & entertainment), Amazon deals, giveaways & more. Delivered free every Monday!</p>
-          </div>
-        </div>
-        <div id="BANNER-BUTTON-LINK">
-          <a href="https://herovibes.substack.com/" 
-             class="btn" 
-             target="_blank" 
-             rel="noopener noreferrer">
-             Subscribe For Free →
-          </a>
-        </div>
+      <div id="BANNER-BUTTON-LINK">
+        <a href="https://herovibes.substack.com/" 
+           class="btn" 
+           target="_blank" 
+           rel="noopener noreferrer">
+           Subscribe For Free →
+        </a>
       </div>
     </div>
   </div>
 
   <script>
     /* ========================================
-    FOURTHWALL SCROLLBAR FIX [cite: 32-42, 74-86]
+    FOURTHWALL SCROLLBAR FIX
     ========================================
     */
     let lastHeight = 0;
     let resizeTimer;
 
-    /**
-     * Sends the current scrollHeight to the parent window if it has changed.
-     * This is the *only* function that should send a postMessage.
-     */
     function sendHeight() {
-      // Use scrollHeight for content height
       const height = document.body.scrollHeight;
-      
-      // Only send message if height has *actually* changed
       if (height !== lastHeight) {
         lastHeight = height;
-        window.parent.postMessage({ frameHeight: height }, '*');
+        
+        /* * FIX: Send a unique toolID with the message
+         * so the parent page can identify it.
+        */
+        window.parent.postMessage({ 
+          frameHeight: height,
+          toolID: 'HV-NEWSLETTER' 
+        }, '*');
       }
     }
 
-    /**
-     * A debounced version of sendHeight() to be called on content changes.
-     * This ensures we don't spam messages during rapid changes.
-     */
     function scheduleHeightCheck() {
-        // Clear any pending checks
         clearTimeout(resizeTimer);
-        // Schedule a new check after 150ms
         resizeTimer = setTimeout(sendHeight, 150);
     }
 
-    // Send height on initial load (with a slight delay)
-    // This fixes the "Content Cut-Off" race condition.
     window.addEventListener('load', () => {
-        // Increased delay to 150ms to be safer
         setTimeout(sendHeight, 150);
     });
 
-    // Send height on window resize (debounced)
     window.addEventListener('resize', () => {
-        // Use scheduleHeightCheck for built-in debounce
         scheduleHeightCheck();
     });
     
