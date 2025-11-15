@@ -320,10 +320,8 @@
     let originalImage = null;
     let lutData = null;
     let lutSize = 0;
-    let maxImageDimension = 2048; // Limit canvas size for performance
     const canvas = document.getElementById('previewCanvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    let isSliding = false;
 
     // ===== IMAGE UPLOAD HANDLER =====
     document.getElementById('imageInput').addEventListener('change', function(e) {
@@ -415,22 +413,12 @@
         return;
       }
 
-      // Calculate scaled dimensions while maintaining aspect ratio
-      let width = originalImage.width;
-      let height = originalImage.height;
-      
-      if (width > maxImageDimension || height > maxImageDimension) {
-        const scale = maxImageDimension / Math.max(width, height);
-        width = Math.floor(width * scale);
-        height = Math.floor(height * scale);
-      }
+      // Set canvas size to image size
+      canvas.width = originalImage.width;
+      canvas.height = originalImage.height;
 
-      // Set canvas size to scaled image size
-      canvas.width = width;
-      canvas.height = height;
-
-      // Draw image at scaled size
-      ctx.drawImage(originalImage, 0, 0, width, height);
+      // Draw original image
+      ctx.drawImage(originalImage, 0, 0);
 
       // Get image data
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -521,56 +509,25 @@
       };
     }
 
-    // ===== INTENSITY SLIDER - UPDATE VALUE ONLY =====
+    // ===== INTENSITY SLIDER =====
     document.getElementById('intensitySlider').addEventListener('input', function(e) {
       document.getElementById('intensityValue').textContent = e.target.value + '%';
-    });
-
-    // ===== INTENSITY SLIDER - TOUCHSTART/MOUSEDOWN =====
-    document.getElementById('intensitySlider').addEventListener('touchstart', function(e) {
-      isSliding = true;
-    });
-
-    document.getElementById('intensitySlider').addEventListener('mousedown', function(e) {
-      isSliding = true;
-    });
-
-    // ===== INTENSITY SLIDER - TOUCHEND/MOUSEUP =====
-    document.getElementById('intensitySlider').addEventListener('touchend', function(e) {
-      if (isSliding) {
-        isSliding = false;
-        applyLUT();
-      }
-    });
-
-    document.getElementById('intensitySlider').addEventListener('mouseup', function(e) {
-      if (isSliding) {
-        isSliding = false;
-        applyLUT();
-      }
-    });
-
-    // ===== INTENSITY SLIDER - CHANGE (FALLBACK) =====
-    document.getElementById('intensitySlider').addEventListener('change', function(e) {
-      if (!isSliding) {
-        applyLUT();
-      }
+      applyLUT();
     });
 
     // ===== DOWNLOAD BUTTON =====
     document.getElementById('downloadBtn').addEventListener('click', function() {
-      // Export as JPG with 0.92 quality for better file size
       canvas.toBlob(function(blob) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'lut-applied-image.jpg';
+        a.download = 'lut-applied-image.png';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         showStatus('Image downloaded successfully', 'success');
-      }, 'image/jpeg', 0.92);
+      });
     });
 
     // ===== STATUS MESSAGE =====
