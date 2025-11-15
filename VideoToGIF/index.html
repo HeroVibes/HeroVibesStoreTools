@@ -699,24 +699,36 @@
       const frameCount = 10;
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
+      let framesLoaded = 0;
 
       for (let i = 0; i < frameCount; i++) {
         const frameDiv = document.createElement('div');
         frameDiv.className = 'timeline-frame';
         
         const time = (state.videoDuration / frameCount) * i;
-        videoPreview.currentTime = time;
+        
+        const captureAtTime = (targetTime, element) => {
+          videoPreview.currentTime = targetTime;
+          
+          const seekHandler = () => {
+            if (Math.abs(videoPreview.currentTime - targetTime) < 0.1) {
+              canvas.width = videoPreview.videoWidth;
+              canvas.height = videoPreview.videoHeight;
+              ctx.drawImage(videoPreview, 0, 0);
+              element.style.backgroundImage = `url(${canvas.toDataURL()})`;
+              videoPreview.removeEventListener('seeked', seekHandler);
+              
+              framesLoaded++;
+              if (framesLoaded === frameCount) {
+                videoPreview.currentTime = state.startTime;
+              }
+            }
+          };
+          
+          videoPreview.addEventListener('seeked', seekHandler);
+        };
 
-        videoPreview.addEventListener('seeked', function captureFrame() {
-          if (Math.abs(videoPreview.currentTime - time) < 0.1) {
-            canvas.width = videoPreview.videoWidth;
-            canvas.height = videoPreview.videoHeight;
-            ctx.drawImage(videoPreview, 0, 0);
-            frameDiv.style.backgroundImage = `url(${canvas.toDataURL()})`;
-            videoPreview.removeEventListener('seeked', captureFrame);
-          }
-        }, { once: false });
-
+        captureAtTime(time, frameDiv);
         timelineFrames.appendChild(frameDiv);
       }
 
@@ -827,6 +839,11 @@
       startTimeSpan.textContent = state.startTime.toFixed(1) + 's';
       durationTimeSpan.textContent = state.trimDuration.toFixed(1) + 's';
       endTimeSpan.textContent = state.endTime.toFixed(1) + 's';
+
+      // UPDATE VIDEO PREVIEW TO SHOW START TIME
+      if (!state.cropEnabled) {
+        videoPreview.currentTime = state.startTime;
+      }
 
       if (state.trimDuration > 10) {
         warningBanner.style.display = 'block';
@@ -1042,6 +1059,7 @@
         outputSection.style.display = 'block';
         scheduleHeightCheck();
       } catch (error) {
+        console.error('GIF generation error:', error);
         alert('Error generating GIF: ' + error.message);
         controlsCard.style.display = 'block';
         progressSection.style.display = 'none';
@@ -1051,95 +1069,121 @@
 
     async function generateGif() {
       return new Promise((resolve, reject) => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
 
-        let width, height;
-        if (state.cropEnabled) {
-          width = Math.round(state.cropRect.width);
-          height = Math.round(state.cropRect.height);
-        } else {
-          width = videoPreview.videoWidth;
-          height = videoPreview.videoHeight;
-        }
-
-        const maxDimension = 600;
-        if (width > maxDimension || height > maxDimension) {
-          const scale = maxDimension / Math.max(width, height);
-          width = Math.round(width * scale);
-          height = Math.round(height * scale);
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const qualityMap = { 1: 20, 2: 10, 3: 1 };
-        const gif = new GIF({
-          workers: 2,
-          quality: qualityMap[state.quality],
-          width: width,
-          height: height,
-          workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
-        });
-
-        const adjustedDuration = state.trimDuration / state.speed;
-        const frameCount = Math.ceil(state.fps * adjustedDuration);
-        const frameDelay = (1000 / state.fps) * state.speed;
-        
-        let currentFrame = 0;
-
-        function captureFrame() {
-          if (currentFrame >= frameCount) {
-            gif.render();
-            return;
+          let width, height;
+          if (state.cropEnabled) {
+            width = Math.round(state.cropRect.width);
+            height = Math.round(state.cropRect.height);
+          } else {
+            width = videoPreview.videoWidth;
+            height = videoPreview.videoHeight;
           }
 
-          const progress = currentFrame / frameCount;
-          const videoTime = state.startTime + (progress * state.trimDuration);
+          const maxDimension = 600;
+          if (width > maxDimension || height > maxDimension) {
+            const scale = maxDimension / Math.max(width, height);
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const qualityMap = { 1: 20, 2: 10, 3: 1 };
+          const gif = new GIF({
+            workers: 2,
+            quality: qualityMap[state.quality],
+            width: width,
+            height: height,
+            workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
+          });
+
+          const adjustedDuration = state.trimDuration / state.speed;
+          const frameCount = Math.ceil(state.fps * adjustedDuration);
+          const frameDelay = (1000 / state.fps) * state.speed;
           
-          videoPreview.currentTime = videoTime;
-          
-          videoPreview.onseeked = () => {
-            ctx.clearRect(0, 0, width, height);
-            
-            if (state.cropEnabled) {
-              ctx.drawImage(
-                videoPreview,
-                state.cropRect.x, state.cropRect.y,
-                state.cropRect.width, state.cropRect.height,
-                0, 0, width, height
-              );
-            } else {
-              ctx.drawImage(videoPreview, 0, 0, width, height);
+          let currentFrame = 0;
+          let isCapturing = false;
+
+          function captureFrame() {
+            if (currentFrame >= frameCount) {
+              console.log('All frames captured, rendering GIF...');
+              gif.render();
+              return;
             }
 
-            gif.addFrame(canvas, { delay: frameDelay, copy: true });
+            if (isCapturing) return;
+            isCapturing = true;
 
-            currentFrame++;
-            const progressPercent = (currentFrame / frameCount) * 100;
-            progressFill.style.width = progressPercent + '%';
-            progressText.textContent = `Processing frame ${currentFrame} of ${frameCount}`;
+            const progress = currentFrame / frameCount;
+            const videoTime = state.startTime + (progress * state.trimDuration);
+            
+            videoPreview.currentTime = videoTime;
+            
+            videoPreview.onseeked = () => {
+              try {
+                ctx.clearRect(0, 0, width, height);
+                
+                if (state.cropEnabled) {
+                  ctx.drawImage(
+                    videoPreview,
+                    state.cropRect.x, state.cropRect.y,
+                    state.cropRect.width, state.cropRect.height,
+                    0, 0, width, height
+                  );
+                } else {
+                  ctx.drawImage(videoPreview, 0, 0, width, height);
+                }
 
-            setTimeout(captureFrame, 10);
-          };
+                gif.addFrame(canvas, { delay: frameDelay, copy: true });
+
+                currentFrame++;
+                const progressPercent = (currentFrame / frameCount) * 100;
+                progressFill.style.width = progressPercent + '%';
+                progressText.textContent = `Processing frame ${currentFrame} of ${frameCount}`;
+
+                isCapturing = false;
+                setTimeout(captureFrame, 10);
+              } catch (err) {
+                console.error('Error capturing frame:', err);
+                isCapturing = false;
+                reject(err);
+              }
+            };
+          }
+
+          gif.on('finished', (blob) => {
+            console.log('GIF rendering complete!');
+            state.generatedGif = blob;
+            const url = URL.createObjectURL(blob);
+            outputGif.src = url;
+            
+            const sizeKB = (blob.size / 1024).toFixed(2);
+            outputInfo.textContent = `Size: ${sizeKB} KB | ${width}x${height}px | ${state.fps} FPS`;
+            
+            resolve();
+          });
+
+          gif.on('progress', (p) => {
+            const percent = Math.round(p * 100);
+            progressText.textContent = `Encoding GIF... ${percent}%`;
+            console.log('Encoding progress:', percent + '%');
+          });
+
+          gif.on('abort', () => {
+            console.error('GIF rendering aborted');
+            reject(new Error('GIF rendering was aborted'));
+          });
+
+          console.log('Starting frame capture...');
+          captureFrame();
+        } catch (err) {
+          console.error('Error in generateGif:', err);
+          reject(err);
         }
-
-        gif.on('finished', (blob) => {
-          state.generatedGif = blob;
-          const url = URL.createObjectURL(blob);
-          outputGif.src = url;
-          
-          const sizeKB = (blob.size / 1024).toFixed(2);
-          outputInfo.textContent = `Size: ${sizeKB} KB | ${width}x${height}px | ${state.fps} FPS`;
-          
-          resolve();
-        });
-
-        gif.on('progress', (p) => {
-          progressText.textContent = `Encoding GIF... ${Math.round(p * 100)}%`;
-        });
-
-        captureFrame();
       });
     }
 
