@@ -8,6 +8,7 @@
     :root{
       --bg:#191919;
       --card-bg:#1F1F1F;
+      --btn-bg:#1F1F1F;
       --hover-bg:#323232;
       --outline:#323232;
       --accent:#87A9FF;
@@ -18,7 +19,7 @@
     
     body{
       margin:0;
-      padding:24px 16px;
+      padding:0;
       background:var(--bg);
       font-family:sans-serif;
     }
@@ -34,44 +35,35 @@
       border:1px solid var(--outline);
       border-radius:var(--radius);
       overflow:hidden;
-      cursor:pointer;
-      transition:background 0.3s ease;
-      text-decoration:none;
-      display:block;
+      display:flex;
+      align-items:center;
+      gap:20px;
     }
     
-    .newsletter-card:hover{
-      background:var(--hover-bg);
+    /* ===== EMAIL ICON ===== */
+    .email-icon{
+      font-size:48px;
+      flex-shrink:0;
+      user-select:none;
+      transition:transform 0.3s ease;
     }
     
-    /* Shimmer effect */
-    .newsletter-card::before{
-      content:'';
-      position:absolute;
-      top:0;
-      left:-100%;
-      width:75%;
-      height:100%;
-      background:linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-      transform:skewX(-25deg);
-      transition:left .7s ease-in-out;
-      pointer-events:none;
+    .newsletter-card:hover .email-icon{
+      animation:emailBounce 0.6s ease-in-out;
     }
     
-    .newsletter-card:hover::before{
-      left:125%;
-    }
-    
-    /* Accessible focus */
-    .newsletter-card:focus-visible{
-      outline:none;
-      box-shadow:0 0 0 3px rgba(135,169,255,0.12);
+    @keyframes emailBounce{
+      0%, 100%{ transform:translateY(0); }
+      25%{ transform:translateY(-8px); }
+      50%{ transform:translateY(0); }
+      75%{ transform:translateY(-4px); }
     }
     
     /* ===== CARD CONTENT ===== */
     .card-content{
       position:relative;
       z-index:1;
+      flex:1;
     }
     
     .card-title{
@@ -84,36 +76,65 @@
     .card-description{
       font-size:14px;
       color:var(--text-secondary);
-      margin:0 0 12px 0;
+      margin:0 0 16px 0;
       line-height:1.5;
     }
     
-    .card-link{
-      font-size:12px;
+    .highlight{
       color:var(--accent);
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
     }
     
-    .card-link::after{
-      content:'→';
+    /* ===== SUBSCRIBE BUTTON ===== */
+    .btn{
+      position:relative;
+      padding:10px 16px;
+      border-radius:var(--radius);
+      background:var(--btn-bg);
+      color:var(--text-primary);
+      border:1px solid rgba(255,255,255,0.06);
+      cursor:pointer;
+      overflow:hidden;
       font-size:14px;
-      transition:transform 0.3s ease;
+      text-decoration:none;
+      display:inline-block;
+      font-family:sans-serif;
     }
     
-    .newsletter-card:hover .card-link::after{
-      transform:translateX(4px);
+    /* shimmer effect */
+    .btn::before{
+      content:'';
+      position:absolute;
+      top:0;
+      left:-100%;
+      width:75%;
+      height:100%;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform:skewX(-25deg);
+      transition:left .7s ease-in-out;
+    }
+    
+    .btn:hover::before{
+      left:125%;
+    }
+    
+    /* accessible focus */
+    .btn:focus-visible{
+      outline:none;
+      box-shadow:0 0 0 3px rgba(135,169,255,0.12);
     }
     
     /* ===== MOBILE OPTIMIZATION ===== */
     @media (max-width: 600px){
-      body{
-        padding:16px 12px;
-      }
-      
       .newsletter-card{
         padding:20px 14px;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:16px;
+      }
+      
+      .email-icon{
+        font-size:40px;
+        align-self:center;
       }
       
       .card-title{
@@ -122,19 +143,26 @@
       
       .card-description{
         font-size:13px;
+        margin-bottom:14px;
+      }
+      
+      .btn{
+        width:100%;
+        text-align:center;
       }
     }
   </style>
 </head>
 <body>
   <!-- ===== NEWSLETTER CARD ===== -->
-  <a href="https://herovibes.substack.com/" class="newsletter-card" target="_blank" rel="noopener noreferrer">
+  <div class="newsletter-card">
+    <div class="email-icon">📧</div>
     <div class="card-content">
       <h2 class="card-title">Stay Updated with the HeroVibes Newsletter</h2>
-      <p class="card-description">Get the latest gaming, tech and entertainment news, plus access to over 3,000 creator resources, exclusive discounts and more—delivered straight to your inbox every Monday.</p>
-      <span class="card-link">Subscribe now</span>
+      <p class="card-description">Get the latest gaming, tech and entertainment news, plus access to <span class="highlight">over 3,000 creator resources</span>, exclusive discounts and more—delivered straight to your inbox every Monday.</p>
+      <a href="https://herovibes.substack.com/" class="btn" target="_blank" rel="noopener noreferrer">Subscribe Now</a>
     </div>
-  </a>
+  </div>
 
   <script>
     // ===== FOURTHWALL SCROLLBAR FIX =====
