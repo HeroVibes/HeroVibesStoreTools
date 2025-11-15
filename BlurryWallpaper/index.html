@@ -446,6 +446,25 @@
              box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
         }
 
+        /* HIDDEN RENDER CANVAS */
+        #render-container {
+            position: fixed;
+            top: -999999px;
+            left: -999999px;
+            width: 4000px;
+            height: 4000px;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        #render-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #000;
+        }
+
         /* MOBILE STYLES */
         @media (max-width: 768px) {
             body {
@@ -651,6 +670,11 @@
         </div>
     </div>
 
+    <!-- HIDDEN RENDER CONTAINER -->
+    <div id="render-container">
+        <div id="render-preview"></div>
+    </div>
+
     <canvas id="render-canvas" style="display: none;"></canvas>
 
     <script>
@@ -682,6 +706,7 @@
         const randomBtn = document.getElementById('random-btn');
         const downloadBtn = document.getElementById('download-btn');
         const resolutionSelect = document.getElementById('resolution-select');
+        const renderPreview = document.getElementById('render-preview');
         const canvas = document.getElementById('render-canvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
@@ -927,213 +952,118 @@
             updatePreview();
         }
 
-        // DOWNLOAD LOGIC - COMPLETELY REWRITTEN
+        // DOWNLOAD LOGIC - USING HTML2CANVAS APPROACH
         async function downloadImage() {
             try {
                 const [w, h] = resolutionSelect.value.split('x').map(Number);
                 
+                // Clone the preview structure
+                renderPreview.innerHTML = preview.innerHTML;
+                renderPreview.style.width = `${w}px`;
+                renderPreview.style.height = `${h}px`;
+                renderPreview.style.position = 'absolute';
+                renderPreview.style.backgroundColor = state.backgroundColor;
+                renderPreview.style.filter = `brightness(${state.brightness}%) saturate(${state.saturation}%)`;
+                renderPreview.style.overflow = 'hidden';
+
+                // Calculate scale factor
+                const rect = preview.getBoundingClientRect();
+                const scaleX = w / rect.width;
+                const scaleY = h / rect.height;
+                const scale = Math.min(scaleX, scaleY);
+
+                // Update all blobs in render preview
+                const renderBlobs = renderPreview.querySelectorAll('.color-blob');
+                renderBlobs.forEach((blob, idx) => {
+                    const bs = state.blobs[idx];
+                    if (!bs) return;
+                    
+                    const size = bs.baseSize * state.sizeMultiplier * scale;
+                    const blur = blurSlider.value * scale;
+                    
+                    blob.style.backgroundColor = bs.color;
+                    blob.style.left = `${bs.x}%`;
+                    blob.style.top = `${bs.y}%`;
+                    blob.style.width = `${size}px`;
+                    blob.style.height = `${size}px`;
+                    blob.style.filter = `blur(${blur}px)`;
+                    blob.style.position = 'absolute';
+                    blob.style.borderRadius = '50%';
+                });
+
+                // Update overlays
+                const renderGrain = renderPreview.querySelector('#grain-overlay');
+                const renderTexture = renderPreview.querySelector('#texture-overlay');
+                const renderVignette = renderPreview.querySelector('#vignette-overlay');
+
+                if (renderGrain) {
+                    renderGrain.style.opacity = state.grain;
+                }
+
+                if (renderVignette) {
+                    renderVignette.style.opacity = state.vignette;
+                }
+
+                if (renderTexture && state.texture === 'noise') {
+                    renderTexture.style.backgroundImage = textureOverlay.style.backgroundImage;
+                    renderTexture.style.backgroundSize = '100px 100px';
+                    renderTexture.style.opacity = state.textureParams.noise.opacity;
+                    renderTexture.style.mixBlendMode = 'overlay';
+                }
+
+                // Wait for render
+                await new Promise(resolve => setTimeout(resolve, 100));
+
                 // Set canvas size
                 canvas.width = w;
                 canvas.height = h;
 
-                // Calculate scale
-                const rect = preview.getBoundingClientRect();
-                const scaleX = w / rect.width;
-                const scaleY = h / rect.height;
+                // Use html2canvas-like approach - draw to canvas using foreignObject in SVG
+                const data = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+                        <foreignObject width="100%" height="100%">
+                            <div xmlns="http://www.w3.org/1999/xhtml" style="width:${w}px;height:${h}px;">
+                                ${renderPreview.outerHTML}
+                            </div>
+                        </foreignObject>
+                    </svg>
+                `;
 
-                // 1. FILL BACKGROUND
-                ctx.fillStyle = state.backgroundColor;
-                ctx.fillRect(0, 0, w, h);
+                const img = new Image();
+                const blob = new Blob([data], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
 
-                // 2. DRAW BLOBS (unblurred first)
-                state.blobs.forEach(b => {
-                    const diameter = b.baseSize * state.sizeMultiplier * Math.min(scaleX, scaleY);
-                    const radius = diameter / 2;
-                    const x_percent = (b.x / 100) * w;
-                    const y_percent = (b.y / 100) * h;
-                    const centerX = x_percent + radius;
-                    const centerY = y_percent + radius;
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0);
+                    URL.revokeObjectURL(url);
 
-                    ctx.fillStyle = b.color;
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-                    ctx.fill();
-                });
+                    // Download
+                    canvas.toBlob(downloadBlob => {
+                        const downloadUrl = URL.createObjectURL(downloadBlob);
+                        const a = document.createElement('a');
+                        a.download = `blurry-wallpaper-${resolutionSelect.value}.jpg`;
+                        a.href = downloadUrl;
+                        a.click();
+                        
+                        setTimeout(() => {
+                            URL.revokeObjectURL(downloadUrl);
+                            a.remove();
+                        }, 100);
+                    }, 'image/jpeg', 0.95);
+                };
 
-                // 3. APPLY BLUR using StackBlur library equivalent (simple box blur approximation)
-                const blurAmount = Math.round(blurSlider.value * Math.min(scaleX, scaleY));
-                if (blurAmount > 0) {
-                    applyCanvasBlur(ctx, w, h, blurAmount);
-                }
+                img.onerror = () => {
+                    console.error('SVG rendering failed');
+                    alert('Download failed. Please try again.');
+                    URL.revokeObjectURL(url);
+                };
 
-                // 4. APPLY BRIGHTNESS AND SATURATION
-                if (state.brightness !== 100 || state.saturation !== 100) {
-                    const imageData = ctx.getImageData(0, 0, w, h);
-                    const data = imageData.data;
-                    const brightnessFactor = state.brightness / 100;
-                    const saturationFactor = state.saturation / 100;
-
-                    for (let i = 0; i < data.length; i += 4) {
-                        let r = data[i];
-                        let g = data[i + 1];
-                        let b = data[i + 2];
-
-                        // Apply saturation
-                        const gray = 0.2989 * r + 0.5870 * g + 0.1140 * b;
-                        r = gray + saturationFactor * (r - gray);
-                        g = gray + saturationFactor * (g - gray);
-                        b = gray + saturationFactor * (b - gray);
-
-                        // Apply brightness
-                        r *= brightnessFactor;
-                        g *= brightnessFactor;
-                        b *= brightnessFactor;
-
-                        data[i] = Math.min(255, Math.max(0, r));
-                        data[i + 1] = Math.min(255, Math.max(0, g));
-                        data[i + 2] = Math.min(255, Math.max(0, b));
-                    }
-                    ctx.putImageData(imageData, 0, 0);
-                }
-
-                // 5. DRAW GRAIN
-                if (state.grain > 0) {
-                    const grainDensity = Math.min((w * h) / 20, 50000);
-                    ctx.fillStyle = `rgba(0,0,0,${state.grain / 2})`;
-                    for (let i = 0; i < grainDensity; i++) {
-                        ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
-                    }
-                }
-
-                // 6. DRAW TEXTURE
-                if (state.texture === 'noise') {
-                    const noiseDensity = Math.min((w * h) / 10, 100000);
-                    ctx.fillStyle = `rgba(0,0,0,${state.textureParams.noise.opacity})`;
-                    for (let i = 0; i < noiseDensity; i++) {
-                        ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
-                    }
-                }
-
-                // 7. DRAW VIGNETTE
-                if (state.vignette > 0) {
-                    const grad = ctx.createRadialGradient(w/2, h/2, Math.max(w,h) * 0.3, w/2, h/2, Math.max(w, h) * 0.9);
-                    grad.addColorStop(0, 'rgba(0,0,0,0)');
-                    grad.addColorStop(1, `rgba(0,0,0,${state.vignette * 0.8})`);
-                    ctx.fillStyle = grad;
-                    ctx.fillRect(0, 0, w, h);
-                }
-
-                // 8. DOWNLOAD
-                canvas.toBlob(blob => {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.download = `blurry-wallpaper-${resolutionSelect.value}.jpg`;
-                    a.href = url;
-                    a.click();
-                    
-                    setTimeout(() => {
-                        URL.revokeObjectURL(url);
-                        a.remove();
-                    }, 100);
-                }, 'image/jpeg', 0.95);
+                img.src = url;
 
             } catch (error) {
                 console.error('Download failed:', error);
                 alert('Download failed. Please try again.');
             }
-        }
-
-        // SIMPLE BOX BLUR IMPLEMENTATION
-        function applyCanvasBlur(ctx, w, h, radius) {
-            const iterations = 3; // More iterations = smoother blur
-            for (let i = 0; i < iterations; i++) {
-                boxBlurHorizontal(ctx, w, h, radius);
-                boxBlurVertical(ctx, w, h, radius);
-            }
-        }
-
-        function boxBlurHorizontal(ctx, w, h, radius) {
-            const imageData = ctx.getImageData(0, 0, w, h);
-            const data = imageData.data;
-            const output = new Uint8ClampedArray(data);
-
-            for (let y = 0; y < h; y++) {
-                let r = 0, g = 0, b = 0, a = 0;
-                let count = 0;
-
-                for (let x = 0; x < w; x++) {
-                    if (x - radius > 0) {
-                        const removeIdx = ((y * w) + (x - radius - 1)) * 4;
-                        r -= data[removeIdx];
-                        g -= data[removeIdx + 1];
-                        b -= data[removeIdx + 2];
-                        a -= data[removeIdx + 3];
-                        count--;
-                    }
-
-                    if (x + radius < w) {
-                        const addIdx = ((y * w) + (x + radius)) * 4;
-                        r += data[addIdx];
-                        g += data[addIdx + 1];
-                        b += data[addIdx + 2];
-                        a += data[addIdx + 3];
-                        count++;
-                    }
-
-                    const idx = ((y * w) + x) * 4;
-                    output[idx] = r / count;
-                    output[idx + 1] = g / count;
-                    output[idx + 2] = b / count;
-                    output[idx + 3] = a / count;
-                }
-            }
-
-            for (let i = 0; i < data.length; i++) {
-                data[i] = output[i];
-            }
-            ctx.putImageData(imageData, 0, 0);
-        }
-
-        function boxBlurVertical(ctx, w, h, radius) {
-            const imageData = ctx.getImageData(0, 0, w, h);
-            const data = imageData.data;
-            const output = new Uint8ClampedArray(data);
-
-            for (let x = 0; x < w; x++) {
-                let r = 0, g = 0, b = 0, a = 0;
-                let count = 0;
-
-                for (let y = 0; y < h; y++) {
-                    if (y - radius > 0) {
-                        const removeIdx = (((y - radius - 1) * w) + x) * 4;
-                        r -= data[removeIdx];
-                        g -= data[removeIdx + 1];
-                        b -= data[removeIdx + 2];
-                        a -= data[removeIdx + 3];
-                        count--;
-                    }
-
-                    if (y + radius < h) {
-                        const addIdx = (((y + radius) * w) + x) * 4;
-                        r += data[addIdx];
-                        g += data[addIdx + 1];
-                        b += data[addIdx + 2];
-                        a += data[addIdx + 3];
-                        count++;
-                    }
-
-                    const idx = ((y * w) + x) * 4;
-                    output[idx] = r / count;
-                    output[idx + 1] = g / count;
-                    output[idx + 2] = b / count;
-                    output[idx + 3] = a / count;
-                }
-            }
-
-            for (let i = 0; i < data.length; i++) {
-                data[i] = output[i];
-            }
-            ctx.putImageData(imageData, 0, 0);
         }
         
         // ASPECT RATIO UPDATE
