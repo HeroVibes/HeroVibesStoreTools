@@ -592,7 +592,8 @@
       speed: 1.0,
       cropEnabled: false,
       cropRect: { x: 0, y: 0, width: 0, height: 0 },
-      generatedGif: null
+      generatedGif: null,
+      lastDraggedHandle: null // Track which handle was last dragged
     };
 
     // ===== DOM ELEMENTS =====
@@ -662,6 +663,7 @@
     });
 
     function handleVideoUpload(file) {
+      console.log('📁 Video upload started:', file.name);
       if (!file.type.startsWith('video/')) {
         alert('Please upload a valid video file');
         return;
@@ -676,6 +678,11 @@
         state.startTime = 0;
         state.endTime = Math.min(10, state.videoDuration);
         state.trimDuration = state.endTime - state.startTime;
+
+        console.log('📹 Video loaded:', {
+          duration: state.videoDuration,
+          dimensions: `${videoPreview.videoWidth}x${videoPreview.videoHeight}`
+        });
 
         if (state.videoDuration > 10) {
           warningBanner.style.display = 'block';
@@ -695,6 +702,7 @@
 
     // ===== TIMELINE GENERATION =====
     function generateTimeline() {
+      console.log('🎞️ Generating timeline...');
       timelineFrames.innerHTML = '';
       const frameCount = 10;
       const canvas = document.createElement('canvas');
@@ -721,6 +729,7 @@
               framesLoaded++;
               if (framesLoaded === frameCount) {
                 videoPreview.currentTime = state.startTime;
+                console.log('✅ Timeline generated successfully');
               }
             }
           };
@@ -752,10 +761,12 @@
       function startDrag(e, type) {
         isDragging = true;
         dragType = type;
+        state.lastDraggedHandle = type; // Track which handle is being dragged
         startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
         startLeft = parseFloat(timelineSelection.style.left);
         startWidth = parseFloat(timelineSelection.style.width);
         e.preventDefault();
+        console.log('🖱️ Timeline drag started:', type);
       }
 
       function doDrag(e) {
@@ -805,6 +816,7 @@
       }
 
       function endDrag() {
+        console.log('🖱️ Timeline drag ended');
         isDragging = false;
         dragType = null;
       }
@@ -840,9 +852,13 @@
       durationTimeSpan.textContent = state.trimDuration.toFixed(1) + 's';
       endTimeSpan.textContent = state.endTime.toFixed(1) + 's';
 
-      // UPDATE VIDEO PREVIEW TO SHOW START TIME
+      // UPDATE VIDEO PREVIEW - Show start time when dragging left handle, end time when dragging right handle
       if (!state.cropEnabled) {
-        videoPreview.currentTime = state.startTime;
+        if (state.lastDraggedHandle === 'left' || state.lastDraggedHandle === 'selection') {
+          videoPreview.currentTime = state.startTime;
+        } else if (state.lastDraggedHandle === 'right') {
+          videoPreview.currentTime = state.endTime;
+        }
       }
 
       if (state.trimDuration > 10) {
@@ -1048,6 +1064,17 @@
 
     // ===== GIF CONVERSION =====
     convertBtn.addEventListener('click', async () => {
+      console.log('🎬 Starting GIF conversion...');
+      console.log('Settings:', {
+        startTime: state.startTime,
+        endTime: state.endTime,
+        duration: state.trimDuration,
+        fps: state.fps,
+        quality: state.quality,
+        speed: state.speed,
+        cropEnabled: state.cropEnabled
+      });
+
       controlsCard.style.display = 'none';
       progressSection.style.display = 'block';
       scheduleHeightCheck();
@@ -1055,11 +1082,12 @@
       try {
         await generateGif();
         
+        console.log('✅ GIF generation complete!');
         progressSection.style.display = 'none';
         outputSection.style.display = 'block';
         scheduleHeightCheck();
       } catch (error) {
-        console.error('GIF generation error:', error);
+        console.error('❌ GIF generation error:', error);
         alert('Error generating GIF: ' + error.message);
         controlsCard.style.display = 'block';
         progressSection.style.display = 'none';
@@ -1070,6 +1098,7 @@
     async function generateGif() {
       return new Promise((resolve, reject) => {
         try {
+          console.log('🖼️ Setting up canvas...');
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
 
@@ -1077,9 +1106,11 @@
           if (state.cropEnabled) {
             width = Math.round(state.cropRect.width);
             height = Math.round(state.cropRect.height);
+            console.log('✂️ Cropping enabled:', { width, height });
           } else {
             width = videoPreview.videoWidth;
             height = videoPreview.videoHeight;
+            console.log('📐 Using full video dimensions:', { width, height });
           }
 
           const maxDimension = 600;
@@ -1087,12 +1118,15 @@
             const scale = maxDimension / Math.max(width, height);
             width = Math.round(width * scale);
             height = Math.round(height * scale);
+            console.log('📏 Scaled down to:', { width, height });
           }
 
           canvas.width = width;
           canvas.height = height;
 
           const qualityMap = { 1: 20, 2: 10, 3: 1 };
+          
+          console.log('⚙️ Initializing GIF encoder...');
           const gif = new GIF({
             workers: 2,
             quality: qualityMap[state.quality],
@@ -1103,27 +1137,31 @@
 
           const adjustedDuration = state.trimDuration / state.speed;
           const frameCount = Math.ceil(state.fps * adjustedDuration);
-          const frameDelay = (1000 / state.fps) * state.speed;
+          const frameDelay = Math.round((1000 / state.fps) * state.speed);
+          
+          console.log('📊 Frame calculation:', {
+            adjustedDuration,
+            frameCount,
+            frameDelay
+          });
           
           let currentFrame = 0;
-          let isCapturing = false;
 
           function captureFrame() {
             if (currentFrame >= frameCount) {
-              console.log('All frames captured, rendering GIF...');
+              console.log('🎨 All frames captured, starting render...');
               gif.render();
               return;
             }
 
-            if (isCapturing) return;
-            isCapturing = true;
-
             const progress = currentFrame / frameCount;
             const videoTime = state.startTime + (progress * state.trimDuration);
             
+            console.log(`📸 Capturing frame ${currentFrame + 1}/${frameCount} at ${videoTime.toFixed(2)}s`);
+            
             videoPreview.currentTime = videoTime;
             
-            videoPreview.onseeked = () => {
+            const seekedHandler = () => {
               try {
                 ctx.clearRect(0, 0, width, height);
                 
@@ -1139,24 +1177,29 @@
                 }
 
                 gif.addFrame(canvas, { delay: frameDelay, copy: true });
+                console.log(`✅ Frame ${currentFrame + 1} added`);
 
                 currentFrame++;
                 const progressPercent = (currentFrame / frameCount) * 100;
                 progressFill.style.width = progressPercent + '%';
                 progressText.textContent = `Processing frame ${currentFrame} of ${frameCount}`;
 
-                isCapturing = false;
+                videoPreview.removeEventListener('seeked', seekedHandler);
                 setTimeout(captureFrame, 10);
               } catch (err) {
-                console.error('Error capturing frame:', err);
-                isCapturing = false;
+                console.error('❌ Error capturing frame:', err);
+                videoPreview.removeEventListener('seeked', seekedHandler);
                 reject(err);
               }
             };
+
+            videoPreview.addEventListener('seeked', seekedHandler);
           }
 
           gif.on('finished', (blob) => {
-            console.log('GIF rendering complete!');
+            console.log('🎉 GIF rendering complete!', {
+              size: (blob.size / 1024).toFixed(2) + ' KB'
+            });
             state.generatedGif = blob;
             const url = URL.createObjectURL(blob);
             outputGif.src = url;
@@ -1170,18 +1213,18 @@
           gif.on('progress', (p) => {
             const percent = Math.round(p * 100);
             progressText.textContent = `Encoding GIF... ${percent}%`;
-            console.log('Encoding progress:', percent + '%');
+            console.log('🔄 Encoding progress:', percent + '%');
           });
 
           gif.on('abort', () => {
-            console.error('GIF rendering aborted');
+            console.error('⚠️ GIF rendering aborted');
             reject(new Error('GIF rendering was aborted'));
           });
 
-          console.log('Starting frame capture...');
+          console.log('🚀 Starting frame capture...');
           captureFrame();
         } catch (err) {
-          console.error('Error in generateGif:', err);
+          console.error('❌ Error in generateGif:', err);
           reject(err);
         }
       });
@@ -1189,6 +1232,7 @@
 
     // ===== OUTPUT BUTTONS =====
     downloadBtn.addEventListener('click', () => {
+      console.log('💾 Downloading GIF...');
       const a = document.createElement('a');
       a.href = URL.createObjectURL(state.generatedGif);
       a.download = 'converted.gif';
