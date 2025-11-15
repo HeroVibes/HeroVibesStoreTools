@@ -673,22 +673,22 @@
             background: var(--bg-primary);
             border: 1px solid var(--outline);
             border-radius: var(--radius);
-            padding: 12px;
+            padding: 16px;
         }
 
         @media (max-width: 640px) {
             .content-wrapper {
-                padding: 10px;
+                padding: 12px;
             }
         }
 
         .content-grid {
             display: none;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 12px;
             max-height: 400px;
             overflow-y: auto;
-            padding: 2px;
+            padding: 4px;
         }
 
         .content-grid.active {
@@ -698,8 +698,7 @@
         @media (max-width: 640px) {
             .content-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
-                max-height: 350px;
+                gap: 10px;
             }
         }
 
@@ -738,15 +737,14 @@
             border-radius: var(--radius);
             cursor: pointer;
             transition: all 0.3s ease;
-            padding: 10px 6px;
+            padding: 12px 8px;
             position: relative;
             overflow: hidden;
         }
 
         @media (max-width: 640px) {
             .grid-item {
-                padding: 8px 4px;
-                border-width: 1.5px;
+                padding: 10px 6px;
             }
         }
 
@@ -778,34 +776,20 @@
             box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.2);
         }
 
-        .grid-item i {
-            font-size: 32px;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-            z-index: 1;
-            line-height: 1;
-        }
-
-        @media (max-width: 640px) {
-            .grid-item i {
-                font-size: 26px;
-                margin-bottom: 4px;
-            }
-        }
-
-        .grid-item img {
-            width: 50%;
+        /* ICON PREVIEW AS IMAGE */
+        .grid-item .icon-preview-img {
+            width: 55%;
             height: auto;
-            max-height: 50%;
             object-fit: contain;
             margin-bottom: 6px;
             z-index: 1;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
 
         @media (max-width: 640px) {
-            .grid-item img {
-                width: 45%;
-                max-height: 45%;
+            .grid-item .icon-preview-img {
+                width: 50%;
                 margin-bottom: 4px;
             }
         }
@@ -829,7 +813,6 @@
             .icon-name {
                 font-size: 8px;
                 line-height: 1.2;
-                -webkit-line-clamp: 1;
             }
         }
 
@@ -1298,6 +1281,9 @@
         let selectedTextureId = 'off_texture';
         let selectedBackgroundId = 'off';
 
+        // Cache for rendered icon previews
+        const iconPreviewCache = {};
+
         // ===== GRADIENT WARNING CHECK =====
         function checkGradientWarning() {
             const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
@@ -1408,6 +1394,33 @@
                 console.error(`Error in renderSvgIcon for ${svgUrl}:`, error);
                 return Promise.reject(error);
             }
+        }
+
+        // NEW: Render Font Awesome icon to high-quality canvas image
+        async function renderFontAwesomeIconToImage(iconData, color = '#FFFFFF') {
+            const cacheKey = `${iconData.id}-${color}`;
+            if (iconPreviewCache[cacheKey]) {
+                return iconPreviewCache[cacheKey];
+            }
+
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const size = 200; // High resolution for crisp rendering
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+
+                ctx.fillStyle = color;
+                const fontFamily = iconData.class.includes('fa-brands') ? '"Font Awesome 6 Brands"' : '"Font Awesome 6 Free"';
+                ctx.font = `900 ${size * 0.7}px ${fontFamily}`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(iconData.unicode, size / 2, size / 2);
+
+                const dataURL = canvas.toDataURL('image/png');
+                iconPreviewCache[cacheKey] = dataURL;
+                resolve(dataURL);
+            });
         }
         
         const patternDrawers = {
@@ -1746,11 +1759,23 @@
                 div.dataset.type = type;
 
                 if (item.type === 'fa-icon') {
-                    div.innerHTML = `<i class="${item.class}"></i><span class="icon-name">${item.name}</span>`;
+                    // Render Font Awesome icon as high-quality image
+                    const iconImageURL = await renderFontAwesomeIconToImage(item, '#FFFFFF');
+                    const img = document.createElement('img');
+                    img.src = iconImageURL;
+                    img.alt = item.name;
+                    img.classList.add('icon-preview-img');
+                    div.appendChild(img);
+                    
+                    const nameSpan = document.createElement('span');
+                    nameSpan.classList.add('icon-name');
+                    nameSpan.textContent = item.name;
+                    div.appendChild(nameSpan);
                 } else if (item.type === 'custom-image') {
                     const img = document.createElement('img');
                     img.src = item.src;
                     img.alt = item.name;
+                    img.classList.add('icon-preview-img');
                     div.appendChild(img);
                     const nameSpan = document.createElement('span');
                     nameSpan.classList.add('icon-name');
@@ -1759,8 +1784,7 @@
                 } else if (item.type === 'custom-svg') {
                     const img = document.createElement('img');
                     img.alt = item.name;
-                    img.style.width = '50%';
-                    img.style.height = 'auto';
+                    img.classList.add('icon-preview-img');
                     try {
                         const whiteSvgImage = await renderSvgIcon(item.src, '#FFFFFF');
                         img.src = whiteSvgImage.src;
