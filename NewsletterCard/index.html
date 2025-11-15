@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HeroVibes Newsletter Banner (XL - Overflow Fix)</title>
+  <title>HeroVibes Newsletter Banner (Wrapper Fix)</title>
   <style>
     /* ========================================
     DESIGN TOKENS (from Design Guide)
@@ -38,19 +38,16 @@
     body {
       background: var(--bg-primary);
       font-family: system-ui, sans-serif;
+      /* IFRAME FIX: Remove all padding/margin from body.
+         Height calculation will be based on the wrapper.
+      */
       margin: 0;
-      /* IFRAME FIX: Apply default padding to the body. [cite: 25] */
-      padding: 24px 16px; /* Default padding from design guide */
-      
-      /* IFRAME FIX: Force body to contain its padding for
-        a correct 'scrollHeight' calculation. [cite: 77, 89]
-      */
-      overflow: hidden;
-      
-      /* IFRAME FIX: Ensure no browser-default min-height
-        is interfering with the calculation. [cite: 55] 
-      */
-      min-height: 0;
+      padding: 0;
+    }
+    
+    /* IFRAME FIX: New wrapper to contain all tool padding */
+    #TOOL-BODY-WRAPPER {
+      padding: 24px 16px; /* Default tool padding  */
     }
 
     /* ========================================
@@ -63,6 +60,7 @@
       border-radius: var(--radius);
       padding: 60px; 
       max-width: 1400px; 
+      /* Now uses '0 auto' for margin as padding is on parent */
       margin: 0 auto; 
       position: relative;
       overflow: hidden;
@@ -219,7 +217,7 @@
       left: 125%;
     }
 
-    /* Accessible focus [cite: 31] */
+    /* Accessible focus */
     .btn:focus-visible {
       outline: none;
       box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
@@ -230,8 +228,8 @@
     ========================================
     */
     @media (max-width: 680px) {
-      body {
-        /* IFRAME FIX: Adjust body padding for mobile */
+      /* IFRAME FIX: Adjust wrapper padding for mobile */
+      #TOOL-BODY-WRAPPER {
         padding: 16px;
       }
       
@@ -275,36 +273,38 @@
 </head>
 <body>
 
-  <div id="HV-NEWSLETTER-WRAPPER">
+  <div id="TOOL-BODY-WRAPPER">
+    <div id="HV-NEWSLETTER-WRAPPER">
     
-    <div id="ANIMATION-CONTAINER">
-      <span class="floating-email">✉️</span>
-      <span class="floating-email">✉️</span>
-      <span class="floating-email">✉️</span>
-      <span class="floating-email">✉️</span>
-      <span class="floating-email">✉️</span>
-    </div>
-    
-    <div id="NEWSLETTER-BANNER">
-      <div id="BANNER-CONTENT">
-        <div id="BANNER-ICON">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
-            <path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
-          </svg>
-        </div>
-        <div id="BANNER-TEXT">
-          <h3>Subscribe to the Newsletter</h3>
-          <p>Get 3,000+ free assets, weekly news (gaming, tech & entertainment), Amazon deals, giveaways & more. Delivered free every Monday!</p>
-        </div>
+      <div id="ANIMATION-CONTAINER">
+        <span class="floating-email">✉️</span>
+        <span class="floating-email">✉️</span>
+        <span class="floating-email">✉️</span>
+        <span class="floating-email">✉️</span>
+        <span class="floating-email">✉️</span>
       </div>
-      <div id="BANNER-BUTTON-LINK">
-        <a href="https://herovibes.substack.com/" 
-           class="btn" 
-           target="_blank" 
-           rel="noopener noreferrer">
-           Subscribe For Free →
-        </a>
+      
+      <div id="NEWSLETTER-BANNER">
+        <div id="BANNER-CONTENT">
+          <div id="BANNER-ICON">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
+              <path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
+            </svg>
+          </div>
+          <div id="BANNER-TEXT">
+            <h3>Subscribe to the Newsletter</h3>
+            <p>Get 3,000+ free assets, weekly news (gaming, tech & entertainment), Amazon deals, giveaways & more. Delivered free every Monday!</p>
+          </div>
+        </div>
+        <div id="BANNER-BUTTON-LINK">
+          <a href="https://herovibes.substack.com/" 
+             class="btn" 
+             target="_blank" 
+             rel="noopener noreferrer">
+             Subscribe For Free →
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -319,39 +319,40 @@
 
     /**
      * Sends the current scrollHeight to the parent window if it has changed.
-     * This is the *only* function that should send a postMessage. [cite: 76]
+     * This is the *only* function that should send a postMessage.
      */
     function sendHeight() {
-      // Use scrollHeight for content height 
+      // Use scrollHeight for content height
       const height = document.body.scrollHeight;
       
-      // Only send message if height has *actually* changed [cite: 78]
+      // Only send message if height has *actually* changed
       if (height !== lastHeight) {
         lastHeight = height;
-        window.parent.postMessage({ frameHeight: height }, '*'); [cite: 79]
+        window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
     /**
      * A debounced version of sendHeight() to be called on content changes.
-     * This ensures we don't spam messages during rapid changes. [cite: 80]
+     * This ensures we don't spam messages during rapid changes.
      */
     function scheduleHeightCheck() {
-        // Clear any pending checks [cite: 82]
+        // Clear any pending checks
         clearTimeout(resizeTimer);
-        // Schedule a new check after 150ms [cite: 83]
+        // Schedule a new check after 150ms
         resizeTimer = setTimeout(sendHeight, 150);
     }
 
-    // Send height on initial load (with a slight delay) [cite: 84]
-    // This fixes the "Content Cut-Off" race condition. [cite: 84]
+    // Send height on initial load (with a slight delay)
+    // This fixes the "Content Cut-Off" race condition.
     window.addEventListener('load', () => {
-        setTimeout(sendHeight, 100);
+        // Increased delay to 150ms to be safer
+        setTimeout(sendHeight, 150);
     });
 
-    // Send height on window resize (debounced) [cite: 85]
+    // Send height on window resize (debounced)
     window.addEventListener('resize', () => {
-        // Use scheduleHeightCheck for built-in debounce [cite: 86]
+        // Use scheduleHeightCheck for built-in debounce
         scheduleHeightCheck();
     });
     
