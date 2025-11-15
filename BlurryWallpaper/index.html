@@ -144,7 +144,7 @@
             border: 1px solid var(--outline);
             border-radius: var(--radius);
             padding: 24px 16px;
-            padding-top: 40px;
+            padding-top: 48px;
             display: flex;
             flex-direction: column;
             gap: 24px;
@@ -153,7 +153,7 @@
 
         #version-tag {
             position: absolute;
-            top: 8px;
+            top: 12px;
             right: 12px;
             font-size: 10px;
             color: var(--text-secondary);
@@ -464,7 +464,7 @@
             
             #controls {
                 gap: 20px;
-                padding-top: 16px;
+                padding-top: 48px;
             }
             
             .action-row {
@@ -491,7 +491,7 @@
 
             #version-tag {
                 font-size: 9px;
-                top: 6px;
+                top: 12px;
                 right: 10px;
             }
             
@@ -542,7 +542,7 @@
 
         <!-- CONTROLS SECTION -->
         <div id="controls">
-            <div id="version-tag">V1.0.1</div>
+            <div id="version-tag">V1.0.2</div>
 
             <div class="control-group">
                 <button class="btn btn-random" id="random-btn">Randomize</button>
@@ -652,7 +652,6 @@
     </div>
 
     <canvas id="render-canvas" style="display: none;"></canvas>
-    <canvas id="temp-canvas" style="display: none;"></canvas>
 
     <script>
         // ===== APP LOGIC =====
@@ -684,9 +683,7 @@
         const downloadBtn = document.getElementById('download-btn');
         const resolutionSelect = document.getElementById('resolution-select');
         const canvas = document.getElementById('render-canvas');
-        const ctx = canvas.getContext('2d');
-        const tempCanvas = document.getElementById('temp-canvas');
-        const tempCtx = tempCanvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
         // APP STATE
         const state = {
@@ -930,73 +927,94 @@
             updatePreview();
         }
 
-        // DOWNLOAD LOGIC
+        // DOWNLOAD LOGIC - COMPLETELY REWRITTEN
         async function downloadImage() {
             try {
                 const [w, h] = resolutionSelect.value.split('x').map(Number);
-                canvas.width = w; 
+                
+                // Set canvas size
+                canvas.width = w;
                 canvas.height = h;
-                tempCanvas.width = w; 
-                tempCanvas.height = h;
+
+                // Calculate scale
+                const rect = preview.getBoundingClientRect();
+                const scaleX = w / rect.width;
+                const scaleY = h / rect.height;
 
                 // 1. FILL BACKGROUND
                 ctx.fillStyle = state.backgroundColor;
                 ctx.fillRect(0, 0, w, h);
 
-                // 2. PREP SCALE AND BLUR-ONLY FILTER
-                const rect = preview.getBoundingClientRect();
-                const scaleX = w / rect.width;
-                const scaleY = h / rect.height;
-                const blur = blurSlider.value * Math.min(scaleX, scaleY);
-                ctx.filter = `blur(${blur}px)`;
-
-                // 3. DRAW BLURRED BLOBS
+                // 2. DRAW BLOBS (unblurred first)
                 state.blobs.forEach(b => {
-                    ctx.fillStyle = b.color;
-                    ctx.beginPath();
-                    
                     const diameter = b.baseSize * state.sizeMultiplier * Math.min(scaleX, scaleY);
                     const radius = diameter / 2;
-                    
                     const x_percent = (b.x / 100) * w;
                     const y_percent = (b.y / 100) * h;
-                    
                     const centerX = x_percent + radius;
                     const centerY = y_percent + radius;
 
+                    ctx.fillStyle = b.color;
+                    ctx.beginPath();
                     ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
                     ctx.fill();
                 });
 
-                // 4. RESET FILTER
-                ctx.filter = 'none';
+                // 3. APPLY BLUR using StackBlur library equivalent (simple box blur approximation)
+                const blurAmount = Math.round(blurSlider.value * Math.min(scaleX, scaleY));
+                if (blurAmount > 0) {
+                    applyCanvasBlur(ctx, w, h, blurAmount);
+                }
 
-                // 5. APPLY BRIGHTNESS/SATURATION
-                tempCtx.drawImage(canvas, 0, 0);
-                ctx.clearRect(0, 0, w, h);
-                ctx.filter = `brightness(${state.brightness}%) saturate(${state.saturation}%)`;
-                ctx.drawImage(tempCanvas, 0, 0);
-                ctx.filter = 'none';
+                // 4. APPLY BRIGHTNESS AND SATURATION
+                if (state.brightness !== 100 || state.saturation !== 100) {
+                    const imageData = ctx.getImageData(0, 0, w, h);
+                    const data = imageData.data;
+                    const brightnessFactor = state.brightness / 100;
+                    const saturationFactor = state.saturation / 100;
 
-                // 6. DRAW GRAIN
-                if(state.grain > 0) {
-                    ctx.fillStyle = `rgba(0,0,0,${state.grain / 2})`;
+                    for (let i = 0; i < data.length; i += 4) {
+                        let r = data[i];
+                        let g = data[i + 1];
+                        let b = data[i + 2];
+
+                        // Apply saturation
+                        const gray = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+                        r = gray + saturationFactor * (r - gray);
+                        g = gray + saturationFactor * (g - gray);
+                        b = gray + saturationFactor * (b - gray);
+
+                        // Apply brightness
+                        r *= brightnessFactor;
+                        g *= brightnessFactor;
+                        b *= brightnessFactor;
+
+                        data[i] = Math.min(255, Math.max(0, r));
+                        data[i + 1] = Math.min(255, Math.max(0, g));
+                        data[i + 2] = Math.min(255, Math.max(0, b));
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                }
+
+                // 5. DRAW GRAIN
+                if (state.grain > 0) {
                     const grainDensity = Math.min((w * h) / 20, 50000);
+                    ctx.fillStyle = `rgba(0,0,0,${state.grain / 2})`;
                     for (let i = 0; i < grainDensity; i++) {
                         ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
                     }
                 }
 
-                // 7. DRAW TEXTURE
+                // 6. DRAW TEXTURE
                 if (state.texture === 'noise') {
-                    ctx.fillStyle = `rgba(0,0,0,${state.textureParams.noise.opacity})`;
                     const noiseDensity = Math.min((w * h) / 10, 100000);
+                    ctx.fillStyle = `rgba(0,0,0,${state.textureParams.noise.opacity})`;
                     for (let i = 0; i < noiseDensity; i++) {
                         ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
                     }
                 }
 
-                // 8. DRAW VIGNETTE
+                // 7. DRAW VIGNETTE
                 if (state.vignette > 0) {
                     const grad = ctx.createRadialGradient(w/2, h/2, Math.max(w,h) * 0.3, w/2, h/2, Math.max(w, h) * 0.9);
                     grad.addColorStop(0, 'rgba(0,0,0,0)');
@@ -1005,7 +1023,7 @@
                     ctx.fillRect(0, 0, w, h);
                 }
 
-                // 9. CREATE AND DOWNLOAD JPG
+                // 8. DOWNLOAD
                 canvas.toBlob(blob => {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -1023,6 +1041,99 @@
                 console.error('Download failed:', error);
                 alert('Download failed. Please try again.');
             }
+        }
+
+        // SIMPLE BOX BLUR IMPLEMENTATION
+        function applyCanvasBlur(ctx, w, h, radius) {
+            const iterations = 3; // More iterations = smoother blur
+            for (let i = 0; i < iterations; i++) {
+                boxBlurHorizontal(ctx, w, h, radius);
+                boxBlurVertical(ctx, w, h, radius);
+            }
+        }
+
+        function boxBlurHorizontal(ctx, w, h, radius) {
+            const imageData = ctx.getImageData(0, 0, w, h);
+            const data = imageData.data;
+            const output = new Uint8ClampedArray(data);
+
+            for (let y = 0; y < h; y++) {
+                let r = 0, g = 0, b = 0, a = 0;
+                let count = 0;
+
+                for (let x = 0; x < w; x++) {
+                    if (x - radius > 0) {
+                        const removeIdx = ((y * w) + (x - radius - 1)) * 4;
+                        r -= data[removeIdx];
+                        g -= data[removeIdx + 1];
+                        b -= data[removeIdx + 2];
+                        a -= data[removeIdx + 3];
+                        count--;
+                    }
+
+                    if (x + radius < w) {
+                        const addIdx = ((y * w) + (x + radius)) * 4;
+                        r += data[addIdx];
+                        g += data[addIdx + 1];
+                        b += data[addIdx + 2];
+                        a += data[addIdx + 3];
+                        count++;
+                    }
+
+                    const idx = ((y * w) + x) * 4;
+                    output[idx] = r / count;
+                    output[idx + 1] = g / count;
+                    output[idx + 2] = b / count;
+                    output[idx + 3] = a / count;
+                }
+            }
+
+            for (let i = 0; i < data.length; i++) {
+                data[i] = output[i];
+            }
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        function boxBlurVertical(ctx, w, h, radius) {
+            const imageData = ctx.getImageData(0, 0, w, h);
+            const data = imageData.data;
+            const output = new Uint8ClampedArray(data);
+
+            for (let x = 0; x < w; x++) {
+                let r = 0, g = 0, b = 0, a = 0;
+                let count = 0;
+
+                for (let y = 0; y < h; y++) {
+                    if (y - radius > 0) {
+                        const removeIdx = (((y - radius - 1) * w) + x) * 4;
+                        r -= data[removeIdx];
+                        g -= data[removeIdx + 1];
+                        b -= data[removeIdx + 2];
+                        a -= data[removeIdx + 3];
+                        count--;
+                    }
+
+                    if (y + radius < h) {
+                        const addIdx = (((y + radius) * w) + x) * 4;
+                        r += data[addIdx];
+                        g += data[addIdx + 1];
+                        b += data[addIdx + 2];
+                        a += data[addIdx + 3];
+                        count++;
+                    }
+
+                    const idx = ((y * w) + x) * 4;
+                    output[idx] = r / count;
+                    output[idx + 1] = g / count;
+                    output[idx + 2] = b / count;
+                    output[idx + 3] = a / count;
+                }
+            }
+
+            for (let i = 0; i < data.length; i++) {
+                data[i] = output[i];
+            }
+            ctx.putImageData(imageData, 0, 0);
         }
         
         // ASPECT RATIO UPDATE
