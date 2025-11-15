@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <style>
+        /* ===== ROOT DESIGN VARIABLES ===== */
+        :root {
+            --bg: #191919; /* TOOL CONTAINER/CARD BACKGROUND */
+            --card-bg: #1F1F1F; /* CARD / INNER CONTAINER BACKGROUND */
+            --btn-bg: #1F1F1F; /* Button Background */
+            --hover: #323232; /* HOVER / INTERACT COLOUR */
+            --outline: #323232; /* OUTLINE COLOUR */
+            --accent: #87A9FF; /* ICON / LINK / ACCENT COLOUR */
+            --text-primary: #D4D4D4; /* PRIMARY TEXT COLOUR */
+            --text-secondary: #8C8C8C; /* SECONDARY TEXT COLOUR */
+            --text-error: #FF8787; /* Custom error color for contrast */
+            
+            --radius: 8px; /* From button template */
+            --font-title: 14px;
+            --font-text: 12px;
+        }
+
+        /* ===== GLOBAL STYLES ===== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            /* DEFAULT PADDING */
+            padding: 24px 16px; 
+        }
+
+        /* ===== FORM GROUP ===== */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        /* ===== LABELS ===== */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: var(--font-title); /* 14px Title */
+            color: var(--text-primary);
+        }
+
+        /* ===== INPUT & TEXTAREA ===== */
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: var(--font-title); /* 14px */
+            background-color: var(--bg); /* Use main bg for contrast */
+            border: 1px solid var(--outline); /* CARD OUTLINE: 1px */
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 200px;
+            resize: vertical;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 13px;
+        }
+
+        input[type="text"]::placeholder,
+        textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 1;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+        }
+        
+        /* ===== STATUS MESSAGE ===== */
+        #status {
+            text-align: center;
+            margin: 16px 0;
+            font-size: var(--font-text); /* 12px Text */
+            color: var(--text-secondary);
+            min-height: 1.2em; /* Prevents layout shift */
+        }
+        .status-success { color: var(--accent); }
+        .status-error { color: var(--text-error); }
+        .status-pending { color: var(--text-secondary); }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            position: relative;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            background: var(--btn-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--outline); /* Use outline color */
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            width: 100%;
+            -webkit-tap-highlight-color: transparent; /* Fix mobile tap flash */
+        }
+
+        /* Shimmer effect */
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: skewX(-25deg);
+            transition: left .7s ease-in-out;
+        }
+
+        /* Shimmer hover */
+        .btn:hover::before {
+            left: 125%;
+        }
+        
+        .btn:hover {
+            background: var(--hover);
+        }
+
+        /* Accessible focus */
+        .btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn:disabled::before {
+            display: none; /* No shimmer when disabled */
+        }
+
+        #scrapeButton {
+            margin-top: 8px; /* Space after input */
+        }
+
+        /* ===== ACTION BUTTONS LAYOUT ===== */
+        .output-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        /* Mobile Optimisation */
+        @media (max-width: 480px) {
+            .output-actions {
+                flex-direction: column;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="tool-container">
+        
+        <div class="form-group">
+            <label for="repoUrl">1. GitHub Folder URL</label>
+            <input type="text" id="repoUrl" placeholder="https://github.com/user/repo/tree/branch/folder">
+        </div>
+
+        <div class="form-group">
+            <label for="baseUrl">2. Static Base URL</label>
+            <input type="text" id="baseUrl" placeholder="https://user.github.io/repo/folder/">
+        </div>
+
+        <button id="scrapeButton" class="btn" type="button">✨ Generate List</button>
+
+        <p id="status"></p>
+
+        <textarea id="output" placeholder="Your formatted list will appear here..."></textarea>
+        
+        <div class="output-actions">
+            <button id="copyButton" class="btn" type="button">📋 Copy to Clipboard</button>
+            <button id="downloadButton" class="btn" type="button">💾 Download as .txt</button>
+        </div>
+
+    </div> <script>
+        // ===== TOOL ELEMENTS =====
+        const repoUrlInput = document.getElementById('repoUrl');
+        const baseUrlInput = document.getElementById('baseUrl');
+        const outputArea = document.getElementById('output');
+        const statusEl = document.getElementById('status');
+        const scrapeButton = document.getElementById('scrapeButton');
+        const copyButton = document.getElementById('copyButton');
+        const downloadButton = document.getElementById('downloadButton');
+
+        repoUrlInput.value = "https://github.com/herovibes/HeroVibesStoreTools/tree/main/StreamDeckBulkIconMaker/Images";
+        baseUrlInput.value = "https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/";
+
+        // ===== EVENT LISTENERS =====
+        scrapeButton.addEventListener('click', fetchFileList);
+        copyButton.addEventListener('click', copyToClipboard);
+        downloadButton.addEventListener('click', downloadAsTxt);
+
+        // ===== TOOL FUNCTIONS =====
+
+        /**
+         * Fetches the file list from the GitHub API.
+         */
+        async function fetchFileList() {
+            const repoUrl = repoUrlInput.value.trim();
+            let baseUrl = baseUrlInput.value.trim();
+            
+            if (!repoUrl || !baseUrl) {
+                updateStatus("Please fill in both URL fields.", "error");
+                return;
+            }
+
+            // Ensure base URL ends with a slash for clean joining
+            if (!baseUrl.endsWith('/')) {
+                baseUrl += '/';
+                baseUrlInput.value = baseUrl; // Update the input field
+            }
+
+            // Convert browser URL to API URL
+            let apiUrl = repoUrl.replace("https://github.com/", "https://api.github.com/repos/");
+            
+            // Handle branch name
+            const branchMatch = apiUrl.match(/\/tree\/([^\/]+)/);
+            let branch = "main"; // Default branch
+            if (branchMatch) {
+                branch = branchMatch[1];
+                apiUrl = apiUrl.replace(/\/tree\/[^\/]+/, "/contents");
+            } else {
+                apiUrl = apiUrl.replace(/\/$/, ""); 
+                if (apiUrl.split('/').length === 5) { 
+                    apiUrl += '/contents';
+                }
+            }
+
+            apiUrl += `?ref=${branch}`; 
+
+            updateStatus("Fetching file list...", "pending");
+            scrapeButton.disabled = true;
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+                }
+                
+                const files = await response.json();
+                
+                if (!Array.isArray(files)) {
+                    throw new Error("Folder not found or API URL is incorrect. Check your URL.");
+                }
+
+                const svgFiles = files.filter(file => file.type === 'file' && file.name.endsWith('.svg'));
+                
+                if (svgFiles.length === 0) {
+                    updateStatus("Success, but no .svg files were found in this folder.", "success");
+                    outputArea.value = "";
+                    scheduleHeightCheck(); // Update height
+                    return;
+                }
+
+                const formattedList = svgFiles.map(file => {
+                    const filename = file.name;
+                    const nameOnly = filename.replace(".svg", "");
+                    const formattedName = formatName(nameOnly);
+                    const staticUrl = baseUrl + filename;
+                    return `${formattedName} - ${staticUrl}`;
+                }).join("\n");
+
+                outputArea.value = formattedList;
+                updateStatus(`Success! Found ${svgFiles.length} .svg files.`, "success");
+                scheduleHeightCheck(); // Update height
+
+            } catch (error) {
+                updateStatus(`Error: ${error.message}`, "error");
+                outputArea.value = `Failed to fetch. Check console (F12) for more details.\nAPI URL tried:\n${apiUrl}`;
+                scheduleHeightCheck(); // Update height
+            } finally {
+                scrapeButton.disabled = false;
+            }
+        }
+
+        /**
+         * Formats filename "adobe-acrobat" to "Adobe-Acrobat".
+         */
+        function formatName(name) {
+            return name.split('-')
+                       .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                       .join('-');
+        }
+
+        /**
+         * Copies the output textarea content to the clipboard.
+         */
+        function copyToClipboard() {
+            if (!outputArea.value) {
+                updateStatus("Nothing to copy!", "error");
+                return;
+            }
+            
+            navigator.clipboard.writeText(outputArea.value).then(() => {
+                updateStatus("Copied to clipboard!", "success");
+            }).catch(err => {
+                updateStatus("Failed to copy.", "error");
+            });
+        }
+
+        /**
+         * Downloads the output textarea content as a .txt file.
+         */
+        function downloadAsTxt() {
+            const text = outputArea.value;
+            if (!text) {
+                updateStatus("Nothing to download!", "error");
+                return;
+            }
+
+            const blob = new Blob([text], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            
+            a.href = url;
+            a.download = "svg_file_list.txt";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            updateStatus("Downloading .txt file...", "success");
+        }
+
+        /**
+         * Updates the status message and triggers an iframe height check.
+         */
+        function updateStatus(message, type) {
+            statusEl.textContent = message;
+            statusEl.className = ''; // Clear classes
+            if (type === 'error') {
+                statusEl.classList.add('status-error');
+            } else if (type === 'success') {
+                statusEl.classList.add('status-success');
+            } else if (type === 'pending') {
+                statusEl.classList.add('status-pending');
+            }
+            
+            scheduleHeightCheck();
+        }
+
+        // ===== FOURTHWALL SCROLLBAR FIX =====
+        let lastHeight = 0;
+        let resizeTimer;
+
+        /**
+         * Sends the current scrollHeight to the parent window if it has changed.
+         * This is the *only* function that should send a postMessage.
+         */
+        function sendHeight() {
+          // Use scrollHeight for content height
+          const height = document.body.scrollHeight;
+          
+          // Only send message if height has *actually* changed 
+          if (height !== lastHeight) {
+            lastHeight = height;
+            window.parent.postMessage({ frameHeight: height }, '*');
+          }
+        }
+
+        /**
+         * A debounced version of sendHeight() to be called on content changes.
+         * This ensures we don't spam messages during rapid changes.
+         */
+        function scheduleHeightCheck() {
+            // Clear any pending checks
+            clearTimeout(resizeTimer);
+            // Schedule a new check after 150ms
+            resizeTimer = setTimeout(sendHeight, 150);
+        }
+
+        // Send height on initial load (with a slight delay)
+        window.addEventListener('load', () => {
+            setTimeout(sendHeight, 100);
+        });
+
+        // Send height on window resize (debounced)
+        window.addEventListener('resize', () => {
+            scheduleHeightCheck();
+        });
+        // ===== END OF SCROLLBAR FIX =====
+        
+    </script>
+</body>
+</html>
