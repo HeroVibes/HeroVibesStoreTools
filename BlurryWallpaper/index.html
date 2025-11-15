@@ -396,6 +396,16 @@
             color: #191919;
             border-color: var(--accent);
         }
+        
+        .btn-primary:disabled {
+            background: var(--hover);
+            color: var(--text-secondary);
+            cursor: wait;
+        }
+        
+        .btn-primary:disabled::before {
+            display: none;
+        }
 
         .btn-primary:hover {
             background: #9BB8FF;
@@ -910,7 +920,7 @@
             updatePreview();
         }
 
-        // ===== START OF IOS/4K RENDER FIX =====
+        // ===== START OF NEW IOS/4K RENDER FIX =====
 
         // --- Helper: RGB to HSL ---
         function rgbToHsl(r, g, b) {
@@ -962,103 +972,112 @@
 
         // --- New Download Function ---
         async function downloadImage() {
-            const [w, h] = resolutionSelect.value.split('x').map(Number);
-            canvas.width = w; canvas.height = h;
-            // No need for tempCanvas with this method
+            // FIX: Add loading state to button
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = "Rendering...";
 
-            // 1. Fill background
-            ctx.fillStyle = state.backgroundColor;
-            ctx.fillRect(0, 0, w, h);
+            // Use setTimeout to allow UI to update *before* the heavy render starts
+            setTimeout(async () => {
+                const [w, h] = resolutionSelect.value.split('x').map(Number);
+                canvas.width = w; canvas.height = h;
+                tempCanvas.width = w; tempCanvas.height = h; // Reinstate temp canvas
 
-            // 2. Prep scale and BLUR-ONLY filter
-            const rect = preview.getBoundingClientRect();
-            const scaleX = w / rect.width;
-            const scaleY = h / rect.height;
-            const blur = blurSlider.value * Math.min(scaleX, scaleY);
-            ctx.filter = `blur(${blur}px)`;
-
-            // 3. Draw blurred blobs
-            state.blobs.forEach(b => {
-                ctx.fillStyle = b.color;
-                ctx.beginPath();
-                const diameter = b.baseSize * state.sizeMultiplier * Math.min(scaleX, scaleY);
-                const radius = diameter / 2;
-                const x_percent = (b.x / 100) * w;
-                const y_percent = (b.y / 100) * h;
-                const centerX = x_percent + radius;
-                const centerY = y_percent + radius;
-                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            
-            // 4. IMPORTANT: Reset filter so we can read the pixel data
-            ctx.filter = 'none';
-
-            // 5. Get the pixel data from the blurred canvas
-            // This is slow, but it's the part that works.
-            let imageData = ctx.getImageData(0, 0, w, h);
-            let data = imageData.data;
-            
-            const brightness = state.brightness / 100;
-            const saturation = state.saturation / 100;
-
-            // 6. Manually loop over all 8.3 million pixels
-            for (let i = 0; i < data.length; i += 4) {
-                let r = data[i];
-                let g = data[i + 1];
-                let b = data[i + 2];
-
-                // --- Apply Brightness ---
-                // This mimics the CSS 'brightness()' filter
-                r = r * brightness;
-                g = g * brightness;
-                b = b * brightness;
-
-                // --- Apply Saturation ---
-                // This mimics the CSS 'saturate()' filter
-                // We must convert to HSL and back
-                let hsl = rgbToHsl(r, g, b);
-                hsl[1] = hsl[1] * saturation; // Adjust saturation
-                let rgb = hslToRgb(hsl[0], hsl[1], hsl[2]);
-                
-                // Clamp all values to 0-255
-                data[i] = clamp(rgb[0]);
-                data[i + 1] = clamp(rgb[1]);
-                data[i + 2] = clamp(rgb[2]);
-            }
-
-            // 7. Write the modified pixel data back
-            ctx.putImageData(imageData, 0, 0);
-
-            // 8. Draw Grain (now on the final filtered image)
-            if(state.grain > 0) {
-                ctx.fillStyle = `rgba(0,0,0,${state.grain})`;
-                for (let i = 0; i < (w * h) / 10; i++) {
-                    ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
-                }
-            }
-
-            // 9. Draw Texture (Noise)
-            if (state.texture === 'noise') {
-                ctx.fillStyle = `rgba(0,0,0,${state.textureParams.noise.opacity})`;
-                for (let i = 0; i < (w * h) / 5; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
-            }
-
-            // 10. Draw Vignette
-            if (state.vignette > 0) {
-                const grad = ctx.createRadialGradient(w/2, h/2, Math.max(w,h) * 0.3, w/2, h/2, Math.max(w, h) * 0.9);
-                grad.addColorStop(0, 'rgba(0,0,0,0)');
-                grad.addColorStop(1, `rgba(0,0,0,${state.vignette * 0.8})`);
-                ctx.fillStyle = grad;
+                // 1. Fill background (on main canvas)
+                ctx.fillStyle = state.backgroundColor;
                 ctx.fillRect(0, 0, w, h);
-            }
 
-            // 11. Create JPG
-            const a = document.createElement('a');
-            a.download = `blurry-wallpaper-${resolutionSelect.value}.jpg`;
-            a.href = canvas.toDataURL('image/jpeg', 0.95); // 95% quality
-            a.click();
-            a.remove();
+                // 2. Prep scale and BLUR-ONLY filter
+                const rect = preview.getBoundingClientRect();
+                const scaleX = w / rect.width;
+                const scaleY = h / rect.height;
+                const blur = blurSlider.value * Math.min(scaleX, scaleY);
+                ctx.filter = `blur(${blur}px)`;
+
+                // 3. Draw blurred blobs (on main canvas)
+                state.blobs.forEach(b => {
+                    ctx.fillStyle = b.color;
+                    ctx.beginPath();
+                    const diameter = b.baseSize * state.sizeMultiplier * Math.min(scaleX, scaleY);
+                    const radius = diameter / 2;
+                    const x_percent = (b.x / 100) * w;
+                    const y_percent = (b.y / 100) * h;
+                    const centerX = x_percent + radius;
+                    const centerY = y_percent + radius;
+                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                // 4. IMPORTANT: Reset filter
+                ctx.filter = 'none';
+
+                // 5. FIX: Force GPU sync. Draw main canvas to temp canvas to "bake" the blur.
+                tempCtx.drawImage(canvas, 0, 0);
+
+                // 6. Get pixel data from the *temp canvas* (which has the baked blur)
+                let imageData = tempCtx.getImageData(0, 0, w, h);
+                let data = imageData.data;
+                
+                const brightness = state.brightness / 100;
+                const saturation = state.saturation / 100;
+
+                // 7. Manually loop over all pixels to apply brightness/saturation
+                for (let i = 0; i < data.length; i += 4) {
+                    let r = data[i];
+                    let g = data[i + 1];
+                    let b = data[i + 2];
+
+                    // --- Apply Brightness ---
+                    r = r * brightness;
+                    g = g * brightness;
+                    b = b * brightness;
+
+                    // --- Apply Saturation ---
+                    let hsl = rgbToHsl(r, g, b);
+                    hsl[1] = hsl[1] * saturation; // Adjust saturation
+                    let rgb = hslToRgb(hsl[0], hsl[1], hsl[2]);
+                    
+                    data[i] = clamp(rgb[0]);
+                    data[i + 1] = clamp(rgb[1]);
+                    data[i + 2] = clamp(rgb[2]);
+                }
+
+                // 8. Write the modified pixel data back to the main canvas
+                ctx.putImageData(imageData, 0, 0);
+
+                // 9. Draw Grain (now on the final filtered image)
+                if(state.grain > 0) {
+                    ctx.fillStyle = `rgba(0,0,0,${state.grain})`;
+                    for (let i = 0; i < (w * h) / 10; i++) {
+                        ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
+                    }
+                }
+
+                // 10. Draw Texture (Noise)
+                if (state.texture === 'noise') {
+                    ctx.fillStyle = `rgba(0,0,0,${state.textureParams.noise.opacity})`;
+                    for (let i = 0; i < (w * h) / 5; i++) ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
+                }
+
+                // 11. Draw Vignette
+                if (state.vignette > 0) {
+                    const grad = ctx.createRadialGradient(w/2, h/2, Math.max(w,h) * 0.3, w/2, h/2, Math.max(w, h) * 0.9);
+                    grad.addColorStop(0, 'rgba(0,0,0,0)');
+                    grad.addColorStop(1, `rgba(0,0,0,${state.vignette * 0.8})`);
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, w, h);
+                }
+
+                // 12. Create JPG
+                const a = document.createElement('a');
+                a.download = `blurry-wallpaper-${resolutionSelect.value}.jpg`;
+                a.href = canvas.toDataURL('image/jpeg', 0.95); // 95% quality
+                a.click();
+                a.remove();
+                
+                // 13. FIX: Reset button state
+                downloadBtn.disabled = false;
+                downloadBtn.textContent = "Download";
+            }, 50); // 50ms delay to let UI update
         }
         // ===== END OF IOS/4K RENDER FIX =====
         
