@@ -300,6 +300,7 @@
         .card {
             position: absolute;
             width: 280px;
+            min-height: 120px;
             border-radius: var(--radius);
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             display: flex;
@@ -314,6 +315,10 @@
             transform: scale(1.03);
         }
 
+        .card.resizing {
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+        }
+
         .card-header {
             height: 32px;
             cursor: grab;
@@ -324,6 +329,7 @@
             padding: 0 12px;
             border-radius: var(--radius) var(--radius) 0 0;
             position: relative;
+            touch-action: none;
         }
 
         .card-header:active {
@@ -354,6 +360,40 @@
         .card-link .card-header { border-left: 4px solid var(--card-link); }
         .card-youtube .card-header { border-left: 4px solid var(--card-youtube); }
         .card-code .card-header { border-left: 4px solid var(--card-code); background: #1e1e1e; }
+
+        /* ===== RESIZE HANDLE ===== */
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            cursor: nwse-resize;
+            z-index: 10;
+            touch-action: none;
+        }
+
+        .resize-handle::before {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 0 12px 12px;
+            border-color: transparent transparent var(--secondary-text) transparent;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+        }
+
+        .card:hover .resize-handle::before {
+            opacity: 0.7;
+        }
+
+        .resize-handle:hover::before {
+            opacity: 1;
+        }
 
         /* ===== CARD CONTENT STYLES ===== */
         .card-body {
@@ -394,7 +434,8 @@
 
         .card-image-content {
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: contain;
             display: block;
         }
 
@@ -704,6 +745,15 @@
             .control-separator {
                 display: none;
             }
+
+            .resize-handle {
+                width: 24px;
+                height: 24px;
+            }
+
+            .resize-handle::before {
+                border-width: 0 0 14px 14px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -776,7 +826,8 @@
             </ul>
             <p><strong>Organize:</strong></p>
             <ul>
-                <li>Drag cards by the top bar to move them.</li>
+                <li>Drag cards by the top bar to move them (or tap & hold on mobile).</li>
+                <li>Resize cards by dragging the bottom-right corner.</li>
                 <li>Double-click <strong>Code</strong> cards to edit inline.</li>
                 <li>Rename cards by clicking their label (Note, Code, etc.).</li>
             </ul>
@@ -797,7 +848,7 @@
                 <li><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg> Copy to clipboard</li>
                 <li><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Delete card</li>
             </ul>
-            <p class="version">Version 1.0.3</p>
+            <p class="version">Version 1.1.0</p>
             <button id="close-help" class="btn">Got it!</button>
         </div>
     </div>
@@ -1019,6 +1070,8 @@
                     x: `${(currentPage.cards.length % 8) * 40 + 40}px`,
                     y: `${(currentPage.cards.length % 8) * 40 + 60}px`,
                     z: 0,
+                    width: data.width || '280px',
+                    height: data.height || 'auto',
                     ytData: data.ytData || null
                 };
                 
@@ -1037,6 +1090,10 @@
                 card.style.left = cardData.x;
                 card.style.top = cardData.y;
                 card.style.zIndex = cardData.z;
+                card.style.width = cardData.width || '280px';
+                if (cardData.height && cardData.height !== 'auto') {
+                    card.style.height = cardData.height;
+                }
 
                 let contentHtml = '';
                 let footerHtml = '';
@@ -1079,10 +1136,12 @@
                         <button type="button" class="card-btn copy-btn" title="Copy">${icons.clipboard}</button>
                         <button type="button" class="card-btn delete-btn" title="Delete">${icons.x}</button>
                     </div>
+                    <div class="resize-handle"></div>
                 `;
                 
                 canvas.appendChild(card);
                 
+                // LABEL EDITING
                 const label = card.querySelector('.card-type-label');
                 label.addEventListener('click', () => {
                     if (label.isContentEditable) return;
@@ -1107,11 +1166,45 @@
                     }
                 });
 
-                card.querySelector('.card-header').addEventListener('mousedown', (e) => {
+                // DRAGGING - MOUSE
+                const header = card.querySelector('.card-header');
+                header.addEventListener('mousedown', (e) => {
                     if (e.target === label) return;
                     startDrag(e, cardData, card);
                 });
 
+                // DRAGGING - TOUCH (tap and hold)
+                let touchHoldTimer;
+                header.addEventListener('touchstart', (e) => {
+                    if (e.target === label) return;
+                    
+                    touchHoldTimer = setTimeout(() => {
+                        startTouchDrag(e, cardData, card);
+                    }, 500);
+                });
+
+                header.addEventListener('touchend', () => {
+                    clearTimeout(touchHoldTimer);
+                });
+
+                header.addEventListener('touchmove', () => {
+                    clearTimeout(touchHoldTimer);
+                });
+
+                // RESIZING - MOUSE
+                const resizeHandle = card.querySelector('.resize-handle');
+                resizeHandle.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    startResize(e, cardData, card);
+                });
+
+                // RESIZING - TOUCH
+                resizeHandle.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                    startTouchResize(e, cardData, card);
+                });
+
+                // CARD ACTIONS
                 card.querySelector('.delete-btn').addEventListener('click', () => deleteCard(cardData.id));
                 card.querySelector('.copy-btn').addEventListener('click', (e) => copyCardContent(e.currentTarget, cardData));
                 card.querySelector('.download-btn').addEventListener('click', (e) => downloadCardContent(e.currentTarget, cardData));
@@ -1161,6 +1254,7 @@
                 controls.linkInput.value = '';
             };
             
+            // MOUSE DRAG
             const startDrag = (e, cardData, cardElement) => {
                 e.preventDefault();
                 highestZ++;
@@ -1202,6 +1296,129 @@
                 
                 document.addEventListener('mousemove', onMove);
                 document.addEventListener('mouseup', onUp);
+            };
+
+            // TOUCH DRAG
+            const startTouchDrag = (e, cardData, cardElement) => {
+                e.preventDefault();
+                highestZ++;
+                cardElement.style.zIndex = cardData.z = highestZ;
+                cardElement.classList.add('dragging');
+                
+                const touch = e.touches[0];
+                const initialX = touch.clientX;
+                const initialY = touch.clientY;
+                const initialLeft = cardElement.offsetLeft;
+                const initialTop = cardElement.offsetTop;
+                
+                const onMove = (moveEvent) => {
+                    const touch = moveEvent.touches[0];
+                    const deltaX = touch.clientX - initialX;
+                    const deltaY = touch.clientY - initialY;
+                    let newX = initialLeft + deltaX;
+                    let newY = initialTop + deltaY;
+                    
+                    newX = Math.max(0, newX);
+                    newY = Math.max(0, newY);
+                    
+                    cardElement.style.left = `${newX}px`;
+                    cardElement.style.top = `${newY}px`;
+                };
+                
+                const onUp = () => {
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend', onUp);
+                    cardElement.classList.remove('dragging');
+                    cardData.x = cardElement.style.left;
+                    cardData.y = cardElement.style.top;
+                    saveState();
+                    setTimeout(scheduleHeightCheck, 100);
+                };
+                
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('touchend', onUp);
+            };
+
+            // MOUSE RESIZE
+            const startResize = (e, cardData, cardElement) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                cardElement.classList.add('resizing');
+                
+                const initialX = e.clientX;
+                const initialY = e.clientY;
+                const initialWidth = cardElement.offsetWidth;
+                const initialHeight = cardElement.offsetHeight;
+                
+                const onMove = (moveEvent) => {
+                    const deltaX = moveEvent.clientX - initialX;
+                    const deltaY = moveEvent.clientY - initialY;
+                    
+                    let newWidth = initialWidth + deltaX;
+                    let newHeight = initialHeight + deltaY;
+                    
+                    newWidth = Math.max(180, newWidth);
+                    newHeight = Math.max(120, newHeight);
+                    
+                    cardElement.style.width = `${newWidth}px`;
+                    cardElement.style.height = `${newHeight}px`;
+                };
+                
+                const onUp = () => {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                    cardElement.classList.remove('resizing');
+                    cardData.width = cardElement.style.width;
+                    cardData.height = cardElement.style.height;
+                    saveState();
+                    setTimeout(scheduleHeightCheck, 100);
+                };
+                
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            };
+
+            // TOUCH RESIZE
+            const startTouchResize = (e, cardData, cardElement) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                cardElement.classList.add('resizing');
+                
+                const touch = e.touches[0];
+                const initialX = touch.clientX;
+                const initialY = touch.clientY;
+                const initialWidth = cardElement.offsetWidth;
+                const initialHeight = cardElement.offsetHeight;
+                
+                const onMove = (moveEvent) => {
+                    const touch = moveEvent.touches[0];
+                    const deltaX = touch.clientX - initialX;
+                    const deltaY = touch.clientY - initialY;
+                    
+                    let newWidth = initialWidth + deltaX;
+                    let newHeight = initialHeight + deltaY;
+                    
+                    newWidth = Math.max(180, newWidth);
+                    newHeight = Math.max(120, newHeight);
+                    
+                    cardElement.style.width = `${newWidth}px`;
+                    cardElement.style.height = `${newHeight}px`;
+                };
+                
+                const onUp = () => {
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend', onUp);
+                    cardElement.classList.remove('resizing');
+                    cardData.width = cardElement.style.width;
+                    cardData.height = cardElement.style.height;
+                    saveState();
+                    setTimeout(scheduleHeightCheck, 100);
+                };
+                
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('touchend', onUp);
             };
 
             const deleteCard = (cardId) => {
