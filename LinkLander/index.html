@@ -1149,14 +1149,17 @@
       mediaCard.addEventListener('click', (e) => {
         e.preventDefault();
         
-        // --- FIX: Send message to parent to scroll up ---
+        // --- FIX: 1. Scroll iframe content to top INSTANTLY ---
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        
+        // --- FIX: 2. Send message to parent to scroll up ---
         window.parent.postMessage({ scrollToTop: true }, '*');
         
-        // Now open the modal
+        // 3. Now open the modal
         mediaModal.classList.add('active');
         document.body.style.overflow = 'hidden';
         
-        // SCROLLBAR FIX: Notify parent of height change
+        // 4. SCROLLBAR FIX: Notify parent of height change
         scheduleHeightCheck();
       });
 
