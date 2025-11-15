@@ -1,1600 +1,2459 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stream Deck Icon Builder</title>
-  <style>
-    :root {
-      --bg: #191919;
-      --card-bg: #1F1F1F;
-      --hover: #323232;
-      --outline: #323232;
-      --accent: #87A9FF;
-      --text-primary: #D4D4D4;
-      --text-secondary: #8C8C8C;
-      --radius: 8px;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text-primary);
-      font-family: sans-serif;
-      padding: 24px 16px;
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    /* ===== SECTION HEADERS ===== */
-    .section-header {
-      font-size: 20px;
-      font-weight: bold;
-      color: var(--text-primary);
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--outline);
-    }
-
-    /* ===== MAIN LAYOUT ===== */
-    .main-layout {
-      display: grid;
-      grid-template-columns: 1fr 400px;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    /* ===== LEFT COLUMN: ICON LIBRARY ===== */
-    .icon-library {
-      background: var(--card-bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      padding: 24px 16px;
-    }
-
-    .search-wrapper {
-      position: relative;
-      margin-bottom: 16px;
-    }
-
-    .search-input {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      color: var(--text-primary);
-      padding: 12px 16px;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .search-input:focus {
-      border-color: var(--accent);
-    }
-
-    .search-input::placeholder {
-      color: var(--text-secondary);
-    }
-
-    .upload-section {
-      margin-bottom: 16px;
-      padding: 16px;
-      background: var(--bg);
-      border: 2px dashed var(--outline);
-      border-radius: var(--radius);
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .upload-section:hover {
-      border-color: var(--accent);
-      background: var(--hover);
-    }
-
-    .upload-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      cursor: pointer;
-    }
-
-    #icon-file-input {
-      display: none;
-    }
-
-    .selection-controls {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .icon-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-      gap: 8px;
-      max-height: 500px;
-      overflow-y: auto;
-      padding-right: 8px;
-    }
-
-    .icon-grid::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .icon-grid::-webkit-scrollbar-track {
-      background: var(--bg);
-      border-radius: 4px;
-    }
-
-    .icon-grid::-webkit-scrollbar-thumb {
-      background: var(--outline);
-      border-radius: 4px;
-    }
-
-    .icon-grid::-webkit-scrollbar-thumb:hover {
-      background: var(--hover);
-    }
-
-    .icon-card {
-      background: var(--bg);
-      border: 2px solid var(--outline);
-      border-radius: var(--radius);
-      padding: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      aspect-ratio: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      position: relative;
-    }
-
-    .icon-card:hover {
-      background: var(--hover);
-      transform: translateY(-2px);
-    }
-
-    .icon-card.selected {
-      border-color: var(--accent);
-      background: var(--hover);
-    }
-
-    .icon-card.selected::after {
-      content: '✓';
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 20px;
-      height: 20px;
-      background: var(--accent);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      color: var(--bg);
-      font-weight: bold;
-    }
-
-    .icon-preview {
-      width: 36px;
-      height: 36px;
-      filter: brightness(0) invert(1);
-      object-fit: contain;
-    }
-
-    .icon-name {
-      font-size: 10px;
-      color: var(--text-secondary);
-      text-align: center;
-      word-break: break-word;
-      line-height: 1.2;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 48px 16px;
-      color: var(--text-secondary);
-      font-size: 14px;
-    }
-
-    /* ===== RIGHT COLUMN: CUSTOMIZATION PANEL ===== */
-    .customization-panel {
-      background: var(--card-bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      padding: 24px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .preview-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .preview-canvas-wrapper {
-      background: var(--bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .preview-canvas {
-      display: block;
-      max-width: 100%;
-      height: auto;
-      border-radius: 12px;
-    }
-
-    .control-section {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .control-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-
-    .control-input {
-      background: var(--bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      color: var(--text-primary);
-      padding: 8px 12px;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .control-input:focus {
-      border-color: var(--accent);
-    }
-
-    .color-picker-group {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .color-input {
-      width: 60px;
-      height: 38px;
-      background: var(--bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      cursor: pointer;
-      padding: 4px;
-    }
-
-    .range-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .range-input {
-      flex: 1;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 6px;
-      background: var(--bg);
-      border-radius: 3px;
-      outline: none;
-    }
-
-    .range-input::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      background: var(--accent);
-      border-radius: 50%;
-      cursor: pointer;
-    }
-
-    .range-input::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      background: var(--accent);
-      border-radius: 50%;
-      cursor: pointer;
-      border: none;
-    }
-
-    .range-value {
-      min-width: 40px;
-      text-align: right;
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-
-    select.control-input {
-      cursor: pointer;
-    }
-
-    .preset-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-    }
-
-    .preset-option {
-      aspect-ratio: 16/9;
-      border: 2px solid var(--outline);
-      border-radius: var(--radius);
-      cursor: pointer;
-      transition: all 0.2s;
-      background-size: cover;
-      background-position: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .preset-option:hover {
-      border-color: var(--hover);
-      transform: scale(1.05);
-    }
-
-    .preset-option.selected {
-      border-color: var(--accent);
-    }
-
-    .preset-option.selected::after {
-      content: '✓';
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 16px;
-      height: 16px;
-      background: var(--accent);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      color: var(--bg);
-      font-weight: bold;
-    }
-
-    .texture-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-    }
-
-    .texture-option {
-      aspect-ratio: 1;
-      border: 2px solid var(--outline);
-      border-radius: var(--radius);
-      cursor: pointer;
-      transition: all 0.2s;
-      background-size: cover;
-      background-position: center;
-    }
-
-    .texture-option:hover {
-      border-color: var(--hover);
-    }
-
-    .texture-option.selected {
-      border-color: var(--accent);
-    }
-
-    .texture-none {
-      background: linear-gradient(45deg, var(--bg) 25%, var(--outline) 25%, var(--outline) 50%, var(--bg) 50%, var(--bg) 75%, var(--outline) 75%);
-      background-size: 8px 8px;
-    }
-
-    /* ===== BUTTONS ===== */
-    .btn {
-      position: relative;
-      padding: 10px 16px;
-      border-radius: var(--radius);
-      background: var(--card-bg);
-      color: var(--text-primary);
-      border: 1px solid rgba(255,255,255,0.06);
-      cursor: pointer;
-      overflow: hidden;
-      font-size: 14px;
-      font-family: sans-serif;
-      transition: all 0.2s;
-      text-align: center;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 75%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-      transform: skewX(-25deg);
-      transition: left 0.7s ease-in-out;
-    }
-
-    .btn:hover::before {
-      left: 125%;
-    }
-
-    .btn:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: var(--bg);
-      font-weight: bold;
-    }
-
-    .btn-small {
-      padding: 6px 12px;
-      font-size: 12px;
-    }
-
-    .btn-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    /* ===== SELECTION BAR ===== */
-    .selection-bar {
-      background: var(--card-bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .selection-info {
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-
-    .selection-count {
-      color: var(--accent);
-      font-weight: bold;
-    }
-
-    .selection-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    /* ===== MOBILE OPTIMIZATION ===== */
-    @media (max-width: 1024px) {
-      .main-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .customization-panel {
-        order: -1;
-      }
-
-      .icon-grid {
-        max-height: 400px;
-      }
-
-      .preset-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 640px) {
-      body {
-        padding: 16px 12px;
-      }
-
-      .icon-library,
-      .customization-panel {
-        padding: 16px 12px;
-      }
-
-      .icon-grid {
-        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-        max-height: 300px;
-      }
-
-      .icon-preview {
-        width: 28px;
-        height: 28px;
-      }
-
-      .texture-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .btn-group {
-        grid-template-columns: 1fr;
-      }
-
-      .selection-actions {
-        width: 100%;
-      }
-
-      .selection-actions .btn {
-        flex: 1;
-      }
-
-      .preset-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <!-- ===== MAIN LAYOUT ===== -->
-    <div class="main-layout">
-      <!-- ===== LEFT: ICON LIBRARY ===== -->
-      <div class="icon-library">
-        <div class="section-header">Icon Library</div>
-        
-        <!-- ===== UPLOAD SECTION ===== -->
-        <div class="upload-section" onclick="document.getElementById('icon-file-input').click()">
-          <div class="upload-label">📁 Click to upload custom icons (PNG, JPG, SVG)</div>
-          <input type="file" id="icon-file-input" accept="image/png,image/jpeg,image/svg+xml" multiple>
-        </div>
-
-        <!-- ===== SELECTION CONTROLS ===== -->
-        <div class="selection-controls">
-          <button class="btn btn-small" id="select-all-btn">Select All</button>
-          <button class="btn btn-small" id="deselect-all-btn">Deselect All</button>
-        </div>
-
-        <div class="search-wrapper">
-          <input 
-            type="text" 
-            id="search-input" 
-            class="search-input" 
-            placeholder="Search icons..."
-          >
-        </div>
-        <div id="icon-grid" class="icon-grid"></div>
-        <div id="empty-state" class="empty-state" style="display: none;">
-          No icons found matching your search.
-        </div>
-      </div>
-
-      <!-- ===== RIGHT: CUSTOMIZATION PANEL ===== -->
-      <div class="customization-panel">
-        <div class="section-header">Customize Icon</div>
-        
-        <!-- ===== PREVIEW ===== -->
-        <div class="preview-section">
-          <div class="preview-canvas-wrapper">
-            <canvas id="preview-canvas" class="preview-canvas" width="256" height="256"></canvas>
-          </div>
-        </div>
-
-        <!-- ===== SIZE CONTROL ===== -->
-        <div class="control-section">
-          <div class="control-group">
-            <label class="control-label">Output Size (px)</label>
-            <select id="size-select" class="control-input">
-              <option value="72">72 × 72</option>
-              <option value="144">144 × 144</option>
-              <option value="256" selected>256 × 256</option>
-              <option value="512">512 × 512</option>
-              <option value="1024">1024 × 1024</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- ===== BACKGROUND CONTROLS ===== -->
-        <div class="control-section">
-          <div class="control-group">
-            <label class="control-label">Background Type</label>
-            <select id="bg-type" class="control-input">
-              <option value="solid">Solid Color</option>
-              <option value="gradient">Gradient</option>
-              <option value="preset">Preset Gradient</option>
-            </select>
-          </div>
-
-          <div id="solid-color-controls">
-            <div class="control-group">
-              <label class="control-label">Background Color</label>
-              <div class="color-picker-group">
-                <input type="text" id="bg-color-text" class="control-input" value="#000000">
-                <input type="color" id="bg-color" class="color-input" value="#000000">
-              </div>
-            </div>
-          </div>
-
-          <div id="gradient-controls" style="display: none;">
-            <div class="control-group">
-              <label class="control-label">Gradient Color 1</label>
-              <div class="color-picker-group">
-                <input type="text" id="grad-color1-text" class="control-input" value="#1a1a2e">
-                <input type="color" id="grad-color1" class="color-input" value="#1a1a2e">
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">Gradient Color 2</label>
-              <div class="color-picker-group">
-                <input type="text" id="grad-color2-text" class="control-input" value="#16213e">
-                <input type="color" id="grad-color2" class="color-input" value="#16213e">
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">Gradient Angle</label>
-              <div class="range-group">
-                <input type="range" id="grad-angle" class="range-input" min="0" max="360" value="135">
-                <span class="range-value" id="grad-angle-value">135°</span>
-              </div>
-            </div>
-          </div>
-
-          <div id="preset-controls" style="display: none;">
-            <div class="control-group">
-              <label class="control-label">Preset Gradients</label>
-              <div class="preset-grid" id="preset-grid"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===== ICON CONTROLS ===== -->
-        <div class="control-section">
-          <div class="control-group">
-            <label class="control-label">Icon Color</label>
-            <div class="color-picker-group">
-              <input type="text" id="icon-color-text" class="control-input" value="#FFFFFF">
-              <input type="color" id="icon-color" class="color-input" value="#FFFFFF">
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label">Icon Size</label>
-            <div class="range-group">
-              <input type="range" id="icon-scale" class="range-input" min="30" max="90" value="60">
-              <span class="range-value" id="icon-scale-value">60%</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===== TEXTURE OVERLAY ===== -->
-        <div class="control-section">
-          <div class="control-group">
-            <label class="control-label">Texture Overlay</label>
-            <div class="texture-grid" id="texture-grid">
-              <div class="texture-option texture-none selected" data-texture="none" title="None"></div>
-            </div>
-          </div>
-
-          <div class="control-group" id="texture-opacity-group" style="display: none;">
-            <label class="control-label">Texture Opacity</label>
-            <div class="range-group">
-              <input type="range" id="texture-opacity" class="range-input" min="0" max="100" value="20">
-              <span class="range-value" id="texture-opacity-value">20%</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===== CORNER ROUNDING ===== -->
-        <div class="control-section">
-          <div class="control-group">
-            <label class="control-label">Corner Radius</label>
-            <div class="range-group">
-              <input type="range" id="corner-radius" class="range-input" min="0" max="50" value="16">
-              <span class="range-value" id="corner-radius-value">16%</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===== ACTION BUTTONS ===== -->
-        <div class="btn-group">
-          <button class="btn" id="add-to-batch-btn" disabled>Add to Batch</button>
-          <button class="btn btn-primary" id="download-single-btn" disabled>Download</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== SELECTION BAR ===== -->
-    <div class="selection-bar">
-      <div class="selection-info">
-        <span class="selection-count" id="selection-count">0</span> icons in batch
-      </div>
-      <div class="selection-actions">
-        <button class="btn" id="clear-batch-btn">Clear Batch</button>
-        <button class="btn btn-primary" id="download-batch-btn" disabled>Download Batch (.zip)</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Include JSZip library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
-  <script>
-    // ===== ICON DATABASE =====
-    const builtInIcons = [
-      { name: 'Adobe Acrobat', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-acrobat.svg', keywords: ['adobe', 'acrobat', 'pdf', 'document', 'reader'], builtin: true },
-      { name: 'Adobe Illustrator', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-illustrator.svg', keywords: ['adobe', 'illustrator', 'vector', 'design', 'graphics', 'ai'], builtin: true },
-      { name: 'Adobe Lightroom', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-lightroom.svg', keywords: ['adobe', 'lightroom', 'photo', 'editing', 'photography', 'lr'], builtin: true },
-      { name: 'Adobe Photoshop', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-photoshop.svg', keywords: ['adobe', 'photoshop', 'photo', 'editing', 'graphics', 'ps'], builtin: true },
-      { name: 'Adobe Premiere Pro', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-premiere-pro.svg', keywords: ['adobe', 'premiere', 'video', 'editing', 'film', 'pr'], builtin: true },
-      { name: 'Amazon', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/amazon.svg', keywords: ['amazon', 'shopping', 'ecommerce', 'online', 'store'], builtin: true },
-      { name: 'Arrow Down', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-down.svg', keywords: ['arrow', 'down', 'direction', 'navigate', 'point'], builtin: true },
-      { name: 'Arrow Left', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-left.svg', keywords: ['arrow', 'left', 'direction', 'navigate', 'back', 'previous'], builtin: true },
-      { name: 'Arrow Right', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-right.svg', keywords: ['arrow', 'right', 'direction', 'navigate', 'forward', 'next'], builtin: true },
-      { name: 'Arrow Up', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-up.svg', keywords: ['arrow', 'up', 'direction', 'navigate', 'point'], builtin: true },
-      { name: 'Arrows Horizontal', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows-h.svg', keywords: ['arrow', 'horizontal', 'dual', 'left', 'right', 'bidirectional', 'swap'], builtin: true },
-      { name: 'Arrows Spin', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows-spin.svg', keywords: ['arrow', 'spin', 'rotate', 'refresh', 'reload', 'cycle'], builtin: true },
-      { name: 'Arrows All', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows.svg', keywords: ['arrow', 'all', 'directions', 'navigate', 'move', 'expand'], builtin: true },
-      { name: 'Calendar', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/calendar.svg', keywords: ['calendar', 'date', 'schedule', 'time', 'event', 'planner'], builtin: true },
-      { name: 'Discord', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/discord.svg', keywords: ['discord', 'chat', 'voice', 'gaming', 'community', 'social'], builtin: true },
-      { name: 'Download', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/download.svg', keywords: ['download', 'save', 'get', 'arrow', 'import'], builtin: true },
-      { name: 'Elgato', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/elgato.svg', keywords: ['elgato', 'stream', 'deck', 'gaming', 'streaming', 'capture'], builtin: true },
-      { name: 'Facebook', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/facebook.svg', keywords: ['facebook', 'social', 'media', 'meta', 'network'], builtin: true },
-      { name: 'Google Drive', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/google-drive.svg', keywords: ['google', 'drive', 'cloud', 'storage', 'files', 'docs'], builtin: true },
-      { name: 'Google', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/google.svg', keywords: ['google', 'search', 'browser', 'web', 'internet'], builtin: true },
-      { name: 'Instagram', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/instagram.svg', keywords: ['instagram', 'social', 'media', 'photo', 'sharing', 'meta'], builtin: true },
-      { name: 'Reddit', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/reddit.svg', keywords: ['reddit', 'social', 'community', 'forum', 'discussion'], builtin: true },
-      { name: 'Safari', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/safari.svg', keywords: ['safari', 'browser', 'web', 'apple', 'internet'], builtin: true },
-      { name: 'Text', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/text.svg', keywords: ['text', 'font', 'type', 'letter', 't', 'typography'], builtin: true },
-      { name: 'TikTok', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/tiktok.svg', keywords: ['tiktok', 'social', 'media', 'video', 'short', 'entertainment'], builtin: true },
-      { name: 'Twitch', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/twitch.svg', keywords: ['twitch', 'streaming', 'gaming', 'live', 'broadcast', 'stream'], builtin: true },
-      { name: 'X (Twitter)', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/x-twitter.svg', keywords: ['x', 'twitter', 'social', 'media', 'tweet', 'post'], builtin: true },
-      { name: 'YouTube', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/youtube.svg', keywords: ['youtube', 'video', 'streaming', 'google', 'content', 'creator'], builtin: true }
-    ];
-
-    // ===== TEXTURE DATABASE =====
-    const textures = [
-      { name: 'Noise', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiLz48L3N2Zz4=' },
-      { name: 'Dots', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9IiNmZmYiLz48L3N2Zz4=' },
-      { name: 'Grid', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDBoNDB2MVYwek0wIDBoMXY0MEgweiIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iLjEiLz48L3N2Zz4=' },
-      { name: 'Diagonal Lines', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTAgNDBMNDAgME00MCA0MEw4MCAwTTAgMEwtNDAgNDAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxIiBvcGFjaXR5PSIwLjEiLz48L3N2Zz4=' },
-      { name: 'Carbon Fiber', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNiIgaGVpZ2h0PSI2IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI2IiBoZWlnaHQ9IjYiIGZpbGw9IiMxYTFhMWEiLz48Y2lyY2xlIGN4PSIzIiBjeT0iMyIgcj0iMSIgZmlsbD0iIzMzMyIvPjwvc3ZnPg==' },
-      { name: 'Hexagons', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0yOCAwTDU2IDE2LjFWNDcuOUwyOCA2NEwwIDQ3LjlWMTYuMXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxIiBvcGFjaXR5PSIwLjA1Ii8+PC9zdmc+' }
-    ];
-
-    // ===== GRADIENT PRESETS =====
-    const gradientPresets = [
-      { name: 'Sunset', colors: ['#FF512F', '#DD2476'], angle: 135 },
-      { name: 'Ocean', colors: ['#2E3192', '#1BFFFF'], angle: 135 },
-      { name: 'Purple Haze', colors: ['#360033', '#0b8793'], angle: 135 },
-      { name: 'Fire', colors: ['#f12711', '#f5af19'], angle: 45 },
-      { name: 'Ice', colors: ['#00d2ff', '#3a7bd5'], angle: 135 },
-      { name: 'Forest', colors: ['#134E5E', '#71B280'], angle: 135 },
-      { name: 'Royal', colors: ['#141E30', '#243B55'], angle: 135 },
-      { name: 'Peach', colors: ['#ED4264', '#FFEDBC'], angle: 135 },
-      { name: 'Aqua', colors: ['#13547a', '#80d0c7'], angle: 135 },
-      { name: 'Neon', colors: ['#7F00FF', '#E100FF'], angle: 135 },
-      { name: 'Candy', colors: ['#D38312', '#A83279'], angle: 135 },
-      { name: 'Midnight', colors: ['#232526', '#414345'], angle: 135 }
-    ];
-
-    // ===== STATE =====
-    let icons = [...builtInIcons];
-    let selectedIcons = new Set();
-    let filteredIcons = [...icons];
-    let batchIcons = [];
-    let loadedTextures = {};
-
-    // ===== SETTINGS STATE =====
-    const settings = {
-      size: 256,
-      bgType: 'solid',
-      bgColor: '#000000',
-      gradColor1: '#1a1a2e',
-      gradColor2: '#16213e',
-      gradAngle: 135,
-      presetGradient: null,
-      iconColor: '#FFFFFF',
-      iconScale: 60,
-      texture: 'none',
-      textureOpacity: 20,
-      cornerRadius: 16
-    };
-
-    // ===== DOM ELEMENTS =====
-    const searchInput = document.getElementById('search-input');
-    const iconGrid = document.getElementById('icon-grid');
-    const emptyState = document.getElementById('empty-state');
-    const previewCanvas = document.getElementById('preview-canvas');
-    const ctx = previewCanvas.getContext('2d');
-    const iconFileInput = document.getElementById('icon-file-input');
-
-    // Controls
-    const sizeSelect = document.getElementById('size-select');
-    const bgType = document.getElementById('bg-type');
-    const bgColorText = document.getElementById('bg-color-text');
-    const bgColor = document.getElementById('bg-color');
-    const gradColor1Text = document.getElementById('grad-color1-text');
-    const gradColor1 = document.getElementById('grad-color1');
-    const gradColor2Text = document.getElementById('grad-color2-text');
-    const gradColor2 = document.getElementById('grad-color2');
-    const gradAngle = document.getElementById('grad-angle');
-    const gradAngleValue = document.getElementById('grad-angle-value');
-    const iconColorText = document.getElementById('icon-color-text');
-    const iconColor = document.getElementById('icon-color');
-    const iconScale = document.getElementById('icon-scale');
-    const iconScaleValue = document.getElementById('icon-scale-value');
-    const textureGrid = document.getElementById('texture-grid');
-    const textureOpacity = document.getElementById('texture-opacity');
-    const textureOpacityValue = document.getElementById('texture-opacity-value');
-    const textureOpacityGroup = document.getElementById('texture-opacity-group');
-    const cornerRadius = document.getElementById('corner-radius');
-    const cornerRadiusValue = document.getElementById('corner-radius-value');
-    const solidColorControls = document.getElementById('solid-color-controls');
-    const gradientControls = document.getElementById('gradient-controls');
-    const presetControls = document.getElementById('preset-controls');
-    const presetGrid = document.getElementById('preset-grid');
-
-    // Buttons
-    const selectAllBtn = document.getElementById('select-all-btn');
-    const deselectAllBtn = document.getElementById('deselect-all-btn');
-    const addToBatchBtn = document.getElementById('add-to-batch-btn');
-    const downloadSingleBtn = document.getElementById('download-single-btn');
-    const clearBatchBtn = document.getElementById('clear-batch-btn');
-    const downloadBatchBtn = document.getElementById('download-batch-btn');
-    const selectionCount = document.getElementById('selection-count');
-
-    // ===== INITIALIZE =====
-    function init() {
-      renderIconGrid();
-      renderTextureGrid();
-      renderPresetGrid();
-      setupEventListeners();
-      updatePreview();
-      preloadTextures();
-    }
-
-    // ===== RENDER ICON GRID =====
-    function renderIconGrid() {
-      iconGrid.innerHTML = '';
-      
-      if (filteredIcons.length === 0) {
-        iconGrid.style.display = 'none';
-        emptyState.style.display = 'block';
-        scheduleHeightCheck();
-        return;
-      }
-
-      iconGrid.style.display = 'grid';
-      emptyState.style.display = 'none';
-
-      filteredIcons.forEach(icon => {
-        const card = document.createElement('div');
-        card.className = 'icon-card';
-        if (selectedIcons.has(icon.url)) {
-          card.classList.add('selected');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Deck Icon Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        /* ===== ROOT VARIABLES ===== */
+        :root {
+            --bg-primary: #191919;
+            --bg-secondary: #1F1F1F;
+            --bg-hover: #323232;
+            --outline: #323232;
+            --accent: #87A9FF;
+            --text-primary: #D4D4D4;
+            --text-secondary: #8C8C8C;
+            --success: #4CAF50;
+            --radius: 8px;
         }
-        
-        card.innerHTML = `
-          <img src="${icon.url}" alt="${icon.name}" class="icon-preview" style="${icon.builtin ? '' : 'filter: none;'}">
-          <div class="icon-name">${icon.name}</div>
-        `;
-        
-        card.addEventListener('click', () => toggleIconSelection(icon, card));
-        iconGrid.appendChild(card);
-      });
 
-      scheduleHeightCheck();
-    }
+        /* ===== GLOBAL STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    // ===== RENDER TEXTURE GRID =====
-    function renderTextureGrid() {
-      textures.forEach(texture => {
-        const option = document.createElement('div');
-        option.className = 'texture-option';
-        option.dataset.texture = texture.name.toLowerCase();
-        option.style.backgroundImage = `url(${texture.url})`;
-        option.title = texture.name;
-        
-        option.addEventListener('click', () => selectTexture(texture.name.toLowerCase(), option));
-        textureGrid.appendChild(option);
-      });
-    }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 24px 16px;
+        }
 
-    // ===== RENDER PRESET GRID =====
-    function renderPresetGrid() {
-      gradientPresets.forEach((preset, index) => {
-        const option = document.createElement('div');
-        option.className = 'preset-option';
-        option.dataset.preset = index;
-        option.title = preset.name;
-        
-        const angle = preset.angle;
-        option.style.background = `linear-gradient(${angle}deg, ${preset.colors[0]}, ${preset.colors[1]})`;
-        
-        option.addEventListener('click', () => selectPreset(index, option));
-        presetGrid.appendChild(option);
-      });
-    }
+        /* ===== MAIN CONTAINER ===== */
+        .main-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-    // ===== SELECT PRESET =====
-    function selectPreset(index, element) {
-      const preset = gradientPresets[index];
-      settings.presetGradient = index;
-      settings.gradColor1 = preset.colors[0];
-      settings.gradColor2 = preset.colors[1];
-      settings.gradAngle = preset.angle;
-      
-      gradColor1.value = preset.colors[0];
-      gradColor1Text.value = preset.colors[0];
-      gradColor2.value = preset.colors[1];
-      gradColor2Text.value = preset.colors[1];
-      gradAngle.value = preset.angle;
-      gradAngleValue.textContent = preset.angle + '°';
-      
-      document.querySelectorAll('.preset-option').forEach(opt => {
-        opt.classList.remove('selected');
-      });
-      element.classList.add('selected');
-      
-      updatePreview();
-    }
+        /* ===== TWO COLUMN LAYOUT ===== */
+        .layout-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
 
-    // ===== TOGGLE ICON SELECTION =====
-    function toggleIconSelection(icon, card) {
-      if (selectedIcons.has(icon.url)) {
-        selectedIcons.delete(icon.url);
-        card.classList.remove('selected');
-      } else {
-        selectedIcons.add(icon.url);
-        card.classList.add('selected');
-      }
-      updateSelectionUI();
-      
-      // Update preview with first selected icon
-      if (selectedIcons.size > 0) {
-        const firstSelectedUrl = Array.from(selectedIcons)[0];
-        const firstIcon = icons.find(i => i.url === firstSelectedUrl);
-        updatePreviewWithIcon(firstIcon);
-      } else {
-        updatePreview();
-      }
-    }
+        @media (min-width: 768px) {
+            .layout-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+            }
 
-    // ===== SELECT TEXTURE =====
-    function selectTexture(textureName, element) {
-      settings.texture = textureName;
-      
-      document.querySelectorAll('.texture-option').forEach(opt => {
-        opt.classList.remove('selected');
-      });
-      element.classList.add('selected');
+            .left-column {
+                order: 1;
+            }
 
-      textureOpacityGroup.style.display = textureName === 'none' ? 'none' : 'flex';
-      
-      updatePreview();
-    }
+            .right-column {
+                order: 2;
+            }
+        }
 
-    // ===== PRELOAD TEXTURES =====
-    async function preloadTextures() {
-      for (const texture of textures) {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        await new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve;
-          img.src = texture.url;
-        });
-        loadedTextures[texture.name.toLowerCase()] = img;
-      }
-    }
+        .left-column,
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
 
-    // ===== UPDATE PREVIEW WITH ICON =====
-    async function updatePreviewWithIcon(icon) {
-      const size = 256;
-      const radiusPx = (size * settings.cornerRadius) / 100;
+        /* ===== COLLAPSIBLE SECTIONS ===== */
+        .collapsible-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
 
-      ctx.clearRect(0, 0, size, size);
-      ctx.save();
-      
-      // Create rounded rectangle path
-      ctx.beginPath();
-      ctx.moveTo(radiusPx, 0);
-      ctx.lineTo(size - radiusPx, 0);
-      ctx.quadraticCurveTo(size, 0, size, radiusPx);
-      ctx.lineTo(size, size - radiusPx);
-      ctx.quadraticCurveTo(size, size, size - radiusPx, size);
-      ctx.lineTo(radiusPx, size);
-      ctx.quadraticCurveTo(0, size, 0, size - radiusPx);
-      ctx.lineTo(0, radiusPx);
-      ctx.quadraticCurveTo(0, 0, radiusPx, 0);
-      ctx.closePath();
-      ctx.clip();
+        .collapsible-section:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 16px rgba(135, 169, 255, 0.1);
+        }
 
-      // Draw background
-      if (settings.bgType === 'solid') {
-        ctx.fillStyle = settings.bgColor;
-        ctx.fillRect(0, 0, size, size);
-      } else {
-        const angle = (settings.gradAngle * Math.PI) / 180;
-        const x1 = size / 2 - Math.cos(angle) * size / 2;
-        const y1 = size / 2 - Math.sin(angle) * size / 2;
-        const x2 = size / 2 + Math.cos(angle) * size / 2;
-        const y2 = size / 2 + Math.sin(angle) * size / 2;
-        
-        const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
-        gradient.addColorStop(0, settings.gradColor1);
-        gradient.addColorStop(1, settings.gradColor2);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, size, size);
-      }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.3s ease;
+        }
 
-      // Draw texture overlay
-      if (settings.texture !== 'none' && loadedTextures[settings.texture]) {
-        ctx.globalAlpha = settings.textureOpacity / 100;
-        const pattern = ctx.createPattern(loadedTextures[settings.texture], 'repeat');
-        ctx.fillStyle = pattern;
-        ctx.fillRect(0, 0, size, size);
-        ctx.globalAlpha = 1;
-      }
+        .section-header:hover {
+            background: var(--bg-hover);
+        }
 
-      ctx.restore();
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+        }
 
-      // Draw icon
-      if (icon) {
-        try {
-          const response = await fetch(icon.url);
-          const blob = await response.blob();
-          const isBuiltIn = icon.builtin;
-          
-          if (blob.type === 'image/svg+xml' && isBuiltIn) {
-            // For built-in SVGs, apply color modification
-            const svgText = await blob.text();
-            let modifiedSvg = svgText.replace(/fill="[^"]*"/g, `fill="${settings.iconColor}"`);
-            modifiedSvg = modifiedSvg.replace(/stroke="[^"]*"/g, `stroke="${settings.iconColor}"`);
-            if (!modifiedSvg.includes('fill=')) {
-              modifiedSvg = modifiedSvg.replace('<svg', `<svg fill="${settings.iconColor}"`);
+        .section-title i {
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        .section-header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .help-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .help-btn:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .toggle-icon {
+            color: var(--text-secondary);
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 0 24px 24px 24px;
+            max-height: 5000px;
+            opacity: 1;
+            transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+            overflow: hidden;
+        }
+
+        .section-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding: 0 24px;
+        }
+
+        /* ===== HELP MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(135, 169, 255, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--outline);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .help-section {
+            margin-bottom: 16px;
+        }
+
+        .help-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .help-section h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+
+        .help-section p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* ===== PREVIEW SECTION ===== */
+        .preview-container {
+            position: relative;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: var(--radius);
+            padding: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border: 1px solid var(--outline);
+            overflow: hidden;
+        }
+
+        .preview-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(135, 169, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .preview-area {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+        @media (max-width: 767px) {
+            .preview-area {
+                width: 250px;
+                height: 250px;
             }
             
-            const img = new Image();
-            const svgBlob = new Blob([modifiedSvg], { type: 'image/svg+xml' });
-            const url = URL.createObjectURL(svgBlob);
+            .preview-container {
+                padding: 24px;
+            }
+        }
+
+        #iconPreview {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .preview-overlay-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-align: center;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 640px) {
+            .preview-overlay-text {
+                font-size: 16px;
+            }
+        }
+
+        .preview-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card.clickable {
+            cursor: pointer;
+        }
+
+        .stat-card.clickable:hover {
+            border-color: var(--accent);
+            background: var(--bg-hover);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        /* ===== INPUT STYLES ===== */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.1);
+        }
+
+        /* ===== CHECKBOX STYLES ===== */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 640px) {
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--outline);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .checkbox-item input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--bg-primary);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .checkbox-item label {
+            font-size: 12px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        /* ===== COLOR PICKER STYLES ===== */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 640px) {
+            .color-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .color-picker-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .color-picker-item label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .color-input-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 48px;
+            border: 2px solid var(--outline);
+            border-radius: var(--radius);
+            cursor: pointer;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        input[type="color"]:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.1);
+        }
+
+        .hex-input {
+            width: 100%;
+            padding: 6px 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .hex-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.1);
+        }
+
+        /* Gradient Warning */
+        .gradient-warning {
+            display: none;
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: var(--radius);
+            padding: 8px 12px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: #FFA500;
+            line-height: 1.4;
+        }
+
+        .gradient-warning.active {
+            display: block;
+        }
+
+        /* ===== BUTTON STYLES ===== */
+        .btn {
+            position: relative;
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--outline);
+            cursor: pointer;
+            overflow: hidden;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
+        }
+
+        .btn:hover::before {
+            left: 125%;
+        }
+
+        .btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+        }
+
+        .btn-success {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+            font-weight: 700;
+        }
+
+        .btn-success:hover {
+            background: #5cb85f;
+            border-color: #5cb85f;
+            box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== TAB NAVIGATION ===== */
+        .tab-navigation {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg-primary);
+            box-shadow: 0 4px 12px rgba(135, 169, 255, 0.2);
+        }
+
+        /* ===== GRID CONTENT ===== */
+        .content-wrapper {
+            position: relative;
+            background: var(--bg-primary);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius);
+            padding: 16px;
+        }
+
+        .content-grid {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .content-grid.active {
+            display: grid;
+        }
+
+        @media (max-width: 640px) {
+            .content-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                max-height: 350px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+        }
+
+        /* Custom Scrollbar */
+        .content-grid::-webkit-scrollbar,
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .content-grid::-webkit-scrollbar-track,
+        .modal-content::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 4px;
+        }
+
+        .content-grid::-webkit-scrollbar-thumb,
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--outline);
+            border-radius: 4px;
+        }
+
+        .content-grid::-webkit-scrollbar-thumb:hover,
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* ===== GRID ITEMS ===== */
+        .grid-item {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-secondary);
+            border: 2px solid var(--outline);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            position: relative;
+            overflow: hidden;
+            min-height: 80px;
+        }
+
+        @media (max-width: 640px) {
+            .grid-item {
+                padding: 6px;
+                min-height: 70px;
+            }
+        }
+
+        .grid-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(135, 169, 255, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .grid-item:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(135, 169, 255, 0.2);
+        }
+
+        .grid-item:hover::before {
+            opacity: 1;
+        }
+
+        .grid-item.selected {
+            border-color: var(--accent);
+            background: rgba(135, 169, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.2);
+        }
+
+        .grid-item i {
+            font-size: 28px;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            z-index: 1;
+        }
+
+        @media (max-width: 640px) {
+            .grid-item i {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid-item i {
+                font-size: 20px;
+                margin-bottom: 2px;
+            }
+        }
+
+        .grid-item img {
+            max-width: 45%;
+            max-height: 45%;
+            object-fit: contain;
+            margin-bottom: 6px;
+            z-index: 1;
+        }
+
+        @media (max-width: 640px) {
+            .grid-item img {
+                max-width: 40%;
+                max-height: 40%;
+                margin-bottom: 4px;
+            }
+        }
+
+        .icon-name {
+            font-size: 9px;
+            color: var(--text-secondary);
+            text-align: center;
+            z-index: 1;
+            line-height: 1.2;
+            word-break: break-word;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        @media (max-width: 640px) {
+            .icon-name {
+                font-size: 8px;
+                -webkit-line-clamp: 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .icon-name {
+                font-size: 7px;
+            }
+        }
+
+        .background-name-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: var(--text-primary);
+            font-size: 9px;
+            padding: 6px 4px 4px;
+            text-align: center;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 640px) {
+            .background-name-overlay {
+                font-size: 8px;
+                padding: 4px 2px 2px;
+            }
+        }
+
+        /* ===== UPLOAD AREA ===== */
+        .upload-area {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+            border: 2px dashed var(--success);
+            position: relative;
+        }
+
+        .upload-area:hover {
+            background: rgba(76, 175, 80, 0.15);
+            border-color: #5cb85f;
+        }
+
+        .upload-area label {
+            color: var(--success);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        @media (max-width: 640px) {
+            .upload-area label {
+                font-size: 9px;
+            }
+        }
+
+        .upload-area input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="layout-container">
+            <div class="left-column">
+                <div class="collapsible-section">
+                   
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <i class="fas fa-images"></i>
+                            <span>Content</span>
+              
+                        </div>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="section-content">
+                      
+                        <div class="tab-navigation">
+                            <button class="tab-btn active" id="showIconsBtn">Icons</button>
+                            <button class="tab-btn" id="showTxBtn">Textures</button>
+                            <button class="tab-btn" id="showBgBtn">Gradients</button>
+      
+                        </div>
+                        <div class="content-wrapper">
+                            <div id="iconsContent" class="content-grid active">
+                          
+                                <div class="grid-item upload-area">
+                                    <label for="uploadIcon">+ Upload</label>
+                                    <input type="file" id="uploadIcon" accept="image/*,.svg">
+               
+                                </div>
+                            </div>
+                            <div id="txContent" class="content-grid">
+                         
+                                <div class="grid-item upload-area">
+                                    <label for="uploadTx">+ Upload</label>
+                                    <input type="file" id="uploadTx" accept="image/*">
+              
+                                </div>
+                            </div>
+                            <div id="bgContent" class="content-grid">
+                        
+                                <div class="grid-item upload-area">
+                                    <label for="uploadBg">+ Upload</label>
+                                    <input type="file" id="uploadBg" accept="image/*">
+             
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+         
+                </div>
+
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+           
+                            <i class="fas fa-sliders-h"></i>
+                            <span>Settings</span>
+                        </div>
+                        <div class="section-header-right">
+    
+                            <button class="help-btn" onclick="openHelpModal(event)" title="Help">
+                                <i class="fas fa-question"></i>
+                            </button>
+           
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                    </div>
+                    <div class="section-content">
+               
+                        <div class="input-group">
+                            <label for="iconName">Icon Name</label>
+                            <input type="text" id="iconName" value="Custom Icon" placeholder="Enter icon name...">
+                        </div>
+
+ 
+                        <div class="input-group">
+                            <label>Options</label>
+                            <div class="checkbox-grid">
+                   
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="saveAsZip">
+                                    <label for="saveAsZip">Multi-Size & ZIP</label>
+         
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="edgeOnOff" checked>
+     
+                                    <label for="edgeOnOff">Edge On/Off</label>
+                                </div>
+                                <div class="checkbox-item">
+  
+                                    <input type="checkbox" id="edgeGlowOnOff" checked>
+                                    <label for="edgeGlowOnOff">Edge Glow</label>
+                         
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="logoGlowOnOff">
+                      
+                                    <label for="logoGlowOnOff">Logo Glow</label>
+                                </div>
+                            </div>
+                        
+                        </div>
+
+                        <div class="input-group">
+                            <div class="color-grid">
+                                <div class="color-picker-item">
+             
+                                    <label for="iconColor">Icon</label>
+                                    <div class="color-input-wrapper">
+                                       
+                                        <input type="color" id="iconColor" value="#FFFFFF">
+                                        <input type="text" id="iconColorHex" value="#FFFFFF" class="hex-input" maxlength="7">
+                                    </div>
+               
+                                </div>
+                                <div class="color-picker-item">
+                                    <label for="backgroundColor">Background</label>
+             
+                                    <div class="color-input-wrapper">
+                                        <input type="color" id="backgroundColor" value="#000000">
+                                 
+                                        <input type="text" id="backgroundColorHex" value="#000000" class="hex-input" maxlength="7">
+                                    </div>
+                                </div>
+                    
+                                <div class="color-picker-item">
+                                    <label for="glowColor">Glow</label>
+                                    <div class="color-input-wrapper">
+             
+                                        <input type="color" id="glowColor" value="#87A9FF">
+                                        <input type="text" id="glowColorHex" value="#87A9FF" class="hex-input" maxlength="7">
+                         
+                                    </div>
+                                </div>
+                            </div>
+                            <div 
+                                class="gradient-warning" id="gradientWarning">
+                                ⚠️ A gradient is active.
+                                Turn off the gradient first to use a solid background color.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div 
+                class="right-column">
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                  
+                            <i class="fas fa-eye"></i>
+                            <span>Preview</span>
+                        </div>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+         
+                    </div>
+                    <div class="section-content">
+                        <div class="preview-container">
+                            <div class="preview-area">
+              
+                                <canvas id="iconPreview" width="300" height="300"></canvas>
+                                <div class="preview-overlay-text">SELECT AN ICON</div>
+                            </div>
+                
+                        </div>
+                        <div class="preview-stats">
+                            <div class="stat-card">
+                                <div class="stat-label">Icons Selected</div>
+    
+                                <div class="stat-value" id="selectedCount">0</div>
+                            </div>
+                            <div class="stat-card clickable" id="sizeCard">
+           
+                                <div class="stat-label">Resolution</div>
+                                <div class="stat-value">
+                                    <span id="currentSize">144</span>px
+        
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                </div>
+
+                <div class="collapsible-section">
+                    <div class="section-content" style="padding: 24px;">
+                        <button id="downloadBtn" class="btn btn-success">
+  
+                            <i class="fas fa-download"></i> Download Icons
+                        </button>
+                    </div>
+                </div>
+          
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="helpModal" onclick="closeHelpModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-circle-info"></i>
+          
+                    <span>Quick Guide</span>
+                </div>
+                <button class="modal-close" onclick="closeHelpModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+     
+            <div class="modal-body">
+                <div class="help-section">
+                    <h3>Resolution</h3>
+                    <p>Click the Resolution card to cycle through sizes (72px, 96px, 144px, 288px, 500px).
+Default is 144px.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>Multi-Size & ZIP</h3>
+                    <p>Generates icons in all 5 sizes and packages them into a ZIP file organized by folders.</p>
+        
+                </div>
+
+                <div class="help-section">
+                    <h3>Effects</h3>
+                    <p><strong>Edge On/Off:</strong> Toggle corner bracket decorations.<br>
+                    <strong>Edge Glow:</strong> Adds glow to brackets (requires Edge On).<br>
+  
+                    <strong>Logo Glow:</strong> Adds glow around your icon.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>Content Tabs</h3>
+                    <p><strong>Icons:</strong> Select 
+or upload logos.<br>
+                    <strong>Textures:</strong> Add overlay patterns.<br>
+                    <strong>Gradients:</strong> Apply gradient backgrounds (disables solid background color).</p>
+                </div>
+
+                <div class="help-section">
+               
+                    <h3>Multi-Selection</h3>
+                    <p>Select multiple icons to batch-generate with the same styling.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== HELP MODAL =====
+        function openHelpModal(event) {
+ 
+            event.stopPropagation();
+            document.getElementById('helpModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            setTimeout(scheduleHeightCheck, 100);
+        }
+
+        function closeHelpModal(event) {
+            if (!event || event.target.classList.contains('modal-overlay') || event.target.closest('.modal-close')) {
+                document.getElementById('helpModal').classList.remove('active');
+                document.body.style.overflow = '';
+                setTimeout(scheduleHeightCheck, 100);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeHelpModal();
+            }
+        });
+        // ===== COLLAPSIBLE SECTIONS =====
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.toggle-icon');
             
-            await new Promise((resolve, reject) => {
-              img.onload = resolve;
-              img.onerror = reject;
-              img.src = url;
+            content.classList.toggle('collapsed');
+            icon.classList.toggle('collapsed');
+            
+            setTimeout(scheduleHeightCheck, 350);
+        }
+
+        // ===== SIZE CYCLER =====
+        const sizeCard = document.getElementById('sizeCard');
+        const currentSizeEl = document.getElementById('currentSize');
+        const sizes = [72, 96, 144, 288, 500];
+        let currentSizeIndex = 2;
+        let selectedSize = sizes[currentSizeIndex];
+        sizeCard.addEventListener('click', () => {
+            currentSizeIndex = (currentSizeIndex + 1) % sizes.length;
+            selectedSize = sizes[currentSizeIndex];
+            currentSizeEl.textContent = selectedSize;
+        });
+        // ===== ELEMENTS =====
+        const iconPreview = document.getElementById('iconPreview');
+        const ctx = iconPreview.getContext('2d');
+        const showIconsBtn = document.getElementById('showIconsBtn');
+        const showTxBtn = document.getElementById('showTxBtn');
+        const showBgBtn = document.getElementById('showBgBtn');
+        const iconsContent = document.getElementById('iconsContent');
+        const txContent = document.getElementById('txContent');
+        const bgContent = document.getElementById('bgContent');
+        
+        const iconColorInput = document.getElementById('iconColor');
+        const backgroundColorInput = document.getElementById('backgroundColor');
+        const glowColorInput = document.getElementById('glowColor');
+        
+        const iconColorHexInput = document.getElementById('iconColorHex');
+        const backgroundColorHexInput = document.getElementById('backgroundColorHex');
+        const glowColorHexInput = document.getElementById('glowColorHex');
+
+        const edgeOnOffCheckbox = document.getElementById('edgeOnOff');
+        const edgeGlowOnOffCheckbox = document.getElementById('edgeGlowOnOff');
+        const logoGlowOnOffCheckbox = document.getElementById('logoGlowOnOff');
+        const previewOverlayText = document.querySelector('.preview-overlay-text');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const iconNameInput = document.getElementById('iconName');
+        const selectedCountEl = document.getElementById('selectedCount');
+        const gradientWarning = document.getElementById('gradientWarning');
+        let customIconCount = 0;
+        let customTextureCount = 0;
+        let customBackgroundCount = 0;
+        
+        // ===== DATA =====
+        const iconsData = [
+            { id: 'adobe-acrobat', name: 'Acrobat', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-acrobat.svg' },
+            { id: 'adobe-illustrator', name: 'Illustrator', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-illustrator.svg' },
+            { id: 'adobe-lightroom', name: 'Lightroom', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-lightroom.svg' },
+            { id: 'adobe-photoshop', name: 'Photoshop', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-photoshop.svg' },
+            { id: 'adobe-premiere-pro', name: 'Premiere Pro', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-premiere-pro.svg' },
+            { id: 'amazon', name: 'Amazon', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/amazon.svg' },
+            { id: 'arrow-down', name: 'Arrow Down', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-down.svg' },
+            { id: 'arrow-left', name: 'Arrow Left', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-left.svg' },
+            { id: 'arrow-right', name: 'Arrow Right', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-right.svg' },
+            { id: 'arrow-up', name: 'Arrow Up', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-up.svg' },
+            { id: 'arrows-h', name: 'Arrows H', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows-h.svg' },
+            { id: 'arrows-spin', name: 'Arrows Spin', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows-spin.svg' },
+            { id: 'arrows', name: 'Arrows', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows.svg' },
+            { id: 'calendar', name: 'Calendar', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/calendar.svg' },
+            { id: 'discord', name: 'Discord', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/discord.svg' },
+            { id: 'download', name: 'Download', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/download.svg' },
+            { id: 'elgato', name: 'Elgato', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/elgato.svg' },
+            { id: 'facebook', name: 'Facebook', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/facebook.svg' },
+            { id: 'google-drive', name: 'Google Drive', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/google-drive.svg' },
+            { id: 'google', name: 'Google', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/google.svg' },
+            { id: 'instagram', name: 'Instagram', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/instagram.svg' },
+            { id: 'reddit', name: 'Reddit', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/reddit.svg' },
+            { id: 'safari', name: 'Safari', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/safari.svg' },
+            { id: 'text', name: 'Text', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/text.svg' },
+            { id: 'tiktok', name: 'Tiktok', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/tiktok.svg' },
+            { id: 'twitch', name: 'Twitch', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/twitch.svg' },
+            { id: 'x-twitter', name: 'X (Twitter)', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/x-twitter.svg' },
+            { id: 'youtube', name: 'Youtube', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/youtube.svg' }
+        ];
+        const backgroundsData = [
+            { id: 'off', name: 'Off', type: 'color', value: '#333333' },
+            { id: 'gradient_blue', name: 'Blue Grad', type: 'gradient', colors: ['#007bff', '#66bbff'] },
+            { id: 'gradient_green', name: 'Green Grad', type: 'gradient', colors: ['#28a745', '#76e091'] },
+            { id: 'gradient_purple', name: 'Purple Grad', type: 'gradient', colors: ['#6f42c1', '#b388ff'] },
+       
+            { id: 'gradient_red', name: 'Red Grad', type: 'gradient', colors: ['#dc3545', '#ff7f8c'] },
+            { id: 'gradient_orange', name: 'Orange Grad', type: 'gradient', colors: ['#fd7e14', '#ffc107'] },
+            { id: 'gradient_teal', name: 'Teal Grad', type: 'gradient', colors: ['#20c997', '#6eead7'] },
+            { id: 'gradient_grey', name: 'Grey Grad', type: 'gradient', colors: ['#6c757d', '#adb5bd'] },
+            { id: 'gradient_pink', 
+                name: 'Pink Grad', type: 'gradient', colors: ['#e83e8c', '#ff85d2'] },
+            { id: 'gradient_brown', name: 'Brown Grad', type: 'gradient', colors: ['#795548', '#a1887f'] },
+            { id: 'gradient_gold', name: 'Gold Grad', type: 'gradient', colors: ['#FFD700', '#FFA500'] },
+            { id: 'gradient_indigo', name: 'Indigo Grad', type: 'gradient', colors: ['#4b0082', '#8a2be2'] },
+            { id: 'gradient_emerald', name: 'Emerald Grad', type: 'gradient', colors: ['#50C878', '#3D9970'] 
+            },
+            { id: 'gradient_violet', name: 'Violet Grad', type: 'gradient', colors: ['#EE82EE', '#D8BFD8'] },
+            { id: 'gradient_sky', name: 'Sky Grad', type: 'gradient', colors: ['#87CEEB', '#ADD8E6'] },
+            { id: 'gradient_forest', name: 'Forest Grad', type: 'gradient', colors: ['#228B22', '#6B8E23'] },
+            { id: 'gradient_sunset', name: 'Sunset Grad', type: 'gradient', colors: ['#FF6B6B', '#FFE66B'] },
+        
+            { id: 'gradient_ocean', name: 'Ocean Grad', type: 'gradient', colors: ['#1A2980', '#26D0CE'] },
+            { id: 'gradient_spring', name: 'Spring Grad', type: 'gradient', colors: ['#00FF87', '#60BF60'] },
+            { id: 'gradient_autumn', name: 'Autumn Grad', type: 'gradient', colors: ['#C79081', '#F29C6B'] },
+            { id: 'gradient_dawn', name: 'Dawn Grad', type: 'gradient', colors: ['#FFC371', '#FF5F6D'] },
+            { id: 'gradient_twilight', name: 
+                'Twilight Grad', type: 'gradient', colors: ['#5F2C82', '#49A09D'] },
+            { id: 'gradient_royal', name: 'Royal Grad', type: 'gradient', colors: ['#4C4C4C', '#5C5C5C'] },
+            { id: 'gradient_electric', name: 'Electric Grad', type: 'gradient', colors: ['#6A057F', '#88B04B'] },
+            { id: 'gradient_softblue', name: 'Soft Blue Grad', type: 'gradient', colors: ['#D6E6F2', '#B9D7EA'] },
+            { id: 'gradient_warmgrey', name: 'Warm Grey Grad', type: 'gradient', colors: ['#D3CFCF', 
+                '#EAEAEA'] },
+            { id: 'gradient_coolgrey', name: 'Cool Grey Grad', type: 'gradient', colors: ['#ECEFF1', '#CFD8DC'] },
+            { id: 'gradient_deepblue', name: 'Deep Blue Grad', type: 'gradient', colors: ['#213A50', '#07244D'] },
+            { id: 'gradient_darkred', name: 'Dark Red Grad', type: 'gradient', colors: ['#8B0000', '#CD5C5C'] },
+            { id: 'gradient_lime', name: 'Lime Grad', type: 'gradient', colors: ['#8BC34A', '#CDDC39'] },
+    
+            { id: 'gradient_peach', name: 'Peach Grad', type: 'gradient', colors: ['#FFCBA4', '#FFAB91'] },
+            { id: 'gradient_mint', name: 'Mint Grad', type: 'gradient', colors: ['#98FB98', '#66CDAA'] },
+            { id: 'gradient_lavender', name: 'Lavender Grad', type: 'gradient', colors: ['#E6E6FA', '#D8BFD8'] },
+            { id: 'gradient_chocolate', name: 'Choco Grad', type: 'gradient', colors: ['#5C3317', '#A0522D'] },
+            
+            { id: 'gradient_charcoal', name: 'Charcoal Grad', type: 'gradient', colors: ['#36454F', '#525252'] }
+        ];
+        const texturesData = [
+            { id: 'off_texture', name: 'Off', type: 'texture', textureOpacity: 0 },
+            { id: 'texture_dots_light', name: 'Dots Light', type: 'texture', pattern: 'dots', textureOpacity: 0.08, dotSize: 1, dotGap: 15 },
+            { id: 'texture_dots_medium', name: 'Dots Med', type: 'texture', pattern: 'dots', textureOpacity: 0.15, dotSize: 2, dotGap: 10 },
+            { id: 'texture_dots_dense', name: 'Dots Dense', type: 'texture', 
+                pattern: 'dots', textureOpacity: 0.2, dotSize: 1.5, dotGap: 8 },
+            { id: 'texture_stripes_thin', name: 'Stripes Thin', type: 'texture', pattern: 'stripes', width: 3, gap: 10, textureOpacity: 0.1 },
+            { id: 'texture_stripes_thick', name: 'Stripes Thick', type: 'texture', pattern: 'stripes', width: 8, gap: 18, textureOpacity: 0.1 },
+            { id: 'texture_lines_horizontal', name: 'H Lines', type: 'texture', pattern: 'lines', thickness: 3, spacing: 15, textureOpacity: 0.1 },
+        
+            { id: 'texture_lines_vertical', name: 'V Lines', type: 'texture', pattern: 'lines_v', thickness: 3, spacing: 15, textureOpacity: 0.1 },
+            { id: 'texture_crosshatch', name: 'Crosshatch', type: 'texture', pattern: 'crosshatch', textureOpacity: 0.1, lineThickness: 2, lineSpacing: 10 },
+            { id: 'texture_squares', name: 'Squares', type: 'texture', pattern: 'squares', textureOpacity: 0.08, squareSize: 10, squareGap: 20 },
+            { id: 'texture_grid', name: 'Grid', type: 'texture', pattern: 'grid', textureOpacity: 0.12, lineThickness: 2, lineSpacing: 
+                15 },
+            { id: 'texture_diamond', name: 'Diamond', type: 'texture', pattern: 'diamond', textureOpacity: 0.1, diamondSize: 10, spacing: 20 },
+            { id: 'texture_noise', name: 'Noise', type: 'texture', pattern: 'noise', textureOpacity: 0.05 },
+            { id: 'texture_diagonal_stripes', name: 'Diag Stripes', type: 'texture', pattern: 'diagonal_stripes', width: 4, gap: 12, textureOpacity: 0.1 },
+            { id: 'texture_checkerboard', name: 'Checkerboard', type: 'texture', pattern: 'checkerboard', 
+                squareSize: 15, textureOpacity: 0.05 },
+            { id: 'texture_wave', name: 'Wave', type: 'texture', pattern: 'wave', textureOpacity: 0.07 },
+            { id: 'texture_honeycomb', name: 'Honeycomb', type: 'texture', pattern: 'honeycomb', textureOpacity: 0.09 },
+            { id: 'texture_circles', name: 'Circles', type: 'texture', pattern: 'circles', textureOpacity: 0.07, circleRadius: 5, circleGap: 20 },
+            { id: 'texture_hex_grid', name: 'Hex Grid', type: 'texture', pattern: 'hex_grid', textureOpacity: 
+                0.08, hexSize: 10 },
+            { id: 'texture_pyramids', name: 'Pyramids', type: 'texture', pattern: 'pyramids', textureOpacity: 0.06 },
+            { id: 'texture_concentric', name: 'Concentric', type: 'texture', pattern: 'concentric', textureOpacity: 0.08, ringCount: 3, ringGap: 5 },
+            { id: 'texture_diagonal_cross', name: 'Diag Cross', type: 'texture', pattern: 'diagonal_cross', textureOpacity: 0.1, lineThickness: 3, lineSpacing: 15 },
+            { id: 'texture_woven', name: 'Woven', type: 'texture', 
+                pattern: 'woven', textureOpacity: 0.1, weaveSize: 8 },
+            { id: 'texture_brick', name: 'Brick', type: 'texture', pattern: 'brick', textureOpacity: 0.09, brickWidth: 25, brickHeight: 12 },
+            { id: 'texture_fish_scale', name: 'Fish Scale', type: 'texture', pattern: 'fish_scale', textureOpacity: 0.07, scaleRadius: 10 },
+            { id: 'texture_stars', name: 'Stars', type: 'texture', pattern: 'stars', textureOpacity: 0.06, starSize: 3, starCount: 15 },
+            { id: 
+                'texture_doodle', name: 'Doodle', type: 'texture', pattern: 'doodle', textureOpacity: 0.05 },
+            { id: 'texture_bubble', name: 'Bubble', type: 'texture', pattern: 'bubble', textureOpacity: 0.08, bubbleSize: 6, bubbleCount: 10 },
+            { id: 'texture_cloud', name: 'Cloud', type: 'texture', pattern: 'cloud', textureOpacity: 0.04 },
+            { id: 'texture_mesh', name: 'Mesh', type: 'texture', pattern: 'mesh', textureOpacity: 0.1, meshDensity: 10 },
+            { id: 'texture_ripples', name: 
+                'Ripples', type: 'texture', pattern: 'ripples', textureOpacity: 0.07, rippleStrength: 5 },
+            { id: 'texture_fractal', name: 'Fractal', type: 'texture', pattern: 'fractal', textureOpacity: 0.06 },
+            { id: 'texture_circuit', name: 'Circuit', type: 'texture', pattern: 'circuit', textureOpacity: 0.09 },
+            { id: 'texture_camo', name: 'Camo', type: 'texture', pattern: 'camo', textureOpacity: 0.12 }
+        ];
+        let selectedIcons = [];
+        let latestSelectedIconId = null;
+        let selectedTextureId = 'off_texture';
+        let selectedBackgroundId = 'off';
+        // ===== GRADIENT WARNING CHECK =====
+        function checkGradientWarning() {
+            const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
+            if (currentBg && currentBg.type === 'gradient') {
+                gradientWarning.classList.add('active');
+            } else {
+                gradientWarning.classList.remove('active');
+            }
+        }
+
+        backgroundColorInput.addEventListener('click', checkGradientWarning);
+        backgroundColorHexInput.addEventListener('focus', checkGradientWarning);
+        // ===== HELPER FUNCTIONS =====
+        function clearSelection(elements) {
+            elements.forEach(el => el.classList.remove('selected'));
+        }
+
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+               
+                img.onerror = (e) => reject(new Error(`Failed to load image: ${src}`));
+                img.src = src;
             });
+        }
+
+        const svgCache = {};
+        async function getSvgText(svgUrl) {
+            if (svgCache[svgUrl]) {
+                return svgCache[svgUrl];
+            }
+            try {
+                const response = await fetch(svgUrl);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch SVG: ${response.statusText}`);
+                }
+                const svgText = await response.text();
+                svgCache[svgUrl] = svgText;
+                return svgText;
+            } catch (error) {
+                console.error(`Error fetching SVG from ${svgUrl}:`, error);
+                throw error;
+            }
+        }
+
+        async function renderSvgIcon(svgUrl, targetColor) {
+            try {
+                let originalSvgText = await getSvgText(svgUrl);
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(originalSvgText, 'image/svg+xml');
+                const svgElement = svgDoc.documentElement;
+
+                const referenceSizeForImage = 300;
+                svgElement.setAttribute('width', `${referenceSizeForImage}px`);
+                svgElement.setAttribute('height', `${referenceSizeForImage}px`);
+                svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+                svgElement.querySelectorAll('style').forEach(styleTag => {
+                    styleTag.remove();
+                });
+                svgElement.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, text, g').forEach(shape => {
+                    const currentFill = shape.getAttribute('fill');
+                    const currentStroke = shape.getAttribute('stroke');
+                    
+                    shape.removeAttribute('fill');
+     
+                    shape.removeAttribute('stroke');
+                    shape.removeAttribute('style');
+
+                    if (currentFill === 'none') {
+                        shape.setAttribute('fill', 'none');
+                
+                    } else {
+                        if (shape.tagName !== 'g' || shape.hasAttribute('fill')) {
+                           shape.setAttribute('fill', targetColor);
+                        }
             
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(radiusPx, 0);
-            ctx.lineTo(size - radiusPx, 0);
-            ctx.quadraticCurveTo(size, 0, size, radiusPx);
-            ctx.lineTo(size, size - radiusPx);
-            ctx.quadraticCurveTo(size, size, size - radiusPx, size);
-            ctx.lineTo(radiusPx, size);
-            ctx.quadraticCurveTo(0, size, 0, size - radiusPx);
-            ctx.lineTo(0, radiusPx);
-            ctx.quadraticCurveTo(0, 0, radiusPx, 0);
-            ctx.closePath();
-            ctx.clip();
-            
-            const iconSize = (size * settings.iconScale) / 100;
-            const iconX = (size - iconSize) / 2;
-            const iconY = (size - iconSize) / 2;
-            
-            ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
-            ctx.restore();
-            URL.revokeObjectURL(url);
-          } else {
-            // For custom uploads (PNG/JPG), draw as-is
-            const img = new Image();
-            const url = URL.createObjectURL(blob);
-            
-            await new Promise((resolve, reject) => {
-              img.onload = resolve;
-              img.onerror = reject;
-              img.src = url;
+                    }
+                    
+                    if (currentStroke === 'none') {
+                        shape.setAttribute('stroke', 'none');
+                    } else if 
+                    (currentStroke) {
+                        shape.setAttribute('stroke', targetColor);
+                    }
+                });
+                if (svgElement.getAttribute('fill') !== 'none') {
+                     svgElement.setAttribute('fill', targetColor);
+                } else if (!svgElement.hasAttribute('fill')) {
+                    svgElement.setAttribute('fill', targetColor);
+                }
+
+                const modifiedSvgText = new XMLSerializer().serializeToString(svgDoc);
+                const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(modifiedSvgText)}`;
+
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = (e) => {
+                   
+                        console.error(`Failed to load modified SVG as image for ${svgUrl}`);
+                        reject(new Error(`Could not load SVG as image for ${svgUrl}.`));
+                    }
+                    img.src = svgDataUrl;
+             
+                });
+
+            } catch (error) {
+                console.error(`Error in renderSvgIcon for ${svgUrl}:`, error);
+                return Promise.reject(error);
+            }
+        }
+        
+        const patternDrawers = {
+            dots: (ctx, item, scaleFactor) => {
+                ctx.beginPath();
+                ctx.arc((item.dotGap || 5) * scaleFactor, (item.dotGap || 5) * scaleFactor, (item.dotSize || 1) * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(((item.dotGap * 4) || 20) * scaleFactor, ((item.dotGap * 3) || 15) * scaleFactor, (item.dotSize || 1) * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(((item.dotGap * 2) || 10) * scaleFactor, ((item.dotGap * 5) || 25) * scaleFactor, (item.dotSize || 1) * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            stripes: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.fillRect(0, 0, (item.width || 5) * scaleFactor, canvasHeight);
+                ctx.fillRect((item.gap || 15) * scaleFactor, 0, (item.width || 5) * scaleFactor, canvasHeight);
+            },
+            lines: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.fillRect(0, 0, canvasWidth, (item.thickness || 5) * scaleFactor);
+                ctx.fillRect(0, (item.spacing || 15) * scaleFactor, canvasWidth, (item.thickness || 5) * scaleFactor);
+            },
+            lines_v: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.fillRect(0, 0, (item.thickness || 5) * scaleFactor, canvasHeight);
+                ctx.fillRect((item.spacing || 15) * scaleFactor, 0, (item.thickness || 5) * scaleFactor, canvasHeight);
+            },
+            crosshatch: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.fillRect(0, 0, canvasWidth, (item.lineThickness || 2) * scaleFactor);
+                ctx.fillRect(0, (item.lineSpacing || 10) * scaleFactor, canvasWidth, (item.lineThickness || 2) * scaleFactor);
+                ctx.fillRect(0, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
+                ctx.fillRect((item.lineSpacing || 10) * scaleFactor, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
+            },
+            squares: (ctx, item, scaleFactor) => {
+                ctx.fillRect(0, 0, (item.squareSize || 10) * scaleFactor, (item.squareSize || 10) * scaleFactor);
+                ctx.fillRect((item.squareGap || 20) * scaleFactor, (item.squareGap || 20) * scaleFactor, (item.squareSize || 10) * scaleFactor, (item.squareSize || 10) * scaleFactor);
+            },
+            grid: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.fillRect(0, 0, canvasWidth, (item.lineThickness || 2) * scaleFactor);
+                ctx.fillRect(0, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
+                ctx.fillRect(canvasWidth - ((item.lineThickness || 2) * scaleFactor), 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
+                ctx.fillRect(0, canvasHeight - ((item.lineThickness || 2) * scaleFactor), canvasWidth, (item.lineThickness || 2) * scaleFactor);
+                ctx.fillRect(canvasWidth/2 - ((item.lineThickness || 2) * scaleFactor)/2, 0, (item.lineThickness || 2) * scaleFactor, canvasHeight);
+                ctx.fillRect(0, canvasHeight/2 - ((item.lineThickness || 2) * scaleFactor)/2, canvasWidth, (item.lineThickness || 2) * scaleFactor);
+            },
+            diamond: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.save();
+                ctx.translate(canvasWidth / 2, canvasHeight / 2);
+                ctx.rotate(Math.PI / 4);
+                ctx.fillRect(-(item.diamondSize || 5) * scaleFactor, -(item.diamondSize || 5) * scaleFactor, (item.diamondSize || 10) * scaleFactor, (item.diamondSize || 10) * scaleFactor);
+                ctx.restore();
+            },
+            noise: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                for (let i = 0; i < canvasWidth * canvasHeight / 5; i++) {
+                    const x = Math.random() * canvasWidth;
+                    const y = Math.random() * canvasHeight;
+                    const size = Math.random() * 1.5 * scaleFactor;
+                    ctx.fillRect(x, y, size, size);
+                }
+            },
+            diagonal_stripes: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.save();
+                ctx.rotate(45 * Math.PI / 180);
+                ctx.fillRect(0, -canvasHeight, (item.width || 4) * scaleFactor, canvasHeight * 2);
+                ctx.fillRect((item.gap || 12) * scaleFactor, -canvasHeight, (item.width || 4) * scaleFactor, canvasHeight * 2);
+                ctx.restore();
+            },
+            checkerboard: (ctx, item, scaleFactor) => {
+                const squareSize = (item.squareSize || 15) * scaleFactor;
+                ctx.fillRect(0, 0, squareSize, squareSize);
+                ctx.fillRect(squareSize, squareSize, squareSize, squareSize);
+            },
+            wave: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.beginPath();
+                ctx.moveTo(0, canvasHeight / 2);
+                ctx.bezierCurveTo(canvasWidth / 4, canvasHeight / 4, canvasWidth / 2, 3 * canvasHeight / 4, canvasWidth, canvasHeight / 2);
+                ctx.lineWidth = 2 * scaleFactor;
+                ctx.stroke();
+            },
+            honeycomb: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                const hexSize = (item.hexSize || 8) * scaleFactor;
+                const hexWidth = hexSize * Math.sqrt(3);
+                const hexHeight = hexSize * 2;
+                function drawHex(cx, cy) {
+                    ctx.beginPath();
+                    for (let i = 0; i < 6; i++) {
+                        ctx.lineTo(cx + hexSize * Math.cos(i * Math.PI / 3), cy + hexSize * Math.sin(i * Math.PI / 3));
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                ctx.fillStyle = `rgba(255,255,255,${item.textureOpacity || 0.09})`;
+                drawHex(hexWidth / 2, hexHeight / 2);
+                drawHex(hexWidth / 2, hexHeight / 2 + hexHeight * 3 / 2);
+                drawHex(hexWidth / 2 + hexWidth * 3 / 2, hexHeight / 2 + hexHeight * 3 / 4);
+            },
+            circles: (ctx, item, scaleFactor) => {
+                ctx.beginPath();
+                ctx.arc((item.circleGap || 10) * scaleFactor, (item.circleGap || 10) * scaleFactor, (item.circleRadius || 5) * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(((item.circleGap * 2) || 20) * scaleFactor, (item.circleGap || 10) * scaleFactor, (item.circleRadius || 5) * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            hex_grid: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                const hexSize = (item.hexSize || 10) * scaleFactor;
+                const hexWidth = hexSize * Math.sqrt(3);
+                const hexHeight = hexSize * 2;
+                function drawHexOutline(cx, cy) {
+                    ctx.beginPath();
+                    for (let i = 0; i < 6; i++) {
+                        ctx.lineTo(cx + hexSize * Math.cos(i * Math.PI / 3), cy + hexSize * Math.sin(i * Math.PI / 3));
+                    }
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.08})`;
+                drawHexOutline(hexWidth / 2, hexHeight / 2);
+                drawHexOutline(hexWidth / 2, hexHeight / 2 + hexHeight * 3 / 2);
+            },
+            pyramids: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.save();
+                ctx.translate(canvasWidth / 2, canvasHeight / 2);
+                ctx.beginPath();
+                ctx.moveTo(-10 * scaleFactor, 10 * scaleFactor);
+                ctx.lineTo(0, -10 * scaleFactor);
+                ctx.lineTo(10 * scaleFactor, 10 * scaleFactor);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            },
+            concentric: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.beginPath();
+                for (let i = 0; i < (item.ringCount || 3); i++) {
+                    ctx.arc(canvasWidth / 2, canvasHeight / 2, (i + 1) * (item.ringGap || 5) * scaleFactor, 0, Math.PI * 2);
+                }
+                ctx.stroke();
+            },
+            diagonal_cross: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.fillRect(0, 0, (item.lineThickness || 3) * scaleFactor, canvasHeight);
+                ctx.fillRect((item.lineSpacing || 15) * scaleFactor, 0, (item.lineThickness || 3) * scaleFactor, canvasHeight);
+                ctx.save();
+                ctx.rotate(90 * Math.PI / 180);
+                ctx.fillRect(0, -(item.lineSpacing || 15) * scaleFactor, (item.lineThickness || 3) * scaleFactor, canvasHeight);
+                ctx.fillRect(0, 0, (item.lineThickness || 3) * scaleFactor, canvasHeight);
+                ctx.restore();
+            },
+            woven: (ctx, item, scaleFactor) => {
+                ctx.fillRect(0, 0, (item.weaveSize || 8) * scaleFactor, (item.weaveSize * 2 || 16) * scaleFactor);
+                ctx.fillRect((item.weaveSize * 2 || 16) * scaleFactor, (item.weaveSize || 8) * scaleFactor, (item.weaveSize || 8) * scaleFactor, (item.weaveSize * 2 || 16) * scaleFactor);
+            },
+            brick: (ctx, item, scaleFactor) => {
+                ctx.fillRect(0, 0, (item.brickWidth || 25) * scaleFactor, (item.brickHeight || 12) * scaleFactor);
+                ctx.fillRect(item.brickWidth / 2 * scaleFactor, (item.brickHeight || 12) * scaleFactor, (item.brickWidth || 25) * scaleFactor, (item.brickHeight || 12) * scaleFactor);
+            },
+            fish_scale: (ctx, item, scaleFactor) => {
+                ctx.beginPath();
+                ctx.arc((item.scaleRadius || 10) * scaleFactor, 0, (item.scaleRadius || 10) * scaleFactor, 0, Math.PI, true);
+                ctx.arc((item.scaleRadius * 3 || 30) * scaleFactor, 0, (item.scaleRadius || 10) * scaleFactor, 0, Math.PI, true);
+                ctx.fill();
+            },
+            stars: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                for (let i = 0; i < (item.starCount || 5); i++) {
+                    const x = Math.random() * canvasWidth;
+                    const y = Math.random() * canvasHeight;
+                    const size = (item.starSize || 3) * scaleFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y + size);
+                    for (let j = 0; j < 5; j++) {
+                        ctx.lineTo(x + size * Math.sin(j * Math.PI * 2 / 5), y + size * Math.cos(j * Math.PI * 2 / 5));
+                        ctx.lineTo(x + size / 2 * Math.sin((j + 0.5) * Math.PI * 2 / 5), y + size / 2 * Math.cos((j + 0.5) * Math.PI * 2 / 5));
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            },
+            doodle: (ctx, item, scaleFactor) => {
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(10 * scaleFactor, 20 * scaleFactor, 20 * scaleFactor, 0, 30 * scaleFactor, 20 * scaleFactor);
+                ctx.bezierCurveTo(10 * scaleFactor, 0, 0, 20 * scaleFactor, 0, 0);
+                ctx.stroke();
+            },
+            bubble: (ctx, item, scaleFactor) => {
+                ctx.beginPath();
+                ctx.arc((item.bubbleSize || 6) * scaleFactor, (item.bubbleSize || 6) * scaleFactor, (item.bubbleSize || 6) * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(((item.bubbleSize * 3) || 18) * scaleFactor, ((item.bubbleSize * 2) || 12) * scaleFactor, (item.bubbleSize || 6) * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            cloud: (ctx, item, scaleFactor) => {
+                ctx.beginPath();
+                ctx.arc(5 * scaleFactor, 10 * scaleFactor, 5 * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(15 * scaleFactor, 8 * scaleFactor, 7 * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(25 * scaleFactor, 10 * scaleFactor, 5 * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            mesh: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.1})`;
+                ctx.lineWidth = 1 * scaleFactor;
+                for (let i = 0; i < canvasWidth; i += (item.meshDensity || 10) * scaleFactor) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, canvasHeight);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(canvasWidth, i);
+                    ctx.stroke();
+                }
+            },
+            ripples: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.07})`;
+                ctx.lineWidth = 1.5 * scaleFactor;
+                ctx.beginPath();
+                ctx.arc(canvasWidth / 2, canvasHeight / 2, (item.rippleStrength || 5) * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(canvasWidth / 2, canvasWidth / 2, (item.rippleStrength || 5) * 2 * scaleFactor, 0, Math.PI * 2);
+                ctx.stroke();
+            },
+            fractal: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.06})`;
+                ctx.lineWidth = 1 * scaleFactor;
+                function drawLine(x1, y1, x2, y2, depth) {
+                    if (depth > 3) return;
+                    const dx = x2 - x1;
+                    const dy = y2 - y1;
+                    const len = Math.sqrt(dx * dx + dy * dy);
+                    if (len < 5 * scaleFactor) return;
+                    const midX = (x1 + x2) / 2;
+                    const midY = (y1 + y2) / 2;
+                    const perpX = midX + dy * 0.1 * Math.random() * scaleFactor;
+                    const perpY = midY - dx * 0.1 * Math.random() * scaleFactor;
+
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(perpX, perpY);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+                    drawLine(x1, y1, perpX, perpY, depth + 1);
+                    drawLine(perpX, perpY, x2, y2, depth + 1);
+                }
+                drawLine(0, 0, canvasWidth, canvasHeight, 0);
+                drawLine(canvasWidth, 0, 0, canvasHeight, 0);
+            },
+            circuit: (ctx, item, scaleFactor, canvasWidth, canvasHeight) => {
+                ctx.strokeStyle = `rgba(255,255,255,${item.textureOpacity || 0.09})`;
+                ctx.lineWidth = 1 * scaleFactor;
+                for (let i = 0; i < canvasWidth; i += 5 * scaleFactor) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, Math.random() * canvasHeight);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(i, Math.random() * canvasHeight, 2 * scaleFactor, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            },
+            camo: (ctx, item, scaleFactor) => {
+                ctx.fillStyle = `rgba(0,0,0,${item.textureOpacity || 0.12})`;
+                ctx.beginPath();
+                ctx.arc(5 * scaleFactor, 5 * scaleFactor, 10 * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(20 * scaleFactor, 10 * scaleFactor, 8 * scaleFactor, 0, Math.PI * 2);
+                ctx.arc(10 * scaleFactor, 20 * scaleFactor, 12 * scaleFactor, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        };
+
+        function drawPattern(ctx, itemData, scaleFactor, canvasWidth, canvasHeight, isTexturePreview = false) {
+            if (!itemData || itemData.textureOpacity === 0) return;
+            const tempPatternCanvas = document.createElement('canvas');
+            const tempPatternCtx = tempPatternCanvas.getContext('2d');
+            tempPatternCanvas.width = 30 * scaleFactor;
+            tempPatternCanvas.height = 30 * scaleFactor;
+            if (isTexturePreview) {
+                tempPatternCtx.fillStyle = `rgba(0,0,0,${itemData.textureOpacity || 0.1})`;
+                tempPatternCtx.strokeStyle = `rgba(0,0,0,${itemData.textureOpacity || 0.1})`;
+            } else {
+                tempPatternCtx.fillStyle = `rgba(255,255,255,${itemData.textureOpacity || 0.1})`;
+                tempPatternCtx.strokeStyle = `rgba(255,255,255,${itemData.textureOpacity || 0.1})`;
+            }
+            tempPatternCtx.lineWidth = 1 * scaleFactor;
+            const drawer = patternDrawers[itemData.pattern];
+            if (drawer) {
+                tempPatternCtx.save();
+                drawer(tempPatternCtx, itemData, scaleFactor, tempPatternCanvas.width, tempPatternCanvas.height);
+                tempPatternCtx.restore();
+            }
+
+            const pattern = ctx.createPattern(tempPatternCanvas, 'repeat');
+            ctx.fillStyle = pattern;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        }
+
+        function renderPatternToMiniCanvas(itemData, targetCanvas, targetCtx, size, type) {
+            targetCtx.clearRect(0, 0, size, size);
+            let baseColor = '#333333';
+            if (type === 'texture') {
+                baseColor = '#888888';
+            }
+
+            targetCtx.fillStyle = baseColor;
+            targetCtx.fillRect(0, 0, size, size);
+            if (itemData.type === 'color') {
+                targetCtx.fillStyle = itemData.value ||
+                baseColor;
+                targetCtx.fillRect(0, 0, size, size);
+            } else if (itemData.type === 'gradient') {
+                const gradient = targetCtx.createLinearGradient(0, 0, size, size);
+                gradient.addColorStop(0, itemData.colors[0]);
+                gradient.addColorStop(1, itemData.colors[1]);
+                targetCtx.fillStyle = gradient;
+                targetCtx.fillRect(0, 0, size, size);
+            } else if (itemData.type === 'texture') {
+                drawPattern(targetCtx, itemData, size / 30, size, size, true);
+            } else if (itemData.type === 'custom-image') {
+                loadImage(itemData.src).then(img => {
+                    targetCtx.drawImage(img, 0, 0, size, size);
+                }).catch(e => console.error("Error loading custom image for preview:", e));
+            }
+        }
+
+        async function populateGrid(container, data, type) {
+            const uploadArea = container.querySelector('.upload-area');
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
+
+            const fragment = document.createDocumentFragment();
+            if (uploadArea) {
+                fragment.appendChild(uploadArea);
+            }
+
+            for (const item of data) {
+                const div = document.createElement('div');
+                div.classList.add('grid-item');
+                div.dataset.id = item.id;
+                div.dataset.type = type;
+
+                if (item.type === 'fa-icon') {
+                    div.innerHTML = `<i class="${item.class}"></i><span class="icon-name">${item.name}</span>`;
+                } else if (item.type === 'custom-image') {
+                    const img = document.createElement('img');
+                    img.src = item.src;
+                    img.alt = item.name;
+                    div.appendChild(img);
+                    const nameSpan = document.createElement('span');
+                    nameSpan.classList.add('icon-name');
+                    nameSpan.textContent = item.name;
+                    div.appendChild(nameSpan);
+                } else if (item.type === 'custom-svg') {
+                    const img = document.createElement('img');
+                    img.alt = item.name;
+                    try {
+                        const whiteSvgImage = await renderSvgIcon(item.src, '#FFFFFF');
+                        img.src = whiteSvgImage.src;
+                    } catch (e) {
+                        console.error(`Error loading white SVG for grid preview (${item.name}):`, e);
+                        img.src = item.src;
+                    }
+                    div.appendChild(img);
+                    const nameSpan = document.createElement('span');
+                    nameSpan.classList.add('icon-name');
+                    nameSpan.textContent = item.name;
+                    div.appendChild(nameSpan);
+                } else if (type === 'background' || type === 'texture') {
+                    const miniCanvas = document.createElement('canvas');
+                    miniCanvas.width = 60;
+                    miniCanvas.height = 60;
+                    const miniCtx = miniCanvas.getContext('2d');
+                    renderPatternToMiniCanvas(item, miniCanvas, miniCtx, 60, type);
+
+                    div.style.backgroundImage = `url(${miniCanvas.toDataURL()})`;
+                    div.style.backgroundSize = 'cover';
+                    div.style.backgroundPosition = 'center';
+                    div.style.position = 'relative';
+
+                    if (item.type === 'custom-image') {
+                        try {
+                            const img = await loadImage(item.src);
+                            miniCtx.clearRect(0, 0, 60, 60);
+                            miniCtx.drawImage(img, 0, 0, 60, 60);
+                            div.style.backgroundImage = `url(${miniCanvas.toDataURL()})`;
+                        } catch (e) {
+                            console.error(`Error loading custom ${type} preview for grid:`, e);
+                            div.style.backgroundColor = '#ccc';
+                        }
+                    }
+                    const nameOverlay = document.createElement('span');
+                    nameOverlay.classList.add('background-name-overlay');
+                    nameOverlay.textContent = item.name;
+                    div.appendChild(nameOverlay);
+                }
+
+                if (type === 'icon' && selectedIcons.includes(item.id)) {
+                    div.classList.add('selected');
+                } else if (type === 'background' && selectedBackgroundId === item.id) {
+                    div.classList.add('selected');
+                } else if (type === 'texture' && selectedTextureId === item.id) {
+                    div.classList.add('selected');
+                }
+
+                div.addEventListener('click', () => handleGridItemClick(item, div, type));
+                fragment.appendChild(div);
+            }
+
+            container.appendChild(fragment);
+            scheduleHeightCheck();
+        }
+
+        function handleGridItemClick(item, element, type) {
+            if (type === 'icon') {
+                if (element.classList.contains('selected')) {
+                    element.classList.remove('selected');
+                    selectedIcons = selectedIcons.filter(id => id !== item.id);
+                    if (latestSelectedIconId === item.id) {
+                        latestSelectedIconId = selectedIcons.length > 0 ?
+                        selectedIcons[selectedIcons.length - 1] : null;
+                    }
+                } else {
+                    element.classList.add('selected');
+                    selectedIcons.push(item.id);
+                    latestSelectedIconId = item.id;
+                }
+                updateSelectedCount();
+            } else if (type ==='background') {
+                clearSelection(bgContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                element.classList.add('selected');
+                selectedBackgroundId = item.id;
+                checkGradientWarning();
+            } else if (type === 'texture') {
+                clearSelection(txContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                element.classList.add('selected');
+                selectedTextureId = item.id;
+            }
+            debouncedDrawPreview();
+        }
+
+        function updateSelectedCount() {
+            selectedCountEl.textContent = selectedIcons.length;
+        }
+
+        async function renderIconToCanvas(iconData, backgroundData, textureData, iconColor, bgColor, glowColor, edgeOn, logoGlowOn, edgeGlowOn, targetCanvas, targetCtx, targetSize) {
+            targetCtx.shadowBlur = 0;
+            targetCtx.shadowColor = 'transparent';
+            targetCtx.shadowOffsetX = 0;
+            targetCtx.shadowOffsetY = 0;
+            targetCtx.clearRect(0, 0, targetSize, targetSize);
+
+            const baseIconFontSize = 150;
+            const iconRenderSizeRatio = 0.7;
+            const baseEdgeLineWidth = 6;
+            const baseEdgeOffset = 20;
+            const baseEdgeLineLength = 55;
+            let iconFontSize = baseIconFontSize * (targetSize / 300);
+            let iconImageDrawSize = targetSize * iconRenderSizeRatio;
+            if (backgroundData && backgroundData.id === 'off') {
+                targetCtx.fillStyle = bgColor;
+                targetCtx.fillRect(0, 0, targetSize, targetSize);
+            } else if (backgroundData) {
+                if (backgroundData.type === 'color') {
+                    targetCtx.fillStyle = backgroundData.value;
+                    targetCtx.fillRect(0, 0, targetSize, targetSize);
+                } else if (backgroundData.type === 'gradient') {
+                    const gradient = targetCtx.createLinearGradient(0, 0, targetSize, targetSize);
+                    gradient.addColorStop(0, backgroundData.colors[0]);
+                    gradient.addColorStop(1, backgroundData.colors[1]);
+                    targetCtx.fillStyle = gradient;
+                    targetCtx.fillRect(0, 0, targetSize, targetSize);
+                } else if (backgroundData.type === 'custom-image') {
+                    try {
+                        const img = await loadImage(backgroundData.src);
+                        targetCtx.drawImage(img, 0, 0, targetSize, targetSize);
+                    } catch (error) {
+                        console.error('Error drawing custom background image:', error);
+                        targetCtx.fillStyle = bgColor;
+                        targetCtx.fillRect(0, 0, targetSize, targetSize);
+                    }
+                }
+            } else {
+                targetCtx.fillStyle = bgColor;
+                targetCtx.fillRect(0, 0, targetSize, targetSize);
+            }
+
+            if (textureData && textureData.textureOpacity > 0) {
+                drawPattern(targetCtx, textureData, targetSize / 300, targetSize, targetSize, false);
+            } else if (textureData && textureData.type === 'custom-image') {
+                try {
+                    const img = await loadImage(textureData.src);
+                    targetCtx.globalAlpha = textureData.textureOpacity || 1;
+                    targetCtx.drawImage(img, 0, 0, targetSize, targetSize);
+                    targetCtx.globalAlpha = 1;
+                } catch (error) {
+                    console.error('Error drawing custom texture image:', error);
+                }
+            }
+
+            if (iconData) {
+                if (logoGlowOn) {
+                    targetCtx.shadowColor = glowColor;
+                    targetCtx.shadowBlur = 15 * (targetSize / 300);
+                    targetCtx.shadowOffsetX = 0;
+                    targetCtx.shadowOffsetY = 0;
+                }
+
+                if (iconData.type === 'fa-icon') {
+                    targetCtx.fillStyle = iconColor;
+                    const fontFamily = iconData.class.includes('fa-brands') ? '"Font Awesome 6 Brands"' : '"Font Awesome 6 Free"';
+                    targetCtx.font = `900 ${iconFontSize}px ${fontFamily}`;
+                    targetCtx.textAlign = 'center';
+                    targetCtx.textBaseline = 'middle';
+                    targetCtx.fillText(iconData.unicode, targetSize / 2, targetSize / 2);
+                } else if (iconData.type === 'custom-image') {
+                    try {
+                        const img = await loadImage(iconData.src);
+                        const imgAspectRatio = img.width / img.height;
+                        let drawWidth = iconImageDrawSize;
+                        let drawHeight = iconImageDrawSize;
+                        if (imgAspectRatio > 1) { 
+                            drawHeight = drawWidth / imgAspectRatio;
+                        } else { 
+                            drawWidth = drawHeight * imgAspectRatio;
+                        }
+                        const drawX = (targetSize - drawWidth) / 2;
+                        const drawY = (targetSize - drawHeight) / 2;
+                        targetCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                    } catch (error) {
+                        console.error('Error drawing custom icon image:', error);
+                        targetCtx.fillStyle = iconColor;
+                        targetCtx.font = `bold ${50 * (targetSize / 300)}px Arial`;
+                        targetCtx.textAlign = 'center';
+                        targetCtx.textBaseline = 'middle';
+                        targetCtx.fillText('?', targetSize / 2, targetSize / 2);
+                    }
+                } else if (iconData.type === 'custom-svg') {
+                    try {
+                        const img = await renderSvgIcon(iconData.src, iconColor);
+                        const imgAspectRatio = img.width / img.height; 
+                        let drawWidth = iconImageDrawSize;
+                        let drawHeight = iconImageDrawSize;
+                        if (imgAspectRatio > 1) { 
+                            drawHeight = drawWidth / imgAspectRatio;
+                        } else { 
+                            drawWidth = drawHeight * imgAspectRatio;
+                        }
+                        const drawX = (targetSize - drawWidth) / 2;
+                        const drawY = (targetSize - drawHeight) / 2;
+                        targetCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                    } catch (error) {
+                        console.error('Error drawing custom SVG icon:', error);
+                        targetCtx.fillStyle = iconColor;
+                        targetCtx.font = `bold ${50 * (targetSize / 300)}px Arial`;
+                        targetCtx.textAlign = 'center';
+                        targetCtx.textBaseline = 'middle';
+                        targetCtx.fillText('SVG?', targetSize / 2, targetSize / 2);
+                    }
+                }
+                targetCtx.shadowBlur = 0;
+                targetCtx.shadowColor = 'transparent';
+                targetCtx.shadowOffsetX = 0;
+                targetCtx.shadowOffsetY = 0;
+            }
+
+            if (edgeOn) {
+                if (edgeGlowOn) {
+                    targetCtx.shadowColor = glowColor;
+                    targetCtx.shadowBlur = 15 * (targetSize / 300);
+                    targetCtx.shadowOffsetX = 0;
+                    targetCtx.shadowOffsetY = 0;
+                }
+
+                targetCtx.strokeStyle = glowColor;
+                targetCtx.lineWidth = baseEdgeLineWidth * (targetSize / 300);
+                targetCtx.lineCap = 'round';
+                targetCtx.lineJoin = 'round';
+                const offset = baseEdgeOffset * (targetSize / 300);
+                const lineLength = baseEdgeLineLength * (targetSize / 300);
+
+                targetCtx.beginPath();
+                targetCtx.moveTo(offset, offset + lineLength);
+                targetCtx.lineTo(offset, offset);
+                targetCtx.lineTo(offset + lineLength, offset);
+                targetCtx.moveTo(targetSize - offset - lineLength, offset);
+                targetCtx.lineTo(targetSize - offset, offset);
+                targetCtx.lineTo(targetSize - offset, offset + lineLength);
+                targetCtx.moveTo(targetSize - offset, targetSize - offset - lineLength);
+                targetCtx.lineTo(targetSize - offset, targetSize - offset);
+                targetCtx.lineTo(targetSize - offset - lineLength, targetSize - offset);
+                targetCtx.moveTo(offset + lineLength, targetSize - offset);
+                targetCtx.lineTo(offset, targetSize - offset);
+                targetCtx.lineTo(offset, targetSize - offset - lineLength); 
+                targetCtx.stroke();
+
+                targetCtx.shadowBlur = 0;
+                targetCtx.shadowColor = 'transparent';
+                targetCtx.shadowOffsetX = 0;
+                targetCtx.shadowOffsetY = 0;
+            }
+        }
+
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        const debouncedDrawPreview = debounce(() => {
+            document.fonts.ready.then(drawPreview);
+        }, 100);
+        async function drawPreview() {
+            const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
+            const currentTx = texturesData.find(tx => tx.id === selectedTextureId);
+            const latestIcon = iconsData.find(icon => icon.id === latestSelectedIconId);
+            if (latestIcon) {
+                previewOverlayText.style.display = 'none';
+            } else {
+                previewOverlayText.style.display = 'block';
+            }
+
+            await renderIconToCanvas(
+                latestIcon,
+                currentBg,
+                currentTx,
+                iconColorInput.value,
+                backgroundColorInput.value,
+       
+                glowColorInput.value,
+                edgeOnOffCheckbox.checked,
+                logoGlowOnOffCheckbox.checked,
+                edgeGlowOnOffCheckbox.checked,
+                iconPreview,
+                ctx,
+           
+                300
+            );
+        }
+
+        function normalizeHex(hex) {
+            if (!hex) return '';
+            hex = hex.startsWith('#') ? hex : '#' + hex;
+            if (hex.length === 4 && /^#[0-9a-fA-F]{3}$/.test(hex)) {
+                return '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+            }
+            return hex.toUpperCase();
+        }
+
+        function isValidHex(hex) {
+            return /^#?([0-9a-fA-F]{3}){1,2}$/.test(hex);
+        }
+
+        function updateColorInputs(colorPickerElement, hexInputElement, newColor) {
+            const normalizedColor = normalizeHex(newColor);
+            colorPickerElement.value = normalizedColor;
+            hexInputElement.value = normalizedColor;
+        }
+
+        // ===== TAB SWITCHING =====
+        showIconsBtn.addEventListener('click', () => {
+            showIconsBtn.classList.add('active');
+            showTxBtn.classList.remove('active');
+            showBgBtn.classList.remove('active');
+            iconsContent.classList.add('active');
+            txContent.classList.remove('active');
+           
+            bgContent.classList.remove('active');
+        });
+        showTxBtn.addEventListener('click', () => {
+            showTxBtn.classList.add('active');
+            showIconsBtn.classList.remove('active');
+            showBgBtn.classList.remove('active');
+            txContent.classList.add('active');
+            iconsContent.classList.remove('active');
+            bgContent.classList.remove('active');
+        });
+        showBgBtn.addEventListener('click', () => {
+            showBgBtn.classList.add('active');
+            showIconsBtn.classList.remove('active');
+            showTxBtn.classList.remove('active');
+            bgContent.classList.add('active');
+            iconsContent.classList.remove('active');
+            txContent.classList.remove('active');
+        });
+        // ===== COLOR SYNC WITH DEBOUNCE =====
+        function setupColorSync(colorPicker, hexInput) {
+            colorPicker.addEventListener('input', () => {
+                updateColorInputs(colorPicker, hexInput, colorPicker.value);
+                debouncedDrawPreview();
             });
-            
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(radiusPx, 0);
-            ctx.lineTo(size - radiusPx, 0);
-            ctx.quadraticCurveTo(size, 0, size, radiusPx);
-            ctx.lineTo(size, size - radiusPx);
-            ctx.quadraticCurveTo(size, size, size - radiusPx, size);
-            ctx.lineTo(radiusPx, size);
-            ctx.quadraticCurveTo(0, size, 0, size - radiusPx);
-            ctx.lineTo(0, radiusPx);
-            ctx.quadraticCurveTo(0, 0, radiusPx, 0);
-            ctx.closePath();
-            ctx.clip();
-            
-            const iconSize = (size * settings.iconScale) / 100;
-            const iconX = (size - iconSize) / 2;
-            const iconY = (size - iconSize) / 2;
-            
-            ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
-            ctx.restore();
-            URL.revokeObjectURL(url);
-          }
-        } catch (error) {
-          console.error('Error drawing icon:', error);
-        }
-      }
-    }
-
-    // ===== UPDATE PREVIEW =====
-    async function updatePreview() {
-      const firstSelectedUrl = selectedIcons.size > 0 ? Array.from(selectedIcons)[0] : null;
-      const icon = firstSelectedUrl ? icons.find(i => i.url === firstSelectedUrl) : null;
+            let hexInputTimeout;
+            hexInput.addEventListener('input', () => {
+                const value = hexInput.value;
+                
+                clearTimeout(hexInputTimeout);
+                
+                if (value.length === 7 && isValidHex(value)) {
       
-      if (!icon) {
-        const size = 256;
-        ctx.fillStyle = '#0a0a0a';
-        ctx.fillRect(0, 0, size, size);
-        ctx.fillStyle = '#666';
-        ctx.font = '14px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Select an icon', size/2, size/2);
-        return;
-      }
-
-      await updatePreviewWithIcon(icon);
-    }
-
-    // ===== GENERATE ICON =====
-    async function generateIcon(icon, outputSize) {
-      const canvas = document.createElement('canvas');
-      canvas.width = outputSize;
-      canvas.height = outputSize;
-      const ctx = canvas.getContext('2d');
-      
-      const radiusPx = (outputSize * settings.cornerRadius) / 100;
-
-      ctx.save();
-      // Create rounded rectangle path
-      ctx.beginPath();
-      ctx.moveTo(radiusPx, 0);
-      ctx.lineTo(outputSize - radiusPx, 0);
-      ctx.quadraticCurveTo(outputSize, 0, outputSize, radiusPx);
-      ctx.lineTo(outputSize, outputSize - radiusPx);
-      ctx.quadraticCurveTo(outputSize, outputSize, outputSize - radiusPx, outputSize);
-      ctx.lineTo(radiusPx, outputSize);
-      ctx.quadraticCurveTo(0, outputSize, 0, outputSize - radiusPx);
-      ctx.lineTo(0, radiusPx);
-      ctx.quadraticCurveTo(0, 0, radiusPx, 0);
-      ctx.closePath();
-      ctx.clip();
-
-      // Draw background
-      if (settings.bgType === 'solid') {
-        ctx.fillStyle = settings.bgColor;
-        ctx.fillRect(0, 0, outputSize, outputSize);
-      } else {
-        const angle = (settings.gradAngle * Math.PI) / 180;
-        const x1 = outputSize / 2 - Math.cos(angle) * outputSize / 2;
-        const y1 = outputSize / 2 - Math.sin(angle) * outputSize / 2;
-        const x2 = outputSize / 2 + Math.cos(angle) * outputSize / 2;
-        const y2 = outputSize / 2 + Math.sin(angle) * outputSize / 2;
-        
-        const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
-        gradient.addColorStop(0, settings.gradColor1);
-        gradient.addColorStop(1, settings.gradColor2);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, outputSize, outputSize);
-      }
-
-      // Draw texture overlay
-      if (settings.texture !== 'none' && loadedTextures[settings.texture]) {
-        ctx.globalAlpha = settings.textureOpacity / 100;
-        const pattern = ctx.createPattern(loadedTextures[settings.texture], 'repeat');
-        ctx.fillStyle = pattern;
-        ctx.fillRect(0, 0, outputSize, outputSize);
-        ctx.globalAlpha = 1;
-      }
-
-      ctx.restore();
-
-      // Draw icon
-      const response = await fetch(icon.url);
-      const blob = await response.blob();
-      const isBuiltIn = icon.builtin;
-      
-      if (blob.type === 'image/svg+xml' && isBuiltIn) {
-        const svgText = await blob.text();
-        let modifiedSvg = svgText.replace(/fill="[^"]*"/g, `fill="${settings.iconColor}"`);
-        modifiedSvg = modifiedSvg.replace(/stroke="[^"]*"/g, `stroke="${settings.iconColor}"`);
-        if (!modifiedSvg.includes('fill=')) {
-          modifiedSvg = modifiedSvg.replace('<svg', `<svg fill="${settings.iconColor}"`);
-        }
-        
-        const img = new Image();
-        const svgBlob = new Blob([modifiedSvg], { type: 'image/svg+xml' });
-        const url = URL.createObjectURL(svgBlob);
-        
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = url;
-        });
-        
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(radiusPx, 0);
-        ctx.lineTo(outputSize - radiusPx, 0);
-        ctx.quadraticCurveTo(outputSize, 0, outputSize, radiusPx);
-        ctx.lineTo(outputSize, outputSize - radiusPx);
-        ctx.quadraticCurveTo(outputSize, outputSize, outputSize - radiusPx, outputSize);
-        ctx.lineTo(radiusPx, outputSize);
-        ctx.quadraticCurveTo(0, outputSize, 0, outputSize - radiusPx);
-        ctx.lineTo(0, radiusPx);
-        ctx.quadraticCurveTo(0, 0, radiusPx, 0);
-        ctx.closePath();
-        ctx.clip();
-        
-        const iconSize = (outputSize * settings.iconScale) / 100;
-        const iconX = (outputSize - iconSize) / 2;
-        const iconY = (outputSize - iconSize) / 2;
-        
-        ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
-        ctx.restore();
-        URL.revokeObjectURL(url);
-      } else {
-        const img = new Image();
-        const url = URL.createObjectURL(blob);
-        
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = url;
-        });
-        
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(radiusPx, 0);
-        ctx.lineTo(outputSize - radiusPx, 0);
-        ctx.quadraticCurveTo(outputSize, 0, outputSize, radiusPx);
-        ctx.lineTo(outputSize, outputSize - radiusPx);
-        ctx.quadraticCurveTo(outputSize, outputSize, outputSize - radiusPx, outputSize);
-        ctx.lineTo(radiusPx, outputSize);
-        ctx.quadraticCurveTo(0, outputSize, 0, outputSize - radiusPx);
-        ctx.lineTo(0, radiusPx);
-        ctx.quadraticCurveTo(0, 0, radiusPx, 0);
-        ctx.closePath();
-        ctx.clip();
-        
-        const iconSize = (outputSize * settings.iconScale) / 100;
-        const iconX = (outputSize - iconSize) / 2;
-        const iconY = (outputSize - iconSize) / 2;
-        
-        ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
-        ctx.restore();
-        URL.revokeObjectURL(url);
-      }
-
-      return canvas;
-    }
-
-    // ===== HANDLE FILE UPLOAD =====
-    iconFileInput.addEventListener('change', async (e) => {
-      const files = Array.from(e.target.files);
-      
-      for (const file of files) {
-        const url = URL.createObjectURL(file);
-        const name = file.name.replace(/\.[^/.]+$/, '');
-        
-        const customIcon = {
-          name: name,
-          url: url,
-          keywords: [name.toLowerCase()],
-          builtin: false,
-          isCustom: true
-        };
-        
-        icons.push(customIcon);
-      }
-      
-      filteredIcons = [...icons];
-      renderIconGrid();
-      
-      // Clear the input
-      e.target.value = '';
-    });
-
-    // ===== DOWNLOAD SINGLE ICON =====
-    async function downloadSingle() {
-      if (selectedIcons.size === 0) return;
-
-      downloadSingleBtn.disabled = true;
-      downloadSingleBtn.textContent = 'Generating...';
-
-      try {
-        const firstSelectedUrl = Array.from(selectedIcons)[0];
-        const icon = icons.find(i => i.url === firstSelectedUrl);
-        
-        const canvas = await generateIcon(icon, settings.size);
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${icon.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${settings.size}px.png`;
-        a.click();
-        URL.revokeObjectURL(url);
-
-        downloadSingleBtn.textContent = 'Downloaded!';
-        setTimeout(() => {
-          downloadSingleBtn.textContent = 'Download';
-          downloadSingleBtn.disabled = false;
-        }, 1500);
-      } catch (error) {
-        console.error('Download error:', error);
-        downloadSingleBtn.textContent = 'Error';
-        setTimeout(() => {
-          downloadSingleBtn.textContent = 'Download';
-          downloadSingleBtn.disabled = false;
-        }, 1500);
-      }
-    }
-
-    // ===== ADD TO BATCH =====
-    function addToBatch() {
-      if (selectedIcons.size === 0) return;
-
-      selectedIcons.forEach(iconUrl => {
-        const icon = icons.find(i => i.url === iconUrl);
-        const batchItem = {
-          icon: icon,
-          settings: {...settings}
-        };
-        batchIcons.push(batchItem);
-      });
-
-      updateBatchUI();
-
-      addToBatchBtn.textContent = 'Added!';
-      setTimeout(() => {
-        addToBatchBtn.textContent = 'Add to Batch';
-      }, 1000);
-    }
-
-    // ===== UPDATE BATCH UI =====
-    function updateBatchUI() {
-      selectionCount.textContent = batchIcons.length;
-      downloadBatchBtn.disabled = batchIcons.length === 0;
-      scheduleHeightCheck();
-    }
-
-    // ===== UPDATE SELECTION UI =====
-    function updateSelectionUI() {
-      const hasSelection = selectedIcons.size > 0;
-      addToBatchBtn.disabled = !hasSelection;
-      downloadSingleBtn.disabled = !hasSelection;
-    }
-
-    // ===== CLEAR BATCH =====
-    function clearBatch() {
-      batchIcons = [];
-      updateBatchUI();
-    }
-
-    // ===== SELECT ALL =====
-    function selectAll() {
-      filteredIcons.forEach(icon => selectedIcons.add(icon.url));
-      renderIconGrid();
-      updateSelectionUI();
-      updatePreview();
-    }
-
-    // ===== DESELECT ALL =====
-    function deselectAll() {
-      selectedIcons.clear();
-      renderIconGrid();
-      updateSelectionUI();
-      updatePreview();
-    }
-
-    // ===== DOWNLOAD BATCH =====
-    async function downloadBatch() {
-      if (batchIcons.length === 0) return;
-
-      downloadBatchBtn.disabled = true;
-      downloadBatchBtn.textContent = `Generating 0/${batchIcons.length}...`;
-
-      try {
-        const zip = new JSZip();
-
-        for (let i = 0; i < batchIcons.length; i++) {
-          const item = batchIcons[i];
-          
-          const originalSettings = {...settings};
-          Object.assign(settings, item.settings);
-          
-          const canvas = await generateIcon(item.icon, item.settings.size);
-          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-          
-          const fileName = `${item.icon.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${item.settings.size}px.png`;
-          zip.file(fileName, blob);
-          
-          Object.assign(settings, originalSettings);
-          
-          downloadBatchBtn.textContent = `Generating ${i + 1}/${batchIcons.length}...`;
+                    hexInputTimeout = setTimeout(() => {
+                        updateColorInputs(colorPicker, hexInput, value);
+                        debouncedDrawPreview();
+                    }, 300);
+           
+                } else if (value.length === 4 && isValidHex(value)) {
+                    hexInputTimeout = setTimeout(() => {
+                        updateColorInputs(colorPicker, hexInput, value);
+                        debouncedDrawPreview();
+             
+                    }, 300);
+                }
+            });
         }
 
-        downloadBatchBtn.textContent = 'Creating ZIP...';
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
-        const url = URL.createObjectURL(zipBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `stream-deck-icons-${Date.now()}.zip`;
-        a.click();
-        URL.revokeObjectURL(url);
-
-        downloadBatchBtn.textContent = 'Downloaded!';
-        setTimeout(() => {
-          downloadBatchBtn.textContent = 'Download Batch (.zip)';
-          downloadBatchBtn.disabled = false;
-        }, 2000);
-      } catch (error) {
-        console.error('Batch download error:', error);
-        downloadBatchBtn.textContent = 'Error';
-        setTimeout(() => {
-          downloadBatchBtn.textContent = 'Download Batch (.zip)';
-          downloadBatchBtn.disabled = false;
-        }, 2000);
-      }
-    }
-
-    // ===== SETUP EVENT LISTENERS =====
-    function setupEventListeners() {
-      // Search
-      searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase().trim();
-        filteredIcons = searchTerm === '' ? [...icons] : 
-          icons.filter(icon => 
-            icon.name.toLowerCase().includes(searchTerm) ||
-            icon.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm))
-          );
-        renderIconGrid();
-      });
-
-      // Size
-      sizeSelect.addEventListener('change', (e) => {
-        settings.size = parseInt(e.target.value);
-      });
-
-      // Background type
-      bgType.addEventListener('change', (e) => {
-        settings.bgType = e.target.value;
-        solidColorControls.style.display = e.target.value === 'solid' ? 'block' : 'none';
-        gradientControls.style.display = e.target.value === 'gradient' ? 'block' : 'none';
-        presetControls.style.display = e.target.value === 'preset' ? 'block' : 'none';
-        updatePreview();
-        scheduleHeightCheck();
-      });
-
-      // Color inputs
-      const syncColorInputs = (colorPicker, textInput, settingKey) => {
-        colorPicker.addEventListener('input', (e) => {
-          settings[settingKey] = e.target.value;
-          textInput.value = e.target.value;
-          settings.presetGradient = null;
-          document.querySelectorAll('.preset-option').forEach(opt => opt.classList.remove('selected'));
-          updatePreview();
+        setupColorSync(iconColorInput, iconColorHexInput);
+        setupColorSync(backgroundColorInput, backgroundColorHexInput);
+        setupColorSync(glowColorInput, glowColorHexInput);
+        // ===== CHECKBOX & NAME LISTENERS =====
+        document.querySelectorAll('.checkbox-item input, #iconName').forEach(input => {
+            input.addEventListener('change', () => {
+                debouncedDrawPreview();
+            });
         });
-        textInput.addEventListener('input', (e) => {
-          const value = e.target.value;
-          if (/^#[0-9A-F]{6}$/i.test(value)) {
-            settings[settingKey] = value;
-            colorPicker.value = value;
-            settings.presetGradient = null;
-            document.querySelectorAll('.preset-option').forEach(opt => opt.classList.remove('selected'));
-            updatePreview();
-          }
+        // ===== DOWNLOAD FUNCTIONALITY =====
+        downloadBtn.addEventListener('click', async () => {
+            if (selectedIcons.length === 0) {
+                alert('Please select at least one icon to download.');
+                return;
+            }
+
+            const baseFileName = iconNameInput.value.trim() || 
+            'CustomIcon';
+            const saveAsZip = document.getElementById('saveAsZip').checked;
+            const currentBg = backgroundsData.find(bg => bg.id === selectedBackgroundId);
+            const currentTx = texturesData.find(tx => tx.id === selectedTextureId);
+            const bgColor = backgroundColorInput.value;
+            const iconColor = iconColorInput.value;
+            const glowColor = glowColorInput.value;
+  
+            const edgeOn = edgeOnOffCheckbox.checked;
+            const logoGlowOn = logoGlowOnOffCheckbox.checked;
+            const edgeGlowOn = edgeGlowOnOffCheckbox.checked;
+
+            let zip;
+            if (saveAsZip) {
+                zip = new JSZip();
+                const sizesToGenerate = [500, 288, 144, 96, 72];
+                const recommendedSize = 144;
+
+                downloadBtn.disabled = true;
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating ZIP...';
+
+                try {
+                    for (const iconId of selectedIcons) {
+                        const iconData = iconsData.find(i => i.id === iconId);
+                        if (!iconData) {
+                            console.warn(`Icon with ID ${iconId} not found. Skipping.`);
+                            continue;
+                        }
+
+                        const cleanIconName = iconData.name.replace(/[^a-z0-9]/gi, '_');
+                        for (const size of sizesToGenerate) {
+                            const exportCanvas = document.createElement('canvas');
+                            exportCanvas.width = size;
+                            exportCanvas.height = size;
+                            const exportCtx = exportCanvas.getContext('2d');
+                            await renderIconToCanvas(
+                                iconData,
+                                currentBg,
+                                currentTx,
+   
+                                iconColor,
+                                bgColor,
+                                glowColor,
+       
+                                edgeOn,
+                                logoGlowOn,
+                                edgeGlowOn,
+           
+                                exportCanvas,
+                                exportCtx,
+                                size
+               
+                            );
+
+                            const dataURL = exportCanvas.toDataURL('image/png');
+                            const base64Data = dataURL.split(',')[1];
+                            
+                            let folderName = `${size}px`;
+                            if (size === recommendedSize) {
+                                folderName = `${size}px (Recommended)`;
+                            }
+
+                            zip.file(`${folderName}/${baseFileName}_${cleanIconName}.png`, base64Data, { base64: true });
+                        }
+                    }
+
+                    const zipBlob = await zip.generateAsync({ type: 'blob' });
+                    const zipFileName = `${baseFileName}_Icons.zip`;
+                    const zipLink = document.createElement('a');
+                    zipLink.href = URL.createObjectURL(zipBlob);
+                    zipLink.download = zipFileName;
+                    document.body.appendChild(zipLink);
+                    zipLink.click();
+                    document.body.removeChild(zipLink);
+                    URL.revokeObjectURL(zipLink.href);
+                } catch (error) {
+                    console.error('Error during ZIP icon download:', error);
+                    alert('An error occurred during ZIP download. Please check the console for details.');
+                } finally {
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons';
+                }
+
+            } else {
+                downloadBtn.disabled = true;
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+                try {
+                    for (const iconId of selectedIcons) {
+                        const iconData = iconsData.find(i => i.id === iconId);
+                        if (!iconData) {
+                            console.warn(`Icon with ID ${iconId} not found. Skipping.`);
+                            continue;
+                        }
+
+                        const exportCanvas = document.createElement('canvas');
+                        exportCanvas.width = selectedSize;
+                        exportCanvas.height = selectedSize;
+                        const exportCtx = exportCanvas.getContext('2d');
+                        await renderIconToCanvas(
+                            iconData,
+                            currentBg,
+                            currentTx,
+               
+                            iconColor,
+                            bgColor,
+                            glowColor,
+                            edgeOn,
+   
+                            logoGlowOn,
+                            edgeGlowOn,
+                            exportCanvas,
+                   
+                            exportCtx,
+                            selectedSize
+                        );
+                        const cleanIconName = iconData.name.replace(/[^a-z0-9]/gi, '_');
+                        const fileName = `${baseFileName}_${cleanIconName}.png`;
+                        const dataURL = exportCanvas.toDataURL('image/png');
+
+                        const link = document.createElement('a');
+                        link.download = fileName;
+                        link.href = dataURL;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                } catch (error) {
+                    console.error('Error during single icon download:', error);
+                    alert('An error occurred during download. Please check the console for details.');
+                } finally {
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons';
+                }
+            }
         });
-      };
+        // ===== UPLOAD HANDLERS =====
+        document.getElementById('uploadIcon').addEventListener('change', async (event) => {
+            if (event.target.files.length > 0) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+        
+                    customIconCount++;
+                    const isSVG = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
+                    const newIconType = isSVG ? 'custom-svg' : 'custom-image';
 
-      syncColorInputs(bgColor, bgColorText, 'bgColor');
-      syncColorInputs(gradColor1, gradColor1Text, 'gradColor1');
-      syncColorInputs(gradColor2, gradColor2Text, 'gradColor2');
-      syncColorInputs(iconColor, iconColorText, 'iconColor');
+                    const newIcon = { 
+          
+                        id: 'custom-icon-' + Date.now(), 
+                        name: `Custom ${customIconCount}`, 
+                        type: newIconType, 
+                        src: e.target.result 
+   
+                    };
+                    iconsData.unshift(newIcon);
+                    await populateGrid(iconsContent, iconsData, 'icon');
+                    
+                    
+                    clearSelection(iconsContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                    const newIconElement = iconsContent.querySelector(`[data-id="${newIcon.id}"]`);
+                    if (newIconElement) newIconElement.classList.add('selected');
+                    selectedIcons = [newIcon.id];
+                    latestSelectedIconId = newIcon.id;
+                    updateSelectedCount();
+                    
+                    debouncedDrawPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
-      // Gradient angle
-      gradAngle.addEventListener('input', (e) => {
-        settings.gradAngle = parseInt(e.target.value);
-        gradAngleValue.textContent = settings.gradAngle + '°';
-        settings.presetGradient = null;
-        document.querySelectorAll('.preset-option').forEach(opt => opt.classList.remove('selected'));
-        updatePreview();
-      });
-
-      // Icon scale
-      iconScale.addEventListener('input', (e) => {
-        settings.iconScale = parseInt(e.target.value);
-        iconScaleValue.textContent = settings.iconScale + '%';
-        updatePreview();
-      });
-
-      // Texture opacity
-      textureOpacity.addEventListener('input', (e) => {
-        settings.textureOpacity = parseInt(e.target.value);
-        textureOpacityValue.textContent = settings.textureOpacity + '%';
-        updatePreview();
-      });
-
-      // Corner radius
-      cornerRadius.addEventListener('input', (e) => {
-        settings.cornerRadius = parseInt(e.target.value);
-        cornerRadiusValue.textContent = settings.cornerRadius + '%';
-        updatePreview();
-      });
-
-      // Buttons
-      selectAllBtn.addEventListener('click', selectAll);
-      deselectAllBtn.addEventListener('click', deselectAll);
-      downloadSingleBtn.addEventListener('click', downloadSingle);
-      addToBatchBtn.addEventListener('click', addToBatch);
-      clearBatchBtn.addEventListener('click', clearBatch);
-      downloadBatchBtn.addEventListener('click', downloadBatch);
-    }
-
-    // ===== INITIALIZE APP =====
-    init();
-
-    // ===== FOURTHWALL SCROLLBAR FIX =====
-    let lastHeight = 0;
-    let resizeTimer;
-
-    function sendHeight() {
-      const height = document.body.scrollHeight;
+        document.getElementById('uploadTx').addEventListener('change', async (event) => {
+            if (event.target.files.length > 0) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+           
+                    customTextureCount++;
+                    const newTx = { 
+                        id: 'custom-tx-' + Date.now(), 
+                        name: `Custom ${customTextureCount}`, 
+            
+                        type: 'custom-image', 
+                        src: e.target.result, 
+                        textureOpacity: 0.8 
+                    };
+              
+                    texturesData.unshift(newTx);
+                    await populateGrid(txContent, texturesData, 'texture');
+                    
+                    clearSelection(txContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                    const newTxElement = txContent.querySelector(`[data-id="${newTx.id}"]`);
+        
+                    if (newTxElement) newTxElement.classList.add('selected');
+                    selectedTextureId = newTx.id;
+                    
+                    debouncedDrawPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        document.getElementById('uploadBg').addEventListener('change', async (event) => {
+            if (event.target.files.length > 0) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    
+                    customBackgroundCount++;
+                    const newBg = { 
+                        id: 'custom-bg-' + Date.now(), 
+                        name: `Custom ${customBackgroundCount}`, 
+                     
+                        type: 'custom-image', 
+                        src: e.target.result 
+                    };
+                    backgroundsData.unshift(newBg);
+                    await populateGrid(bgContent, backgroundsData, 'background');
       
-      if (height !== lastHeight) {
-        lastHeight = height;
-        window.parent.postMessage({ frameHeight: height }, '*');
-      }
-    }
+               
+                    clearSelection(bgContent.querySelectorAll('.grid-item:not(.upload-area)'));
+                    const newBgElement = bgContent.querySelector(`[data-id="${newBg.id}"]`);
+                    if (newBgElement) newBgElement.classList.add('selected');
+                    selectedBackgroundId = newBg.id;
+                    
+                    debouncedDrawPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        // ===== INITIALIZATION =====
+        document.fonts.ready.then(async () => {
+            await populateGrid(iconsContent, iconsData, 'icon');
+            await populateGrid(txContent, texturesData, 'texture');
+            await populateGrid(bgContent, backgroundsData, 'background');
+            debouncedDrawPreview();
+            iconColorHexInput.value = normalizeHex(iconColorInput.value);
+            backgroundColorHexInput.value = normalizeHex(backgroundColorInput.value);
+ 
+            glowColorHexInput.value = normalizeHex(glowColorInput.value);
+            updateSelectedCount();
+            checkGradientWarning();
+        });
+        // ===== FOURTHWALL SCROLLBAR FIX =====
+        let lastHeight = 0;
+        let resizeTimer;
+        function sendHeight() {
+            const height = document.body.scrollHeight;
+            if (height !== lastHeight) {
+                lastHeight = height;
+                window.parent.postMessage({ frameHeight: height }, '*');
+            }
+        }
 
-    function scheduleHeightCheck() {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(sendHeight, 150);
-    }
+        function scheduleHeightCheck() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(sendHeight, 150);
+        }
 
-    window.addEventListener('load', () => {
-      setTimeout(sendHeight, 100);
-    });
-
-    window.addEventListener('resize', () => {
-      scheduleHeightCheck();
-    });
-    // ===== END OF SCROLLBAR FIX =====
-  </script>
+        window.addEventListener('load', () => {
+            setTimeout(sendHeight, 100);
+        });
+        window.addEventListener('resize', () => {
+            scheduleHeightCheck();
+        });
+    </script>
 </body>
 </html>
