@@ -110,6 +110,17 @@
             font-family: sans-serif;
         }
 
+        .input-group input[type="number"],
+        .input-group input[type="date"] {
+            background: #191919;
+            border: 1px solid #323232;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: #D4D4D4;
+            font-size: 14px;
+            font-family: sans-serif;
+        }
+
         .input-group textarea {
             min-height: 120px;
             resize: vertical;
@@ -619,7 +630,7 @@
                     </div>
                 </div>
 
-                <div class="input-group">
+                <div class="input-group" style="margin-bottom: 0;">
                     <input 
                         type="number" 
                         id="custom-retweets" 
@@ -764,7 +775,7 @@
         const previewDate = document.getElementById('preview-date');
 
         let currentProfileImage = null;
-        let currentMode = 'custom'; // 'url' or 'custom'
+        let currentMode = 'url'; // Start with 'url' mode
 
         // Set today's date
         const today = new Date().toISOString().split('T')[0];
@@ -1064,58 +1075,3 @@
                 showStatus('Error generating image: ' + error.message, 'error');
                 downloadBtn.textContent = 'Download as PNG';
                 downloadBtn.disabled = false;
-            }
-        });
-
-        // ===== CUSTOMIZATION LISTENERS =====
-        showProfilePic.addEventListener('change', applyCustomizations);
-        showLikes.addEventListener('change', applyCustomizations);
-        showRetweets.addEventListener('change', applyCustomizations);
-        showDate.addEventListener('change', applyCustomizations);
-        themeLight.addEventListener('change', applyTheme);
-        themeDark.addEventListener('change', applyTheme);
-
-        // ===== ENTER KEY SUPPORT =====
-        tweetUrl.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                loadBtn.click();
-            }
-        });
-
-        // ===== INITIALIZE =====
-        applyCustomizations();
-        applyTheme();
-        updateCustomPreview();
-    </script>
-
-    <script>
-    // ===== FOURTHWALL SCROLLBAR FIX =====
-    let lastHeight = 0;
-    let resizeTimer;
-
-    function sendHeight() {
-      const height = document.body.scrollHeight;
-      
-      if (height !== lastHeight) {
-        lastHeight = height;
-        window.parent.postMessage({ frameHeight: height }, '*');
-      }
-    }
-
-    function scheduleHeightCheck() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(sendHeight, 150);
-    }
-
-    window.addEventListener('load', () => {
-        setTimeout(sendHeight, 100);
-    });
-
-    window.addEventListener('resize', () => {
-        scheduleHeightCheck();
-    });
-    
-    // ===== END OF SCROLLBAR FIX =====
-    </script>
-</body>
-</html>
