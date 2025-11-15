@@ -32,8 +32,18 @@
 
     /* ===== MAIN CONTAINER ===== */
     .container {
-      max-width: 800px;
+      max-width: 1400px;
       margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    /* ===== DESKTOP LAYOUT ===== */
+    @media (min-width: 900px) {
+      .container {
+        grid-template-columns: 350px 1fr;
+      }
     }
 
     /* ===== CONTROLS SECTION ===== */
@@ -42,7 +52,6 @@
       border: 1px solid var(--outline);
       border-radius: var(--radius);
       padding: 24px 16px;
-      margin-bottom: 16px;
     }
 
     .control-group {
@@ -168,18 +177,28 @@
       border: 1px solid var(--outline);
       border-radius: var(--radius);
       padding: 24px 16px;
-      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
     }
 
     .preview-label {
       font-size: 12px;
       color: var(--text-secondary);
-      margin-bottom: 12px;
       text-align: center;
     }
 
     .preview-container {
       width: 100%;
+      max-width: 800px;
       aspect-ratio: 16/9;
       border-radius: var(--radius);
       overflow: hidden;
@@ -189,8 +208,8 @@
 
     .preview-container.vertical {
       aspect-ratio: 9/16;
-      max-height: 500px;
-      margin: 0 auto;
+      max-width: 400px;
+      max-height: 600px;
     }
 
     #preview-canvas {
@@ -247,7 +266,7 @@
     }
 
     /* ===== RESPONSIVE ===== */
-    @media (max-width: 600px) {
+    @media (max-width: 899px) {
       body {
         padding: 16px 12px;
       }
@@ -263,23 +282,26 @@
       .toggle-btn {
         width: 100%;
       }
-
-      .preview-container.vertical {
-        max-height: 400px;
-      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- ===== CONTROLS ===== -->
+    <!-- ===== CONTROLS (LEFT SIDE ON DESKTOP) ===== -->
     <div class="controls">
       <div class="control-group">
         <div class="control-label">Orientation</div>
         <div class="toggle-group">
-          <button class="toggle-btn active" data-orientation="horizontal">Horizontal (4K)</button>
-          <button class="toggle-btn" data-orientation="vertical">Vertical (4K)</button>
+          <button class="toggle-btn active" data-orientation="horizontal">Horizontal</button>
+          <button class="toggle-btn" data-orientation="vertical">Vertical</button>
         </div>
+      </div>
+
+      <div class="control-group">
+        <label class="checkbox-toggle">
+          <input type="checkbox" id="blur-toggle" checked>
+          <span>Apply Blur Effect</span>
+        </label>
       </div>
 
       <div class="control-group">
@@ -291,17 +313,19 @@
 
       <div class="control-group">
         <div class="button-grid">
-          <button class="btn" id="randomize-btn">Randomize Colors</button>
+          <button class="btn" id="randomize-btn">Randomize</button>
           <button class="btn btn-primary" id="download-btn">Download 4K</button>
         </div>
       </div>
     </div>
 
-    <!-- ===== PREVIEW ===== -->
+    <!-- ===== PREVIEW (RIGHT SIDE ON DESKTOP) ===== -->
     <div class="preview-section">
-      <div class="preview-label">Preview (scaled down for display)</div>
-      <div class="preview-container" id="preview-container">
-        <canvas id="preview-canvas"></canvas>
+      <div class="preview-wrapper">
+        <div class="preview-label">Preview (scaled for display)</div>
+        <div class="preview-container" id="preview-container">
+          <canvas id="preview-canvas"></canvas>
+        </div>
       </div>
     </div>
   </div>
@@ -310,7 +334,9 @@
     // ===== WALLPAPER GENERATOR STATE =====
     let orientation = 'horizontal';
     let noiseEnabled = false;
+    let blurEnabled = true;
     let currentColors = [];
+    let circleData = []; // Store circle positions for consistency
 
     const previewCanvas = document.getElementById('preview-canvas');
     const previewCtx = previewCanvas.getContext('2d', { willReadFrequently: true });
@@ -330,7 +356,14 @@
         }
         
         generateWallpaper();
+        scheduleHeightCheck();
       });
+    });
+
+    // ===== BLUR TOGGLE =====
+    document.getElementById('blur-toggle').addEventListener('change', (e) => {
+      blurEnabled = e.target.checked;
+      generateWallpaper();
     });
 
     // ===== NOISE TOGGLE =====
@@ -364,26 +397,74 @@
       return colors;
     }
 
-    // ===== APPLY NOISE/GRAIN =====
-    function applyNoise(ctx, width, height) {
-      const imageData = ctx.getImageData(0, 0, width, height);
-      const data = imageData.data;
+    // ===== GENERATE CIRCLE DATA =====
+    function generateCircleData() {
+      circleData = [];
+      for (let i = 0; i < 40; i++) {
+        circleData.push({
+          x: Math.random(),
+          y: Math.random(),
+          radiusScale: Math.random() * 0.3 + 0.2,
+          colorIndex: Math.floor(Math.random() * currentColors.length)
+        });
+      }
+    }
+
+    // ===== DRAW WALLPAPER ON CANVAS =====
+    function drawWallpaper(ctx, width, height, applyNoise = false) {
+      // Create gradient
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
       
-      const noiseIntensity = 25;
+      currentColors.forEach((color, index) => {
+        gradient.addColorStop(index / (currentColors.length - 1), color);
+      });
       
-      for (let i = 0; i < data.length; i += 4) {
-        const noise = (Math.random() - 0.5) * noiseIntensity;
-        data[i] += noise;     // R
-        data[i + 1] += noise; // G
-        data[i + 2] += noise; // B
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+      
+      if (blurEnabled) {
+        // Apply blur effect using shadow blur
+        ctx.shadowBlur = width * 0.05;
+        ctx.shadowColor = currentColors[0];
+        
+        // Draw overlapping circles using stored data
+        circleData.forEach(circle => {
+          const x = circle.x * width;
+          const y = circle.y * height;
+          const radius = circle.radiusScale * width;
+          
+          ctx.fillStyle = currentColors[circle.colorIndex];
+          ctx.globalAlpha = 0.3;
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
       }
       
-      ctx.putImageData(imageData, 0, 0);
+      // Apply noise as overlay (after blur)
+      if (applyNoise && noiseEnabled) {
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        const noiseIntensity = 25;
+        
+        for (let i = 0; i < data.length; i += 4) {
+          const noise = (Math.random() - 0.5) * noiseIntensity;
+          data[i] += noise;     // R
+          data[i + 1] += noise; // G
+          data[i + 2] += noise; // B
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+      }
     }
 
     // ===== GENERATE WALLPAPER =====
     function generateWallpaper() {
       currentColors = generateRandomColors();
+      generateCircleData();
       
       // Preview dimensions (scaled down)
       const previewWidth = previewCanvas.offsetWidth * 2 || 800;
@@ -392,43 +473,7 @@
       previewCanvas.width = previewWidth;
       previewCanvas.height = previewHeight;
       
-      // Create gradient
-      const gradient = previewCtx.createLinearGradient(
-        0, 0,
-        previewWidth, previewHeight
-      );
-      
-      currentColors.forEach((color, index) => {
-        gradient.addColorStop(index / (currentColors.length - 1), color);
-      });
-      
-      previewCtx.fillStyle = gradient;
-      previewCtx.fillRect(0, 0, previewWidth, previewHeight);
-      
-      // Apply blur effect using shadow blur
-      previewCtx.shadowBlur = 100;
-      previewCtx.shadowColor = currentColors[0];
-      
-      // Draw multiple overlapping circles for blur effect
-      for (let i = 0; i < 20; i++) {
-        const x = Math.random() * previewWidth;
-        const y = Math.random() * previewHeight;
-        const radius = Math.random() * 300 + 200;
-        const colorIndex = Math.floor(Math.random() * currentColors.length);
-        
-        previewCtx.fillStyle = currentColors[colorIndex];
-        previewCtx.globalAlpha = 0.3;
-        previewCtx.beginPath();
-        previewCtx.arc(x, y, radius, 0, Math.PI * 2);
-        previewCtx.fill();
-      }
-      
-      previewCtx.globalAlpha = 1;
-      previewCtx.shadowBlur = 0;
-      
-      if (noiseEnabled) {
-        applyNoise(previewCtx, previewWidth, previewHeight);
-      }
+      drawWallpaper(previewCtx, previewWidth, previewHeight, true);
     }
 
     // ===== DOWNLOAD 4K WALLPAPER =====
@@ -443,40 +488,7 @@
       downloadCanvas.width = width;
       downloadCanvas.height = height;
       
-      // Create gradient
-      const gradient = downloadCtx.createLinearGradient(0, 0, width, height);
-      
-      currentColors.forEach((color, index) => {
-        gradient.addColorStop(index / (currentColors.length - 1), color);
-      });
-      
-      downloadCtx.fillStyle = gradient;
-      downloadCtx.fillRect(0, 0, width, height);
-      
-      // Apply blur effect
-      downloadCtx.shadowBlur = 200;
-      downloadCtx.shadowColor = currentColors[0];
-      
-      // Draw overlapping circles for blur
-      for (let i = 0; i < 40; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const radius = Math.random() * 600 + 400;
-        const colorIndex = Math.floor(Math.random() * currentColors.length);
-        
-        downloadCtx.fillStyle = currentColors[colorIndex];
-        downloadCtx.globalAlpha = 0.3;
-        downloadCtx.beginPath();
-        downloadCtx.arc(x, y, radius, 0, Math.PI * 2);
-        downloadCtx.fill();
-      }
-      
-      downloadCtx.globalAlpha = 1;
-      downloadCtx.shadowBlur = 0;
-      
-      if (noiseEnabled) {
-        applyNoise(downloadCtx, width, height);
-      }
+      drawWallpaper(downloadCtx, width, height, true);
       
       // Download
       downloadCanvas.toBlob((blob) => {
