@@ -85,6 +85,38 @@
       color: var(--text-secondary);
     }
 
+    .upload-section {
+      margin-bottom: 16px;
+      padding: 16px;
+      background: var(--bg);
+      border: 2px dashed var(--outline);
+      border-radius: var(--radius);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .upload-section:hover {
+      border-color: var(--accent);
+      background: var(--hover);
+    }
+
+    .upload-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    #icon-file-input {
+      display: none;
+    }
+
+    .selection-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
     .icon-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
@@ -125,6 +157,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
+      position: relative;
     }
 
     .icon-card:hover {
@@ -137,10 +170,28 @@
       background: var(--hover);
     }
 
+    .icon-card.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--bg);
+      font-weight: bold;
+    }
+
     .icon-preview {
       width: 36px;
       height: 36px;
       filter: brightness(0) invert(1);
+      object-fit: contain;
     }
 
     .icon-name {
@@ -190,6 +241,7 @@
       display: block;
       max-width: 100%;
       height: auto;
+      border-radius: 12px;
     }
 
     .control-section {
@@ -288,6 +340,50 @@
       cursor: pointer;
     }
 
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .preset-option {
+      aspect-ratio: 16/9;
+      border: 2px solid var(--outline);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preset-option:hover {
+      border-color: var(--hover);
+      transform: scale(1.05);
+    }
+
+    .preset-option.selected {
+      border-color: var(--accent);
+    }
+
+    .preset-option.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 16px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--bg);
+      font-weight: bold;
+    }
+
     .texture-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -365,6 +461,11 @@
       font-weight: bold;
     }
 
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
     .btn-group {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -413,6 +514,10 @@
       .icon-grid {
         max-height: 400px;
       }
+
+      .preset-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     @media (max-width: 640px) {
@@ -450,6 +555,10 @@
       .selection-actions .btn {
         flex: 1;
       }
+
+      .preset-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -460,6 +569,19 @@
       <!-- ===== LEFT: ICON LIBRARY ===== -->
       <div class="icon-library">
         <div class="section-header">Icon Library</div>
+        
+        <!-- ===== UPLOAD SECTION ===== -->
+        <div class="upload-section" onclick="document.getElementById('icon-file-input').click()">
+          <div class="upload-label">📁 Click to upload custom icons (PNG, JPG, SVG)</div>
+          <input type="file" id="icon-file-input" accept="image/png,image/jpeg,image/svg+xml" multiple>
+        </div>
+
+        <!-- ===== SELECTION CONTROLS ===== -->
+        <div class="selection-controls">
+          <button class="btn btn-small" id="select-all-btn">Select All</button>
+          <button class="btn btn-small" id="deselect-all-btn">Deselect All</button>
+        </div>
+
         <div class="search-wrapper">
           <input 
             type="text" 
@@ -506,6 +628,7 @@
             <select id="bg-type" class="control-input">
               <option value="solid">Solid Color</option>
               <option value="gradient">Gradient</option>
+              <option value="preset">Preset Gradient</option>
             </select>
           </div>
 
@@ -542,6 +665,13 @@
               </div>
             </div>
           </div>
+
+          <div id="preset-controls" style="display: none;">
+            <div class="control-group">
+              <label class="control-label">Preset Gradients</label>
+              <div class="preset-grid" id="preset-grid"></div>
+            </div>
+          </div>
         </div>
 
         <!-- ===== ICON CONTROLS ===== -->
@@ -568,7 +698,7 @@
           <div class="control-group">
             <label class="control-label">Texture Overlay</label>
             <div class="texture-grid" id="texture-grid">
-              <div class="texture-option texture-none selected" data-texture="none"></div>
+              <div class="texture-option texture-none selected" data-texture="none" title="None"></div>
             </div>
           </div>
 
@@ -617,47 +747,66 @@
 
   <script>
     // ===== ICON DATABASE =====
-    const icons = [
-      { name: 'Adobe Acrobat', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-acrobat.svg', keywords: ['adobe', 'acrobat', 'pdf', 'document', 'reader'] },
-      { name: 'Adobe Illustrator', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-illustrator.svg', keywords: ['adobe', 'illustrator', 'vector', 'design', 'graphics', 'ai'] },
-      { name: 'Adobe Lightroom', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-lightroom.svg', keywords: ['adobe', 'lightroom', 'photo', 'editing', 'photography', 'lr'] },
-      { name: 'Adobe Photoshop', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-photoshop.svg', keywords: ['adobe', 'photoshop', 'photo', 'editing', 'graphics', 'ps'] },
-      { name: 'Adobe Premiere Pro', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-premiere-pro.svg', keywords: ['adobe', 'premiere', 'video', 'editing', 'film', 'pr'] },
-      { name: 'Amazon', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/amazon.svg', keywords: ['amazon', 'shopping', 'ecommerce', 'online', 'store'] },
-      { name: 'Arrow Down', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-down.svg', keywords: ['arrow', 'down', 'direction', 'navigate', 'point'] },
-      { name: 'Arrow Left', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-left.svg', keywords: ['arrow', 'left', 'direction', 'navigate', 'back', 'previous'] },
-      { name: 'Arrow Right', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-right.svg', keywords: ['arrow', 'right', 'direction', 'navigate', 'forward', 'next'] },
-      { name: 'Arrow Up', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-up.svg', keywords: ['arrow', 'up', 'direction', 'navigate', 'point'] },
-      { name: 'Arrows Horizontal', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows-h.svg', keywords: ['arrow', 'horizontal', 'dual', 'left', 'right', 'bidirectional', 'swap'] },
-      { name: 'Arrows Spin', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows-spin.svg', keywords: ['arrow', 'spin', 'rotate', 'refresh', 'reload', 'cycle'] },
-      { name: 'Arrows All', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows.svg', keywords: ['arrow', 'all', 'directions', 'navigate', 'move', 'expand'] },
-      { name: 'Calendar', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/calendar.svg', keywords: ['calendar', 'date', 'schedule', 'time', 'event', 'planner'] },
-      { name: 'Discord', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/discord.svg', keywords: ['discord', 'chat', 'voice', 'gaming', 'community', 'social'] },
-      { name: 'Download', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/download.svg', keywords: ['download', 'save', 'get', 'arrow', 'import'] },
-      { name: 'Elgato', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/elgato.svg', keywords: ['elgato', 'stream', 'deck', 'gaming', 'streaming', 'capture'] },
-      { name: 'Facebook', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/facebook.svg', keywords: ['facebook', 'social', 'media', 'meta', 'network'] },
-      { name: 'Google Drive', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/google-drive.svg', keywords: ['google', 'drive', 'cloud', 'storage', 'files', 'docs'] },
-      { name: 'Google', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/google.svg', keywords: ['google', 'search', 'browser', 'web', 'internet'] },
-      { name: 'Instagram', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/instagram.svg', keywords: ['instagram', 'social', 'media', 'photo', 'sharing', 'meta'] },
-      { name: 'Reddit', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/reddit.svg', keywords: ['reddit', 'social', 'community', 'forum', 'discussion'] },
-      { name: 'Safari', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/safari.svg', keywords: ['safari', 'browser', 'web', 'apple', 'internet'] },
-      { name: 'Text', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/text.svg', keywords: ['text', 'font', 'type', 'letter', 't', 'typography'] },
-      { name: 'TikTok', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/tiktok.svg', keywords: ['tiktok', 'social', 'media', 'video', 'short', 'entertainment'] },
-      { name: 'Twitch', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/twitch.svg', keywords: ['twitch', 'streaming', 'gaming', 'live', 'broadcast', 'stream'] },
-      { name: 'X (Twitter)', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/x-twitter.svg', keywords: ['x', 'twitter', 'social', 'media', 'tweet', 'post'] },
-      { name: 'YouTube', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/youtube.svg', keywords: ['youtube', 'video', 'streaming', 'google', 'content', 'creator'] }
+    const builtInIcons = [
+      { name: 'Adobe Acrobat', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-acrobat.svg', keywords: ['adobe', 'acrobat', 'pdf', 'document', 'reader'], builtin: true },
+      { name: 'Adobe Illustrator', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-illustrator.svg', keywords: ['adobe', 'illustrator', 'vector', 'design', 'graphics', 'ai'], builtin: true },
+      { name: 'Adobe Lightroom', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-lightroom.svg', keywords: ['adobe', 'lightroom', 'photo', 'editing', 'photography', 'lr'], builtin: true },
+      { name: 'Adobe Photoshop', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-photoshop.svg', keywords: ['adobe', 'photoshop', 'photo', 'editing', 'graphics', 'ps'], builtin: true },
+      { name: 'Adobe Premiere Pro', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-premiere-pro.svg', keywords: ['adobe', 'premiere', 'video', 'editing', 'film', 'pr'], builtin: true },
+      { name: 'Amazon', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/amazon.svg', keywords: ['amazon', 'shopping', 'ecommerce', 'online', 'store'], builtin: true },
+      { name: 'Arrow Down', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-down.svg', keywords: ['arrow', 'down', 'direction', 'navigate', 'point'], builtin: true },
+      { name: 'Arrow Left', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-left.svg', keywords: ['arrow', 'left', 'direction', 'navigate', 'back', 'previous'], builtin: true },
+      { name: 'Arrow Right', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-right.svg', keywords: ['arrow', 'right', 'direction', 'navigate', 'forward', 'next'], builtin: true },
+      { name: 'Arrow Up', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-up.svg', keywords: ['arrow', 'up', 'direction', 'navigate', 'point'], builtin: true },
+      { name: 'Arrows Horizontal', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows-h.svg', keywords: ['arrow', 'horizontal', 'dual', 'left', 'right', 'bidirectional', 'swap'], builtin: true },
+      { name: 'Arrows Spin', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows-spin.svg', keywords: ['arrow', 'spin', 'rotate', 'refresh', 'reload', 'cycle'], builtin: true },
+      { name: 'Arrows All', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows.svg', keywords: ['arrow', 'all', 'directions', 'navigate', 'move', 'expand'], builtin: true },
+      { name: 'Calendar', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/calendar.svg', keywords: ['calendar', 'date', 'schedule', 'time', 'event', 'planner'], builtin: true },
+      { name: 'Discord', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/discord.svg', keywords: ['discord', 'chat', 'voice', 'gaming', 'community', 'social'], builtin: true },
+      { name: 'Download', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/download.svg', keywords: ['download', 'save', 'get', 'arrow', 'import'], builtin: true },
+      { name: 'Elgato', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/elgato.svg', keywords: ['elgato', 'stream', 'deck', 'gaming', 'streaming', 'capture'], builtin: true },
+      { name: 'Facebook', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/facebook.svg', keywords: ['facebook', 'social', 'media', 'meta', 'network'], builtin: true },
+      { name: 'Google Drive', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/google-drive.svg', keywords: ['google', 'drive', 'cloud', 'storage', 'files', 'docs'], builtin: true },
+      { name: 'Google', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/google.svg', keywords: ['google', 'search', 'browser', 'web', 'internet'], builtin: true },
+      { name: 'Instagram', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/instagram.svg', keywords: ['instagram', 'social', 'media', 'photo', 'sharing', 'meta'], builtin: true },
+      { name: 'Reddit', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/reddit.svg', keywords: ['reddit', 'social', 'community', 'forum', 'discussion'], builtin: true },
+      { name: 'Safari', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/safari.svg', keywords: ['safari', 'browser', 'web', 'apple', 'internet'], builtin: true },
+      { name: 'Text', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/text.svg', keywords: ['text', 'font', 'type', 'letter', 't', 'typography'], builtin: true },
+      { name: 'TikTok', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/tiktok.svg', keywords: ['tiktok', 'social', 'media', 'video', 'short', 'entertainment'], builtin: true },
+      { name: 'Twitch', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/twitch.svg', keywords: ['twitch', 'streaming', 'gaming', 'live', 'broadcast', 'stream'], builtin: true },
+      { name: 'X (Twitter)', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/x-twitter.svg', keywords: ['x', 'twitter', 'social', 'media', 'tweet', 'post'], builtin: true },
+      { name: 'YouTube', url: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/youtube.svg', keywords: ['youtube', 'video', 'streaming', 'google', 'content', 'creator'], builtin: true }
     ];
 
     // ===== TEXTURE DATABASE =====
     const textures = [
       { name: 'Noise', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiLz48L3N2Zz4=' },
       { name: 'Dots', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9IiNmZmYiLz48L3N2Zz4=' },
-      { name: 'Grid', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDBoNDB2MVYwek0wIDBoMXY0MEgweiIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iLjEiLz48L3N2Zz4=' }
+      { name: 'Grid', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDBoNDB2MVYwek0wIDBoMXY0MEgweiIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iLjEiLz48L3N2Zz4=' },
+      { name: 'Diagonal Lines', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTAgNDBMNDAgME00MCA0MEw4MCAwTTAgMEwtNDAgNDAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxIiBvcGFjaXR5PSIwLjEiLz48L3N2Zz4=' },
+      { name: 'Carbon Fiber', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNiIgaGVpZ2h0PSI2IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI2IiBoZWlnaHQ9IjYiIGZpbGw9IiMxYTFhMWEiLz48Y2lyY2xlIGN4PSIzIiBjeT0iMyIgcj0iMSIgZmlsbD0iIzMzMyIvPjwvc3ZnPg==' },
+      { name: 'Hexagons', url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0yOCAwTDU2IDE2LjFWNDcuOUwyOCA2NEwwIDQ3LjlWMTYuMXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxIiBvcGFjaXR5PSIwLjA1Ii8+PC9zdmc+' }
+    ];
+
+    // ===== GRADIENT PRESETS =====
+    const gradientPresets = [
+      { name: 'Sunset', colors: ['#FF512F', '#DD2476'], angle: 135 },
+      { name: 'Ocean', colors: ['#2E3192', '#1BFFFF'], angle: 135 },
+      { name: 'Purple Haze', colors: ['#360033', '#0b8793'], angle: 135 },
+      { name: 'Fire', colors: ['#f12711', '#f5af19'], angle: 45 },
+      { name: 'Ice', colors: ['#00d2ff', '#3a7bd5'], angle: 135 },
+      { name: 'Forest', colors: ['#134E5E', '#71B280'], angle: 135 },
+      { name: 'Royal', colors: ['#141E30', '#243B55'], angle: 135 },
+      { name: 'Peach', colors: ['#ED4264', '#FFEDBC'], angle: 135 },
+      { name: 'Aqua', colors: ['#13547a', '#80d0c7'], angle: 135 },
+      { name: 'Neon', colors: ['#7F00FF', '#E100FF'], angle: 135 },
+      { name: 'Candy', colors: ['#D38312', '#A83279'], angle: 135 },
+      { name: 'Midnight', colors: ['#232526', '#414345'], angle: 135 }
     ];
 
     // ===== STATE =====
-    let currentIcon = null;
-    let selectedIconElement = null;
+    let icons = [...builtInIcons];
+    let selectedIcons = new Set();
     let filteredIcons = [...icons];
     let batchIcons = [];
     let loadedTextures = {};
@@ -670,6 +819,7 @@
       gradColor1: '#1a1a2e',
       gradColor2: '#16213e',
       gradAngle: 135,
+      presetGradient: null,
       iconColor: '#FFFFFF',
       iconScale: 60,
       texture: 'none',
@@ -683,6 +833,7 @@
     const emptyState = document.getElementById('empty-state');
     const previewCanvas = document.getElementById('preview-canvas');
     const ctx = previewCanvas.getContext('2d');
+    const iconFileInput = document.getElementById('icon-file-input');
 
     // Controls
     const sizeSelect = document.getElementById('size-select');
@@ -707,8 +858,12 @@
     const cornerRadiusValue = document.getElementById('corner-radius-value');
     const solidColorControls = document.getElementById('solid-color-controls');
     const gradientControls = document.getElementById('gradient-controls');
+    const presetControls = document.getElementById('preset-controls');
+    const presetGrid = document.getElementById('preset-grid');
 
     // Buttons
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const deselectAllBtn = document.getElementById('deselect-all-btn');
     const addToBatchBtn = document.getElementById('add-to-batch-btn');
     const downloadSingleBtn = document.getElementById('download-single-btn');
     const clearBatchBtn = document.getElementById('clear-batch-btn');
@@ -719,6 +874,7 @@
     function init() {
       renderIconGrid();
       renderTextureGrid();
+      renderPresetGrid();
       setupEventListeners();
       updatePreview();
       preloadTextures();
@@ -731,6 +887,7 @@
       if (filteredIcons.length === 0) {
         iconGrid.style.display = 'none';
         emptyState.style.display = 'block';
+        scheduleHeightCheck();
         return;
       }
 
@@ -740,12 +897,16 @@
       filteredIcons.forEach(icon => {
         const card = document.createElement('div');
         card.className = 'icon-card';
+        if (selectedIcons.has(icon.url)) {
+          card.classList.add('selected');
+        }
+        
         card.innerHTML = `
-          <img src="${icon.url}" alt="${icon.name}" class="icon-preview">
+          <img src="${icon.url}" alt="${icon.name}" class="icon-preview" style="${icon.builtin ? '' : 'filter: none;'}">
           <div class="icon-name">${icon.name}</div>
         `;
         
-        card.addEventListener('click', () => selectIcon(icon, card));
+        card.addEventListener('click', () => toggleIconSelection(icon, card));
         iconGrid.appendChild(card);
       });
 
@@ -766,22 +927,64 @@
       });
     }
 
-    // ===== SELECT ICON =====
-    function selectIcon(icon, cardElement) {
-      currentIcon = icon;
+    // ===== RENDER PRESET GRID =====
+    function renderPresetGrid() {
+      gradientPresets.forEach((preset, index) => {
+        const option = document.createElement('div');
+        option.className = 'preset-option';
+        option.dataset.preset = index;
+        option.title = preset.name;
+        
+        const angle = preset.angle;
+        option.style.background = `linear-gradient(${angle}deg, ${preset.colors[0]}, ${preset.colors[1]})`;
+        
+        option.addEventListener('click', () => selectPreset(index, option));
+        presetGrid.appendChild(option);
+      });
+    }
+
+    // ===== SELECT PRESET =====
+    function selectPreset(index, element) {
+      const preset = gradientPresets[index];
+      settings.presetGradient = index;
+      settings.gradColor1 = preset.colors[0];
+      settings.gradColor2 = preset.colors[1];
+      settings.gradAngle = preset.angle;
       
-      // Update visual selection
-      if (selectedIconElement) {
-        selectedIconElement.classList.remove('selected');
-      }
-      cardElement.classList.add('selected');
-      selectedIconElement = cardElement;
-
-      // Enable buttons
-      addToBatchBtn.disabled = false;
-      downloadSingleBtn.disabled = false;
-
+      gradColor1.value = preset.colors[0];
+      gradColor1Text.value = preset.colors[0];
+      gradColor2.value = preset.colors[1];
+      gradColor2Text.value = preset.colors[1];
+      gradAngle.value = preset.angle;
+      gradAngleValue.textContent = preset.angle + '°';
+      
+      document.querySelectorAll('.preset-option').forEach(opt => {
+        opt.classList.remove('selected');
+      });
+      element.classList.add('selected');
+      
       updatePreview();
+    }
+
+    // ===== TOGGLE ICON SELECTION =====
+    function toggleIconSelection(icon, card) {
+      if (selectedIcons.has(icon.url)) {
+        selectedIcons.delete(icon.url);
+        card.classList.remove('selected');
+      } else {
+        selectedIcons.add(icon.url);
+        card.classList.add('selected');
+      }
+      updateSelectionUI();
+      
+      // Update preview with first selected icon
+      if (selectedIcons.size > 0) {
+        const firstSelectedUrl = Array.from(selectedIcons)[0];
+        const firstIcon = icons.find(i => i.url === firstSelectedUrl);
+        updatePreviewWithIcon(firstIcon);
+      } else {
+        updatePreview();
+      }
     }
 
     // ===== SELECT TEXTURE =====
@@ -812,23 +1015,13 @@
       }
     }
 
-    // ===== UPDATE PREVIEW =====
-    async function updatePreview() {
-      if (!currentIcon) {
-        ctx.fillStyle = '#0a0a0a';
-        ctx.fillRect(0, 0, 256, 256);
-        ctx.fillStyle = '#666';
-        ctx.font = '14px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Select an icon', 128, 128);
-        return;
-      }
-
+    // ===== UPDATE PREVIEW WITH ICON =====
+    async function updatePreviewWithIcon(icon) {
       const size = 256;
       const radiusPx = (size * settings.cornerRadius) / 100;
 
-      // Draw background with corner radius
       ctx.clearRect(0, 0, size, size);
+      ctx.save();
       
       // Create rounded rectangle path
       ctx.beginPath();
@@ -871,36 +1064,111 @@
         ctx.globalAlpha = 1;
       }
 
+      ctx.restore();
+
       // Draw icon
-      try {
-        const response = await fetch(currentIcon.url);
-        const svgText = await response.text();
-        
-        let modifiedSvg = svgText.replace(/fill="[^"]*"/g, `fill="${settings.iconColor}"`);
-        modifiedSvg = modifiedSvg.replace(/stroke="[^"]*"/g, `stroke="${settings.iconColor}"`);
-        if (!modifiedSvg.includes('fill=')) {
-          modifiedSvg = modifiedSvg.replace('<svg', `<svg fill="${settings.iconColor}"`);
+      if (icon) {
+        try {
+          const response = await fetch(icon.url);
+          const blob = await response.blob();
+          const isBuiltIn = icon.builtin;
+          
+          if (blob.type === 'image/svg+xml' && isBuiltIn) {
+            // For built-in SVGs, apply color modification
+            const svgText = await blob.text();
+            let modifiedSvg = svgText.replace(/fill="[^"]*"/g, `fill="${settings.iconColor}"`);
+            modifiedSvg = modifiedSvg.replace(/stroke="[^"]*"/g, `stroke="${settings.iconColor}"`);
+            if (!modifiedSvg.includes('fill=')) {
+              modifiedSvg = modifiedSvg.replace('<svg', `<svg fill="${settings.iconColor}"`);
+            }
+            
+            const img = new Image();
+            const svgBlob = new Blob([modifiedSvg], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(svgBlob);
+            
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = url;
+            });
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(radiusPx, 0);
+            ctx.lineTo(size - radiusPx, 0);
+            ctx.quadraticCurveTo(size, 0, size, radiusPx);
+            ctx.lineTo(size, size - radiusPx);
+            ctx.quadraticCurveTo(size, size, size - radiusPx, size);
+            ctx.lineTo(radiusPx, size);
+            ctx.quadraticCurveTo(0, size, 0, size - radiusPx);
+            ctx.lineTo(0, radiusPx);
+            ctx.quadraticCurveTo(0, 0, radiusPx, 0);
+            ctx.closePath();
+            ctx.clip();
+            
+            const iconSize = (size * settings.iconScale) / 100;
+            const iconX = (size - iconSize) / 2;
+            const iconY = (size - iconSize) / 2;
+            
+            ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
+            ctx.restore();
+            URL.revokeObjectURL(url);
+          } else {
+            // For custom uploads (PNG/JPG), draw as-is
+            const img = new Image();
+            const url = URL.createObjectURL(blob);
+            
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = url;
+            });
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(radiusPx, 0);
+            ctx.lineTo(size - radiusPx, 0);
+            ctx.quadraticCurveTo(size, 0, size, radiusPx);
+            ctx.lineTo(size, size - radiusPx);
+            ctx.quadraticCurveTo(size, size, size - radiusPx, size);
+            ctx.lineTo(radiusPx, size);
+            ctx.quadraticCurveTo(0, size, 0, size - radiusPx);
+            ctx.lineTo(0, radiusPx);
+            ctx.quadraticCurveTo(0, 0, radiusPx, 0);
+            ctx.closePath();
+            ctx.clip();
+            
+            const iconSize = (size * settings.iconScale) / 100;
+            const iconX = (size - iconSize) / 2;
+            const iconY = (size - iconSize) / 2;
+            
+            ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
+            ctx.restore();
+            URL.revokeObjectURL(url);
+          }
+        } catch (error) {
+          console.error('Error drawing icon:', error);
         }
-        
-        const img = new Image();
-        const svgBlob = new Blob([modifiedSvg], { type: 'image/svg+xml' });
-        const url = URL.createObjectURL(svgBlob);
-        
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = url;
-        });
-        
-        const iconSize = (size * settings.iconScale) / 100;
-        const iconX = (size - iconSize) / 2;
-        const iconY = (size - iconSize) / 2;
-        
-        ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
-        URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error('Error drawing icon:', error);
       }
+    }
+
+    // ===== UPDATE PREVIEW =====
+    async function updatePreview() {
+      const firstSelectedUrl = selectedIcons.size > 0 ? Array.from(selectedIcons)[0] : null;
+      const icon = firstSelectedUrl ? icons.find(i => i.url === firstSelectedUrl) : null;
+      
+      if (!icon) {
+        const size = 256;
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = '#666';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Select an icon', size/2, size/2);
+        return;
+      }
+
+      await updatePreviewWithIcon(icon);
     }
 
     // ===== GENERATE ICON =====
@@ -912,6 +1180,7 @@
       
       const radiusPx = (outputSize * settings.cornerRadius) / 100;
 
+      ctx.save();
       // Create rounded rectangle path
       ctx.beginPath();
       ctx.moveTo(radiusPx, 0);
@@ -953,50 +1222,131 @@
         ctx.globalAlpha = 1;
       }
 
+      ctx.restore();
+
       // Draw icon
       const response = await fetch(icon.url);
-      const svgText = await response.text();
+      const blob = await response.blob();
+      const isBuiltIn = icon.builtin;
       
-      let modifiedSvg = svgText.replace(/fill="[^"]*"/g, `fill="${settings.iconColor}"`);
-      modifiedSvg = modifiedSvg.replace(/stroke="[^"]*"/g, `stroke="${settings.iconColor}"`);
-      if (!modifiedSvg.includes('fill=')) {
-        modifiedSvg = modifiedSvg.replace('<svg', `<svg fill="${settings.iconColor}"`);
+      if (blob.type === 'image/svg+xml' && isBuiltIn) {
+        const svgText = await blob.text();
+        let modifiedSvg = svgText.replace(/fill="[^"]*"/g, `fill="${settings.iconColor}"`);
+        modifiedSvg = modifiedSvg.replace(/stroke="[^"]*"/g, `stroke="${settings.iconColor}"`);
+        if (!modifiedSvg.includes('fill=')) {
+          modifiedSvg = modifiedSvg.replace('<svg', `<svg fill="${settings.iconColor}"`);
+        }
+        
+        const img = new Image();
+        const svgBlob = new Blob([modifiedSvg], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(svgBlob);
+        
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = url;
+        });
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(radiusPx, 0);
+        ctx.lineTo(outputSize - radiusPx, 0);
+        ctx.quadraticCurveTo(outputSize, 0, outputSize, radiusPx);
+        ctx.lineTo(outputSize, outputSize - radiusPx);
+        ctx.quadraticCurveTo(outputSize, outputSize, outputSize - radiusPx, outputSize);
+        ctx.lineTo(radiusPx, outputSize);
+        ctx.quadraticCurveTo(0, outputSize, 0, outputSize - radiusPx);
+        ctx.lineTo(0, radiusPx);
+        ctx.quadraticCurveTo(0, 0, radiusPx, 0);
+        ctx.closePath();
+        ctx.clip();
+        
+        const iconSize = (outputSize * settings.iconScale) / 100;
+        const iconX = (outputSize - iconSize) / 2;
+        const iconY = (outputSize - iconSize) / 2;
+        
+        ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
+        ctx.restore();
+        URL.revokeObjectURL(url);
+      } else {
+        const img = new Image();
+        const url = URL.createObjectURL(blob);
+        
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = url;
+        });
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(radiusPx, 0);
+        ctx.lineTo(outputSize - radiusPx, 0);
+        ctx.quadraticCurveTo(outputSize, 0, outputSize, radiusPx);
+        ctx.lineTo(outputSize, outputSize - radiusPx);
+        ctx.quadraticCurveTo(outputSize, outputSize, outputSize - radiusPx, outputSize);
+        ctx.lineTo(radiusPx, outputSize);
+        ctx.quadraticCurveTo(0, outputSize, 0, outputSize - radiusPx);
+        ctx.lineTo(0, radiusPx);
+        ctx.quadraticCurveTo(0, 0, radiusPx, 0);
+        ctx.closePath();
+        ctx.clip();
+        
+        const iconSize = (outputSize * settings.iconScale) / 100;
+        const iconX = (outputSize - iconSize) / 2;
+        const iconY = (outputSize - iconSize) / 2;
+        
+        ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
+        ctx.restore();
+        URL.revokeObjectURL(url);
       }
-      
-      const img = new Image();
-      const svgBlob = new Blob([modifiedSvg], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(svgBlob);
-      
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = url;
-      });
-      
-      const iconSize = (outputSize * settings.iconScale) / 100;
-      const iconX = (outputSize - iconSize) / 2;
-      const iconY = (outputSize - iconSize) / 2;
-      
-      ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
-      URL.revokeObjectURL(url);
 
       return canvas;
     }
 
+    // ===== HANDLE FILE UPLOAD =====
+    iconFileInput.addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+      
+      for (const file of files) {
+        const url = URL.createObjectURL(file);
+        const name = file.name.replace(/\.[^/.]+$/, '');
+        
+        const customIcon = {
+          name: name,
+          url: url,
+          keywords: [name.toLowerCase()],
+          builtin: false,
+          isCustom: true
+        };
+        
+        icons.push(customIcon);
+      }
+      
+      filteredIcons = [...icons];
+      renderIconGrid();
+      
+      // Clear the input
+      e.target.value = '';
+    });
+
     // ===== DOWNLOAD SINGLE ICON =====
     async function downloadSingle() {
-      if (!currentIcon) return;
+      if (selectedIcons.size === 0) return;
 
       downloadSingleBtn.disabled = true;
       downloadSingleBtn.textContent = 'Generating...';
 
       try {
-        const canvas = await generateIcon(currentIcon, settings.size);
+        const firstSelectedUrl = Array.from(selectedIcons)[0];
+        const icon = icons.find(i => i.url === firstSelectedUrl);
+        
+        const canvas = await generateIcon(icon, settings.size);
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${currentIcon.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${settings.size}px.png`;
+        a.download = `${icon.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${settings.size}px.png`;
         a.click();
         URL.revokeObjectURL(url);
 
@@ -1017,14 +1367,17 @@
 
     // ===== ADD TO BATCH =====
     function addToBatch() {
-      if (!currentIcon) return;
+      if (selectedIcons.size === 0) return;
 
-      const batchItem = {
-        icon: currentIcon,
-        settings: {...settings}
-      };
+      selectedIcons.forEach(iconUrl => {
+        const icon = icons.find(i => i.url === iconUrl);
+        const batchItem = {
+          icon: icon,
+          settings: {...settings}
+        };
+        batchIcons.push(batchItem);
+      });
 
-      batchIcons.push(batchItem);
       updateBatchUI();
 
       addToBatchBtn.textContent = 'Added!';
@@ -1040,10 +1393,33 @@
       scheduleHeightCheck();
     }
 
+    // ===== UPDATE SELECTION UI =====
+    function updateSelectionUI() {
+      const hasSelection = selectedIcons.size > 0;
+      addToBatchBtn.disabled = !hasSelection;
+      downloadSingleBtn.disabled = !hasSelection;
+    }
+
     // ===== CLEAR BATCH =====
     function clearBatch() {
       batchIcons = [];
       updateBatchUI();
+    }
+
+    // ===== SELECT ALL =====
+    function selectAll() {
+      filteredIcons.forEach(icon => selectedIcons.add(icon.url));
+      renderIconGrid();
+      updateSelectionUI();
+      updatePreview();
+    }
+
+    // ===== DESELECT ALL =====
+    function deselectAll() {
+      selectedIcons.clear();
+      renderIconGrid();
+      updateSelectionUI();
+      updatePreview();
     }
 
     // ===== DOWNLOAD BATCH =====
@@ -1059,7 +1435,6 @@
         for (let i = 0; i < batchIcons.length; i++) {
           const item = batchIcons[i];
           
-          // Temporarily apply settings
           const originalSettings = {...settings};
           Object.assign(settings, item.settings);
           
@@ -1069,7 +1444,6 @@
           const fileName = `${item.icon.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${item.settings.size}px.png`;
           zip.file(fileName, blob);
           
-          // Restore settings
           Object.assign(settings, originalSettings);
           
           downloadBatchBtn.textContent = `Generating ${i + 1}/${batchIcons.length}...`;
@@ -1122,14 +1496,18 @@
         settings.bgType = e.target.value;
         solidColorControls.style.display = e.target.value === 'solid' ? 'block' : 'none';
         gradientControls.style.display = e.target.value === 'gradient' ? 'block' : 'none';
+        presetControls.style.display = e.target.value === 'preset' ? 'block' : 'none';
         updatePreview();
+        scheduleHeightCheck();
       });
 
-      // Background color
+      // Color inputs
       const syncColorInputs = (colorPicker, textInput, settingKey) => {
         colorPicker.addEventListener('input', (e) => {
           settings[settingKey] = e.target.value;
           textInput.value = e.target.value;
+          settings.presetGradient = null;
+          document.querySelectorAll('.preset-option').forEach(opt => opt.classList.remove('selected'));
           updatePreview();
         });
         textInput.addEventListener('input', (e) => {
@@ -1137,6 +1515,8 @@
           if (/^#[0-9A-F]{6}$/i.test(value)) {
             settings[settingKey] = value;
             colorPicker.value = value;
+            settings.presetGradient = null;
+            document.querySelectorAll('.preset-option').forEach(opt => opt.classList.remove('selected'));
             updatePreview();
           }
         });
@@ -1151,6 +1531,8 @@
       gradAngle.addEventListener('input', (e) => {
         settings.gradAngle = parseInt(e.target.value);
         gradAngleValue.textContent = settings.gradAngle + '°';
+        settings.presetGradient = null;
+        document.querySelectorAll('.preset-option').forEach(opt => opt.classList.remove('selected'));
         updatePreview();
       });
 
@@ -1176,6 +1558,8 @@
       });
 
       // Buttons
+      selectAllBtn.addEventListener('click', selectAll);
+      deselectAllBtn.addEventListener('click', deselectAll);
       downloadSingleBtn.addEventListener('click', downloadSingle);
       addToBatchBtn.addEventListener('click', addToBatch);
       clearBatchBtn.addEventListener('click', clearBatch);
