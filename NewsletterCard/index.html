@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HeroVibes Newsletter Banner (Unique ID Fix)</title>
+  <title>HeroVibes Newsletter Banner (Aggressive Fix)</title>
   <style>
     /* ========================================
     DESIGN TOKENS (from Design Guide)
@@ -39,10 +39,12 @@
       background: var(--bg-primary);
       font-family: system-ui, sans-serif;
       margin: 0;
-      /* IFRAME FIX: Apply default padding directly to the body
-         to ensure 'scrollHeight' is calculated correctly.
-      */
+      /* IFRAME FIX: Apply padding directly to the body */
       padding: 24px 16px; 
+      /* IFRAME FIX: Force body to contain its padding
+         for a more stable 'scrollHeight' calculation.
+      */
+      overflow: hidden;
     }
 
     /* ========================================
@@ -55,10 +57,9 @@
       border-radius: var(--radius);
       padding: 60px; 
       max-width: 1400px; 
-      /* IFRAME FIX: Margin is now horizontal-only */
       margin: 0 auto; 
       position: relative;
-      overflow: hidden;
+      overflow: hidden; /* Contains emoji animation */
     }
 
     #NEWSLETTER-BANNER {
@@ -188,6 +189,7 @@
     @media (max-width: 680px) {
       body {
         padding: 16px; /* Mobile body padding */
+        overflow: auto; /* Re-enable scroll on mobile if needed */
       }
       
       #HV-NEWSLETTER-WRAPPER {
@@ -251,7 +253,7 @@
 
   <script>
     /* ========================================
-    FOURTHWALL SCROLLBAR FIX
+    FOURTHWALL SCROLLBAR FIX [cite: 32-42, 74-86]
     ========================================
     */
     let lastHeight = 0;
@@ -262,9 +264,7 @@
       if (height !== lastHeight) {
         lastHeight = height;
         
-        /* * FIX: Send a unique toolID with the message
-         * so the parent page can identify it.
-        */
+        /* FIX: Send a unique toolID */
         window.parent.postMessage({ 
           frameHeight: height,
           toolID: 'HV-NEWSLETTER' 
@@ -277,10 +277,15 @@
         resizeTimer = setTimeout(sendHeight, 150);
     }
 
+    // Send height on initial load (with a slight delay)
     window.addEventListener('load', () => {
-        setTimeout(sendHeight, 150);
+        /* IFRAME FIX: Increased delay to 300ms 
+           to beat the race condition. 
+        */
+        setTimeout(sendHeight, 300);
     });
 
+    // Send height on window resize (debounced)
     window.addEventListener('resize', () => {
         scheduleHeightCheck();
     });
