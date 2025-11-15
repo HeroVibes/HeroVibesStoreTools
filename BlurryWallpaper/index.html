@@ -527,8 +527,8 @@
                     <div class="control-group" id="resolution-control">
                         <label for="resolution-select" class="control-label">Resolution</label>
                         <select id="resolution-select">
-                            <option value="3840x2160">4K Landscape (3840x2160)</option>
-                            <option value="2160x3840">4K Portrait (2160x3840)</option>
+                            <option value="1920x1080">Full HD (1920x1080)</option>
+                            <option value="1080x1920">Mobile (1080x1920)</option>
                         </select>
                     </div>
                     <button class="btn btn-primary" id="download-btn">Download</button>
@@ -920,7 +920,7 @@
             updatePreview();
         }
 
-        // ===== START OF NEW IOS/4K RENDER FIX =====
+        // ===== START OF IOS/1080p RENDER FIX =====
 
         // --- Helper: RGB to HSL ---
         function rgbToHsl(r, g, b) {
@@ -980,7 +980,7 @@
             setTimeout(async () => {
                 const [w, h] = resolutionSelect.value.split('x').map(Number);
                 canvas.width = w; canvas.height = h;
-                tempCanvas.width = w; tempCanvas.height = h; // Reinstate temp canvas
+                tempCanvas.width = w; tempCanvas.height = h;
 
                 // 1. Fill background (on main canvas)
                 ctx.fillStyle = state.backgroundColor;
@@ -1014,7 +1014,16 @@
                 tempCtx.drawImage(canvas, 0, 0);
 
                 // 6. Get pixel data from the *temp canvas* (which has the baked blur)
-                let imageData = tempCtx.getImageData(0, 0, w, h);
+                let imageData;
+                try {
+                     imageData = tempCtx.getImageData(0, 0, w, h);
+                } catch (e) {
+                    console.error("Failed to get image data:", e);
+                    downloadBtn.disabled = false;
+                    downloadBtn.textContent = "Error";
+                    return; // Stop if we can't get data
+                }
+                
                 let data = imageData.data;
                 
                 const brightness = state.brightness / 100;
@@ -1079,7 +1088,7 @@
                 downloadBtn.textContent = "Download";
             }, 50); // 50ms delay to let UI update
         }
-        // ===== END OF IOS/4K RENDER FIX =====
+        // ===== END OF IOS/1080p RENDER FIX =====
         
         
         function updateAspectRatio() {
