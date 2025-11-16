@@ -67,11 +67,11 @@
 
     .mode-btn:first-child {
       border-radius: var(--radius) 0 0 var(--radius);
-      border-right: none;
     }
 
     .mode-btn:last-child {
       border-radius: 0 var(--radius) var(--radius) 0;
+      border-left: none;
     }
 
     .mode-btn.active {
@@ -79,6 +79,14 @@
       color: var(--accent);
       border-color: var(--accent);
       z-index: 1;
+    }
+
+    .mode-btn.active:first-child {
+      border-right: 1px solid var(--accent);
+    }
+
+    .mode-btn.active:last-child {
+      border-left: 1px solid var(--accent);
     }
 
     .mode-btn::before {
@@ -389,14 +397,14 @@
   <div class="container">
     <!-- ===== MODE TOGGLE ===== -->
     <div class="mode-toggle">
-      <button class="mode-btn active" data-mode="encode">🔒 Encode</button>
-      <button class="mode-btn" data-mode="decode">🔓 Decode</button>
+      <button class="mode-btn active" data-mode="encode">Encode</button>
+      <button class="mode-btn" data-mode="decode">Decode</button>
     </div>
 
     <!-- ===== INPUT SECTION ===== -->
     <div class="io-section">
       <div class="io-label">
-        <span id="inputLabel">Plain Text</span>
+        <span id="inputLabel">Plain Text Input</span>
         <span class="char-count" id="inputCount">0 characters</span>
       </div>
       <textarea 
@@ -425,15 +433,15 @@
     <!-- ===== ACTIONS SECTION ===== -->
     <div class="actions-section">
       <div class="action-buttons">
-        <button class="btn btn-primary" id="convertBtn">🔄 Convert</button>
-        <button class="btn" id="clearBtn">🗑️ Clear All</button>
+        <button class="btn btn-primary" id="convertBtn">Convert</button>
+        <button class="btn" id="clearBtn">Clear All</button>
       </div>
 
       <div class="quick-actions">
-        <button class="quick-btn" id="copyBtn">📋 Copy Result</button>
-        <button class="quick-btn" id="swapBtn">🔄 Swap Input/Output</button>
-        <button class="quick-btn" id="downloadBtn">💾 Download</button>
-        <button class="quick-btn" id="shareBtn">🔗 Share URL</button>
+        <button class="quick-btn" id="copyBtn">Copy Result</button>
+        <button class="quick-btn" id="swapBtn">Swap Input/Output</button>
+        <button class="quick-btn" id="downloadBtn">Download</button>
+        <button class="quick-btn" id="shareBtn">Share Tool</button>
       </div>
     </div>
 
@@ -502,6 +510,7 @@
         currentMode = btn.dataset.mode;
         updateLabels();
         outputText.value = '';
+        outputCount.textContent = '0 characters';
         updateStats();
         scheduleHeightCheck();
       });
@@ -509,20 +518,42 @@
 
     function updateLabels() {
       if (currentMode === 'encode') {
-        inputLabel.textContent = 'Plain Text';
+        inputLabel.textContent = 'Plain Text Input';
         outputLabel.textContent = 'Base64 Output';
-        convertBtn.innerHTML = '🔄 Encode';
+        convertBtn.textContent = 'Encode';
       } else {
         inputLabel.textContent = 'Base64 Input';
         outputLabel.textContent = 'Plain Text Output';
-        convertBtn.innerHTML = '🔄 Decode';
+        convertBtn.textContent = 'Decode';
       }
     }
 
-    // ===== CHARACTER COUNTER =====
+    // ===== LIVE PREVIEW CONVERSION =====
     inputText.addEventListener('input', () => {
       inputCount.textContent = `${inputText.value.length} characters`;
+      
+      // Live preview conversion
+      const input = inputText.value;
+      
+      if (input.trim()) {
+        try {
+          if (currentMode === 'encode') {
+            outputText.value = btoa(unescape(encodeURIComponent(input)));
+          } else {
+            outputText.value = decodeURIComponent(escape(atob(input)));
+          }
+          outputCount.textContent = `${outputText.value.length} characters`;
+        } catch (error) {
+          outputText.value = '';
+          outputCount.textContent = '0 characters';
+        }
+      } else {
+        outputText.value = '';
+        outputCount.textContent = '0 characters';
+      }
+      
       updateStats();
+      scheduleHeightCheck();
     });
 
     // ===== CONVERT FUNCTION =====
@@ -548,6 +579,7 @@
       } catch (error) {
         showNotification('Invalid input for ' + currentMode + 'ing', 'error');
         outputText.value = '';
+        outputCount.textContent = '0 characters';
       }
     });
 
@@ -571,6 +603,17 @@
       
       outputText.select();
       document.execCommand('copy');
+      
+      // Change button text temporarily
+      const originalText = copyBtn.textContent;
+      copyBtn.textContent = 'Copied!';
+      copyBtn.style.color = 'var(--accent)';
+      
+      setTimeout(() => {
+        copyBtn.textContent = originalText;
+        copyBtn.style.color = '';
+      }, 2000);
+      
       showNotification('Copied to clipboard!', 'success');
     });
 
@@ -611,19 +654,8 @@
 
     // ===== SHARE FUNCTION =====
     shareBtn.addEventListener('click', () => {
-      if (!outputText.value) {
-        showNotification('Nothing to share', 'error');
-        return;
-      }
-      
-      const encodedData = encodeURIComponent(outputText.value);
-      const url = `${window.location.origin}${window.location.pathname}?data=${encodedData}&mode=${currentMode}`;
-      
-      navigator.clipboard.writeText(url).then(() => {
-        showNotification('Share URL copied!', 'success');
-      }).catch(() => {
-        showNotification('Failed to copy URL', 'error');
-      });
+      window.open('https://herovibes.store/pages/base64-converter', '_blank');
+      showNotification('Opening share page...', 'success');
     });
 
     // ===== STATISTICS UPDATE =====
