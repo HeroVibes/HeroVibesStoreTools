@@ -22,19 +22,22 @@
       --radius: 8px;
     }
 
+    /* Full reset for iframe chaos */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; width:100%; overflow-x:hidden; }
+
     body {
-      margin: 0;
-      padding: 0;
       font-family: var(--font-family);
       color: var(--primary-text);
       background: linear-gradient(135deg, #191919, #1F1F1F);
       animation: gradientShift 10s ease infinite;
+      background-size: 200% 200%;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       transition: background 1s ease;
-      overflow: hidden; /* Hide any iframe bleed */
+      padding: 16px;
     }
 
     @keyframes gradientShift {
@@ -48,18 +51,23 @@
       border: var(--card-outline) solid var(--outline-color);
       border-radius: var(--radius);
       padding: var(--default-padding);
-      max-width: 90%;
-      width: 400px;
+      max-width: 400px;
+      width: 100%;
       text-align: center;
       transition: opacity 0.5s ease, transform 0.5s ease;
       position: relative;
       z-index: 1;
+      margin: auto;
     }
 
     .hidden {
       opacity: 0;
       transform: scale(0.95);
       pointer-events: none;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
     }
 
     input[type="text"] {
@@ -68,9 +76,9 @@
       color: var(--primary-text);
       padding: 10px;
       border-radius: var(--radius);
-      width: calc(100% - 22px);
+      width: 100%;
       font-size: var(--title-font-size);
-      margin-bottom: 10px;
+      margin: 12px 0 16px;
     }
 
     .btn {
@@ -83,205 +91,201 @@
       cursor: pointer;
       overflow: hidden;
       font-size: var(--title-font-size);
-      transition: background 0.3s;
+      min-width: 100px;
     }
 
-    .btn:hover {
-      background: var(--hover-bg);
-    }
-
+    .btn:hover { background: var(--hover-bg); }
     .btn::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: -100%;
-      width: 75%;
-      height: 100%;
+      top: 0; left: -100%; width: 75%; height: 100%;
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
       transform: skewX(-25deg);
-      transition: left 0.7s ease-in-out;
+      transition: left .7s ease-in-out;
     }
-
-    .btn:hover::before {
-      left: 125%;
-    }
-
-    .btn:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
-    }
+    .btn:hover::before { left: 125%; }
+    .btn:focus-visible { outline:none; box-shadow:0 0 0 3px rgba(135,169,255,0.12); }
 
     .gif-container {
       position: relative;
       margin: 20px auto;
+      max-width: 300px;
       cursor: pointer;
     }
 
     .gif-container img {
       width: 100%;
       border-radius: var(--radius);
+      display: block;
     }
 
     .input-behind {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
+      width: 85%;
       opacity: 0;
       transition: opacity 0.5s;
-      width: 80%;
+      pointer-events: none;
     }
 
     .gif-container.active .input-behind {
       opacity: 1;
+      pointer-events: auto;
     }
 
     .version {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
       font-size: var(--text-font-size);
       color: var(--secondary-text);
-      opacity: 0.5;
-      z-index: 0;
+      opacity: 0.6;
     }
 
-    /* Iframe cloak: Fake full window + block dev tools snoops */
-    html, body { height: 100%; width: 100%; }
     #cloak-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: var(--primary-bg);
       z-index: 9999;
-      display: none;
+      display: flex;
       justify-content: center;
       align-items: center;
       color: var(--accent-color);
       font-size: 18px;
       text-align: center;
       padding: 20px;
+      display: none;
     }
 
-    @media (max-width: 600px) {
-      .container {
-        width: 90%;
-        padding: 16px;
-      }
-      .version { font-size: 10px; bottom: 5px; right: 5px; }
+    @media (max-width: 480px) {
+      body { padding: 12px; }
+      .container { padding: 20px 14px; }
+      .version { font-size: 10px; bottom: 6px; right: 8px; }
     }
   </style>
 </head>
 <body>
-  <div id="cloak-overlay">Direct access only, cheater! GitHub? Nice try. 😏</div>
+  <div id="cloak-overlay">Direct GitHub access blocked. Play fair, hero. 🦸‍♂️</div>
 
   <div id="step1" class="container">
-    <p style="font-size: var(--header-font-size); font-weight: bold;">Quick Quiz: What is the next number in the sequence 2, 3, 5, 7, 11?</p>
+    <p style="font-size:var(--header-font-size);font-weight:bold;margin:0 0 16px;">Quick Quiz: What is the next number in the sequence 2, 3, 5, 7, 11?</p>
     <input type="text" id="quiz-answer" placeholder="Enter your answer">
     <button class="btn" onclick="checkQuiz()">Submit</button>
   </div>
+
   <div id="step2" class="container hidden">
-    <p style="font-size: var(--title-font-size);">Hint: Hero</p>
+    <p style="font-size:var(--title-font-size);margin:0 0 12px;">Hint: Hero</p>
     <div class="gif-container" onclick="revealInput()">
-      <img src="https://via.placeholder.com/300x200?text=Stego+GIF" alt="Placeholder GIF">
+      <img src="https://via.placeholder.com/300x200?text=Stego+GIF" alt="Secret GIF">
       <div class="input-behind">
         <input type="text" id="password-input" placeholder="Enter decoded password">
         <button class="btn" onclick="checkPassword()">Submit</button>
       </div>
     </div>
   </div>
+
   <div id="step3" class="container hidden">
-    <p style="font-size: var(--header-font-size); font-weight: bold;">Encrypted License Key:</p>
-    <p id="encrypted-key" style="font-size: var(--title-font-size);">U2FtcGxlRW5jcnlwdGVkS2V5MTIzNDU= (Base64 Decode using our tool)</p>
-    <p style="font-size: var(--text-font-size); color: var(--secondary-text);">Transform using Base64 decoder to reveal the Steam key.</p>
+    <p style="font-size:var(--header-font-size);font-weight:bold;margin:0 0 12px;">Encrypted License Key:</p>
+    <p id="encrypted-key" style="font-size:var(--title-font-size);word-break:break-all;margin:0 0 8px;">
+      U2FtcGxlRW5jcnlwdGVkS2V5MTIzNDU= 
+    </p>
+    <p style="font-size:var(--text-font-size);color:var(--secondary-text);margin:0;">
+      Use our Base64 Decoder tool to reveal the Steam key.
+    </p>
   </div>
-  <div class="version">V1.0.1</div>
+
+  <div class="version">V1.0.2</div>
 
   <form id="second-notification-form" action="https://formspree.io/f/xkgznjpd" method="POST" style="display:none;">
     <input type="text" name="Claim_Confirmation" value="Someone has claimed the code">
   </form>
 
   <script>
-    // Obfuscated vars to dodge inspectors (minify in prod, lol)
-    const _0x4a3f=['top','self','parent','frameElement','documentElement','doScroll','userAgent','navigator','webkit','msie','trident','opera','location','href','https://herovibes.github.io/HeroVibesStoreTools/','indexOf','cloak-overlay','style','display','block','none','console','log','Konami page cloaked. Dev tools? We don't do that here. 🔒','checkQuiz','quiz-answer','value','trim','toLowerCase','13','transitionToStep','Incorrect! Primes don't lie. 🤓','revealInput','gif-container','classList','add','active','checkPassword','password-input','secretpass','Someone has claimed the code','second-notification-form','submit','Incorrect password, script kiddie!','step','hidden','remove','body','background','linear-gradient(135deg, #1F1F1F, #323232)','scheduleHeightCheck','Transition error:','sendHeight','scrollHeight','lastHeight','parent','postMessage','frameHeight','*','resizeTimer','clearTimeout','setTimeout',150,'load',100,'resize'];
+    // === BUG TEST ANSWERS (for you, Rob) ===
+    // Step 1: Quiz Answer → 13
+    // Step 2: Password → konamihero
+    // Step 3: Base64 Decode "U2FtcGxlRW5jcnlwdGVkS2V5MTIzNDU=" → SampleEncryptedKey12345
+    // (Replace with real stego + key later)
 
-    (function cloakInit() {
+    const _0x9f=['top','self','parent','frameElement','documentElement','doScroll','userAgent','webkit','msie','trident','opera','location','href','https://herovibes.github.io/HeroVibesStoreTools/','indexOf','cloak-overlay','style','display','block','none','console','log','Cloaked & centered. Iframe? Never heard of her. 🕶️','checkQuiz','quiz-answer','value','trim','toLowerCase','13','transitionToStep','Wrong! It’s 13, you prime suspect. 🔢','revealInput','gif-container','classList','add','active','checkPassword','password-input','konamihero','second-notification-form','submit','Nah, that’s not the vibe. Try decoding with "Hero". 🕵️','step','hidden','remove','body','background','linear-gradient(135deg, #1F1F1F, #323232)','scheduleHeightCheck','sendHeight','scrollHeight','lastHeight','parent','postMessage','frameHeight','*','resizeTimer','clearTimeout','setTimeout',150,'load',100,'resize'];
+
+    (function initCloak() {
       try {
-        // Iframe detection circus
-        if (window[_0x4a3f[0]] !== window || window[_0x4a3f[1]] !== window[_0x4a3f[0]] || window[_0x4a3f[2]] !== window[_0x4a3f[1]] || window[_0x4a3f[3]] || (document[_0x4a3f[4]] && document[_0x4a3f[4]][_0x4a3f[5]] && document[_0x4a3f[5]]('parent')) || /iframe/i.test(navigator[_0x4a3f[7]]) || navigator[_0x4a3f[6]].indexOf(_0x4a3f[8]) > -1 || navigator[_0x4a3f[6]].indexOf(_0x4a3f[9]) > -1 || navigator[_0x4a3f[6]].indexOf(_0x4a3f[10]) > -1 || navigator[_0x4a3f[6]].indexOf(_0x4a3f[11]) > -1) {
-          // GitHub direct access? Roast 'em
-          if (location[_0x4a3f[13]][_0x4a3f[12]](_0x4a3f[14]) > -1) {
-            document.getElementById(_0x4a3f[15])[_0x4a3f[17]][_0x4a3f[16]] = _0x4a3f[18];
+        if (window[_0x9f[0]] !== window || window[_0x9f[1]] !== window[_0x9f[0]] || window[_0x9f[2]] !== window[_0x9f[1]] || window[_0x9f[3]] || 
+            (document[_0x9f[4]] && document[_0x9f[4]][_0x9f[5]] && document[_0x9f[5]]('parent')) || 
+            /iframe/i.test(navigator[_0x9f[6]]) || 
+            navigator[_0x9f[6]].indexOf(_0x9f[7])>-1 || navigator[_0x9f[6]].indexOf(_0x9f[8])>-1 || 
+            navigator[_0x9f[6]].indexOf(_0x9f[9])>-1 || navigator[_0x9f[6]].indexOf(_0x9f[10])>-1) {
+          if (location[_0x9f[12]][_0x9f[11]](_0x9f[13]) > -1) {
+            document.getElementById(_0x9f[14])[_0x9f[16]][_0x9f[15]] = _0x9f[17];
           }
-          return; // Bail – no secrets for iframes
+          return;
         }
-        document.getElementById(_0x4a3f[15])[_0x4a3f[17]][_0x4a3f[16]] = _0x4a3f[19];
-      } catch (e) { console[_0x4a3f[21]](_0x4a3f[20] + e); }
+        document.getElementById(_0x9f[14])[_0x9f[16]][_0x9f[15]] = _0x9f[18];
+      } catch(e) { console[_0x9f[20]](_0x9f[19] + e); }
     })();
 
-    // Developer notes: #QUIZ CHECK (obfuscated logic)
     function checkQuiz() {
       try {
-        const a = document.getElementById(_0x4a3f[22])[_0x4a3f[23]].trim().toLowerCase();
-        if (a === _0x4a3f[26]) { transitionToStep(2); }
-        else { console.error('Quiz fail'); alert(_0x4a3f[27]); }
-      } catch (e) { console.error('Quiz error:', e); }
+        const ans = document.getElementById(_0x9f[22])[_0x9f[23]].trim().toLowerCase();
+        if (ans === _0x9f[26]) { transitionToStep(2); }
+        else { console.error('Quiz failed'); alert(_0x9f[27]); }
+      } catch(e) { console.error('Quiz error:', e); }
     }
 
-    // Developer notes: #PASSWORD REVEAL
     function revealInput() {
-      try { document.querySelector('.' + _0x4a3f[28]).classList.add(_0x4a3f[30]); }
-      catch (e) { console.error('Reveal fail:', e); }
+      try { document.querySelector('.' + _0x9f[28]).classList.add(_0x9f[30]); }
+      catch(e) { console.error('Reveal error:', e); }
     }
 
-    // Developer notes: #PASSWORD CHECK
     function checkPassword() {
       try {
-        const p = document.getElementById(_0x4a3f[31])[_0x4a3f[23]].trim().toLowerCase();
-        if (p === _0x4a3f[32]) { transitionToStep(3); document.getElementById(_0x4a3f[34]).submit(); }
-        else { console.error('Pass fail'); alert(_0x4a3f[35]); }
-      } catch (e) { console.error('Pass error:', e); }
+        const pass = document.getElementById(_0x9f[31])[_0x9f[23]].trim().toLowerCase();
+        if (pass === _0x9f[32]) { 
+          transitionToStep(3); 
+          setTimeout(() => document.getElementById(_0x9f[33]).submit(), 300);
+        } else { console.error('Password failed'); alert(_0x9f[34]); }
+      } catch(e) { console.error('Password error:', e); }
     }
 
-    // Developer notes: #TRANSITION FUNCTION
     function transitionToStep(s) {
       try {
-        const c = document.getElementById('step' + (s-1));
-        const n = document.getElementById('step' + s);
-        if (c && n) {
-          c.classList.add(_0x4a3f[36]);
+        const cur = document.getElementById('step' + (s-1));
+        const nxt = document.getElementById('step' + s);
+        if (cur && nxt) {
+          cur.classList.add(_0x9f[35]);
           setTimeout(() => {
-            document.body.style.background = _0x4a3f[38];
-            n.classList.remove(_0x4a3f[36]);
+            document.body.style.background = _0x9f[37];
+            nxt.classList.remove(_0x9f[35]);
             scheduleHeightCheck();
           }, 500);
         }
-      } catch (e) { console.error(_0x4a3f[39] + e); }
+      } catch(e) { console.error('Transition failed:', e); }
     }
 
-    // Block right-click & dev tools shortcuts (F12, Ctrl+Shift+I, etc.)
+    // Anti-inspector spice
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('keydown', e => {
-      if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) {
-        e.preventDefault(); alert('Nice try, inspector gadget! 🕵️‍♂️');
+      if ([123, 85].includes(e.keyCode) || (e.ctrlKey && e.shiftKey && e.keyCode === 73)) {
+        e.preventDefault();
+        alert('F12? More like F-U! 😜');
       }
     });
+    setInterval(() => { debugger; }, 120);
 
-    // Infinite debugger loop for fun (breaks dev tools)
-    setInterval(() => { debugger; }, 100);
-
-    console.log('Cloak active. Source? Over your dead cache. 💀');
-
-    // ===== FOURTHWALL SCROLLBAR FIX (only if iframe – but cloaked) =====
+    // Iframe height fix — now bulletproof
     let lastHeight = 0, resizeTimer;
     function sendHeight() {
-      if (window.parent === window) return; // No postMessage if direct
+      if (window.parent === window) return;
       const h = document.body.scrollHeight;
       if (h !== lastHeight) { lastHeight = h; window.parent.postMessage({frameHeight: h}, '*'); }
     }
-    function scheduleHeightCheck() { clearTimeout(resizeTimer); resizeTimer = setTimeout(sendHeight, _0x4a3f[41]); }
-    window.addEventListener('load', () => setTimeout(sendHeight, _0x4a3f[42]));
+    function scheduleHeightCheck() { clearTimeout(resizeTimer); resizeTimer = setTimeout(sendHeight, _0x9f[39]); }
+    window.addEventListener('load', () => setTimeout(sendHeight, _0x9f[40]));
     window.addEventListener('resize', scheduleHeightCheck);
-    // ===== END OF SCROLLBAR FIX =====
+
+    console.log('Konami V1.0.2: Centered, cloaked, and iframe-proof. Cheaters get roasted. 🔥');
   </script>
 </body>
 </html>
