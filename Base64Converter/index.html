@@ -26,46 +26,59 @@
 
     body {
       background: var(--bg);
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       color: var(--text-primary);
-      padding: 24px 16px;
+      padding: 0;
     }
 
     /* ===== MAIN CONTAINER ===== */
     .container {
       max-width: 800px;
       margin: 0 auto;
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      overflow: hidden;
     }
 
     /* ===== MODE TOGGLE ===== */
     .mode-toggle {
       display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-      background: var(--card-bg);
-      padding: 6px;
-      border-radius: var(--radius);
-      border: 1px solid var(--outline);
+      gap: 0;
+      background: var(--bg);
+      padding: 24px 16px 16px 16px;
+      border-bottom: 1px solid var(--outline);
     }
 
     .mode-btn {
       flex: 1;
       padding: 10px 16px;
-      border: none;
+      border: 1px solid var(--outline);
       background: transparent;
       color: var(--text-secondary);
-      border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: normal;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    .mode-btn:first-child {
+      border-radius: var(--radius) 0 0 var(--radius);
+      border-right: none;
+    }
+
+    .mode-btn:last-child {
+      border-radius: 0 var(--radius) var(--radius) 0;
     }
 
     .mode-btn.active {
-      background: var(--hover);
+      background: var(--card-bg);
       color: var(--accent);
+      border-color: var(--accent);
+      z-index: 1;
     }
 
     .mode-btn::before {
@@ -86,24 +99,27 @@
 
     /* ===== INPUT/OUTPUT AREAS ===== */
     .io-section {
-      background: var(--card-bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 16px;
+      padding: 24px 16px;
+      border-bottom: 1px solid var(--outline);
+    }
+
+    .io-section:last-of-type {
+      border-bottom: none;
     }
 
     .io-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .char-count {
-      font-size: 11px;
+      font-size: 12px;
+      font-weight: normal;
       color: var(--text-secondary);
     }
 
@@ -111,7 +127,7 @@
       width: 100%;
       background: var(--bg);
       border: 1px solid var(--outline);
-      border-radius: 6px;
+      border-radius: var(--radius);
       padding: 12px;
       color: var(--text-primary);
       font-size: 14px;
@@ -131,7 +147,12 @@
       opacity: 0.5;
     }
 
-    /* ===== ACTION BUTTONS ===== */
+    /* ===== ACTION BUTTONS SECTION ===== */
+    .actions-section {
+      padding: 24px 16px;
+      border-bottom: 1px solid var(--outline);
+    }
+
     .action-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -141,16 +162,17 @@
 
     .btn {
       position: relative;
-      padding: 12px 16px;
+      padding: 10px 16px;
       border-radius: var(--radius);
-      background: var(--card-bg);
+      background: var(--bg);
       color: var(--text-primary);
       border: 1px solid rgba(255,255,255,0.06);
       cursor: pointer;
       overflow: hidden;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: normal;
       transition: all 0.3s ease;
+      font-family: sans-serif;
     }
 
     .btn::before {
@@ -186,27 +208,28 @@
     .btn-primary {
       background: var(--accent);
       color: #191919;
-      font-weight: 600;
+      font-weight: normal;
     }
 
     /* ===== QUICK ACTIONS ===== */
     .quick-actions {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 8px;
-      flex-wrap: wrap;
     }
 
     .quick-btn {
-      padding: 8px 12px;
+      padding: 10px 16px;
       font-size: 12px;
-      background: var(--card-bg);
+      background: var(--bg);
       border: 1px solid var(--outline);
-      border-radius: 6px;
+      border-radius: var(--radius);
       color: var(--text-secondary);
       cursor: pointer;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      font-family: sans-serif;
     }
 
     .quick-btn::before {
@@ -230,6 +253,66 @@
       left: 125%;
     }
 
+    /* ===== FEATURES SECTION ===== */
+    .features {
+      padding: 24px 16px;
+    }
+
+    .features-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .feature-item {
+      padding: 16px 12px;
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      font-size: 12px;
+      text-align: center;
+      color: var(--text-secondary);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .feature-item:hover {
+      background: var(--hover);
+      border-color: var(--accent);
+    }
+
+    .feature-item:hover::before {
+      left: 125%;
+    }
+
+    .feature-value {
+      display: block;
+      font-weight: bold;
+      color: var(--accent);
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
     /* ===== NOTIFICATION ===== */
     .notification {
       position: fixed;
@@ -240,7 +323,7 @@
       border-radius: var(--radius);
       padding: 12px 16px;
       color: var(--text-primary);
-      font-size: 14px;
+      font-size: 12px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -280,94 +363,24 @@
       background: var(--error);
     }
 
-    /* ===== FEATURES SECTION ===== */
-    .features {
-      background: var(--card-bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .features-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--text-primary);
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 8px;
-    }
-
-    .feature-item {
-      padding: 10px 12px;
-      background: var(--bg);
-      border: 1px solid var(--outline);
-      border-radius: 6px;
-      font-size: 12px;
-      text-align: center;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .feature-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 75%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-      transform: skewX(-25deg);
-      transition: left 0.7s ease-in-out;
-    }
-
-    .feature-item:hover {
-      background: var(--hover);
-      color: var(--text-primary);
-      border-color: var(--accent);
-    }
-
-    .feature-item:hover::before {
-      left: 125%;
-    }
-
-    .feature-value {
-      display: block;
-      font-weight: 600;
-      color: var(--accent);
-      margin-top: 4px;
-    }
-
     /* ===== MOBILE RESPONSIVE ===== */
     @media (max-width: 600px) {
-      body {
-        padding: 16px 12px;
-      }
-
       .action-buttons {
         grid-template-columns: 1fr;
-      }
-
-      .mode-toggle {
-        flex-direction: column;
-        gap: 6px;
       }
 
       .notification {
         right: 12px;
         left: 12px;
-        top: 16px;
+        top: 12px;
       }
 
       .feature-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
+      }
+
+      .quick-actions {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -394,12 +407,6 @@
       ></textarea>
     </div>
 
-    <!-- ===== ACTION BUTTONS ===== -->
-    <div class="action-buttons">
-      <button class="btn btn-primary" id="convertBtn">🔄 Convert</button>
-      <button class="btn" id="clearBtn">🗑️ Clear All</button>
-    </div>
-
     <!-- ===== OUTPUT SECTION ===== -->
     <div class="io-section">
       <div class="io-label">
@@ -415,17 +422,24 @@
       ></textarea>
     </div>
 
-    <!-- ===== QUICK ACTIONS ===== -->
-    <div class="quick-actions">
-      <button class="quick-btn" id="copyBtn">📋 Copy Result</button>
-      <button class="quick-btn" id="swapBtn">🔄 Swap Input/Output</button>
-      <button class="quick-btn" id="downloadBtn">💾 Download</button>
-      <button class="quick-btn" id="shareBtn">🔗 Share URL</button>
+    <!-- ===== ACTIONS SECTION ===== -->
+    <div class="actions-section">
+      <div class="action-buttons">
+        <button class="btn btn-primary" id="convertBtn">🔄 Convert</button>
+        <button class="btn" id="clearBtn">🗑️ Clear All</button>
+      </div>
+
+      <div class="quick-actions">
+        <button class="quick-btn" id="copyBtn">📋 Copy Result</button>
+        <button class="quick-btn" id="swapBtn">🔄 Swap Input/Output</button>
+        <button class="quick-btn" id="downloadBtn">💾 Download</button>
+        <button class="quick-btn" id="shareBtn">🔗 Share URL</button>
+      </div>
     </div>
 
     <!-- ===== FEATURES SECTION ===== -->
     <div class="features">
-      <div class="features-title">📊 Statistics</div>
+      <div class="features-title">Statistics</div>
       <div class="feature-grid">
         <div class="feature-item">
           Original Size
@@ -440,7 +454,7 @@
           <span class="feature-value" id="sizeChange">0%</span>
         </div>
         <div class="feature-item">
-          Characters
+          Total Characters
           <span class="feature-value" id="totalChars">0</span>
         </div>
       </div>
@@ -497,11 +511,11 @@
       if (currentMode === 'encode') {
         inputLabel.textContent = 'Plain Text';
         outputLabel.textContent = 'Base64 Output';
-        convertBtn.innerHTML = '🔒 Encode';
+        convertBtn.innerHTML = '🔄 Encode';
       } else {
         inputLabel.textContent = 'Base64 Input';
         outputLabel.textContent = 'Plain Text Output';
-        convertBtn.innerHTML = '🔓 Decode';
+        convertBtn.innerHTML = '🔄 Decode';
       }
     }
 
