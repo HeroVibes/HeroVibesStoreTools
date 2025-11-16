@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base64 Encoder/Decoder</title>
+  <style>
+    :root {
+      --bg: #191919;
+      --card-bg: #1F1F1F;
+      --hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+      --success: #4CAF50;
+      --error: #FF6B6B;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+      padding: 24px 16px;
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* ===== MODE TOGGLE ===== */
+    .mode-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      background: var(--card-bg);
+      padding: 6px;
+      border-radius: var(--radius);
+      border: 1px solid var(--outline);
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mode-btn.active {
+      background: var(--hover);
+      color: var(--accent);
+    }
+
+    .mode-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .mode-btn:hover::before {
+      left: 125%;
+    }
+
+    /* ===== INPUT/OUTPUT AREAS ===== */
+    .io-section {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .io-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .char-count {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .io-textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: 6px;
+      padding: 12px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: 'Courier New', monospace;
+      resize: vertical;
+      min-height: 120px;
+      transition: border-color 0.3s ease;
+    }
+
+    .io-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .io-textarea::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.5;
+    }
+
+    /* ===== ACTION BUTTONS ===== */
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      position: relative;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .btn:hover::before {
+      left: 125%;
+    }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn:disabled::before {
+      display: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #191919;
+      font-weight: 600;
+    }
+
+    /* ===== QUICK ACTIONS ===== */
+    .quick-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .quick-btn {
+      padding: 8px 12px;
+      font-size: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quick-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .quick-btn:hover {
+      background: var(--hover);
+      color: var(--text-primary);
+    }
+
+    .quick-btn:hover::before {
+      left: 125%;
+    }
+
+    /* ===== NOTIFICATION ===== */
+    .notification {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      color: var(--text-primary);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .notification.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .notification.success {
+      border-color: var(--success);
+    }
+
+    .notification.error {
+      border-color: var(--error);
+    }
+
+    .notification-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+    }
+
+    .notification.success .notification-icon {
+      background: var(--success);
+    }
+
+    .notification.error .notification-icon {
+      background: var(--error);
+    }
+
+    /* ===== FEATURES SECTION ===== */
+    .features {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .features-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+    }
+
+    .feature-item {
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: 6px;
+      font-size: 12px;
+      text-align: center;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .feature-item:hover {
+      background: var(--hover);
+      color: var(--text-primary);
+      border-color: var(--accent);
+    }
+
+    .feature-item:hover::before {
+      left: 125%;
+    }
+
+    .feature-value {
+      display: block;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+
+    /* ===== MOBILE RESPONSIVE ===== */
+    @media (max-width: 600px) {
+      body {
+        padding: 16px 12px;
+      }
+
+      .action-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .mode-toggle {
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .notification {
+        right: 12px;
+        left: 12px;
+        top: 16px;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ===== MODE TOGGLE ===== -->
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="encode">🔒 Encode</button>
+      <button class="mode-btn" data-mode="decode">🔓 Decode</button>
+    </div>
+
+    <!-- ===== INPUT SECTION ===== -->
+    <div class="io-section">
+      <div class="io-label">
+        <span id="inputLabel">Plain Text</span>
+        <span class="char-count" id="inputCount">0 characters</span>
+      </div>
+      <textarea 
+        class="io-textarea" 
+        id="inputText" 
+        placeholder="Enter your text here..."
+        rows="5"
+      ></textarea>
+    </div>
+
+    <!-- ===== ACTION BUTTONS ===== -->
+    <div class="action-buttons">
+      <button class="btn btn-primary" id="convertBtn">🔄 Convert</button>
+      <button class="btn" id="clearBtn">🗑️ Clear All</button>
+    </div>
+
+    <!-- ===== OUTPUT SECTION ===== -->
+    <div class="io-section">
+      <div class="io-label">
+        <span id="outputLabel">Base64 Output</span>
+        <span class="char-count" id="outputCount">0 characters</span>
+      </div>
+      <textarea 
+        class="io-textarea" 
+        id="outputText" 
+        placeholder="Result will appear here..."
+        rows="5"
+        readonly
+      ></textarea>
+    </div>
+
+    <!-- ===== QUICK ACTIONS ===== -->
+    <div class="quick-actions">
+      <button class="quick-btn" id="copyBtn">📋 Copy Result</button>
+      <button class="quick-btn" id="swapBtn">🔄 Swap Input/Output</button>
+      <button class="quick-btn" id="downloadBtn">💾 Download</button>
+      <button class="quick-btn" id="shareBtn">🔗 Share URL</button>
+    </div>
+
+    <!-- ===== FEATURES SECTION ===== -->
+    <div class="features">
+      <div class="features-title">📊 Statistics</div>
+      <div class="feature-grid">
+        <div class="feature-item">
+          Original Size
+          <span class="feature-value" id="originalSize">0 B</span>
+        </div>
+        <div class="feature-item">
+          Encoded Size
+          <span class="feature-value" id="encodedSize">0 B</span>
+        </div>
+        <div class="feature-item">
+          Size Change
+          <span class="feature-value" id="sizeChange">0%</span>
+        </div>
+        <div class="feature-item">
+          Characters
+          <span class="feature-value" id="totalChars">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NOTIFICATION ===== -->
+  <div class="notification" id="notification">
+    <div class="notification-icon"></div>
+    <span id="notificationText"></span>
+  </div>
+
+  <script>
+    // ===== STATE MANAGEMENT =====
+    let currentMode = 'encode';
+
+    // ===== DOM ELEMENTS =====
+    const inputText = document.getElementById('inputText');
+    const outputText = document.getElementById('outputText');
+    const inputLabel = document.getElementById('inputLabel');
+    const outputLabel = document.getElementById('outputLabel');
+    const inputCount = document.getElementById('inputCount');
+    const outputCount = document.getElementById('outputCount');
+    const convertBtn = document.getElementById('convertBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const swapBtn = document.getElementById('swapBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const modeBtns = document.querySelectorAll('.mode-btn');
+    const notification = document.getElementById('notification');
+    const notificationText = document.getElementById('notificationText');
+
+    // Stats elements
+    const originalSize = document.getElementById('originalSize');
+    const encodedSize = document.getElementById('encodedSize');
+    const sizeChange = document.getElementById('sizeChange');
+    const totalChars = document.getElementById('totalChars');
+
+    // ===== MODE TOGGLE =====
+    modeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMode = btn.dataset.mode;
+        updateLabels();
+        outputText.value = '';
+        updateStats();
+        scheduleHeightCheck();
+      });
+    });
+
+    function updateLabels() {
+      if (currentMode === 'encode') {
+        inputLabel.textContent = 'Plain Text';
+        outputLabel.textContent = 'Base64 Output';
+        convertBtn.innerHTML = '🔒 Encode';
+      } else {
+        inputLabel.textContent = 'Base64 Input';
+        outputLabel.textContent = 'Plain Text Output';
+        convertBtn.innerHTML = '🔓 Decode';
+      }
+    }
+
+    // ===== CHARACTER COUNTER =====
+    inputText.addEventListener('input', () => {
+      inputCount.textContent = `${inputText.value.length} characters`;
+      updateStats();
+    });
+
+    // ===== CONVERT FUNCTION =====
+    convertBtn.addEventListener('click', () => {
+      const input = inputText.value;
+      
+      if (!input.trim()) {
+        showNotification('Please enter some text first', 'error');
+        return;
+      }
+
+      try {
+        if (currentMode === 'encode') {
+          outputText.value = btoa(unescape(encodeURIComponent(input)));
+          showNotification('Successfully encoded!', 'success');
+        } else {
+          outputText.value = decodeURIComponent(escape(atob(input)));
+          showNotification('Successfully decoded!', 'success');
+        }
+        outputCount.textContent = `${outputText.value.length} characters`;
+        updateStats();
+        scheduleHeightCheck();
+      } catch (error) {
+        showNotification('Invalid input for ' + currentMode + 'ing', 'error');
+        outputText.value = '';
+      }
+    });
+
+    // ===== CLEAR FUNCTION =====
+    clearBtn.addEventListener('click', () => {
+      inputText.value = '';
+      outputText.value = '';
+      inputCount.textContent = '0 characters';
+      outputCount.textContent = '0 characters';
+      updateStats();
+      showNotification('Cleared all fields', 'success');
+      scheduleHeightCheck();
+    });
+
+    // ===== COPY FUNCTION =====
+    copyBtn.addEventListener('click', () => {
+      if (!outputText.value) {
+        showNotification('Nothing to copy', 'error');
+        return;
+      }
+      
+      outputText.select();
+      document.execCommand('copy');
+      showNotification('Copied to clipboard!', 'success');
+    });
+
+    // ===== SWAP FUNCTION =====
+    swapBtn.addEventListener('click', () => {
+      if (!outputText.value) {
+        showNotification('Nothing to swap', 'error');
+        return;
+      }
+      
+      const temp = inputText.value;
+      inputText.value = outputText.value;
+      outputText.value = temp;
+      
+      inputCount.textContent = `${inputText.value.length} characters`;
+      outputCount.textContent = `${outputText.value.length} characters`;
+      updateStats();
+      showNotification('Swapped input and output!', 'success');
+      scheduleHeightCheck();
+    });
+
+    // ===== DOWNLOAD FUNCTION =====
+    downloadBtn.addEventListener('click', () => {
+      if (!outputText.value) {
+        showNotification('Nothing to download', 'error');
+        return;
+      }
+      
+      const blob = new Blob([outputText.value], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `base64_${currentMode}_${Date.now()}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showNotification('Downloaded!', 'success');
+    });
+
+    // ===== SHARE FUNCTION =====
+    shareBtn.addEventListener('click', () => {
+      if (!outputText.value) {
+        showNotification('Nothing to share', 'error');
+        return;
+      }
+      
+      const encodedData = encodeURIComponent(outputText.value);
+      const url = `${window.location.origin}${window.location.pathname}?data=${encodedData}&mode=${currentMode}`;
+      
+      navigator.clipboard.writeText(url).then(() => {
+        showNotification('Share URL copied!', 'success');
+      }).catch(() => {
+        showNotification('Failed to copy URL', 'error');
+      });
+    });
+
+    // ===== STATISTICS UPDATE =====
+    function updateStats() {
+      const inputBytes = new Blob([inputText.value]).size;
+      const outputBytes = new Blob([outputText.value]).size;
+      
+      originalSize.textContent = formatBytes(inputBytes);
+      encodedSize.textContent = formatBytes(outputBytes);
+      
+      if (inputBytes > 0 && outputBytes > 0) {
+        const change = ((outputBytes - inputBytes) / inputBytes * 100).toFixed(1);
+        sizeChange.textContent = (change > 0 ? '+' : '') + change + '%';
+      } else {
+        sizeChange.textContent = '0%';
+      }
+      
+      totalChars.textContent = (inputText.value.length + outputText.value.length).toString();
+    }
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    // ===== NOTIFICATION SYSTEM =====
+    function showNotification(message, type = 'success') {
+      notificationText.textContent = message;
+      notification.className = `notification ${type}`;
+      notification.classList.add('show');
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    // ===== URL PARAMETER LOADING =====
+    window.addEventListener('load', () => {
+      const params = new URLSearchParams(window.location.search);
+      const data = params.get('data');
+      const mode = params.get('mode');
+      
+      if (data && mode) {
+        currentMode = mode;
+        modeBtns.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.mode === mode);
+        });
+        updateLabels();
+        outputText.value = decodeURIComponent(data);
+        outputCount.textContent = `${outputText.value.length} characters`;
+        updateStats();
+      }
+      
+      scheduleHeightCheck();
+    });
+
+    // ===== ENTER KEY SUPPORT =====
+    inputText.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        convertBtn.click();
+      }
+    });
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+      scheduleHeightCheck();
+    });
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+</body>
+</html>
