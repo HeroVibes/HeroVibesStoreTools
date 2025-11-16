@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <style>
+    :root {
+      --primary-bg: #191919;
+      --secondary-bg: #1F1F1F;
+      --hover-bg: #323232;
+      --outline-color: #323232;
+      --accent-color: #87A9FF;
+      --primary-text: #D4D4D4;
+      --secondary-text: #8C8C8C;
+      --font-family: sans-serif;
+      --header-font-size: 20px;
+      --title-font-size: 14px;
+      --text-font-size: 12px;
+      --default-padding: 24px 16px;
+      --card-outline: 1px;
+      --radius: 8px;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+      color: var(--primary-text);
+      background: linear-gradient(135deg, #191919, #1F1F1F);
+      animation: gradientShift 10s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      transition: background 1s ease;
+      overflow: hidden; /* Hide any iframe bleed */
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      background: var(--secondary-bg);
+      border: var(--card-outline) solid var(--outline-color);
+      border-radius: var(--radius);
+      padding: var(--default-padding);
+      max-width: 90%;
+      width: 400px;
+      text-align: center;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hidden {
+      opacity: 0;
+      transform: scale(0.95);
+      pointer-events: none;
+    }
+
+    input[type="text"] {
+      background: var(--primary-bg);
+      border: 1px solid var(--outline-color);
+      color: var(--primary-text);
+      padding: 10px;
+      border-radius: var(--radius);
+      width: calc(100% - 22px);
+      font-size: var(--title-font-size);
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--secondary-bg);
+      color: var(--primary-text);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: var(--title-font-size);
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: var(--hover-bg);
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .btn:hover::before {
+      left: 125%;
+    }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
+
+    .gif-container {
+      position: relative;
+      margin: 20px auto;
+      cursor: pointer;
+    }
+
+    .gif-container img {
+      width: 100%;
+      border-radius: var(--radius);
+    }
+
+    .input-behind {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: opacity 0.5s;
+      width: 80%;
+    }
+
+    .gif-container.active .input-behind {
+      opacity: 1;
+    }
+
+    .version {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      font-size: var(--text-font-size);
+      color: var(--secondary-text);
+      opacity: 0.5;
+      z-index: 0;
+    }
+
+    /* Iframe cloak: Fake full window + block dev tools snoops */
+    html, body { height: 100%; width: 100%; }
+    #cloak-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--primary-bg);
+      z-index: 9999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      color: var(--accent-color);
+      font-size: 18px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        width: 90%;
+        padding: 16px;
+      }
+      .version { font-size: 10px; bottom: 5px; right: 5px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="cloak-overlay">Direct access only, cheater! GitHub? Nice try. 😏</div>
+
+  <div id="step1" class="container">
+    <p style="font-size: var(--header-font-size); font-weight: bold;">Quick Quiz: What is the next number in the sequence 2, 3, 5, 7, 11?</p>
+    <input type="text" id="quiz-answer" placeholder="Enter your answer">
+    <button class="btn" onclick="checkQuiz()">Submit</button>
+  </div>
+  <div id="step2" class="container hidden">
+    <p style="font-size: var(--title-font-size);">Hint: Hero</p>
+    <div class="gif-container" onclick="revealInput()">
+      <img src="https://via.placeholder.com/300x200?text=Stego+GIF" alt="Placeholder GIF">
+      <div class="input-behind">
+        <input type="text" id="password-input" placeholder="Enter decoded password">
+        <button class="btn" onclick="checkPassword()">Submit</button>
+      </div>
+    </div>
+  </div>
+  <div id="step3" class="container hidden">
+    <p style="font-size: var(--header-font-size); font-weight: bold;">Encrypted License Key:</p>
+    <p id="encrypted-key" style="font-size: var(--title-font-size);">U2FtcGxlRW5jcnlwdGVkS2V5MTIzNDU= (Base64 Decode using our tool)</p>
+    <p style="font-size: var(--text-font-size); color: var(--secondary-text);">Transform using Base64 decoder to reveal the Steam key.</p>
+  </div>
+  <div class="version">V1.0.1</div>
+
+  <form id="second-notification-form" action="https://formspree.io/f/xkgznjpd" method="POST" style="display:none;">
+    <input type="text" name="Claim_Confirmation" value="Someone has claimed the code">
+  </form>
+
+  <script>
+    // Obfuscated vars to dodge inspectors (minify in prod, lol)
+    const _0x4a3f=['top','self','parent','frameElement','documentElement','doScroll','userAgent','navigator','webkit','msie','trident','opera','location','href','https://herovibes.github.io/HeroVibesStoreTools/','indexOf','cloak-overlay','style','display','block','none','console','log','Konami page cloaked. Dev tools? We don't do that here. 🔒','checkQuiz','quiz-answer','value','trim','toLowerCase','13','transitionToStep','Incorrect! Primes don't lie. 🤓','revealInput','gif-container','classList','add','active','checkPassword','password-input','secretpass','Someone has claimed the code','second-notification-form','submit','Incorrect password, script kiddie!','step','hidden','remove','body','background','linear-gradient(135deg, #1F1F1F, #323232)','scheduleHeightCheck','Transition error:','sendHeight','scrollHeight','lastHeight','parent','postMessage','frameHeight','*','resizeTimer','clearTimeout','setTimeout',150,'load',100,'resize'];
+
+    (function cloakInit() {
+      try {
+        // Iframe detection circus
+        if (window[_0x4a3f[0]] !== window || window[_0x4a3f[1]] !== window[_0x4a3f[0]] || window[_0x4a3f[2]] !== window[_0x4a3f[1]] || window[_0x4a3f[3]] || (document[_0x4a3f[4]] && document[_0x4a3f[4]][_0x4a3f[5]] && document[_0x4a3f[5]]('parent')) || /iframe/i.test(navigator[_0x4a3f[7]]) || navigator[_0x4a3f[6]].indexOf(_0x4a3f[8]) > -1 || navigator[_0x4a3f[6]].indexOf(_0x4a3f[9]) > -1 || navigator[_0x4a3f[6]].indexOf(_0x4a3f[10]) > -1 || navigator[_0x4a3f[6]].indexOf(_0x4a3f[11]) > -1) {
+          // GitHub direct access? Roast 'em
+          if (location[_0x4a3f[13]][_0x4a3f[12]](_0x4a3f[14]) > -1) {
+            document.getElementById(_0x4a3f[15])[_0x4a3f[17]][_0x4a3f[16]] = _0x4a3f[18];
+          }
+          return; // Bail – no secrets for iframes
+        }
+        document.getElementById(_0x4a3f[15])[_0x4a3f[17]][_0x4a3f[16]] = _0x4a3f[19];
+      } catch (e) { console[_0x4a3f[21]](_0x4a3f[20] + e); }
+    })();
+
+    // Developer notes: #QUIZ CHECK (obfuscated logic)
+    function checkQuiz() {
+      try {
+        const a = document.getElementById(_0x4a3f[22])[_0x4a3f[23]].trim().toLowerCase();
+        if (a === _0x4a3f[26]) { transitionToStep(2); }
+        else { console.error('Quiz fail'); alert(_0x4a3f[27]); }
+      } catch (e) { console.error('Quiz error:', e); }
+    }
+
+    // Developer notes: #PASSWORD REVEAL
+    function revealInput() {
+      try { document.querySelector('.' + _0x4a3f[28]).classList.add(_0x4a3f[30]); }
+      catch (e) { console.error('Reveal fail:', e); }
+    }
+
+    // Developer notes: #PASSWORD CHECK
+    function checkPassword() {
+      try {
+        const p = document.getElementById(_0x4a3f[31])[_0x4a3f[23]].trim().toLowerCase();
+        if (p === _0x4a3f[32]) { transitionToStep(3); document.getElementById(_0x4a3f[34]).submit(); }
+        else { console.error('Pass fail'); alert(_0x4a3f[35]); }
+      } catch (e) { console.error('Pass error:', e); }
+    }
+
+    // Developer notes: #TRANSITION FUNCTION
+    function transitionToStep(s) {
+      try {
+        const c = document.getElementById('step' + (s-1));
+        const n = document.getElementById('step' + s);
+        if (c && n) {
+          c.classList.add(_0x4a3f[36]);
+          setTimeout(() => {
+            document.body.style.background = _0x4a3f[38];
+            n.classList.remove(_0x4a3f[36]);
+            scheduleHeightCheck();
+          }, 500);
+        }
+      } catch (e) { console.error(_0x4a3f[39] + e); }
+    }
+
+    // Block right-click & dev tools shortcuts (F12, Ctrl+Shift+I, etc.)
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) {
+        e.preventDefault(); alert('Nice try, inspector gadget! 🕵️‍♂️');
+      }
+    });
+
+    // Infinite debugger loop for fun (breaks dev tools)
+    setInterval(() => { debugger; }, 100);
+
+    console.log('Cloak active. Source? Over your dead cache. 💀');
+
+    // ===== FOURTHWALL SCROLLBAR FIX (only if iframe – but cloaked) =====
+    let lastHeight = 0, resizeTimer;
+    function sendHeight() {
+      if (window.parent === window) return; // No postMessage if direct
+      const h = document.body.scrollHeight;
+      if (h !== lastHeight) { lastHeight = h; window.parent.postMessage({frameHeight: h}, '*'); }
+    }
+    function scheduleHeightCheck() { clearTimeout(resizeTimer); resizeTimer = setTimeout(sendHeight, _0x4a3f[41]); }
+    window.addEventListener('load', () => setTimeout(sendHeight, _0x4a3f[42]));
+    window.addEventListener('resize', scheduleHeightCheck);
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+</body>
+</html>
