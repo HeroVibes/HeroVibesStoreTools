@@ -166,6 +166,7 @@
       padding:20px;
       margin-top:16px;
       overflow-x:auto;
+      min-height:100px;
     }
     
     /* ===== ACTION BUTTONS ===== */
@@ -267,18 +268,18 @@
       background:var(--bg);
       border:1px solid var(--outline);
       border-radius:var(--radius);
-      padding:0;
       margin-top:12px;
       overflow:hidden;
-      height:0;
+      max-height:0;
       opacity:0;
-      transition:all 0.3s ease;
+      padding:0 20px;
+      transition:max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
     }
     
     .instructions-popup.show{
-      padding:12px 20px;
-      height:auto;
+      max-height:500px;
       opacity:1;
+      padding:16px 20px;
     }
     
     .instructions-popup h3{
@@ -288,7 +289,7 @@
     }
     
     .instructions-popup ol{
-      margin:0;
+      margin:0 0 8px 0;
       padding-left:20px;
       font-size:12px;
       color:var(--text-secondary);
@@ -727,7 +728,9 @@ ${html}
     });
     
     // ===== INITIAL PREVIEW =====
-    updatePreview();
+    setTimeout(() => {
+      updatePreview();
+    }, 100);
     
     // ===== FOURTHWALL SCROLLBAR FIX =====
     let lastHeight = 0;
@@ -749,6 +752,8 @@ ${html}
 
     window.addEventListener('load', () => {
         setTimeout(sendHeight, 100);
+        setTimeout(sendHeight, 300);
+        setTimeout(sendHeight, 500);
     });
 
     window.addEventListener('resize', () => {
