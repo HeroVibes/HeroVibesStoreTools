@@ -1,0 +1,761 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Email Signature Generator</title>
+  <style>
+    :root{
+      --bg:#191919;
+      --card-bg:#1F1F1F;
+      --hover:#323232;
+      --outline:#323232;
+      --accent:#87A9FF;
+      --text-primary:#D4D4D4;
+      --text-secondary:#8C8C8C;
+      --radius:8px;
+    }
+    
+    *{
+      box-sizing:border-box;
+    }
+    
+    body{
+      margin:0;
+      padding:24px 16px;
+      background:var(--bg);
+      font-family:sans-serif;
+      color:var(--text-primary);
+    }
+    
+    /* ===== MAIN CONTAINER ===== */
+    .container{
+      max-width:900px;
+      margin:0 auto;
+    }
+    
+    /* ===== INPUT SECTION ===== */
+    .input-section{
+      background:var(--card-bg);
+      border:1px solid var(--outline);
+      border-radius:var(--radius);
+      padding:24px 16px;
+      margin-bottom:20px;
+    }
+    
+    .section-title{
+      font-size:20px;
+      font-weight:bold;
+      margin:0 0 20px 0;
+      color:var(--text-primary);
+    }
+    
+    .input-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:16px;
+    }
+    
+    @media(min-width:600px){
+      .input-grid{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+    
+    .input-group{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    
+    .input-group.full-width{
+      grid-column:1/-1;
+    }
+    
+    label{
+      font-size:12px;
+      color:var(--text-secondary);
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="url"],
+    textarea{
+      background:var(--bg);
+      border:1px solid var(--outline);
+      border-radius:var(--radius);
+      padding:10px 12px;
+      color:var(--text-primary);
+      font-size:14px;
+      font-family:sans-serif;
+      transition:border-color 0.2s;
+    }
+    
+    input:focus,
+    textarea:focus{
+      outline:none;
+      border-color:var(--accent);
+    }
+    
+    textarea{
+      resize:vertical;
+      min-height:60px;
+    }
+    
+    /* ===== TEMPLATE SELECTION ===== */
+    .template-section{
+      background:var(--card-bg);
+      border:1px solid var(--outline);
+      border-radius:var(--radius);
+      padding:24px 16px;
+      margin-bottom:20px;
+    }
+    
+    .template-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+      gap:12px;
+      margin-top:16px;
+    }
+    
+    .template-card{
+      background:var(--bg);
+      border:2px solid var(--outline);
+      border-radius:var(--radius);
+      padding:12px;
+      cursor:pointer;
+      transition:all 0.2s;
+      text-align:center;
+    }
+    
+    .template-card:hover{
+      border-color:var(--accent);
+      background:var(--hover);
+    }
+    
+    .template-card.active{
+      border-color:var(--accent);
+      background:var(--hover);
+    }
+    
+    .template-name{
+      font-size:14px;
+      font-weight:bold;
+      margin-bottom:6px;
+    }
+    
+    .template-desc{
+      font-size:12px;
+      color:var(--text-secondary);
+    }
+    
+    /* ===== PREVIEW SECTION ===== */
+    .preview-section{
+      background:var(--card-bg);
+      border:1px solid var(--outline);
+      border-radius:var(--radius);
+      padding:24px 16px;
+      margin-bottom:20px;
+    }
+    
+    .preview-container{
+      background:var(--bg);
+      border:1px solid var(--outline);
+      border-radius:var(--radius);
+      padding:20px;
+      margin-top:16px;
+      overflow-x:auto;
+    }
+    
+    /* ===== ACTION BUTTONS ===== */
+    .action-buttons{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:16px;
+    }
+    
+    .btn{
+      position:relative;
+      padding:10px 16px;
+      border-radius:var(--radius);
+      background:var(--card-bg);
+      color:var(--text-primary);
+      border:1px solid rgba(255,255,255,0.06);
+      cursor:pointer;
+      overflow:hidden;
+      font-size:14px;
+      font-family:sans-serif;
+      transition:background 0.2s;
+    }
+    
+    .btn::before{
+      content:'';
+      position:absolute;
+      top:0;
+      left:-100%;
+      width:75%;
+      height:100%;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform:skewX(-25deg);
+      transition:left .7s ease-in-out;
+    }
+    
+    .btn:hover::before{
+      left:125%;
+    }
+    
+    .btn:focus-visible{
+      outline:none;
+      box-shadow:0 0 0 3px rgba(135,169,255,0.12);
+    }
+    
+    .btn:active{
+      background:var(--hover);
+    }
+    
+    /* ===== SIGNATURE TEMPLATES STYLING ===== */
+    .sig-wrapper{
+      font-family:Arial, sans-serif;
+      line-height:1.4;
+    }
+    
+    .sig-wrapper a{
+      color:#87A9FF;
+      text-decoration:none;
+    }
+    
+    .sig-wrapper a:hover{
+      text-decoration:underline;
+    }
+    
+    /* ===== COPY SUCCESS MESSAGE ===== */
+    .copy-message{
+      position:fixed;
+      bottom:20px;
+      right:20px;
+      background:var(--accent);
+      color:#191919;
+      padding:12px 20px;
+      border-radius:var(--radius);
+      font-size:14px;
+      font-weight:bold;
+      opacity:0;
+      transform:translateY(20px);
+      transition:all 0.3s;
+      pointer-events:none;
+      z-index:1000;
+    }
+    
+    .copy-message.show{
+      opacity:1;
+      transform:translateY(0);
+    }
+    
+    /* ===== INSTRUCTIONS POPUP ===== */
+    .instructions-trigger{
+      color:var(--accent);
+      cursor:pointer;
+      font-size:14px;
+      text-decoration:underline;
+      margin-top:16px;
+      display:inline-block;
+    }
+    
+    .instructions-popup{
+      background:var(--bg);
+      border:1px solid var(--outline);
+      border-radius:var(--radius);
+      padding:0;
+      margin-top:12px;
+      overflow:hidden;
+      height:0;
+      opacity:0;
+      transition:all 0.3s ease;
+    }
+    
+    .instructions-popup.show{
+      padding:12px 20px;
+      height:auto;
+      opacity:1;
+    }
+    
+    .instructions-popup h3{
+      font-size:14px;
+      margin:0 0 12px 0;
+      color:var(--accent);
+    }
+    
+    .instructions-popup ol{
+      margin:0;
+      padding-left:20px;
+      font-size:12px;
+      color:var(--text-secondary);
+    }
+    
+    .instructions-popup li{
+      margin-bottom:8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- ===== INPUT SECTION ===== -->
+    <div class="input-section">
+      <h2 class="section-title">Your Information</h2>
+      <div class="input-grid">
+        <div class="input-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" placeholder="John Doe">
+        </div>
+        <div class="input-group">
+          <label for="jobTitle">Job Title</label>
+          <input type="text" id="jobTitle" placeholder="Content Creator">
+        </div>
+        <div class="input-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="john@example.com">
+        </div>
+        <div class="input-group">
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" placeholder="+1 (555) 123-4567">
+        </div>
+        <div class="input-group">
+          <label for="website">Website</label>
+          <input type="url" id="website" placeholder="https://yoursite.com">
+        </div>
+        <div class="input-group">
+          <label for="company">Company</label>
+          <input type="text" id="company" placeholder="Your Company">
+        </div>
+        <div class="input-group">
+          <label for="twitter">Twitter/X</label>
+          <input type="text" id="twitter" placeholder="@yourusername">
+        </div>
+        <div class="input-group">
+          <label for="linkedin">LinkedIn</label>
+          <input type="url" id="linkedin" placeholder="linkedin.com/in/username">
+        </div>
+        <div class="input-group">
+          <label for="instagram">Instagram</label>
+          <input type="text" id="instagram" placeholder="@yourusername">
+        </div>
+        <div class="input-group">
+          <label for="youtube">YouTube</label>
+          <input type="url" id="youtube" placeholder="youtube.com/@channel">
+        </div>
+        <div class="input-group full-width">
+          <label for="address">Address (Optional)</label>
+          <input type="text" id="address" placeholder="123 Main St, City, Country">
+        </div>
+        <div class="input-group full-width">
+          <label for="tagline">Tagline/Quote (Optional)</label>
+          <textarea id="tagline" placeholder="A short tagline or inspirational quote"></textarea>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ===== TEMPLATE SELECTION ===== -->
+    <div class="template-section">
+      <h2 class="section-title">Choose Template</h2>
+      <div class="template-grid">
+        <div class="template-card active" data-template="1">
+          <div class="template-name">Classic</div>
+          <div class="template-desc">Clean & Simple</div>
+        </div>
+        <div class="template-card" data-template="2">
+          <div class="template-name">Modern</div>
+          <div class="template-desc">Bold & Minimal</div>
+        </div>
+        <div class="template-card" data-template="3">
+          <div class="template-name">Professional</div>
+          <div class="template-desc">Corporate Style</div>
+        </div>
+        <div class="template-card" data-template="4">
+          <div class="template-name">Creative</div>
+          <div class="template-desc">Colorful Accent</div>
+        </div>
+        <div class="template-card" data-template="5">
+          <div class="template-name">Compact</div>
+          <div class="template-desc">Space Efficient</div>
+        </div>
+        <div class="template-card" data-template="6">
+          <div class="template-name">Bold</div>
+          <div class="template-desc">Large Name</div>
+        </div>
+        <div class="template-card" data-template="7">
+          <div class="template-name">Elegant</div>
+          <div class="template-desc">Refined Style</div>
+        </div>
+        <div class="template-card" data-template="8">
+          <div class="template-name">Social</div>
+          <div class="template-desc">Social Focus</div>
+        </div>
+        <div class="template-card" data-template="9">
+          <div class="template-name">Divided</div>
+          <div class="template-desc">Side by Side</div>
+        </div>
+        <div class="template-card" data-template="10">
+          <div class="template-name">Minimal</div>
+          <div class="template-desc">Ultra Clean</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ===== PREVIEW SECTION ===== -->
+    <div class="preview-section">
+      <h2 class="section-title">Preview & Export</h2>
+      <div class="preview-container" id="previewContainer">
+        <!-- Signature preview will appear here -->
+      </div>
+      <div class="action-buttons">
+        <button class="btn" id="copyBtn">Copy to Clipboard</button>
+        <button class="btn" id="downloadBtn">Download HTML</button>
+      </div>
+      <span class="instructions-trigger" id="instructionsTrigger">How do I add this to Gmail?</span>
+      <div class="instructions-popup" id="instructionsPopup">
+        <h3>Adding to Gmail:</h3>
+        <ol>
+          <li>Click "Copy to Clipboard" above</li>
+          <li>Open Gmail Settings (gear icon → See all settings)</li>
+          <li>Scroll to "Signature" section</li>
+          <li>Click "+ Create new" for a new signature</li>
+          <li>Paste (Ctrl+V or Cmd+V) into the signature editor</li>
+          <li>Scroll down and click "Save Changes"</li>
+        </ol>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- ===== COPY SUCCESS MESSAGE ===== -->
+  <div class="copy-message" id="copyMessage">Copied to clipboard!</div>
+
+  <script>
+    // ===== DATA & STATE =====
+    let currentTemplate = 1;
+    const inputs = {
+      fullName: document.getElementById('fullName'),
+      jobTitle: document.getElementById('jobTitle'),
+      email: document.getElementById('email'),
+      phone: document.getElementById('phone'),
+      website: document.getElementById('website'),
+      company: document.getElementById('company'),
+      twitter: document.getElementById('twitter'),
+      linkedin: document.getElementById('linkedin'),
+      instagram: document.getElementById('instagram'),
+      youtube: document.getElementById('youtube'),
+      address: document.getElementById('address'),
+      tagline: document.getElementById('tagline')
+    };
+    
+    // ===== TEMPLATE SELECTION =====
+    document.querySelectorAll('.template-card').forEach(card => {
+      card.addEventListener('click', function() {
+        document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        currentTemplate = parseInt(this.getAttribute('data-template'));
+        updatePreview();
+      });
+    });
+    
+    // ===== UPDATE PREVIEW ON INPUT =====
+    Object.values(inputs).forEach(input => {
+      input.addEventListener('input', updatePreview);
+    });
+    
+    // ===== GENERATE SIGNATURE HTML =====
+    function generateSignature() {
+      const data = {};
+      for (let key in inputs) {
+        data[key] = inputs[key].value.trim();
+      }
+      
+      // Clean URLs
+      if (data.website && !data.website.startsWith('http')) {
+        data.website = 'https://' + data.website;
+      }
+      if (data.linkedin && !data.linkedin.startsWith('http')) {
+        data.linkedin = 'https://' + data.linkedin;
+      }
+      if (data.youtube && !data.youtube.startsWith('http')) {
+        data.youtube = 'https://' + data.youtube;
+      }
+      
+      // Template generators
+      const templates = {
+        1: generateTemplate1,
+        2: generateTemplate2,
+        3: generateTemplate3,
+        4: generateTemplate4,
+        5: generateTemplate5,
+        6: generateTemplate6,
+        7: generateTemplate7,
+        8: generateTemplate8,
+        9: generateTemplate9,
+        10: generateTemplate10
+      };
+      
+      return templates[currentTemplate](data);
+    }
+    
+    // ===== TEMPLATE 1: CLASSIC ===== 
+    function generateTemplate1(d) {
+      return `
+<div style="font-family:Arial,sans-serif;font-size:14px;color:#333;line-height:1.6;">
+  ${d.fullName ? `<div style="font-size:18px;font-weight:bold;color:#000;margin-bottom:4px;">${d.fullName}</div>` : ''}
+  ${d.jobTitle ? `<div style="color:#666;margin-bottom:8px;">${d.jobTitle}${d.company ? ` at ${d.company}` : ''}</div>` : ''}
+  ${d.email ? `<div style="margin-bottom:2px;">✉ <a href="mailto:${d.email}" style="color:#87A9FF;text-decoration:none;">${d.email}</a></div>` : ''}
+  ${d.phone ? `<div style="margin-bottom:2px;">📞 ${d.phone}</div>` : ''}
+  ${d.website ? `<div style="margin-bottom:2px;">🌐 <a href="${d.website}" style="color:#87A9FF;text-decoration:none;">${d.website.replace(/^https?:\/\//, '')}</a></div>` : ''}
+  ${(d.twitter || d.linkedin || d.instagram || d.youtube) ? `<div style="margin-top:8px;">
+    ${d.twitter ? `<a href="https://twitter.com/${d.twitter.replace('@','')}" style="color:#87A9FF;text-decoration:none;margin-right:12px;">Twitter</a>` : ''}
+    ${d.linkedin ? `<a href="${d.linkedin}" style="color:#87A9FF;text-decoration:none;margin-right:12px;">LinkedIn</a>` : ''}
+    ${d.instagram ? `<a href="https://instagram.com/${d.instagram.replace('@','')}" style="color:#87A9FF;text-decoration:none;margin-right:12px;">Instagram</a>` : ''}
+    ${d.youtube ? `<a href="${d.youtube}" style="color:#87A9FF;text-decoration:none;">YouTube</a>` : ''}
+  </div>` : ''}
+  ${d.tagline ? `<div style="margin-top:8px;font-style:italic;color:#888;font-size:12px;">"${d.tagline}"</div>` : ''}
+</div>`;
+    }
+    
+    // ===== TEMPLATE 2: MODERN =====
+    function generateTemplate2(d) {
+      return `
+<div style="font-family:Arial,sans-serif;font-size:14px;color:#333;">
+  ${d.fullName ? `<div style="font-size:20px;font-weight:bold;color:#000;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">${d.fullName}</div>` : ''}
+  ${d.jobTitle ? `<div style="color:#87A9FF;font-weight:bold;margin-bottom:12px;">${d.jobTitle}</div>` : ''}
+  <div style="border-top:2px solid #87A9FF;padding-top:8px;">
+    ${d.email ? `<div style="margin-bottom:4px;"><a href="mailto:${d.email}" style="color:#333;text-decoration:none;">${d.email}</a></div>` : ''}
+    ${d.phone ? `<div style="margin-bottom:4px;">${d.phone}</div>` : ''}
+    ${d.website ? `<div><a href="${d.website}" style="color:#87A9FF;text-decoration:none;">${d.website.replace(/^https?:\/\//, '')}</a></div>` : ''}
+  </div>
+</div>`;
+    }
+    
+    // ===== TEMPLATE 3: PROFESSIONAL =====
+    function generateTemplate3(d) {
+      return `
+<table style="font-family:Arial,sans-serif;font-size:14px;color:#333;" cellpadding="0" cellspacing="0">
+  <tr>
+    <td style="padding-right:15px;border-right:2px solid #87A9FF;">
+      ${d.fullName ? `<div style="font-size:16px;font-weight:bold;color:#000;margin-bottom:4px;">${d.fullName}</div>` : ''}
+      ${d.jobTitle ? `<div style="color:#666;font-size:13px;">${d.jobTitle}</div>` : ''}
+      ${d.company ? `<div style="color:#666;font-size:13px;">${d.company}</div>` : ''}
+    </td>
+    <td style="padding-left:15px;">
+      ${d.email ? `<div style="margin-bottom:3px;">E: <a href="mailto:${d.email}" style="color:#87A9FF;text-decoration:none;">${d.email}</a></div>` : ''}
+      ${d.phone ? `<div style="margin-bottom:3px;">P: ${d.phone}</div>` : ''}
+      ${d.website ? `<div>W: <a href="${d.website}" style="color:#87A9FF;text-decoration:none;">${d.website.replace(/^https?:\/\//, '')}</a></div>` : ''}
+    </td>
+  </tr>
+</table>`;
+    }
+    
+    // ===== TEMPLATE 4: CREATIVE =====
+    function generateTemplate4(d) {
+      return `
+<div style="font-family:Arial,sans-serif;font-size:14px;color:#333;">
+  <div style="background:linear-gradient(90deg,#87A9FF,#6B8FE8);padding:12px;border-radius:4px;margin-bottom:10px;">
+    ${d.fullName ? `<div style="font-size:18px;font-weight:bold;color:#fff;">${d.fullName}</div>` : ''}
+    ${d.jobTitle ? `<div style="color:#fff;font-size:13px;">${d.jobTitle}</div>` : ''}
+  </div>
+  ${d.email ? `<div style="margin-bottom:4px;">📧 <a href="mailto:${d.email}" style="color:#87A9FF;text-decoration:none;">${d.email}</a></div>` : ''}
+  ${d.phone ? `<div style="margin-bottom:4px;">📱 ${d.phone}</div>` : ''}
+  ${d.website ? `<div style="margin-bottom:4px;">💻 <a href="${d.website}" style="color:#87A9FF;text-decoration:none;">${d.website.replace(/^https?:\/\//, '')}</a></div>` : ''}
+  ${d.tagline ? `<div style="margin-top:8px;color:#666;font-style:italic;font-size:12px;">${d.tagline}</div>` : ''}
+</div>`;
+    }
+    
+    // ===== TEMPLATE 5: COMPACT =====
+    function generateTemplate5(d) {
+      let parts = [];
+      if (d.fullName) parts.push(`<strong>${d.fullName}</strong>`);
+      if (d.jobTitle) parts.push(d.jobTitle);
+      if (d.email) parts.push(`<a href="mailto:${d.email}" style="color:#87A9FF;text-decoration:none;">${d.email}</a>`);
+      if (d.phone) parts.push(d.phone);
+      if (d.website) parts.push(`<a href="${d.website}" style="color:#87A9FF;text-decoration:none;">${d.website.replace(/^https?:\/\//, '')}</a>`);
+      
+      return `<div style="font-family:Arial,sans-serif;font-size:13px;color:#333;">${parts.join(' | ')}</div>`;
+    }
+    
+    // ===== TEMPLATE 6: BOLD =====
+    function generateTemplate6(d) {
+      return `
+<div style="font-family:Arial,sans-serif;color:#333;">
+  ${d.fullName ? `<div style="font-size:24px;font-weight:bold;color:#000;margin-bottom:8px;">${d.fullName}</div>` : ''}
+  ${d.jobTitle ? `<div style="font-size:16px;color:#87A9FF;margin-bottom:12px;">${d.jobTitle}</div>` : ''}
+  <div style="font-size:14px;">
+    ${d.email ? `<div style="margin-bottom:4px;"><a href="mailto:${d.email}" style="color:#333;text-decoration:none;">${d.email}</a></div>` : ''}
+    ${d.phone ? `<div style="margin-bottom:4px;">${d.phone}</div>` : ''}
+    ${d.website ? `<div><a href="${d.website}" style="color:#87A9FF;text-decoration:none;font-weight:bold;">${d.website.replace(/^https?:\/\//, '')}</a></div>` : ''}
+  </div>
+</div>`;
+    }
+    
+    // ===== TEMPLATE 7: ELEGANT =====
+    function generateTemplate7(d) {
+      return `
+<div style="font-family:Georgia,serif;font-size:14px;color:#333;">
+  ${d.fullName ? `<div style="font-size:18px;color:#000;margin-bottom:4px;">${d.fullName}</div>` : ''}
+  ${d.jobTitle ? `<div style="color:#666;font-style:italic;margin-bottom:8px;">${d.jobTitle}${d.company ? `, ${d.company}` : ''}</div>` : ''}
+  <div style="border-top:1px solid #ccc;padding-top:8px;font-family:Arial,sans-serif;font-size:13px;">
+    ${d.email ? `<div style="margin-bottom:3px;"><a href="mailto:${d.email}" style="color:#87A9FF;text-decoration:none;">${d.email}</a></div>` : ''}
+    ${d.phone ? `<div style="margin-bottom:3px;">${d.phone}</div>` : ''}
+    ${d.website ? `<div><a href="${d.website}" style="color:#87A9FF;text-decoration:none;">${d.website.replace(/^https?:\/\//, '')}</a></div>` : ''}
+  </div>
+</div>`;
+    }
+    
+    // ===== TEMPLATE 8: SOCIAL =====
+    function generateTemplate8(d) {
+      return `
+<div style="font-family:Arial,sans-serif;font-size:14px;color:#333;">
+  ${d.fullName ? `<div style="font-size:18px;font-weight:bold;color:#000;margin-bottom:4px;">${d.fullName}</div>` : ''}
+  ${d.jobTitle ? `<div style="color:#666;margin-bottom:8px;">${d.jobTitle}</div>` : ''}
+  ${d.email ? `<div style="margin-bottom:8px;"><a href="mailto:${d.email}" style="color:#87A9FF;text-decoration:none;">${d.email}</a></div>` : ''}
+  <div style="display:flex;gap:12px;">
+    ${d.twitter ? `<a href="https://twitter.com/${d.twitter.replace('@','')}" style="color:#1DA1F2;text-decoration:none;font-weight:bold;">X</a>` : ''}
+    ${d.linkedin ? `<a href="${d.linkedin}" style="color:#0077B5;text-decoration:none;font-weight:bold;">in</a>` : ''}
+    ${d.instagram ? `<a href="https://instagram.com/${d.instagram.replace('@','')}" style="color:#E4405F;text-decoration:none;font-weight:bold;">IG</a>` : ''}
+    ${d.youtube ? `<a href="${d.youtube}" style="color:#FF0000;text-decoration:none;font-weight:bold;">YT</a>` : ''}
+  </div>
+</div>`;
+    }
+    
+    // ===== TEMPLATE 9: DIVIDED =====
+    function generateTemplate9(d) {
+      return `
+<table style="font-family:Arial,sans-serif;font-size:14px;color:#333;" cellpadding="0" cellspacing="0">
+  <tr>
+    <td style="padding-right:20px;vertical-align:top;">
+      ${d.fullName ? `<div style="font-size:16px;font-weight:bold;color:#000;margin-bottom:4px;">${d.fullName}</div>` : ''}
+      ${d.jobTitle ? `<div style="color:#666;font-size:13px;margin-bottom:2px;">${d.jobTitle}</div>` : ''}
+      ${d.company ? `<div style="color:#666;font-size:13px;">${d.company}</div>` : ''}
+    </td>
+    <td style="border-left:1px solid #ddd;padding-left:20px;vertical-align:top;">
+      ${d.email ? `<div style="margin-bottom:4px;font-size:13px;"><a href="mailto:${d.email}" style="color:#87A9FF;text-decoration:none;">${d.email}</a></div>` : ''}
+      ${d.phone ? `<div style="margin-bottom:4px;font-size:13px;">${d.phone}</div>` : ''}
+      ${d.website ? `<div style="font-size:13px;"><a href="${d.website}" style="color:#87A9FF;text-decoration:none;">${d.website.replace(/^https?:\/\//, '')}</a></div>` : ''}
+    </td>
+  </tr>
+</table>`;
+    }
+    
+    // ===== TEMPLATE 10: MINIMAL =====
+    function generateTemplate10(d) {
+      return `
+<div style="font-family:Arial,sans-serif;font-size:13px;color:#555;line-height:1.8;">
+  ${d.fullName ? `<div style="font-weight:bold;color:#000;">${d.fullName}</div>` : ''}
+  ${d.email ? `<div><a href="mailto:${d.email}" style="color:#87A9FF;text-decoration:none;">${d.email}</a></div>` : ''}
+  ${d.website ? `<div><a href="${d.website}" style="color:#87A9FF;text-decoration:none;">${d.website.replace(/^https?:\/\//, '')}</a></div>` : ''}
+</div>`;
+    }
+    
+    // ===== UPDATE PREVIEW =====
+    function updatePreview() {
+      const html = generateSignature();
+      document.getElementById('previewContainer').innerHTML = `<div class="sig-wrapper">${html}</div>`;
+      scheduleHeightCheck();
+    }
+    
+    // ===== COPY TO CLIPBOARD =====
+    document.getElementById('copyBtn').addEventListener('click', async function() {
+      const html = generateSignature();
+      
+      try {
+        // Create a temporary div to hold the HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        document.body.appendChild(tempDiv);
+        
+        // Select the content
+        const range = document.createRange();
+        range.selectNodeContents(tempDiv);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        
+        // Copy as rich text
+        document.execCommand('copy');
+        
+        // Clean up
+        document.body.removeChild(tempDiv);
+        selection.removeAllRanges();
+        
+        // Show success message
+        const msg = document.getElementById('copyMessage');
+        msg.classList.add('show');
+        setTimeout(() => msg.classList.remove('show'), 2000);
+      } catch (err) {
+        alert('Failed to copy. Please try the download option instead.');
+      }
+    });
+    
+    // ===== DOWNLOAD HTML =====
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+      const html = generateSignature();
+      const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Email Signature</title>
+</head>
+<body>
+${html}
+</body>
+</html>`;
+      
+      const blob = new Blob([fullHtml], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'email-signature.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+    
+    // ===== INSTRUCTIONS TOGGLE =====
+    document.getElementById('instructionsTrigger').addEventListener('click', function() {
+      const popup = document.getElementById('instructionsPopup');
+      popup.classList.toggle('show');
+      scheduleHeightCheck();
+    });
+    
+    // ===== INITIAL PREVIEW =====
+    updatePreview();
+    
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+        scheduleHeightCheck();
+    });
+    
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+</body>
+</html>
