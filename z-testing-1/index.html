@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tier List Maker</title>
+  <style>
+    :root {
+      --bg: #191919;
+      --card-bg: #1F1F1F;
+      --hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: var(--bg);
+      font-family: system-ui, sans-serif;
+      color: var(--text-primary);
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ===== CONTROLS SECTION ===== */
+    .controls {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 16px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .control-group label {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    select, input[type="file"] {
+      background: var(--bg);
+      color: var(--text-primary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 10px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    select:hover, input[type="file"]:hover {
+      background: var(--hover);
+    }
+
+    input[type="file"] {
+      cursor: pointer;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left .7s ease-in-out;
+    }
+
+    .btn:hover::before {
+      left: 125%;
+    }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ===== TIER LIST CONTAINER ===== */
+    #tierListContainer {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    /* ===== TIER ROW ===== */
+    .tier-row {
+      display: flex;
+      margin-bottom: 8px;
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .tier-label {
+      background: var(--card-bg);
+      color: var(--text-primary);
+      font-weight: bold;
+      font-size: 20px;
+      width: 60px;
+      min-width: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--outline);
+    }
+
+    .tier-label.s { background: #FF7F7F; color: #000; }
+    .tier-label.a { background: #FFBF7F; color: #000; }
+    .tier-label.b { background: #FFDF7F; color: #000; }
+    .tier-label.c { background: #FFFF7F; color: #000; }
+    .tier-label.d { background: #BFFF7F; color: #000; }
+    .tier-label.e { background: #7FBFFF; color: #000; }
+    .tier-label.f { background: #BF7FFF; color: #000; }
+
+    .tier-items {
+      display: flex;
+      flex-wrap: wrap;
+      flex: 1;
+      padding: 4px;
+      gap: 4px;
+      min-height: 80px;
+      align-content: flex-start;
+    }
+
+    .tier-items.drag-over {
+      background: var(--hover);
+    }
+
+    /* ===== TIER ITEM ===== */
+    .tier-item {
+      width: 72px;
+      height: 72px;
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: grab;
+      border: 2px solid var(--outline);
+      background: var(--card-bg);
+      flex-shrink: 0;
+    }
+
+    .tier-item:active {
+      cursor: grabbing;
+    }
+
+    .tier-item.dragging {
+      opacity: 0.5;
+    }
+
+    .tier-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ===== UNRANKED SECTION ===== */
+    .unranked-section {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .unranked-header {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      color: var(--text-secondary);
+    }
+
+    .unranked-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      min-height: 80px;
+      padding: 4px;
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+    }
+
+    .unranked-items.drag-over {
+      background: var(--hover);
+    }
+
+    /* ===== ACTION BUTTONS ===== */
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* ===== MOBILE RESPONSIVENESS ===== */
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 8px;
+      }
+
+      .controls {
+        padding: 16px 12px;
+      }
+
+      .control-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      select, input[type="file"], .btn {
+        width: 100%;
+        min-width: unset;
+      }
+
+      .tier-label {
+        width: 50px;
+        min-width: 50px;
+        font-size: 16px;
+      }
+
+      .tier-item {
+        width: 60px;
+        height: 60px;
+      }
+
+      #tierListContainer, .unranked-section {
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .tier-item {
+        width: 50px;
+        height: 50px;
+      }
+
+      .tier-label {
+        width: 40px;
+        min-width: 40px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- ===== CONTROLS SECTION ===== -->
+    <div class="controls">
+      <div class="control-group">
+        <label for="presetSelect">Template:</label>
+        <select id="presetSelect">
+          <option value="">Custom (Upload Your Own)</option>
+          <option value="mcu">MCU Movies</option>
+          <option value="colors">Color Palette</option>
+        </select>
+        
+        <label for="imageUpload">Upload Images:</label>
+        <input type="file" id="imageUpload" accept="image/*" multiple />
+      </div>
+    </div>
+
+    <!-- ===== TIER LIST ===== -->
+    <div id="tierListContainer">
+      <div class="tier-row" data-tier="s">
+        <div class="tier-label s">S</div>
+        <div class="tier-items" data-tier="s"></div>
+      </div>
+      <div class="tier-row" data-tier="a">
+        <div class="tier-label a">A</div>
+        <div class="tier-items" data-tier="a"></div>
+      </div>
+      <div class="tier-row" data-tier="b">
+        <div class="tier-label b">B</div>
+        <div class="tier-items" data-tier="b"></div>
+      </div>
+      <div class="tier-row" data-tier="c">
+        <div class="tier-label c">C</div>
+        <div class="tier-items" data-tier="c"></div>
+      </div>
+      <div class="tier-row" data-tier="d">
+        <div class="tier-label d">D</div>
+        <div class="tier-items" data-tier="d"></div>
+      </div>
+      <div class="tier-row" data-tier="e">
+        <div class="tier-label e">E</div>
+        <div class="tier-items" data-tier="e"></div>
+      </div>
+      <div class="tier-row" data-tier="f">
+        <div class="tier-label f">F</div>
+        <div class="tier-items" data-tier="f"></div>
+      </div>
+    </div>
+
+    <!-- ===== UNRANKED ITEMS ===== -->
+    <div class="unranked-section">
+      <div class="unranked-header">Unranked Items</div>
+      <div class="unranked-items" id="unrankedItems"></div>
+    </div>
+
+    <!-- ===== ACTION BUTTONS ===== -->
+    <div class="action-buttons">
+      <button class="btn" id="downloadBtn">Download Tier List</button>
+      <button class="btn" id="clearBtn">Clear All</button>
+      <button class="btn" id="resetBtn">Reset to Unranked</button>
+    </div>
+
+  </div>
+
+  <script>
+    // ===== PRESET TEMPLATES =====
+    const presets = {
+      mcu: [
+        'https://via.placeholder.com/150/FF6B6B/000000?text=Iron+Man',
+        'https://via.placeholder.com/150/4ECDC4/000000?text=Thor',
+        'https://via.placeholder.com/150/45B7D1/000000?text=Avengers',
+        'https://via.placeholder.com/150/FFA07A/000000?text=Guardians',
+        'https://via.placeholder.com/150/98D8C8/000000?text=Black+Panther',
+        'https://via.placeholder.com/150/F7DC6F/000000?text=Spider-Man',
+        'https://via.placeholder.com/150/BB8FCE/000000?text=Dr+Strange',
+        'https://via.placeholder.com/150/85C1E2/000000?text=Ant-Man',
+        'https://via.placeholder.com/150/F8B739/000000?text=Captain+America',
+        'https://via.placeholder.com/150/52B788/000000?text=Hulk',
+        'https://via.placeholder.com/150/E76F51/000000?text=Black+Widow',
+        'https://via.placeholder.com/150/8E7AB5/000000?text=Hawkeye'
+      ],
+      colors: [
+        'https://via.placeholder.com/150/FF0000/FFFFFF?text=Red',
+        'https://via.placeholder.com/150/00FF00/000000?text=Green',
+        'https://via.placeholder.com/150/0000FF/FFFFFF?text=Blue',
+        'https://via.placeholder.com/150/FFFF00/000000?text=Yellow',
+        'https://via.placeholder.com/150/FF00FF/000000?text=Magenta',
+        'https://via.placeholder.com/150/00FFFF/000000?text=Cyan',
+        'https://via.placeholder.com/150/FFA500/000000?text=Orange',
+        'https://via.placeholder.com/150/800080/FFFFFF?text=Purple',
+        'https://via.placeholder.com/150/FFC0CB/000000?text=Pink',
+        'https://via.placeholder.com/150/A52A2A/FFFFFF?text=Brown'
+      ]
+    };
+
+    // ===== STATE MANAGEMENT =====
+    let draggedItem = null;
+    let itemIdCounter = 0;
+
+    // ===== DOM ELEMENTS =====
+    const presetSelect = document.getElementById('presetSelect');
+    const imageUpload = document.getElementById('imageUpload');
+    const unrankedItems = document.getElementById('unrankedItems');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // ===== PRESET SELECTION =====
+    presetSelect.addEventListener('change', function() {
+      const preset = this.value;
+      if (preset && presets[preset]) {
+        clearAllItems();
+        presets[preset].forEach(url => {
+          createTierItem(url);
+        });
+      }
+    });
+
+    // ===== IMAGE UPLOAD =====
+    imageUpload.addEventListener('change', function(e) {
+      const files = e.target.files;
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          createTierItem(event.target.result);
+        };
+        reader.readAsDataURL(file);
+      });
+      this.value = '';
+    });
+
+    // ===== CREATE TIER ITEM =====
+    function createTierItem(imageSrc) {
+      const item = document.createElement('div');
+      item.className = 'tier-item';
+      item.draggable = true;
+      item.dataset.id = itemIdCounter++;
+      
+      const img = document.createElement('img');
+      img.src = imageSrc;
+      img.alt = 'Tier item';
+      
+      item.appendChild(img);
+      unrankedItems.appendChild(item);
+      
+      setupDragEvents(item);
+      scheduleHeightCheck();
+    }
+
+    // ===== DRAG AND DROP SETUP =====
+    function setupDragEvents(item) {
+      item.addEventListener('dragstart', function(e) {
+        draggedItem = this;
+        this.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+
+      item.addEventListener('dragend', function() {
+        this.classList.remove('dragging');
+        draggedItem = null;
+      });
+    }
+
+    // ===== DROP ZONES =====
+    const dropZones = document.querySelectorAll('.tier-items, .unranked-items');
+    dropZones.forEach(zone => {
+      zone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        this.classList.add('drag-over');
+      });
+
+      zone.addEventListener('dragleave', function() {
+        this.classList.remove('drag-over');
+      });
+
+      zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+        
+        if (draggedItem) {
+          this.appendChild(draggedItem);
+          scheduleHeightCheck();
+        }
+      });
+    });
+
+    // ===== CLEAR ALL ITEMS =====
+    clearBtn.addEventListener('click', function() {
+      if (confirm('Are you sure you want to clear all items?')) {
+        clearAllItems();
+      }
+    });
+
+    function clearAllItems() {
+      document.querySelectorAll('.tier-item').forEach(item => item.remove());
+      scheduleHeightCheck();
+    }
+
+    // ===== RESET TO UNRANKED =====
+    resetBtn.addEventListener('click', function() {
+      const allItems = document.querySelectorAll('.tier-items .tier-item');
+      allItems.forEach(item => {
+        unrankedItems.appendChild(item);
+      });
+      scheduleHeightCheck();
+    });
+
+    // ===== DOWNLOAD TIER LIST =====
+    downloadBtn.addEventListener('click', async function() {
+      const tierListContainer = document.getElementById('tierListContainer');
+      
+      try {
+        // Use html2canvas library via CDN
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        document.head.appendChild(script);
+        
+        script.onload = async function() {
+          const canvas = await html2canvas(tierListContainer, {
+            backgroundColor: '#1F1F1F',
+            scale: 2,
+            logging: false
+          });
+          
+          const link = document.createElement('a');
+          link.download = 'tier-list.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        };
+      } catch (error) {
+        alert('Download feature requires internet connection for the first use.');
+      }
+    });
+
+    // ===== INITIALIZE WITH DEFAULT PRESET =====
+    window.addEventListener('load', function() {
+      presetSelect.value = 'mcu';
+      presetSelect.dispatchEvent(new Event('change'));
+    });
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+      scheduleHeightCheck();
+    });
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+
+</body>
+</html>
