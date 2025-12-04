@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Deck Actions - HeroVibes</title>
+    <style>
+        /* ===== GLOBAL STYLES ===== */ 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-bg: #191919;
+            --secondary-bg: #1F1F1F;
+            --hover-color: #323232;
+            --outline-color: #323232;
+            --accent-color: #87A9FF;
+            --primary-text: #D4D4D4;
+            --secondary-text: #8C8C8C;
+        }
+
+        body {
+            font-family: sans-serif;
+            background: var(--primary-bg);
+            color: var(--primary-text);
+            padding: 24px 16px;
+            min-height: auto;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .sd-main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ===== ICON GRID VIEW ===== */
+        .sd-icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .sd-icon-card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--outline-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sd-icon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
+        }
+
+        .sd-icon-card:hover {
+            background: var(--hover-color);
+            border-color: var(--accent-color);
+            transform: translateY(-4px);
+        }
+
+        .sd-icon-card:hover::before {
+            left: 125%;
+        }
+
+        .sd-icon-card img {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            object-fit: cover;
+        }
+
+        .sd-icon-card h3 {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--primary-text);
+            margin-bottom: 4px;
+        }
+
+        .sd-icon-card p {
+            font-size: 12px;
+            color: var(--secondary-text);
+        }
+
+        /* Coming Soon Badge */
+        .sd-icon-card.coming-soon::after {
+            content: 'COMING SOON';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--accent-color);
+            color: var(--primary-bg);
+            font-size: 10px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .sd-icon-card.coming-soon {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .sd-icon-card.coming-soon:hover {
+            transform: none;
+            border-color: var(--outline-color);
+        }
+
+        /* ===== DETAIL VIEW ===== */
+        .sd-detail-view {
+            display: none;
+            background: var(--secondary-bg);
+            border: 1px solid var(--outline-color);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .sd-detail-view.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sd-detail-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 24px;
+            border-bottom: 1px solid var(--outline-color);
+        }
+
+        .sd-detail-header img {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .sd-detail-header img:hover {
+            border-color: var(--accent-color);
+            transform: scale(1.05);
+        }
+
+        .sd-detail-title {
+            flex: 1;
+        }
+
+        .sd-detail-title h2 {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-text);
+            margin-bottom: 4px;
+        }
+
+        .sd-detail-title p {
+            font-size: 14px;
+            color: var(--secondary-text);
+        }
+
+        .sd-close-btn {
+            background: var(--hover-color);
+            border: 1px solid var(--outline-color);
+            color: var(--primary-text);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sd-close-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
+        }
+
+        .sd-close-btn:hover::before {
+            left: 125%;
+        }
+
+        .sd-close-btn:hover {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .sd-detail-content {
+            display: flex;
+            flex-direction: row;
+        }
+
+        /* ===== LEFT SIDEBAR (Links) ===== */
+        .sd-detail-sidebar {
+            width: 280px;
+            background: rgba(0,0,0,0.2);
+            border-right: 1px solid var(--outline-color);
+            padding: 24px;
+            flex-shrink: 0;
+        }
+
+        .sd-links-section {
+            margin-bottom: 24px;
+        }
+
+        .sd-links-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .sd-links-section h4 {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--secondary-text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .sd-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--primary-text);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sd-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
+        }
+
+        .sd-link:hover {
+            background: var(--hover-color);
+            color: var(--accent-color);
+        }
+
+        .sd-link:hover::before {
+            left: 125%;
+        }
+
+        .sd-link svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .sd-separator {
+            height: 1px;
+            background: var(--outline-color);
+            margin: 16px 0;
+        }
+
+        /* ===== RIGHT CONTENT (Tutorial) ===== */
+        .sd-detail-main {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        .sd-detail-main h3 {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-text);
+            margin-bottom: 16px;
+        }
+
+        .sd-detail-main p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--primary-text);
+            margin-bottom: 16px;
+        }
+
+        .sd-detail-main strong {
+            color: var(--accent-color);
+        }
+
+        /* Custom Scrollbar */
+        .sd-detail-main::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sd-detail-main::-webkit-scrollbar-track {
+            background: var(--primary-bg);
+            border-radius: 4px;
+        }
+
+        .sd-detail-main::-webkit-scrollbar-thumb {
+            background: var(--hover-color);
+            border-radius: 4px;
+        }
+
+        .sd-detail-main::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
+        }
+
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            body {
+                padding: 16px 12px;
+            }
+
+            .sd-icon-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+            }
+
+            .sd-icon-card img {
+                width: 60px;
+                height: 60px;
+            }
+
+            .sd-icon-card h3 {
+                font-size: 12px;
+            }
+
+            .sd-icon-card p {
+                font-size: 11px;
+            }
+
+            .sd-detail-content {
+                flex-direction: column;
+            }
+
+            .sd-detail-sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--outline-color);
+            }
+
+            .sd-detail-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .sd-close-btn {
+                width: 100%;
+            }
+
+            .sd-detail-main {
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+        <div class="sd-main-container">
+                <div class="sd-detail-view" id="detailView">
+            <div class="sd-detail-header">
+                <img id="detailIcon" src="" alt="Action Icon" onclick="closeDetail()" title="Click to return to actions">
+                <div class="sd-detail-title">
+                    <h2 id="detailTitle"></h2>
+                    <p id="detailDescription"></p>
+                </div>
+                <button class="sd-close-btn" onclick="closeDetail()">← Back to Actions</button>
+            </div>
+            <div class="sd-detail-content">
+                                <div class="sd-detail-sidebar">
+                    <div id="downloadsSection" class="sd-links-section">
+                        <h4>Downloads</h4>
+                        <div id="downloadsList"></div>
+                    </div>
+                    <div class="sd-separator"></div>
+                    <div id="pluginsSection" class="sd-links-section">
+                        <h4>Required Plugins</h4>
+                        <div id="pluginsList"></div>
+                    </div>
+                </div>
+                                <div class="sd-detail-main">
+                    <h3>Setup & Tutorial</h3>
+                    <div id="tutorialContent"></div>
+                </div>
+            </div>
+        </div>
+
+                <div class="sd-icon-grid" id="iconGrid"></div>
+    </div>
+
+    <script>
+        
+        const streamDeckActions = [
+            
+            // ============================================================
+            // ACTIVE ACTIONS - Ready to use
+            // ============================================================
+            
+            {
+                order: 1,
+                comingSoon: false,
+                title: "Empty Recycle Bin",
+                slug: "empty-recycle-bin",
+                icon: "https://herovibes.github.io/HeroVibesStoreTools/StreamDeckActions/Icons/RecyleBinIcon.jpg",
+                description: "One-press solution to empty your Windows Recycle Bin",
+                downloads: [
+                    { name: "SD Action", url: "https://github.com/HeroVibes/HeroImageHosts/raw/refs/heads/main/SD_Actions/Empty%20Recycle%20Bin/SD%20Action/HeroEmptyRecycleBinAction.streamDeckAction" },
+                    { name: "Custom Icon", url: "https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/main/SD_Actions/Empty%20Recycle%20Bin/Images/Recycle%20Bin%20Icon.png", filename: "Recycle Bin Icon.png" },
+                    { name: "Download .BAT", url: "https://raw.githubusercontent.com/HeroVibes/HeroImageHosts/main/SD_Actions/Empty%20Recycle%20Bin/Scripts%20&%20Files/Empty%20Recycle%20Bin.bat", filename: "Empty Recycle Bin.bat" }
+                ],
+                plugins: [
+                    { name: "None", url: "#" }
+                ],
+                tutorial: `
+                    <p>This action provides a one-press solution to empty your Windows Recycle Bin directly from your Stream Deck.</p>
+                    <p><strong>Step 1: Download Files</strong><br>
+                    Use the links on the left to download the <strong>SD Action</strong>, the <strong>Custom Icon</strong>, and the <strong>.BAT file</strong>. Place the .BAT file somewhere safe where it won't be moved, like your Documents folder.</p>
+                    
+                    <p><strong>Step 2: Edit the SD Action</strong><br>
+                    Drag the downloaded <strong>SD Action</strong> onto any empty key on your Stream Deck. By default, it's set to run the .BAT file from C:\\Users\\YourUsername\\Documents\\Empty Recycle Bin.bat. You must edit this path to match where you saved the file.</p>
+                    
+                    <p><strong>Step 3: Set the Correct File Path</strong><br>
+                    In the Stream Deck software, select the new key. In the "App / File" field at the bottom, click the "..." button and navigate to wherever you saved the Empty Recycle Bin.bat file. Select it.</p>
+
+                    <p><strong>Step 4: Assign the Icon (Optional)</strong><br>
+                    If the icon doesn't appear automatically, you can set it manually. Drag the downloaded icon file onto the key's icon preview in the Stream Deck software.</p>
+                    
+                    <p><strong>Troubleshooting:</strong><br>
+                    If the key doesn't work, double-check that the file path in the Stream Deck action is 100% correct. Ensure no antivirus software is blocking the script from running.</p>
+                `
+            },
+            
+            {
+                order: 2,
+                comingSoon: false,
+                title: "Clip Organiser",
+                slug: "clip-organiser",
+                icon: "https://herovibes.github.io/HeroVibesStoreTools/StreamDeckActions/Icons/ClipOrganiserIcon.jpg",
+                description: "Quickly organise your OBS/Meld recordings and clips with a single tap of a button, creating a new folder and placing your clip inside.",
+                downloads: [
+                    { name: "Custom Icon", url: "https://herovibes.github.io/HeroVibesStoreTools/StreamDeckActions/Icons/ClipOrganiserIcon.jpg", filename: "Clip Organiser Icon.png" },
+                    { name: "Download .BAT", url: "https://raw.githubusercontent.com/HeroVibes/ClipOrganiser/adebf507e3f222ad0fcb7f941c9dc4c8d4f4c9c9/FileOrganiser.bat", filename: "ClipOrganiser.bat" }
+                ],
+                plugins: [
+                    { name: "None", url: "#" }
+                ],
+                tutorial: `
+                    <p>Automatically organise your recordings and "replay captures" from OBS, Meld and other apps by creating a folder - with a name of your choosing - and moving the latest capture to it.<br>
+                    To use this, you'll need to modify two elements in the script, and a short third step:</p>
+                    <p><strong>Step 1: The Directory</strong><br>
+                    The directory is defined on (default is on Line 8 - <strong>sourceFolder=%USERPROFILE%\\Documents\\Recordings</strong>. Set this to the folder OBS saves all recordings and clips to - simply replace <strong>%USERPROFILE%\\Documents\\Recordings</strong> for your folder path. The default folder for OBS, for instance, would be <strong>C:\\Users<username>\\Videos.</strong></p>
+                    
+                    <p><strong>Step 2: The Folder Name</strong><br>
+                    To customise the name of the folder that will be created - this is where the clips will be moved to - you'll want to change the name on Line 28 - <strong>"call :MoveLatest "%sourceFolder%" "%sourceFolder%\\Gameplay""</strong>. Simply change <strong>"Gameplay"</strong> to the name of the folder; eg. <strong>"Funny Moments", "Boss Fights", "Deaths".</strong></p>
+
+                    <p><strong>Step 3: Rename The Script (Optional)</strong><br>
+                    To help keep things organised - particularly if you plan on having multiple scripts available, it's recommended to rename the script to something that helps identify it, like BossFights.bat, then put it in a safe folder.<br>
+                    Once the setup is complete, the script works best when paired with something like the Elgato Stream Deck. Simply drag and drop the script onto a "button", then test it by recording a short clip and tapping the button - a new folder with the name of your choosing should be created, and the recording should be moved inside.<br>
+                    <strong>Here are a few extra ideas:</strong></p>
+                    
+                    <p><strong>The Ultimate Organiser</strong><br>
+                    One of my favourite uses for this script is to have a whole Stream Deck filled with these - 10+ buttons that automatically sort clips into different folders/categories - funny moments, boss fights, cutscenes, bugs, deaths, multiplayer, etc.. To do this, simply set up one version of the script with the correct directory, then duplicate it, changing the folder name in the script; "Boss Fights", for example, to "Cutscenes". Save it, rename the script to match, then add that one as a separate button. Rinse and repeat for as many folders/categories as you need. Now you have a super-powered clip organiser!</p>
+
+                    <p><strong>Multi-Action</strong><br>
+                    You can pair this with a multi-action via the Stream Deck to capture your clip AND organise it, all with a single tap - capture a replay buffer clip, a slight delay to allow file for the clip to save properly, then run the script.</p>
+
+                    <p><strong>Automatically Upload to Google Drive</strong><br>
+                    If you have the Google Drive app installed on your PC, you can set a Google Drive directory as the save location for the clips - meaning that not only are your clips automatically captured and organised, but they're also immediately available on all devices!<br>
+                    If you enjoy using these, feel free to reach out and leave some suggestions, or let me know if you're having any issues. Feel free to share/modify the script - a shoutout to HeroVision and Elgato is always appreciated.</p>
+                `
+            },
+            
+            {
+                order: 3,
+                comingSoon: true,
+                slug: "action-coming-soon-1",
+                title: "Coming soon",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=🎤",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 4,
+                comingSoon: true,
+                slug: "action-coming-soon-2",
+                title: "Coming soon",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=📹",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 5,
+                comingSoon: true,
+                slug: "action-coming-soon-3",
+                title: "Coming soon",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=💤",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 6,
+                comingSoon: true,
+                slug: "action-coming-soon-4",
+                title: "Coming soon",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=🔒",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 7,
+                comingSoon: true,
+                slug: "action-coming-soon-5",
+                title: "Coming soon",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=🔊",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 8,
+                comingSoon: true,
+                slug: "action-coming-soon-6",
+                title: "Coming soon",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=📍",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 9,
+                comingSoon: true,
+                slug: "action-coming-soon-7",
+                title: "Coming soon",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=📝",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 10,
+                comingSoon: true,
+                slug: "action-coming-soon-8",
+                title: "Coming soon",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=⏱️",
+                description: "Coming soon"
+            },
+            
+            {
+                order: 11,
+                comingSoon: true,
+                slug: "action-coming-soon-9",
+                title: "Coming soon",
+                icon: "https://via.placeholder.com/80/87A9FF/FFFFFF?text=🎯",
+                description: "Coming soon"
+            }
+
+        ];
+
+        /* ========================================
+           CORE FUNCTIONALITY
+           ======================================== */
+        
+        // NEW: Map actions by slug for quick lookup
+        const actionMap = streamDeckActions.reduce((map, action, index) => {
+            if (action.slug) {
+                map[action.slug] = { ...action, index };
+            }
+            return map;
+        }, {});
+
+        // SVG Icons
+        const icons = {
+            download: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
+            package: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>',
+            image: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>'
+        };
+
+        // Generate icon grid
+        function generateIconGrid() {
+            const grid = document.getElementById('iconGrid');
+            grid.innerHTML = '';
+            
+            streamDeckActions.sort((a, b) => a.order - b.order).forEach((action, index) => {
+                const card = document.createElement('div');
+                card.className = 'sd-icon-card';
+                
+                if (action.comingSoon) {
+                    card.classList.add('coming-soon');
+                } else {
+                    // MODIFIED: Call new handler function
+                    card.onclick = () => handleGridClick(index); 
+                }
+                
+                card.innerHTML = `
+                    <img src="${action.icon}" alt="${action.title}">
+                    <h3>${action.title}</h3>
+                    <p>${action.comingSoon ? 'Coming soon' : 'Click to view'}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // NEW: Handles click from grid and triggers hash update
+        function handleGridClick(index) {
+            openDetail(index, true); 
+        }
+
+        // Open detail view
+        function openDetail(index, updateHash = true) {
+            const action = streamDeckActions[index];
+            
+            // Don't open if coming soon
+            if (action.comingSoon) return;
+            
+            document.getElementById('detailIcon').src = action.icon;
+            document.getElementById('detailTitle').textContent = action.title;
+            document.getElementById('detailDescription').textContent = action.description;
+            
+            // Generate downloads
+            const downloadsList = document.getElementById('downloadsList');
+            downloadsList.innerHTML = '';
+            if (action.downloads && action.downloads.length > 0) {
+                action.downloads.forEach(dl => {
+                    const link = document.createElement('a');
+                    link.href = dl.url;
+                    link.className = 'sd-link';
+                    link.target = '_blank';
+                    
+                    if (dl.filename) {
+                        link.classList.add('js-force-download');
+                        link.dataset.filename = dl.filename;
+                    } else {
+                        link.download = '';
+                    }
+                    
+                    const iconType = dl.name.toLowerCase().includes('icon') || dl.name.toLowerCase().includes('image') ? 'image' : 'download';
+                    link.innerHTML = `${icons[iconType]}<span>${dl.name}</span>`;
+                    downloadsList.appendChild(link);
+                });
+            }
+            
+            // Generate plugins
+            const pluginsList = document.getElementById('pluginsList');
+            pluginsList.innerHTML = '';
+            if (action.plugins && action.plugins.length > 0) {
+                action.plugins.forEach(plugin => {
+                    const link = document.createElement('a');
+                    link.href = plugin.url;
+                    link.className = 'sd-link';
+                    link.target = '_blank';
+                    link.innerHTML = `${icons.package}<span>${plugin.name}</span>`;
+                    pluginsList.appendChild(link);
+                });
+            }
+            
+            // Set tutorial content
+            document.getElementById('tutorialContent').innerHTML = action.tutorial;
+            
+            // Show detail view, hide grid
+            document.getElementById('detailView').classList.add('active');
+            document.getElementById('iconGrid').style.display = 'none';
+
+            // NEW: Update URL hash if triggered by user click (not initial load)
+            if (updateHash && action.slug) {
+                window.location.hash = action.slug;
+            }
+            
+            // Re-attach download handlers
+            attachDownloadHandlers();
+            
+            // Update height after view change
+            setTimeout(sendHeight, 100);
+        }
+
+        // Close detail view
+        function closeDetail() {
+            document.getElementById('detailView').classList.remove('active');
+            document.getElementById('iconGrid').style.display = 'grid';
+            
+            // NEW: Remove URL HASH without adding a new history entry
+            if (window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.pathname + window.location.search);
+            } else {
+                window.location.hash = '';
+            }
+            
+            // Update height after view change
+            setTimeout(sendHeight, 100);
+        }
+
+        // Force download function
+        function forceDownload(url, fileName) {
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.blob();
+                })
+                .then(blob => {
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = blobUrl;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(blobUrl);
+                    a.remove();
+                })
+                .catch(error => console.error('Download failed:', error));
+        }
+
+        // Attach download handlers
+        function attachDownloadHandlers() {
+            document.querySelectorAll('.js-force-download').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const filename = this.dataset.filename;
+                    if (filename) {
+                        forceDownload(this.href, filename);
+                    }
+                });
+            });
+        }
+
+        // NEW: Check for an initial hash on load
+        function checkInitialHash() {
+            const hash = window.location.hash.substring(1); 
+            if (hash && actionMap[hash]) {
+                openDetail(actionMap[hash].index, false); 
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            generateIconGrid();
+            checkInitialHash(); // NEW: Load action specified by URL hash
+        });
+        
+        // Ensure close button uses the new function
+        document.getElementById('detailIcon').onclick = closeDetail;
+        document.querySelector('.sd-close-btn').onclick = closeDetail;
+
+
+        // ===== FOURTHWALL SCROLLBAR FIX =====
+        let lastHeight = 0;
+        
+        function sendHeight() {
+            var height = document.body.scrollHeight;
+            // Only send if height has changed to prevent feedback loop
+            if (height !== lastHeight) {
+                lastHeight = height;
+                window.parent.postMessage({ frameHeight: height }, '*');
+            }
+        }
+
+        window.onload = sendHeight;
+        
+        // Use ResizeObserver instead of window.onresize to prevent feedback loop
+        const resizeObserver = new ResizeObserver(() => {
+            sendHeight();
+        });
+        
+        resizeObserver.observe(document.body);
+    </script>
+</body>
+</html>
