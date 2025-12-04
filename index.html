@@ -24,23 +24,20 @@
             --font-text: 12px 'Inter', sans-serif;
         }
 
-        /* General page setup */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background-color: var(--color-primary-bg);
             color: var(--color-text-primary);
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            padding: 24px 16px; /* Default padding */
+            padding: 24px 16px;
         }
         .container { max-width: 1200px; margin: 0 auto; }
 
-        /* Header styling */
         header { text-align: center; margin-bottom: 32px; }
         header h1 { font: var(--font-header); margin-bottom: 8px; }
         header p { font: var(--font-text); color: var(--color-text-secondary); }
 
-        /* Navigation (Back button) */
         nav {
             margin-bottom: 24px;
         }
@@ -50,18 +47,16 @@
             color: var(--color-accent);
             text-decoration: none;
             cursor: pointer;
-            visibility: hidden; /* Hidden by default */
+            visibility: hidden;
         }
         .back-link:hover { text-decoration: underline; }
         
-        /* Grid for cards */
         .file-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 16px;
         }
 
-        /* Loading/Error State */
         .status-message {
             grid-column: 1 / -1;
             text-align: center;
@@ -70,7 +65,6 @@
             padding: 48px 0;
         }
 
-        /* Card styling */
         .card {
             background-color: var(--color-secondary-bg);
             border: 1px solid var(--color-outline);
@@ -82,7 +76,6 @@
         }
         .card:hover { background-color: var(--color-hover); }
 
-        /* Card image/icon preview area */
         .card-preview {
             height: 200px;
             background-color: var(--color-primary-bg);
@@ -102,7 +95,6 @@
             height: 80px;
             color: var(--color-text-secondary);
         }
-        /* Style for non-image file icons */
         .card-preview .file-icon {
             width: 80px;
             height: 80px;
@@ -118,8 +110,6 @@
             color: var(--color-text-primary);
         }
 
-
-        /* Card content area */
         .card-content {
             padding: 16px;
             flex-grow: 1;
@@ -140,9 +130,7 @@
             flex-grow: 1;
         }
 
-        /* Button container */
-        .card-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .card-buttons .btn-full { grid-column: 1 / -1; }
+        .card-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .btn {
             font: var(--font-text);
             font-weight: 700;
@@ -160,7 +148,6 @@
         .btn-secondary:hover { background-color: var(--color-hover); }
         .btn-copied { background-color: #28a745; color: white; }
 
-        /* Footer */
         footer {
             text-align: center;
             margin-top: 32px;
@@ -198,35 +185,22 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-        // Your GitHub username
         const USERNAME = 'HeroVibes';
-        // Repository Name
         const REPO = 'HeroVibesStoreTools';
-        // The base URL for your GitHub Pages site
         const SITE_URL = `https://${USERNAME.toLowerCase()}.github.io/${REPO}/`;
-        // The base URL for the GitHub API
         const API_URL = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/`;
         
-        // --- APPLICATION STATE ---
         let currentPath = '';
         const pathHistory = [''];
 
-        // --- CORE FUNCTIONS ---
-
-        /**
-         * Fetches and displays the contents of a given path in the repository.
-         */
         async function loadContents(path) {
             currentPath = path;
             const fileGrid = document.getElementById('file-grid');
             const backLink = document.getElementById('back-link');
             const headerSubtitle = document.getElementById('header-subtitle');
 
-            // Show loading message
             fileGrid.innerHTML = '<p class="status-message">Loading files...</p>';
             
-            // Update header and back button visibility
             if (path === '') {
                 headerSubtitle.textContent = 'A dynamic file index for the HeroVibesStoreTools repository.';
                 backLink.style.visibility = 'hidden';
@@ -242,14 +216,12 @@
                 }
                 let data = await response.json();
 
-                // Sort data: folders first, then files, all alphabetically
                 data.sort((a, b) => {
                     if (a.type === 'dir' && b.type !== 'dir') return -1;
                     if (a.type !== 'dir' && b.type === 'dir') return 1;
                     return a.name.localeCompare(b.name);
                 });
 
-                // Clear loading message
                 fileGrid.innerHTML = '';
 
                 if (data.length === 0) {
@@ -257,10 +229,7 @@
                     return;
                 }
 
-                // Generate and append cards for each item
                 for (const item of data) {
-                    // Skip files we don't want to show
-                    // This now *allows* index.html in subfolders, but hides the root index.html
                     if ((path === '' && item.name === 'index.html') || item.name.toLowerCase() === '.ds_store' || item.name.toLowerCase() === 'readme.md') {
                         continue;
                     }
@@ -273,34 +242,22 @@
                 }
 
             } catch (error) {
-                console.error('Failed to fetch repository contents:', error);
-                fileGrid.innerHTML = '<p class="status-message">Error loading files. Please check the console.</p>';
+                fileGrid.innerHTML = '<p class="status-message">Error loading files.</p>';
             }
         }
 
-        /**
-         * Navigates to a new folder path and adds to history.
-         */
         function goToFolder(path) {
             pathHistory.push(path);
             loadContents(path);
         }
 
-        /**
-         * Navigates to the previous folder in history.
-         */
         function goBack() {
             if (pathHistory.length > 1) {
-                pathHistory.pop(); // Remove current
-                loadContents(pathHistory[pathHistory.length - 1]); // Load previous
+                pathHistory.pop();
+                loadContents(pathHistory[pathHistory.length - 1]);
             }
         }
 
-        // --- HTML TEMPLATE FUNCTIONS ---
-
-        /**
-         * Generates the HTML for a folder card.
-         */
         function createFolderCard(item) {
             return `
                 <div class="card">
@@ -313,7 +270,7 @@
                         <h3>${item.name}</h3>
                         <p class="file-path">${item.path}</p>
                         <div class="card-buttons">
-                            <button class="btn btn-secondary btn-full" onclick="goToFolder('${item.path}')">
+                            <button class="btn btn-secondary" style="grid-column: 1 / -1;" onclick="goToFolder('${item.path}')">
                                 Open Folder
                             </button>
                         </div>
@@ -322,21 +279,18 @@
             `;
         }
 
-        /**
-         * Generates the HTML for a file card.
-         */
         function createFileCard(item) {
             const staticUrl = SITE_URL + item.path;
+            const rawUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/main/${item.path}`;
+
             const fileExtension = item.name.split('.').pop().toLowerCase();
             const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension);
             const isHtml = fileExtension === 'html';
 
             let previewHtml = '';
             if (isImage) {
-                // Use placeholder on error
-                previewHtml = `<img src="${staticUrl}" alt="${item.name}" onerror="this.src='httpshttps://placehold.co/600x400/191919/8C8C8C?text=Image+Not+Found'">`;
+                previewHtml = `<img src="${staticUrl}" alt="${item.name}" onerror="this.src='https://placehold.co/600x400/191919/8C8C8C?text=Image+Not+Found'">`;
             } else if (isHtml) {
-                // Show a "code" icon for HTML files
                 previewHtml = `
                     <svg class="file-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25" />
@@ -344,7 +298,6 @@
                     <span class="file-icon-label">HTML TOOL</span>
                 `;
             } else {
-                // Show a generic file icon
                 previewHtml = `
                     <svg class="file-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25mC7.714 2.25 7.5 2.464 7.5 2.75v18.5c0 .286.214.5.5.5h8.25a.5.5 0 00.5-.5V6.75a.5.5 0 00-.5-.5H9.75a.5.5 0 01-.5-.5V3.75a.5.5 0 01.5-.5h.25a.5.5 0 01.5.5v2.25c0 .286.214.5.5.5h2.25a.5.5 0 00.5-.5V2.75a.5.5 0 00-.5-.5H8.25z" />
@@ -353,12 +306,16 @@
                 `;
             }
 
-            // Generate buttons: "View Tool" for HTML, "Download" for all other files
-            const buttonsHtml = isHtml
-                ? `<button class="btn btn-primary" onclick="copyToClipboard('${staticUrl}', this)">Copy URL</button>
-                   <a href="${staticUrl}" target="_blank" class="btn btn-secondary">View Tool</a>`
-                : `<button class="btn btn-primary" onclick="copyToClipboard('${staticUrl}', this)">Copy URL</button>
-                   <a href="${staticUrl}" download="${item.name}" class="btn btn-secondary">Download</a>`;
+            let buttonsHtml = '';
+            
+            buttonsHtml += `<button class="btn btn-secondary" onclick="copyToClipboard('${staticUrl}', this, 'Path')">Copy Path</button>`;
+            buttonsHtml += `<button class="btn btn-secondary" onclick="copyToClipboard('${rawUrl}', this, 'Raw')">Copy Raw Link</button>`;
+
+            if (isHtml) {
+                buttonsHtml += `<a href="${staticUrl}" target="_blank" class="btn btn-primary">View Tool</a>`;
+            } else {
+                buttonsHtml += `<a href="${staticUrl}" download="${item.name}" class="btn btn-primary">Download</a>`;
+            }
 
             return `
                 <div class="card">
@@ -376,37 +333,36 @@
             `;
         }
 
-        /**
-         * Copies text to the clipboard and shows visual feedback.
-         */
-        function copyToClipboard(text, buttonElement) {
+        function copyToClipboard(text, buttonElement, type) {
             const textarea = document.createElement('textarea');
             textarea.value = text;
             textarea.style.position = 'fixed';
             textarea.style.opacity = 0;
             document.body.appendChild(textarea);
             textarea.select();
+            
+            const originalText = buttonElement.innerHTML;
+            const fallbackText = type === 'Path' ? 'Copy Path' : (type === 'Raw' ? 'Copy Raw Link' : 'Copy URL');
+
             try {
                 document.execCommand('copy');
-                const originalText = buttonElement.innerHTML;
-                buttonElement.innerHTML = 'Copied!';
+                buttonElement.innerHTML = 'Copied! ✅';
                 buttonElement.classList.add('btn-copied');
+                
                 setTimeout(() => {
-                    buttonElement.innerHTML = originalText;
+                    buttonElement.innerHTML = fallbackText;
                     buttonElement.classList.remove('btn-copied');
                 }, 2000);
             } catch (err) {
-                console.error('Failed to copy text: ', err);
                 buttonElement.innerHTML = 'Error!';
+                
                 setTimeout(() => {
-                    buttonElement.innerHTML = 'Copy URL';
+                    buttonElement.innerHTML = fallbackText;
                 }, 2000);
             }
             document.body.removeChild(textarea);
         }
 
-        // --- INITIALIZATION ---
-        // Load the root directory when the page loads.
         window.onload = () => loadContents('');
 
     </script>
