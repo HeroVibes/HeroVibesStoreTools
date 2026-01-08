@@ -1,0 +1,635 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Timestamp Converter</title>
+  
+  <style>
+    /* Color scheme */
+    :root {
+      --primary-bg: #191919;
+      --secondary-bg: #1F1F1F;
+      --hover-color: #323232;
+      --outline-color: #323232;
+      --accent-color: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+    }
+    
+    /* Body reset - no min-height to avoid iframe issues */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background: var(--primary-bg);
+    }
+    
+    /* Main wrapper */
+    .timestamp-converter-wrapper {
+      --primary-bg: #191919;
+      --secondary-bg: #1F1F1F;
+      --hover-color: #323232;
+      --outline-color: #323232;
+      --accent-color: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+      
+      background: transparent;
+      color: var(--text-primary);
+      font-family: sans-serif;
+      padding: 0;
+      margin: 0;
+      display: block;
+      width: 100%;
+    }
+
+    .timestamp-converter-wrapper * {
+      box-sizing: border-box;
+    }
+
+    /* Container */
+    .timestamp-converter-wrapper .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--secondary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      display: block;
+    }
+
+    /* Upload zone */
+    .timestamp-converter-wrapper .upload-zone {
+      background: var(--primary-bg);
+      border: 2px dashed var(--outline-color);
+      border-radius: var(--radius);
+      padding: 32px 16px;
+      text-align: center;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      display: block;
+    }
+
+    .timestamp-converter-wrapper .upload-zone:hover {
+      border-color: var(--accent-color);
+      background: var(--hover-color);
+    }
+
+    .timestamp-converter-wrapper .upload-zone.drag-over {
+      border-color: var(--accent-color);
+      background: var(--hover-color);
+    }
+
+    .timestamp-converter-wrapper .upload-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      color: var(--accent-color);
+      display: block;
+    }
+
+    .timestamp-converter-wrapper .upload-text {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      display: block;
+      font-family: sans-serif;
+    }
+
+    .timestamp-converter-wrapper .upload-subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: block;
+      font-family: sans-serif;
+      margin: 0;
+    }
+
+    .timestamp-converter-wrapper .file-input {
+      display: none;
+    }
+
+    /* File info display */
+    .timestamp-converter-wrapper .file-info {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--primary-bg);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      border: 1px solid var(--outline-color);
+    }
+
+    .timestamp-converter-wrapper .file-info.active {
+      display: flex;
+    }
+
+    .timestamp-converter-wrapper .file-details {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .timestamp-converter-wrapper .file-icon {
+      font-size: 24px;
+      color: var(--accent-color);
+    }
+
+    .timestamp-converter-wrapper .file-name {
+      font-size: 14px;
+      color: var(--text-primary);
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+      font-family: sans-serif;
+      margin: 0;
+    }
+
+    .timestamp-converter-wrapper .file-type {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      display: block;
+      font-family: sans-serif;
+    }
+
+    /* Buttons */
+    .timestamp-converter-wrapper .btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--secondary-bg);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      font-family: sans-serif;
+      transition: all 0.3s ease;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .timestamp-converter-wrapper .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+      pointer-events: none;
+    }
+
+    .timestamp-converter-wrapper .btn:hover::before {
+      left: 125%;
+    }
+
+    .timestamp-converter-wrapper .btn:hover {
+      background: var(--hover-color);
+    }
+
+    .timestamp-converter-wrapper .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
+
+    .timestamp-converter-wrapper .btn-clear {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+
+    .timestamp-converter-wrapper .btn-primary {
+      width: 100%;
+      margin-top: 16px;
+      font-weight: bold;
+      display: block;
+    }
+
+    /* Output area */
+    .timestamp-converter-wrapper .output-section {
+      display: none;
+      margin-top: 24px;
+    }
+
+    .timestamp-converter-wrapper .output-section.active {
+      display: block;
+    }
+
+    .timestamp-converter-wrapper .output-label {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      display: block;
+      font-family: sans-serif;
+    }
+
+    .timestamp-converter-wrapper .output-textarea {
+      width: 100%;
+      min-height: 300px;
+      background: var(--primary-bg);
+      border: 1px solid var(--outline-color);
+      border-radius: var(--radius);
+      padding: 16px;
+      color: var(--text-primary);
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.8;
+      resize: vertical;
+      outline: none;
+      display: block;
+    }
+
+    .timestamp-converter-wrapper .output-textarea:focus {
+      border-color: var(--accent-color);
+    }
+
+    /* Status messages */
+    .timestamp-converter-wrapper .status-message {
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      font-size: 12px;
+      display: none;
+      font-family: sans-serif;
+    }
+
+    .timestamp-converter-wrapper .status-message.active {
+      display: block;
+    }
+
+    .timestamp-converter-wrapper .status-success {
+      background: rgba(135, 169, 255, 0.1);
+      border: 1px solid var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    .timestamp-converter-wrapper .status-error {
+      background: rgba(255, 99, 99, 0.1);
+      border: 1px solid #ff6363;
+      color: #ff6363;
+    }
+    
+    /* Version */
+    .timestamp-converter-wrapper .tool-version {
+      font-family: sans-serif;
+      font-size: 10px;
+      color: var(--text-secondary);
+      text-align: right;
+      margin-top: 16px;
+      padding-right: 4px;
+    }
+
+    /* Mobile styles */
+    @media (max-width: 640px) {
+      .timestamp-converter-wrapper .container {
+        padding: 16px 12px;
+      }
+
+      .timestamp-converter-wrapper .upload-zone {
+        padding: 24px 12px;
+      }
+
+      .timestamp-converter-wrapper .upload-icon {
+        font-size: 36px;
+      }
+
+      .timestamp-converter-wrapper .file-details {
+        gap: 8px;
+      }
+
+      .timestamp-converter-wrapper .file-name {
+        font-size: 12px;
+      }
+
+      .timestamp-converter-wrapper .output-textarea {
+        min-height: 250px;
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="timestamp-converter-wrapper">
+    
+    <div class="container">
+
+      <div class="status-message" id="statusMessage"></div>
+
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-icon">📁</div>
+        <div class="upload-text">Click or drag file here</div>
+        <div class="upload-subtext">Supports .csv (Premiere Pro) and .edl (DaVinci Resolve)</div>
+        <input type="file" class="file-input" id="fileInput" accept=".csv,.edl">
+      </div>
+
+     
+      <div class="file-info" id="fileInfo">
+        <div class="file-details">
+          <div class="file-icon">📄</div>
+          <div>
+            <div class="file-name" id="fileName">No file selected</div>
+            <div class="file-type" id="fileType"></div>
+          </div>
+        </div>
+        <button class="btn btn-clear" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="output-section" id="outputSection">
+        <label class="output-label">YouTube Timestamps</label>
+        <textarea class="output-textarea" id="outputText" readonly></textarea>
+        <button class="btn btn-primary" id="copyBtn">Copy to Clipboard</button>
+      </div>
+      
+      <div class="tool-version">V1.1.0</div> 
+
+    </div> </div> <script>
+    // Element references
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileType = document.getElementById('fileType');
+    const clearBtn = document.getElementById('clearBtn');
+    const outputSection = document.getElementById('outputSection');
+    const outputText = document.getElementById('outputText');
+    const copyBtn = document.getElementById('copyBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    
+    // File upload handlers
+    uploadZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+    
+    // Drag and drop
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('drag-over');
+    });
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('drag-over');
+    });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+    
+    // Clear button
+    clearBtn.addEventListener('click', () => {
+      resetTool();
+    });
+    
+    // Copy to clipboard (using execCommand for better compatibility)
+    copyBtn.addEventListener('click', () => {
+      try {
+        outputText.select();
+        outputText.setSelectionRange(0, 99999); // For mobile
+    
+        const successful = document.execCommand('copy');
+        
+        if (successful) {
+          showStatus('Copied to clipboard!', 'success');
+        } else {
+          showStatus('Failed to copy. Please copy manually.', 'error');
+        }
+      } catch (err) {
+        console.error('Copy to clipboard failed:', err);
+        showStatus('Failed to copy. Please copy manually.', 'error');
+      }
+      
+      // Deselect
+      if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+      } else if (document.selection) {
+        document.selection.empty();
+      }
+    });
+    
+    // File handler
+    function handleFile(file) {
+      const fileExtension = file.name.split('.').pop().toLowerCase();
+      // Validate file type
+      if (!['csv', 'edl'].includes(fileExtension)) {
+        showStatus('Invalid file type. Please upload a .csv or .edl file.', 'error');
+        return;
+      }
+
+      // Validate file size (2MB limit)
+      if (file.size > 2 * 1024 * 1024) {
+        showStatus('File size must be under 2MB.', 'error');
+        return;
+      }
+
+      // Update UI
+      fileName.textContent = file.name;
+      fileType.textContent = fileExtension.toUpperCase() + ' file';
+      fileInfo.classList.add('active');
+      scheduleHeightCheck(); // Height Changed
+
+      // Read and process file
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target.result;
+        if (fileExtension === 'csv') {
+          processCSV(content);
+        } else if (fileExtension === 'edl') {
+          processEDL(content);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Process Premiere Pro CSV
+    function processCSV(content) {
+      try {
+        const lines = content.split('\n');
+        let output = "";
+        let markerCount = 0;
+
+        for (let i = 1; i < lines.length; i++) {
+          const columns = lines[i].split('\t');
+          if (columns.length < 3) continue;
+
+          const name = columns[0].trim();
+          const timecode = columns[2].trim();
+          
+          if (!name || !timecode) continue;
+          const formattedTime = formatTimecode(timecode);
+          output += `${formattedTime} - ${name}\n`;
+          markerCount++;
+        }
+
+        if (markerCount === 0) {
+          showStatus('No valid markers found in CSV file.', 'error');
+          return;
+        }
+
+        outputText.value = output;
+        outputSection.classList.add('active');
+        scheduleHeightCheck(); // Height Changed
+        showStatus(`Successfully converted ${markerCount} marker${markerCount !== 1 ? 's' : ''}.`, 'success');
+      } catch (error) {
+        showStatus('Error processing CSV file. Please check the file format.', 'error');
+        console.error('CSV Processing Error:', error);
+      }
+    }
+
+    // Process DaVinci Resolve EDL
+    function processEDL(content) {
+      try {
+        const lines = content.split('\n');
+        let output = "";
+        let markerCount = 0;
+        const markers = [];
+
+        // Collect all markers and timecodes
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (line.includes('|M:')) {
+            const previousLine = lines[i - 1];
+            const timecodeMatch = previousLine.match(/(\d{2}:\d{2}:\d{2}:\d{2})/);
+            
+            const markerMatch = line.match(/\|M:([^|]+)/);
+            if (timecodeMatch && markerMatch) {
+              const timecode = timecodeMatch[1];
+              const markerName = markerMatch[1].trim();
+              markers.push({ timecode, markerName });
+            }
+          }
+        }
+
+        if (markers.length === 0) {
+          showStatus('No valid markers found in EDL file.', 'error');
+          return;
+        }
+
+        // Check if all timecodes start with "01:" - if so, subtract an hour
+        let maxHour = 0;
+        markers.forEach(marker => {
+          const hour = parseInt(marker.timecode.split(':')[0], 10);
+          if (hour > maxHour) maxHour = hour;
+        });
+
+        const shouldSubtractHour = (maxHour === 1);
+
+        // Format and output
+        markers.forEach(marker => {
+          const formattedTime = formatTimecode(marker.timecode, shouldSubtractHour);
+          output += `${formattedTime} - ${marker.markerName}\n`;
+          markerCount++;
+        });
+
+        outputText.value = output;
+        outputSection.classList.add('active');
+        scheduleHeightCheck(); // Height Changed
+        showStatus(`Successfully converted ${markerCount} marker${markerCount !== 1 ? 's' : ''}.`, 'success');
+      } catch (error) {
+        showStatus('Error processing EDL file. Please check the file format.', 'error');
+        console.error('EDL Processing Error:', error);
+      }
+    }
+
+    // Format timecode for YouTube
+    function formatTimecode(timecode, subtractHour = false) {
+      const parts = timecode.split(/[:;]/).map(num => parseInt(num, 10));
+      
+      if (parts.length < 3) return timecode;
+      
+      let hours = parts[0] || 0;
+      const minutes = parts[1] || 0;
+      const seconds = parts[2] || 0;
+      
+      // Subtract hour if needed (for DaVinci EDLs starting at 01:00:00:00)
+      if (subtractHour && hours > 0) {
+        hours -= 1;
+      }
+      
+      // Format for YouTube (skip hours if zero)
+      if (hours > 0) {
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      } else {
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+    }
+
+    // Show status message
+    function showStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message ${type === 'success' ? 'status-success' : 'status-error'} active`;
+      scheduleHeightCheck(); // Height Changed
+      
+      setTimeout(() => {
+        statusMessage.classList.remove('active');
+        scheduleHeightCheck(); // Height Changed
+      }, 4000);
+    }
+
+    // Reset everything
+    function resetTool() {
+      fileInput.value = '';
+      fileName.textContent = 'No file selected';
+      fileType.textContent = '';
+      fileInfo.classList.remove('active');
+      outputSection.classList.remove('active');
+      outputText.value = '';
+      statusMessage.classList.remove('active');
+      scheduleHeightCheck(); // Height Changed
+    }
+
+    // Debug mode (uncomment to enable)
+    // window.DEBUG_MODE = true;
+    if (window.DEBUG_MODE) {
+      console.log('✅ Timestamp Converter initialized');
+      console.log('📋 Supported formats: CSV (Premiere Pro), EDL (DaVinci Resolve)');
+    }
+    
+    // Iframe height fix for embedded contexts
+    let lastHeight = 0;
+    let resizeTimer;
+
+    // Send height to parent window
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    // Debounced height check
+    function scheduleHeightCheck() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    // Send height on load and resize
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+        scheduleHeightCheck();
+    });
+  </script>
+</body>
+</html>
