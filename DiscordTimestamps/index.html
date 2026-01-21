@@ -4,65 +4,67 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
+    /* #TS DESIGN SYSTEM SPECIFICATIONS */
     :root {
       --bg-primary: #191919;
       --bg-secondary: #1F1F1F;
-      --hover-color: #323232;
-      --outline-color: #323232;
-      --accent-color: #87A9FF;
+      --hover-interact: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
       --text-primary: #D4D4D4;
       --text-secondary: #8C8C8C;
       --radius: 8px;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* #TS BUG FIX: Remove min-height to allow proper shrinking */
     body {
-      font-family: system-ui, -apple-system, sans-serif;
       background: var(--bg-primary);
       color: var(--text-primary);
-      padding: 24px 16px;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 24px 16px; /* Default Padding */
       line-height: 1.5;
+      overflow: hidden; /* Prevent internal scrollbars */
     }
 
-    #TS-TOOL-CONTAINER {
+    #TS-MAIN-WRAPPER {
+      position: relative;
       max-width: 800px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 20px;
-      position: relative;
+      height: auto; /* Proper Height Management */
     }
 
-    .ts-version {
+    #TS-VERSION-TAG {
       position: absolute;
-      top: -15px;
-      right: 5px;
+      top: -14px;
+      right: 4px;
       font-size: 10px;
       color: var(--text-secondary);
-      opacity: 0.6;
+      opacity: 0.7;
     }
 
     .hero-card {
       background: var(--bg-secondary);
-      border: 1px solid var(--outline-color);
+      border: 1px solid var(--outline);
       border-radius: var(--radius);
       padding: 24px 16px;
+      height: auto;
+      transition: height 0.2s ease; /* Simplified Transitions */
     }
 
     .hero-header {
-      font-size: 20px;
+      font-size: 20px; /* Header Bold */
       font-weight: bold;
       margin-bottom: 16px;
       color: var(--text-primary);
     }
 
     .hero-label {
-      font-size: 14px;
+      font-size: 14px; /* Title size */
       color: var(--text-secondary);
       margin-bottom: 8px;
       display: block;
@@ -72,7 +74,6 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
-      margin-bottom: 16px;
     }
 
     @media (max-width: 600px) {
@@ -82,19 +83,18 @@
     input, textarea {
       width: 100%;
       background: var(--bg-primary);
-      border: 1px solid var(--outline-color);
+      border: 1px solid var(--outline);
       border-radius: var(--radius);
       color: var(--text-primary);
       padding: 12px;
-      font-size: 14px;
+      font-size: 12px; /* Text size */
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s ease;
     }
 
-    input:focus, textarea:focus {
-      border-color: var(--accent-color);
-    }
+    input:focus, textarea:focus { border-color: var(--accent); }
 
+    /* #TS SHIMMER BUTTON TEMPLATE */
     .btn {
       position: relative;
       padding: 10px 16px;
@@ -108,8 +108,6 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      transition: background 0.2s;
     }
 
     .btn::before {
@@ -125,14 +123,15 @@
     }
 
     .btn:hover::before { left: 125%; }
-    .btn:hover { background: var(--hover-color); }
+    .btn:hover { background: var(--hover-interact); }
     .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(135,169,255,0.12); }
 
-    /* ===== RESULTS LIST ===== */
-    .ts-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    /* #TS RESULTS DISPLAY */
+    .ts-list { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+      height: auto; /* Proper Height Management */
     }
 
     .ts-row {
@@ -143,64 +142,66 @@
       padding: 12px;
       background: var(--bg-primary);
       border-radius: var(--radius);
-      border: 1px solid var(--outline-color);
+      border: 1px solid var(--outline);
     }
 
     @media (max-width: 550px) {
-      .ts-row { grid-template-columns: 1fr 70px; }
+      .ts-row { grid-template-columns: 1fr 60px; }
       .ts-code-cell { display: none; }
     }
 
     .ts-preview-text { font-size: 12px; color: var(--text-primary); }
-    .ts-code-cell { font-family: monospace; font-size: 11px; color: var(--accent-color); overflow: hidden; text-overflow: ellipsis; }
+    .ts-code-cell { font-family: monospace; font-size: 11px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; }
     
-    #TS-MESSAGE-INPUT { min-height: 100px; resize: vertical; margin-bottom: 12px; }
+    #TS-MSG-BUILDER { min-height: 100px; resize: vertical; margin-bottom: 12px; }
 
     #TS-TOAST {
       position: fixed;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: var(--accent-color);
+      background: var(--accent);
       color: var(--bg-primary);
       padding: 8px 16px;
       border-radius: 4px;
       font-size: 12px;
       font-weight: bold;
-      pointer-events: none;
       opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 100;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 1000;
     }
   </style>
 </head>
 <body>
 
-<div id="TS-TOOL-CONTAINER">
-  <div class="ts-version">V1.2</div>
+<div id="TS-MAIN-WRAPPER">
+  <div id="TS-VERSION-TAG">V1.3</div>
 
   <div class="hero-card">
     <div class="hero-header">Select Date & Time</div>
     <div class="hero-grid">
       <div>
         <label class="hero-label">Date</label>
-        <input type="date" id="TS-INPUT-DATE">
+        <input type="date" id="TS-DATE-INPUT">
       </div>
       <div>
         <label class="hero-label">Time</label>
-        <input type="time" id="TS-INPUT-TIME">
+        <input type="time" id="TS-TIME-INPUT">
       </div>
     </div>
-    <button class="btn" id="TS-BTN-NOW">Set to Current Time</button>
+    <div style="margin-top: 16px;">
+      <button class="btn" id="TS-BTN-SYNC">Set to Current Time</button>
+    </div>
   </div>
 
   <div class="hero-card">
     <div class="hero-header">Message Builder</div>
-    <textarea id="TS-MESSAGE-INPUT" placeholder="Type your Discord message here..."></textarea>
+    <textarea id="TS-MSG-BUILDER" placeholder="Type your Discord message here..."></textarea>
     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-      <button class="btn" onclick="insertTs('f')">Add Date + Time</button>
-      <button class="btn" onclick="insertTs('R')">Add Relative</button>
-      <button class="btn" id="TS-BTN-COPY-MSG" style="border-color: var(--accent-color);">Copy Full Message</button>
+      <button class="btn" onclick="insertStamp('f')">Add Date + Time</button>
+      <button class="btn" onclick="insertStamp('R')">Add Relative</button>
+      <button class="btn" id="TS-BTN-COPY-ALL" style="border-color: var(--accent);">Copy Full Message</button>
     </div>
   </div>
 
@@ -210,88 +211,85 @@
   </div>
 </div>
 
-<div id="TS-TOAST">COPIED!</div>
+<div id="TS-TOAST">COPIED TO CLIPBOARD</div>
 
 <script>
-  const dateField = document.getElementById('TS-INPUT-DATE');
-  const timeField = document.getElementById('TS-INPUT-TIME');
-  const resultsList = document.getElementById('TS-RESULTS-LIST');
-  const messageInput = document.getElementById('TS-MESSAGE-INPUT');
-  const btnNow = document.getElementById('TS-BTN-NOW');
-  const btnCopyMsg = document.getElementById('TS-BTN-COPY-MSG');
+  const dateIn = document.getElementById('TS-DATE-INPUT');
+  const timeIn = document.getElementById('TS-TIME-INPUT');
+  const results = document.getElementById('TS-RESULTS-LIST');
+  const msgArea = document.getElementById('TS-MSG-BUILDER');
+  const syncBtn = document.getElementById('TS-BTN-SYNC');
+  const copyAllBtn = document.getElementById('TS-BTN-COPY-ALL');
   const toast = document.getElementById('TS-TOAST');
 
-  const FORMATS = [
-    { name: 'Short Time', flag: 't' },
-    { name: 'Long Time', flag: 'T' },
-    { name: 'Short Date', flag: 'd' },
-    { name: 'Long Date', flag: 'D' },
-    { name: 'Short Date/Time', flag: 'f' },
-    { name: 'Long Date/Time', flag: 'F' },
-    { name: 'Relative', flag: 'R' }
+  const STYLES = [
+    { n: 'Short Time', f: 't' },
+    { n: 'Long Time', f: 'T' },
+    { n: 'Short Date', f: 'd' },
+    { n: 'Long Date', f: 'D' },
+    { n: 'Short Full', f: 'f' },
+    { n: 'Long Full', f: 'F' },
+    { n: 'Relative', f: 'R' }
   ];
 
   function getUnix() {
-    const dt = new Date(`${dateField.value}T${timeField.value}`);
-    return Math.floor(dt.getTime() / 1000);
+    const d = new Date(`${dateIn.value}T${timeIn.value}`);
+    return Math.floor(d.getTime() / 1000);
   }
 
-  function updateDisplay() {
+  function updateList() {
     const unix = getUnix();
     if (isNaN(unix)) return;
 
-    resultsList.innerHTML = '';
-    FORMATS.forEach(fmt => {
-      const code = `<t:${unix}:${fmt.flag}>`;
+    results.innerHTML = '';
+    STYLES.forEach(item => {
+      const code = `<t:${unix}:${item.f}>`;
       const row = document.createElement('div');
       row.className = 'ts-row';
       
-      let preview = "...";
       const d = new Date(unix * 1000);
-      if (fmt.flag === 'R') preview = "Relative (e.g. in 2 hours)";
-      else preview = d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+      let preview = (item.f === 'R') ? "Relative (e.g. in 2 hours)" : d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
 
       row.innerHTML = `
-        <div class="ts-preview-text"><strong>${fmt.name}</strong>: ${preview}</div>
+        <div class="ts-preview-text"><strong>${item.n}</strong>: ${preview}</div>
         <div class="ts-code-cell">${code}</div>
-        <button class="btn" onclick="copyValue('${code}')">Copy</button>
+        <button class="btn" onclick="copySnippet('${code}')">Copy</button>
       `;
-      resultsList.appendChild(row);
+      results.appendChild(row);
     });
-    scheduleHeightCheck();
   }
 
-  function copyValue(val) {
+  function copySnippet(val) {
     navigator.clipboard.writeText(val).then(() => {
       toast.style.opacity = '1';
       setTimeout(() => toast.style.opacity = '0', 2000);
     });
   }
 
-  function insertTs(flag) {
+  function insertStamp(flag) {
     const unix = getUnix();
     const code = `<t:${unix}:${flag}>`;
-    const start = messageInput.selectionStart;
-    const end = messageInput.selectionEnd;
-    messageInput.value = messageInput.value.slice(0, start) + code + messageInput.value.slice(end);
-    messageInput.focus();
-    updateDisplay();
+    const start = msgArea.selectionStart;
+    const end = msgArea.selectionEnd;
+    msgArea.value = msgArea.value.slice(0, start) + code + msgArea.value.slice(end);
+    msgArea.focus();
   }
 
-  function resetToNow() {
+  function setNow() {
     const now = new Date();
-    dateField.value = now.toISOString().split('T')[0];
-    timeField.value = now.toTimeString().slice(0, 5);
-    updateDisplay();
+    dateIn.value = now.toISOString().split('T')[0];
+    timeIn.value = now.toTimeString().slice(0, 5);
+    updateList();
   }
 
-  dateField.addEventListener('input', updateDisplay);
-  timeField.addEventListener('input', updateDisplay);
-  btnNow.addEventListener('click', resetToNow);
-  btnCopyMsg.addEventListener('click', () => copyValue(messageInput.value));
+  dateIn.addEventListener('input', updateList);
+  timeIn.addEventListener('input', updateList);
+  syncBtn.addEventListener('click', setNow);
+  copyAllBtn.addEventListener('click', () => copySnippet(msgArea.value));
 
-  resetToNow();
+  setNow();
 
+  // ===== FOURTHWALL SCROLLBAR FIX [cite: 74-87] =====
   let lastHeight = 0;
   let resizeTimer;
 
@@ -307,6 +305,17 @@
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(sendHeight, 150);
   }
+
+  // #TS OBSERVER: Detect any visibility or content changes
+  const observer = new MutationObserver(() => {
+    scheduleHeightCheck();
+  });
+
+  observer.observe(document.body, { 
+    childList: true, 
+    subtree: true, 
+    attributes: true 
+  });
 
   window.addEventListener('load', () => {
     setTimeout(sendHeight, 100);
