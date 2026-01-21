@@ -32,12 +32,13 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      background: var(--bg-primary);
+      padding-top: 10px;
     }
 
-    /* #TS VERSION TAG */
     #TS-VERSION-TAG {
       position: absolute;
-      top: -12px;
+      top: 0;
       right: 0;
       font-size: 10px;
       color: var(--text-secondary);
@@ -88,7 +89,7 @@
 
     input:focus, textarea:focus { border-color: var(--accent); }
 
-    /* #TS BUTTON TEMPLATE */
+    /* #TS SHIMMER BUTTON */
     .btn {
       position: relative;
       padding: 10px 16px;
@@ -147,7 +148,7 @@
 <body>
 
 <div id="TS-MAIN-CONTAINER">
-  <div id="TS-VERSION-TAG">V1.0</div>
+  <div id="TS-VERSION-TAG">V1.1</div>
 
   <div class="hero-card">
     <div class="hero-header">Select Date & Time</div>
@@ -196,8 +197,8 @@
     { label: 'Long Time', flag: 'T' },
     { label: 'Short Date', flag: 'd' },
     { label: 'Long Date', flag: 'D' },
-    { label: 'Short Date/Time', flag: 'f' },
-    { label: 'Long Date/Time', flag: 'F' },
+    { label: 'Short Full', flag: 'f' },
+    { label: 'Long Full', flag: 'F' },
     { label: 'Relative Time', flag: 'R' }
   ];
 
@@ -228,7 +229,6 @@
       `;
       resultsList.appendChild(row);
     });
-    // Manual check after height-changing action
     scheduleHeightCheck();
   }
 
