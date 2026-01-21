@@ -13,7 +13,6 @@
       --text-primary: #D4D4D4;
       --text-secondary: #8C8C8C;
       --radius: 8px;
-      --font-main: system-ui, -apple-system, sans-serif;
     }
 
     * { box-sizing: border-box; }
@@ -22,15 +21,13 @@
       margin: 0;
       background: var(--bg-primary);
       color: var(--text-primary);
-      font-family: var(--font-main);
+      font-family: system-ui, -apple-system, sans-serif;
       padding: 24px 16px;
-      display: flex;
-      justify-content: center;
     }
 
     #TS-MAIN-CONTAINER {
-      width: 100%;
       max-width: 800px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -50,7 +47,7 @@
       color: var(--text-primary);
     }
 
-    .hero-title {
+    .hero-label {
       font-size: 14px;
       color: var(--text-secondary);
       margin-bottom: 8px;
@@ -67,24 +64,19 @@
       .hero-grid { grid-template-columns: 1fr; }
     }
 
-    /* INPUT STYLING */
-    input, textarea, select {
+    input, textarea {
       width: 100%;
       background: var(--bg-primary);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
       color: var(--text-primary);
       padding: 12px;
-      font-size: 14px;
+      font-size: 12px;
       outline: none;
-      transition: border-color 0.2s;
     }
 
-    input:focus, textarea:focus {
-      border-color: var(--accent);
-    }
+    input:focus, textarea:focus { border-color: var(--accent); }
 
-    /* SHIMMER BUTTON TEMPLATE */
     .btn {
       position: relative;
       padding: 10px 16px;
@@ -95,11 +87,10 @@
       cursor: pointer;
       overflow: hidden;
       font-size: 14px;
-      transition: background 0.2s;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      transition: background 0.2s;
     }
 
     .btn::before {
@@ -118,17 +109,11 @@
     .btn:hover { background: var(--hover-interact); }
     .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(135,169,255,0.12); }
 
-    /* TABLE / LIST STYLING */
-    .ts-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 16px;
-    }
+    .ts-list { display: flex; flex-direction: column; gap: 12px; }
 
     .ts-row {
       display: grid;
-      grid-template-columns: 1fr 120px 80px;
+      grid-template-columns: 1fr 140px 80px;
       align-items: center;
       gap: 12px;
       padding: 12px;
@@ -137,187 +122,131 @@
       border: 1px solid var(--outline);
     }
 
-    @media (max-width: 500px) {
+    @media (max-width: 550px) {
       .ts-row { grid-template-columns: 1fr 60px; }
       .ts-code-cell { display: none; }
     }
 
     .ts-preview-text { font-size: 12px; color: var(--text-primary); }
-    .ts-code-cell { font-family: monospace; font-size: 12px; color: var(--accent); }
-
-    /* MESSAGE BUILDER */
-    #TS-MESSAGE-INPUT {
-      min-height: 100px;
-      resize: vertical;
-      font-family: var(--font-main);
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--accent);
-      color: var(--bg-primary);
-      padding: 8px 16px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: bold;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-    }
+    .ts-code-cell { font-family: monospace; font-size: 12px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; }
+    
+    #TS-MESSAGE-INPUT { min-height: 100px; resize: vertical; margin-bottom: 12px; }
   </style>
 </head>
 <body>
 
 <div id="TS-MAIN-CONTAINER">
-  
   <div class="hero-card">
     <div class="hero-header">Select Date & Time</div>
     <div class="hero-grid">
       <div>
-        <label class="hero-title">Date</label>
-        <input type="date" id="TS-INPUT-DATE">
+        <label class="hero-label">Date</label>
+        <input type="date" id="TS-DATE-FIELD">
       </div>
       <div>
-        <label class="hero-title">Time</label>
-        <input type="time" id="TS-INPUT-TIME">
+        <label class="hero-label">Time</label>
+        <input type="time" id="TS-TIME-FIELD">
       </div>
     </div>
-    <div style="margin-top: 16px; display: flex; gap: 8px;">
+    <div style="margin-top: 16px;">
       <button class="btn" id="TS-BTN-NOW">Set to Current Time</button>
     </div>
   </div>
 
   <div class="hero-card">
     <div class="hero-header">Message Builder</div>
-    <label class="hero-title">Draft your message and insert a timestamp format</label>
-    <textarea id="TS-MESSAGE-INPUT" placeholder="Type your Discord message here..."></textarea>
-    <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px;">
-      <button class="btn" onclick="insertTimestamp('f')">Insert Date + Time</button>
-      <button class="btn" onclick="insertTimestamp('R')">Insert Relative</button>
-      <button class="btn" id="TS-BTN-COPY-MSG" style="border-color: var(--accent);">Copy Full Message</button>
+    <label class="hero-label">Draft your post and insert timestamps</label>
+    <textarea id="TS-MESSAGE-INPUT" placeholder="Type your message here..."></textarea>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+      <button class="btn" onclick="insertTs('f')">Add Date + Time</button>
+      <button class="btn" onclick="insertTs('R')">Add Relative</button>
+      <button class="btn" id="TS-BTN-COPY-ALL" style="border-color: var(--accent);">Copy Full Message</button>
     </div>
   </div>
 
   <div class="hero-card">
     <div class="hero-header">Available Formats</div>
-    <div class="ts-list" id="TS-DISPLAY-LIST">
-      </div>
+    <div class="ts-list" id="TS-RESULTS-LIST"></div>
   </div>
-
 </div>
 
-<div id="TS-TOAST" class="toast">COPIED TO CLIPBOARD</div>
-
 <script>
-  // ===== ELEMENTS =====
-  const dateInput = document.querySelector('#TS-INPUT-DATE');
-  const timeInput = document.querySelector('#TS-INPUT-TIME');
-  const displayList = document.querySelector('#TS-DISPLAY-LIST');
-  const messageInput = document.querySelector('#TS-MESSAGE-INPUT');
-  const btnNow = document.querySelector('#TS-BTN-NOW');
-  const btnCopyMsg = document.querySelector('#TS-BTN-COPY-MSG');
-  const toast = document.querySelector('#TS-TOAST');
+  const dateField = document.getElementById('TS-DATE-FIELD');
+  const timeField = document.getElementById('TS-TIME-FIELD');
+  const resultsList = document.getElementById('TS-RESULTS-LIST');
+  const messageInput = document.getElementById('TS-MESSAGE-INPUT');
+  const btnNow = document.getElementById('TS-BTN-NOW');
+  const btnCopyAll = document.getElementById('TS-BTN-COPY-ALL');
 
-  const FORMATS = [
-    { name: 'Short Time', flag: 't' },
-    { name: 'Long Time', flag: 'T' },
-    { name: 'Short Date', flag: 'd' },
-    { name: 'Long Date', flag: 'D' },
-    { name: 'Short Date/Time', flag: 'f' },
-    { name: 'Long Date/Time', flag: 'F' },
-    { name: 'Relative', flag: 'R' }
+  const FORMAT_TYPES = [
+    { label: 'Short Time', flag: 't' },
+    { label: 'Long Time', flag: 'T' },
+    { label: 'Short Date', flag: 'd' },
+    { label: 'Long Date', flag: 'D' },
+    { label: 'Short Date/Time', flag: 'f' },
+    { label: 'Long Date/Time', flag: 'F' },
+    { label: 'Relative Time', flag: 'R' }
   ];
 
-  // ===== INITIALIZE =====
-  function init() {
-    const now = new Date();
-    dateInput.value = now.toISOString().split('T')[0];
-    timeInput.value = now.toTimeString().slice(0, 5);
-    updateDisplay();
-  }
-
-  // ===== LOGIC =====
-  function getUnix() {
-    const dt = new Date(`${dateInput.value}T${timeInput.value}`);
+  function getTimestamp() {
+    const dt = new Date(`${dateField.value}T${timeField.value}`);
     return Math.floor(dt.getTime() / 1000);
   }
 
-  function updateDisplay() {
-    const unix = getUnix();
+  function renderFormats() {
+    const unix = getTimestamp();
     if (isNaN(unix)) return;
 
-    displayList.innerHTML = '';
-    
-    FORMATS.forEach(fmt => {
-      const code = `<t:${unix}:${fmt.flag}>`;
+    resultsList.innerHTML = '';
+    FORMAT_TYPES.forEach(item => {
+      const code = `<t:${unix}:${item.flag}>`;
       const row = document.createElement('div');
       row.className = 'ts-row';
       
-      // Localized preview for UI friendliness
       let preview = "...";
-      try {
-        const d = new Date(unix * 1000);
-        if (fmt.flag === 'R') preview = "Relative (e.g. in 2 hours)";
-        else if (fmt.flag === 't') preview = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        else if (fmt.flag === 'T') preview = d.toLocaleTimeString();
-        else if (fmt.flag === 'd') preview = d.toLocaleDateString();
-        else if (fmt.flag === 'D') preview = d.toLocaleDateString([], {dateStyle: 'long'});
-        else if (fmt.flag === 'f') preview = d.toLocaleString([], {dateStyle: 'long', timeStyle: 'short'});
-        else if (fmt.flag === 'F') preview = d.toLocaleString([], {dateStyle: 'full', timeStyle: 'short'});
-      } catch(e) { preview = "Invalid Date"; }
+      const d = new Date(unix * 1000);
+      if (item.flag === 'R') preview = "Relative (e.g. in 2 hours)";
+      else preview = d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
 
       row.innerHTML = `
-        <div class="ts-preview-text">${fmt.name}: ${preview}</div>
+        <div class="ts-preview-text"><strong>${item.label}</strong>: ${preview}</div>
         <div class="ts-code-cell">${code}</div>
-        <button class="btn" onclick="copyText('${code}')">Copy</button>
+        <button class="btn" onclick="copySnippet('${code}')">Copy</button>
       `;
-      displayList.appendChild(row);
+      resultsList.appendChild(row);
     });
     scheduleHeightCheck();
   }
 
-  function copyText(text) {
-    navigator.clipboard.writeText(text).then(() => {
-      showToast();
-    });
+  function copySnippet(val) {
+    navigator.clipboard.writeText(val);
   }
 
-  function showToast() {
-    toast.style.opacity = '1';
-    setTimeout(() => toast.style.opacity = '0', 2000);
-  }
-
-  function insertTimestamp(flag) {
-    const unix = getUnix();
+  function insertTs(flag) {
+    const unix = getTimestamp();
     const code = `<t:${unix}:${flag}>`;
     const start = messageInput.selectionStart;
     const end = messageInput.selectionEnd;
-    const text = messageInput.value;
-    messageInput.value = text.slice(0, start) + code + text.slice(end);
+    messageInput.value = messageInput.value.slice(0, start) + code + messageInput.value.slice(end);
     messageInput.focus();
-    messageInput.setSelectionRange(start + code.length, start + code.length);
+    scheduleHeightCheck();
   }
 
-  // ===== EVENTS =====
-  dateInput.addEventListener('input', updateDisplay);
-  timeInput.addEventListener('input', updateDisplay);
-
-  btnNow.addEventListener('click', () => {
+  function setCurrentTime() {
     const now = new Date();
-    dateInput.value = now.toISOString().split('T')[0];
-    timeInput.value = now.toTimeString().slice(0, 5);
-    updateDisplay();
-  });
+    dateField.value = now.toISOString().split('T')[0];
+    timeField.value = now.toTimeString().slice(0, 5);
+    renderFormats();
+  }
 
-  btnCopyMsg.addEventListener('click', () => {
-    copyText(messageInput.value);
-  });
+  dateField.addEventListener('input', renderFormats);
+  timeField.addEventListener('input', renderFormats);
+  btnNow.addEventListener('click', setCurrentTime);
+  btnCopyAll.addEventListener('click', () => copySnippet(messageInput.value));
 
-  init();
+  setCurrentTime();
 
-  // ===== FOURTHWALL SCROLLBAR FIX =====
+  // #TS SCROLLBAR FIX
   let lastHeight = 0;
   let resizeTimer;
 
@@ -341,7 +270,6 @@
   window.addEventListener('resize', () => {
     scheduleHeightCheck();
   });
-  // ===== END OF SCROLLBAR FIX =====
 </script>
 
 </body>
