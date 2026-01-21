@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    /* #TS DESIGN SYSTEM SPECIFICATIONS */
+
     :root {
       --bg-primary: #191919;
       --bg-secondary: #1F1F1F;
@@ -18,14 +18,13 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* #TS BUG FIX: Remove min-height to allow proper shrinking */
     body {
       background: var(--bg-primary);
       color: var(--text-primary);
       font-family: system-ui, -apple-system, sans-serif;
-      padding: 24px 16px; /* Default Padding */
+      padding: 24px 16px; 
       line-height: 1.5;
-      overflow: hidden; /* Prevent internal scrollbars */
+      overflow: hidden; 
     }
 
     #TS-MAIN-WRAPPER {
@@ -35,7 +34,7 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
-      height: auto; /* Proper Height Management */
+      height: auto; 
     }
 
     #TS-VERSION-TAG {
@@ -53,18 +52,18 @@
       border-radius: var(--radius);
       padding: 24px 16px;
       height: auto;
-      transition: height 0.2s ease; /* Simplified Transitions */
+      transition: height 0.2s ease; 
     }
 
     .hero-header {
-      font-size: 20px; /* Header Bold */
+      font-size: 20px; 
       font-weight: bold;
       margin-bottom: 16px;
       color: var(--text-primary);
     }
 
     .hero-label {
-      font-size: 14px; /* Title size */
+      font-size: 14px; 
       color: var(--text-secondary);
       margin-bottom: 8px;
       display: block;
@@ -94,7 +93,6 @@
 
     input:focus, textarea:focus { border-color: var(--accent); }
 
-    /* #TS SHIMMER BUTTON TEMPLATE */
     .btn {
       position: relative;
       padding: 10px 16px;
@@ -126,12 +124,11 @@
     .btn:hover { background: var(--hover-interact); }
     .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(135,169,255,0.12); }
 
-    /* #TS RESULTS DISPLAY */
     .ts-list { 
       display: flex; 
       flex-direction: column; 
       gap: 12px; 
-      height: auto; /* Proper Height Management */
+      height: auto;
     }
 
     .ts-row {
@@ -289,7 +286,6 @@
 
   setNow();
 
-  // ===== FOURTHWALL SCROLLBAR FIX [cite: 74-87] =====
   let lastHeight = 0;
   let resizeTimer;
 
@@ -306,7 +302,6 @@
     resizeTimer = setTimeout(sendHeight, 150);
   }
 
-  // #TS OBSERVER: Detect any visibility or content changes
   const observer = new MutationObserver(() => {
     scheduleHeightCheck();
   });
