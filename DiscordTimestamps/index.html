@@ -26,11 +26,22 @@
     }
 
     #TS-MAIN-CONTAINER {
+      position: relative;
       max-width: 800px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 20px;
+    }
+
+    /* #TS VERSION TAG */
+    #TS-VERSION-TAG {
+      position: absolute;
+      top: -12px;
+      right: 0;
+      font-size: 10px;
+      color: var(--text-secondary);
+      pointer-events: none;
     }
 
     .hero-card {
@@ -77,6 +88,7 @@
 
     input:focus, textarea:focus { border-color: var(--accent); }
 
+    /* #TS BUTTON TEMPLATE */
     .btn {
       position: relative;
       padding: 10px 16px;
@@ -90,7 +102,6 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
     }
 
     .btn::before {
@@ -136,6 +147,8 @@
 <body>
 
 <div id="TS-MAIN-CONTAINER">
+  <div id="TS-VERSION-TAG">V1.0</div>
+
   <div class="hero-card">
     <div class="hero-header">Select Date & Time</div>
     <div class="hero-grid">
@@ -215,6 +228,7 @@
       `;
       resultsList.appendChild(row);
     });
+    // Manual check after height-changing action
     scheduleHeightCheck();
   }
 
@@ -246,7 +260,7 @@
 
   setCurrentTime();
 
-  // #TS SCROLLBAR FIX
+  // ===== FOURTHWALL SCROLLBAR FIX =====
   let lastHeight = 0;
   let resizeTimer;
 
