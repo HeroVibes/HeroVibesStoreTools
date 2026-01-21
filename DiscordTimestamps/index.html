@@ -7,47 +7,49 @@
     :root {
       --bg-primary: #191919;
       --bg-secondary: #1F1F1F;
-      --hover-interact: #323232;
-      --outline: #323232;
-      --accent: #87A9FF;
+      --hover-color: #323232;
+      --outline-color: #323232;
+      --accent-color: #87A9FF;
       --text-primary: #D4D4D4;
       --text-secondary: #8C8C8C;
       --radius: 8px;
     }
 
-    * { box-sizing: border-box; }
-
-    body {
+    * {
       margin: 0;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: system-ui, -apple-system, sans-serif;
-      padding: 24px 16px;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    #TS-MAIN-CONTAINER {
-      position: relative;
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 24px 16px;
+      line-height: 1.5;
+    }
+
+    #TS-TOOL-CONTAINER {
       max-width: 800px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 20px;
-      background: var(--bg-primary);
-      padding-top: 10px;
+      position: relative;
     }
 
-    #TS-VERSION-TAG {
+    .ts-version {
       position: absolute;
-      top: 0;
-      right: 0;
+      top: -15px;
+      right: 5px;
       font-size: 10px;
       color: var(--text-secondary);
-      pointer-events: none;
+      opacity: 0.6;
     }
 
     .hero-card {
       background: var(--bg-secondary);
-      border: 1px solid var(--outline);
+      border: 1px solid var(--outline-color);
       border-radius: var(--radius);
       padding: 24px 16px;
     }
@@ -70,6 +72,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
+      margin-bottom: 16px;
     }
 
     @media (max-width: 600px) {
@@ -79,17 +82,19 @@
     input, textarea {
       width: 100%;
       background: var(--bg-primary);
-      border: 1px solid var(--outline);
+      border: 1px solid var(--outline-color);
       border-radius: var(--radius);
       color: var(--text-primary);
       padding: 12px;
-      font-size: 12px;
+      font-size: 14px;
       outline: none;
+      transition: border-color 0.2s;
     }
 
-    input:focus, textarea:focus { border-color: var(--accent); }
+    input:focus, textarea:focus {
+      border-color: var(--accent-color);
+    }
 
-    /* #TS SHIMMER BUTTON */
     .btn {
       position: relative;
       padding: 10px 16px;
@@ -103,6 +108,8 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 8px;
+      transition: background 0.2s;
     }
 
     .btn::before {
@@ -118,10 +125,15 @@
     }
 
     .btn:hover::before { left: 125%; }
-    .btn:hover { background: var(--hover-interact); }
+    .btn:hover { background: var(--hover-color); }
     .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(135,169,255,0.12); }
 
-    .ts-list { display: flex; flex-direction: column; gap: 12px; }
+    /* ===== RESULTS LIST ===== */
+    .ts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
     .ts-row {
       display: grid;
@@ -131,136 +143,155 @@
       padding: 12px;
       background: var(--bg-primary);
       border-radius: var(--radius);
-      border: 1px solid var(--outline);
+      border: 1px solid var(--outline-color);
     }
 
     @media (max-width: 550px) {
-      .ts-row { grid-template-columns: 1fr 60px; }
+      .ts-row { grid-template-columns: 1fr 70px; }
       .ts-code-cell { display: none; }
     }
 
     .ts-preview-text { font-size: 12px; color: var(--text-primary); }
-    .ts-code-cell { font-family: monospace; font-size: 12px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; }
+    .ts-code-cell { font-family: monospace; font-size: 11px; color: var(--accent-color); overflow: hidden; text-overflow: ellipsis; }
     
     #TS-MESSAGE-INPUT { min-height: 100px; resize: vertical; margin-bottom: 12px; }
+
+    #TS-TOAST {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent-color);
+      color: var(--bg-primary);
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 100;
+    }
   </style>
 </head>
 <body>
 
-<div id="TS-MAIN-CONTAINER">
-  <div id="TS-VERSION-TAG">V1.1</div>
+<div id="TS-TOOL-CONTAINER">
+  <div class="ts-version">V1.2</div>
 
   <div class="hero-card">
     <div class="hero-header">Select Date & Time</div>
     <div class="hero-grid">
       <div>
         <label class="hero-label">Date</label>
-        <input type="date" id="TS-DATE-FIELD">
+        <input type="date" id="TS-INPUT-DATE">
       </div>
       <div>
         <label class="hero-label">Time</label>
-        <input type="time" id="TS-TIME-FIELD">
+        <input type="time" id="TS-INPUT-TIME">
       </div>
     </div>
-    <div style="margin-top: 16px;">
-      <button class="btn" id="TS-BTN-NOW">Set to Current Time</button>
-    </div>
+    <button class="btn" id="TS-BTN-NOW">Set to Current Time</button>
   </div>
 
   <div class="hero-card">
     <div class="hero-header">Message Builder</div>
-    <label class="hero-label">Draft your post and insert timestamps</label>
-    <textarea id="TS-MESSAGE-INPUT" placeholder="Type your message here..."></textarea>
+    <textarea id="TS-MESSAGE-INPUT" placeholder="Type your Discord message here..."></textarea>
     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
       <button class="btn" onclick="insertTs('f')">Add Date + Time</button>
       <button class="btn" onclick="insertTs('R')">Add Relative</button>
-      <button class="btn" id="TS-BTN-COPY-ALL" style="border-color: var(--accent);">Copy Full Message</button>
+      <button class="btn" id="TS-BTN-COPY-MSG" style="border-color: var(--accent-color);">Copy Full Message</button>
     </div>
   </div>
 
   <div class="hero-card">
-    <div class="hero-header">Available Formats</div>
+    <div class="hero-header">Discord Formats</div>
     <div class="ts-list" id="TS-RESULTS-LIST"></div>
   </div>
 </div>
 
+<div id="TS-TOAST">COPIED!</div>
+
 <script>
-  const dateField = document.getElementById('TS-DATE-FIELD');
-  const timeField = document.getElementById('TS-TIME-FIELD');
+  const dateField = document.getElementById('TS-INPUT-DATE');
+  const timeField = document.getElementById('TS-INPUT-TIME');
   const resultsList = document.getElementById('TS-RESULTS-LIST');
   const messageInput = document.getElementById('TS-MESSAGE-INPUT');
   const btnNow = document.getElementById('TS-BTN-NOW');
-  const btnCopyAll = document.getElementById('TS-BTN-COPY-ALL');
+  const btnCopyMsg = document.getElementById('TS-BTN-COPY-MSG');
+  const toast = document.getElementById('TS-TOAST');
 
-  const FORMAT_TYPES = [
-    { label: 'Short Time', flag: 't' },
-    { label: 'Long Time', flag: 'T' },
-    { label: 'Short Date', flag: 'd' },
-    { label: 'Long Date', flag: 'D' },
-    { label: 'Short Full', flag: 'f' },
-    { label: 'Long Full', flag: 'F' },
-    { label: 'Relative Time', flag: 'R' }
+  const FORMATS = [
+    { name: 'Short Time', flag: 't' },
+    { name: 'Long Time', flag: 'T' },
+    { name: 'Short Date', flag: 'd' },
+    { name: 'Long Date', flag: 'D' },
+    { name: 'Short Date/Time', flag: 'f' },
+    { name: 'Long Date/Time', flag: 'F' },
+    { name: 'Relative', flag: 'R' }
   ];
 
-  function getTimestamp() {
+  function getUnix() {
     const dt = new Date(`${dateField.value}T${timeField.value}`);
     return Math.floor(dt.getTime() / 1000);
   }
 
-  function renderFormats() {
-    const unix = getTimestamp();
+  function updateDisplay() {
+    const unix = getUnix();
     if (isNaN(unix)) return;
 
     resultsList.innerHTML = '';
-    FORMAT_TYPES.forEach(item => {
-      const code = `<t:${unix}:${item.flag}>`;
+    FORMATS.forEach(fmt => {
+      const code = `<t:${unix}:${fmt.flag}>`;
       const row = document.createElement('div');
       row.className = 'ts-row';
       
       let preview = "...";
       const d = new Date(unix * 1000);
-      if (item.flag === 'R') preview = "Relative (e.g. in 2 hours)";
+      if (fmt.flag === 'R') preview = "Relative (e.g. in 2 hours)";
       else preview = d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
 
       row.innerHTML = `
-        <div class="ts-preview-text"><strong>${item.label}</strong>: ${preview}</div>
+        <div class="ts-preview-text"><strong>${fmt.name}</strong>: ${preview}</div>
         <div class="ts-code-cell">${code}</div>
-        <button class="btn" onclick="copySnippet('${code}')">Copy</button>
+        <button class="btn" onclick="copyValue('${code}')">Copy</button>
       `;
       resultsList.appendChild(row);
     });
     scheduleHeightCheck();
   }
 
-  function copySnippet(val) {
-    navigator.clipboard.writeText(val);
+  function copyValue(val) {
+    navigator.clipboard.writeText(val).then(() => {
+      toast.style.opacity = '1';
+      setTimeout(() => toast.style.opacity = '0', 2000);
+    });
   }
 
   function insertTs(flag) {
-    const unix = getTimestamp();
+    const unix = getUnix();
     const code = `<t:${unix}:${flag}>`;
     const start = messageInput.selectionStart;
     const end = messageInput.selectionEnd;
     messageInput.value = messageInput.value.slice(0, start) + code + messageInput.value.slice(end);
     messageInput.focus();
-    scheduleHeightCheck();
+    updateDisplay();
   }
 
-  function setCurrentTime() {
+  function resetToNow() {
     const now = new Date();
     dateField.value = now.toISOString().split('T')[0];
     timeField.value = now.toTimeString().slice(0, 5);
-    renderFormats();
+    updateDisplay();
   }
 
-  dateField.addEventListener('input', renderFormats);
-  timeField.addEventListener('input', renderFormats);
-  btnNow.addEventListener('click', setCurrentTime);
-  btnCopyAll.addEventListener('click', () => copySnippet(messageInput.value));
+  dateField.addEventListener('input', updateDisplay);
+  timeField.addEventListener('input', updateDisplay);
+  btnNow.addEventListener('click', resetToNow);
+  btnCopyMsg.addEventListener('click', () => copyValue(messageInput.value));
 
-  setCurrentTime();
+  resetToNow();
 
-  // ===== FOURTHWALL SCROLLBAR FIX =====
   let lastHeight = 0;
   let resizeTimer;
 
