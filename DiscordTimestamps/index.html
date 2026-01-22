@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-
     :root {
       --bg-primary: #191919;
       --bg-secondary: #1F1F1F;
@@ -22,9 +21,9 @@
       background: var(--bg-primary);
       color: var(--text-primary);
       font-family: system-ui, -apple-system, sans-serif;
-      padding: 24px 16px; 
+      padding: 24px 16px;
       line-height: 1.5;
-      overflow: hidden; 
+      overflow: hidden;
     }
 
     #TS-MAIN-WRAPPER {
@@ -34,7 +33,7 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
-      height: auto; 
+      height: auto;
     }
 
     #TS-VERSION-TAG {
@@ -52,18 +51,17 @@
       border-radius: var(--radius);
       padding: 24px 16px;
       height: auto;
-      transition: height 0.2s ease; 
     }
 
     .hero-header {
-      font-size: 20px; 
+      font-size: 20px;
       font-weight: bold;
       margin-bottom: 16px;
       color: var(--text-primary);
     }
 
     .hero-label {
-      font-size: 14px; 
+      font-size: 14px;
       color: var(--text-secondary);
       margin-bottom: 8px;
       display: block;
@@ -86,12 +84,28 @@
       border-radius: var(--radius);
       color: var(--text-primary);
       padding: 12px;
-      font-size: 12px; /* Text size */
+      font-size: 12px;
       outline: none;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    input[type="date"], input[type="time"] {
+      cursor: pointer;
     }
 
     input:focus, textarea:focus { border-color: var(--accent); }
+    input:hover { background: var(--hover-interact); }
+
+    input::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      filter: invert(72%) sepia(16%) saturate(4681%) hue-rotate(193deg) brightness(101%) contrast(101%);
+      padding: 5px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    input::-webkit-calendar-picker-indicator:hover {
+      background: rgba(135, 169, 255, 0.15);
+    }
 
     .btn {
       position: relative;
@@ -124,10 +138,10 @@
     .btn:hover { background: var(--hover-interact); }
     .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(135,169,255,0.12); }
 
-    .ts-list { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 12px; 
+    .ts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
       height: auto;
     }
 
@@ -150,7 +164,7 @@
     .ts-preview-text { font-size: 12px; color: var(--text-primary); }
     .ts-code-cell { font-family: monospace; font-size: 11px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; }
     
-    #TS-MSG-BUILDER { min-height: 100px; resize: vertical; margin-bottom: 12px; }
+    #TS-MESSAGE-FIELD { min-height: 100px; resize: vertical; margin-bottom: 12px; }
 
     #TS-TOAST {
       position: fixed;
@@ -173,7 +187,7 @@
 <body>
 
 <div id="TS-MAIN-WRAPPER">
-  <div id="TS-VERSION-TAG">V1.3</div>
+  <div id="TS-VERSION-TAG">V1.0</div>
 
   <div class="hero-card">
     <div class="hero-header">Select Date & Time</div>
@@ -188,137 +202,147 @@
       </div>
     </div>
     <div style="margin-top: 16px;">
-      <button class="btn" id="TS-BTN-SYNC">Set to Current Time</button>
+      <button class="btn" id="TS-SYNC-BTN">Set to Current Time</button>
     </div>
   </div>
 
   <div class="hero-card">
     <div class="hero-header">Message Builder</div>
-    <textarea id="TS-MSG-BUILDER" placeholder="Type your Discord message here..."></textarea>
+    <textarea id="TS-MESSAGE-FIELD" placeholder="Draft your post here..."></textarea>
     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-      <button class="btn" onclick="insertStamp('f')">Add Date + Time</button>
-      <button class="btn" onclick="insertStamp('R')">Add Relative</button>
-      <button class="btn" id="TS-BTN-COPY-ALL" style="border-color: var(--accent);">Copy Full Message</button>
+      <button class="btn" onclick="addStamp('t')">Add Time</button>
+      <button class="btn" onclick="addStamp('d')">Add Date</button>
+      <button class="btn" onclick="addStamp('f')">Add Date + Time</button>
+      <button class="btn" onclick="addStamp('R')">Add Relative</button>
+      <button class="btn" id="TS-COPY-MSG" style="border-color: var(--accent);">Copy Full Message</button>
     </div>
   </div>
 
   <div class="hero-card">
-    <div class="hero-header">Discord Formats</div>
-    <div class="ts-list" id="TS-RESULTS-LIST"></div>
+    <div class="hero-header">Quick Timestamps</div>
+    <div class="ts-list" id="TS-RESULTS-AREA"></div>
   </div>
 </div>
 
 <div id="TS-TOAST">COPIED TO CLIPBOARD</div>
 
 <script>
-  const dateIn = document.getElementById('TS-DATE-INPUT');
-  const timeIn = document.getElementById('TS-TIME-INPUT');
-  const results = document.getElementById('TS-RESULTS-LIST');
-  const msgArea = document.getElementById('TS-MSG-BUILDER');
-  const syncBtn = document.getElementById('TS-BTN-SYNC');
-  const copyAllBtn = document.getElementById('TS-BTN-COPY-ALL');
-  const toast = document.getElementById('TS-TOAST');
+    const dateInput = document.getElementById('TS-DATE-INPUT');
+    const timeInput = document.getElementById('TS-TIME-INPUT');
+    const resultsArea = document.getElementById('TS-RESULTS-AREA');
+    const messageField = document.getElementById('TS-MESSAGE-FIELD');
+    const syncBtn = document.getElementById('TS-SYNC-BTN');
+    const copyMsgBtn = document.getElementById('TS-COPY-MSG');
+    const toast = document.getElementById('TS-TOAST');
 
-  const STYLES = [
-    { n: 'Short Time', f: 't' },
-    { n: 'Long Time', f: 'T' },
-    { n: 'Short Date', f: 'd' },
-    { n: 'Long Date', f: 'D' },
-    { n: 'Short Full', f: 'f' },
-    { n: 'Long Full', f: 'F' },
-    { n: 'Relative', f: 'R' }
-  ];
+    const FORMAT_STYLES = [
+        { n: 'Standard (Date + Time)', f: 'f' },
+        { n: 'Full Details (Weekday + Date)', f: 'F' },
+        { n: 'Simple Time (HH:MM)', f: 't' },
+        { n: 'Precise Time (with Seconds)', f: 'T' },
+        { n: 'Numeric Date (MM/DD/YY)', f: 'd' },
+        { n: 'Written Date (Month Day, Year)', f: 'D' },
+        { n: 'Relative (Countdown)', f: 'R' }
+    ];
 
-  function getUnix() {
-    const d = new Date(`${dateIn.value}T${timeIn.value}`);
-    return Math.floor(d.getTime() / 1000);
-  }
-
-  function updateList() {
-    const unix = getUnix();
-    if (isNaN(unix)) return;
-
-    results.innerHTML = '';
-    STYLES.forEach(item => {
-      const code = `<t:${unix}:${item.f}>`;
-      const row = document.createElement('div');
-      row.className = 'ts-row';
-      
-      const d = new Date(unix * 1000);
-      let preview = (item.f === 'R') ? "Relative (e.g. in 2 hours)" : d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
-
-      row.innerHTML = `
-        <div class="ts-preview-text"><strong>${item.n}</strong>: ${preview}</div>
-        <div class="ts-code-cell">${code}</div>
-        <button class="btn" onclick="copySnippet('${code}')">Copy</button>
-      `;
-      results.appendChild(row);
-    });
-  }
-
-  function copySnippet(val) {
-    navigator.clipboard.writeText(val).then(() => {
-      toast.style.opacity = '1';
-      setTimeout(() => toast.style.opacity = '0', 2000);
-    });
-  }
-
-  function insertStamp(flag) {
-    const unix = getUnix();
-    const code = `<t:${unix}:${flag}>`;
-    const start = msgArea.selectionStart;
-    const end = msgArea.selectionEnd;
-    msgArea.value = msgArea.value.slice(0, start) + code + msgArea.value.slice(end);
-    msgArea.focus();
-  }
-
-  function setNow() {
-    const now = new Date();
-    dateIn.value = now.toISOString().split('T')[0];
-    timeIn.value = now.toTimeString().slice(0, 5);
-    updateList();
-  }
-
-  dateIn.addEventListener('input', updateList);
-  timeIn.addEventListener('input', updateList);
-  syncBtn.addEventListener('click', setNow);
-  copyAllBtn.addEventListener('click', () => copySnippet(msgArea.value));
-
-  setNow();
-
-  let lastHeight = 0;
-  let resizeTimer;
-
-  function sendHeight() {
-    const height = document.body.scrollHeight;
-    if (height !== lastHeight) {
-      lastHeight = height;
-      window.parent.postMessage({ frameHeight: height }, '*');
+    function getUnix() {
+        const d = new Date(`${dateInput.value}T${timeInput.value}`);
+        return Math.floor(d.getTime() / 1000);
     }
-  }
 
-  function scheduleHeightCheck() {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(sendHeight, 150);
-  }
+    function refreshTimestamps() {
+        const unix = getUnix();
+        if (isNaN(unix)) return;
 
-  const observer = new MutationObserver(() => {
-    scheduleHeightCheck();
-  });
+        resultsArea.innerHTML = '';
+        FORMAT_STYLES.forEach(item => {
+            const code = `<t:${unix}:${item.f}>`;
+            const row = document.createElement('div');
+            row.className = 'ts-row';
+            
+            const d = new Date(unix * 1000);
+            let preview = "...";
+            
+            if (item.f === 'R') preview = "Relative (e.g. 5 mins ago)";
+            else if (item.f === 'f') preview = d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+            else if (item.f === 'F') preview = d.toLocaleString([], { dateStyle: 'full', timeStyle: 'short' });
+            else if (item.f === 't') preview = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            else if (item.f === 'T') preview = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            else if (item.f === 'd') preview = d.toLocaleDateString();
+            else if (item.f === 'D') preview = d.toLocaleDateString([], { dateStyle: 'long' });
 
-  observer.observe(document.body, { 
-    childList: true, 
-    subtree: true, 
-    attributes: true 
-  });
+            row.innerHTML = `
+                <div class="ts-preview-text"><strong>${item.n}</strong>: ${preview}</div>
+                <div class="ts-code-cell">${code}</div>
+                <button class="btn" onclick="copyToClipboard('${code}')">Copy</button>
+            `;
+            resultsArea.appendChild(row);
+        });
+    }
 
-  window.addEventListener('load', () => {
-    setTimeout(sendHeight, 100);
-  });
+    function copyToClipboard(val) {
+        navigator.clipboard.writeText(val).then(() => {
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 2000);
+        });
+    }
 
-  window.addEventListener('resize', () => {
-    scheduleHeightCheck();
-  });
+    function addStamp(flag) {
+        const unix = getUnix();
+        const code = `<t:${unix}:${flag}>`;
+        const start = messageField.selectionStart;
+        const end = messageField.selectionField;
+        messageField.value = messageField.value.slice(0, start) + code + messageField.value.slice(end);
+        messageField.focus();
+    }
+
+    function setNow() {
+        const now = new Date();
+        dateInput.value = now.toISOString().split('T')[0];
+        timeInput.value = now.toTimeString().slice(0, 5);
+        refreshTimestamps();
+    }
+
+    dateInput.addEventListener('input', refreshTimestamps);
+    timeInput.addEventListener('input', refreshTimestamps);
+    syncBtn.addEventListener('click', setNow);
+    copyMsgBtn.addEventListener('click', () => copyToClipboard(messageField.value));
+
+    setNow();
+
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+        const height = document.body.scrollHeight;
+        if (height !== lastHeight) {
+            lastHeight = height;
+            window.parent.postMessage({ frameHeight: height }, '*');
+        }
+    }
+
+    function scheduleHeightCheck() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    const observer = new MutationObserver(() => {
+        scheduleHeightCheck();
+    });
+
+    observer.observe(document.body, { 
+        childList: true, 
+        subtree: true, 
+        attributes: true 
+    });
+
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+        scheduleHeightCheck();
+    });
 </script>
 
 </body>
