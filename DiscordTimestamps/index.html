@@ -94,17 +94,21 @@
     }
 
     input:focus, textarea:focus { border-color: var(--accent); }
-    input:hover { background: var(--hover-interact); }
 
     input::-webkit-calendar-picker-indicator {
       cursor: pointer;
-      filter: invert(72%) sepia(16%) saturate(4681%) hue-rotate(193deg) brightness(101%) contrast(101%);
-      padding: 5px;
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 8px;
       border-radius: 4px;
-      transition: background 0.2s;
+      filter: none;
+      transition: opacity 0.2s;
     }
-    input::-webkit-calendar-picker-indicator:hover {
-      background: rgba(135, 169, 255, 0.15);
+
+    input::-webkit-calendar-picker-indicator:hover, 
+    input::-webkit-calendar-picker-indicator:active {
+      opacity: 0.8;
+      background-color: #FFFFFF;
     }
 
     .btn {
@@ -147,7 +151,7 @@
 
     .ts-row {
       display: grid;
-      grid-template-columns: 1fr 140px 80px;
+      grid-template-columns: 1fr 160px 80px;
       align-items: center;
       gap: 12px;
       padding: 12px;
@@ -236,13 +240,13 @@
     const toast = document.getElementById('TS-TOAST');
 
     const FORMAT_STYLES = [
-        { n: 'Standard (Date + Time)', f: 'f' },
-        { n: 'Full Details (Weekday + Date)', f: 'F' },
-        { n: 'Simple Time (HH:MM)', f: 't' },
-        { n: 'Precise Time (with Seconds)', f: 'T' },
-        { n: 'Numeric Date (MM/DD/YY)', f: 'd' },
-        { n: 'Written Date (Month Day, Year)', f: 'D' },
-        { n: 'Relative (Countdown)', f: 'R' }
+        { f: 'F' },
+        { f: 'f' },
+        { f: 'D' },
+        { f: 'd' },
+        { f: 'T' },
+        { f: 't' },
+        { f: 'R' }
     ];
 
     function getUnix() {
@@ -263,16 +267,16 @@
             const d = new Date(unix * 1000);
             let preview = "...";
             
-            if (item.f === 'R') preview = "Relative (e.g. 5 mins ago)";
-            else if (item.f === 'f') preview = d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
-            else if (item.f === 'F') preview = d.toLocaleString([], { dateStyle: 'full', timeStyle: 'short' });
-            else if (item.f === 't') preview = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            else if (item.f === 'T') preview = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            else if (item.f === 'd') preview = d.toLocaleDateString();
-            else if (item.f === 'D') preview = d.toLocaleDateString([], { dateStyle: 'long' });
+            if (item.f === 'F') preview = d.toLocaleString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' at ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            else if (item.f === 'f') preview = d.toLocaleString([], { year: 'numeric', month: 'long', day: 'numeric' }) + ' at ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            else if (item.f === 'D') preview = d.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' });
+            else if (item.f === 'd') preview = d.toLocaleDateString([], { year: '2-digit', month: 'numeric', day: 'numeric' });
+            else if (item.f === 'T') preview = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+            else if (item.f === 't') preview = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            else if (item.f === 'R') preview = "40 seconds ago";
 
             row.innerHTML = `
-                <div class="ts-preview-text"><strong>${item.n}</strong>: ${preview}</div>
+                <div class="ts-preview-text">${preview}</div>
                 <div class="ts-code-cell">${code}</div>
                 <button class="btn" onclick="copyToClipboard('${code}')">Copy</button>
             `;
@@ -281,25 +285,44 @@
     }
 
     function copyToClipboard(val) {
-        navigator.clipboard.writeText(val).then(() => {
-            toast.style.opacity = '1';
-            setTimeout(() => toast.style.opacity = '0', 2000);
-        });
+        if (!navigator.clipboard) {
+            const textArea = document.createElement("textarea");
+            textArea.value = val;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+            showToast();
+        } else {
+            navigator.clipboard.writeText(val).then(showToast);
+        }
+    }
+
+    function showToast() {
+        toast.style.opacity = '1';
+        setTimeout(() => toast.style.opacity = '0', 2000);
     }
 
     function addStamp(flag) {
         const unix = getUnix();
+        if (isNaN(unix)) return;
         const code = `<t:${unix}:${flag}>`;
         const start = messageField.selectionStart;
-        const end = messageField.selectionField;
+        const end = messageField.selectionEnd;
         messageField.value = messageField.value.slice(0, start) + code + messageField.value.slice(end);
         messageField.focus();
     }
 
     function setNow() {
         const now = new Date();
-        dateInput.value = now.toISOString().split('T')[0];
-        timeInput.value = now.toTimeString().slice(0, 5);
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        dateInput.value = `${year}-${month}-${day}`;
+        timeInput.value = `${hours}:${minutes}`;
         refreshTimestamps();
     }
 
