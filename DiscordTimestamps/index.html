@@ -23,7 +23,7 @@
       font-family: system-ui, -apple-system, sans-serif;
       padding: 24px 16px;
       line-height: 1.5;
-      overflow: hidden;
+      overflow-x: hidden;
     }
 
     #TS-MAIN-WRAPPER {
@@ -107,8 +107,7 @@
 
     input::-webkit-calendar-picker-indicator:hover, 
     input::-webkit-calendar-picker-indicator:active {
-      opacity: 0.8;
-      background-color: #FFFFFF;
+      background-color: #D4D4D4;
     }
 
     .btn {
@@ -267,12 +266,15 @@
             const d = new Date(unix * 1000);
             let preview = "...";
             
-            if (item.f === 'F') preview = d.toLocaleString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' at ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-            else if (item.f === 'f') preview = d.toLocaleString([], { year: 'numeric', month: 'long', day: 'numeric' }) + ' at ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            const timeOpts = { hour: 'numeric', minute: '2-digit', hour12: true };
+            const timeSecOpts = { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true };
+
+            if (item.f === 'F') preview = d.toLocaleString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' at ' + d.toLocaleTimeString([], timeOpts);
+            else if (item.f === 'f') preview = d.toLocaleString([], { year: 'numeric', month: 'long', day: 'numeric' }) + ' at ' + d.toLocaleTimeString([], timeOpts);
             else if (item.f === 'D') preview = d.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' });
             else if (item.f === 'd') preview = d.toLocaleDateString([], { year: '2-digit', month: 'numeric', day: 'numeric' });
-            else if (item.f === 'T') preview = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
-            else if (item.f === 't') preview = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            else if (item.f === 'T') preview = d.toLocaleTimeString([], timeSecOpts);
+            else if (item.f === 't') preview = d.toLocaleTimeString([], timeOpts);
             else if (item.f === 'R') preview = "40 seconds ago";
 
             row.innerHTML = `
@@ -285,17 +287,26 @@
     }
 
     function copyToClipboard(val) {
-        if (!navigator.clipboard) {
-            const textArea = document.createElement("textarea");
-            textArea.value = val;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand("copy");
-            document.body.removeChild(textArea);
-            showToast();
-        } else {
-            navigator.clipboard.writeText(val).then(showToast);
+        if (typeof val !== 'string') val = String(val);
+        
+        const textArea = document.createElement("textarea");
+        textArea.value = val;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) showToast();
+        } catch (err) {
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(val).then(showToast);
+            }
         }
+        document.body.removeChild(textArea);
     }
 
     function showToast() {
