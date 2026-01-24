@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShapeStack Game</title>
+  <style>
+    :root {
+      --bg: #191919;
+      --card-bg: #1F1F1F;
+      --hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: sans-serif;
+      color: var(--text-primary);
+      padding: 24px 16px;
+      overflow-x: hidden;
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    .game-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+    }
+
+    /* ===== VERSION NUMBER ===== */
+    .version {
+      text-align: center;
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      opacity: 0.6;
+    }
+
+    /* ===== STATS SECTION ===== */
+    .stats-section {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    /* ===== GAME BOARD ===== */
+    .game-board-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .board-wrapper {
+      position: relative;
+      background: var(--bg);
+      border: 2px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 1px;
+      background: rgba(50, 50, 50, 0.3);
+      border-radius: 4px;
+      padding: 2px;
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      background: var(--card-bg);
+      border-radius: 2px;
+      transition: all 0.15s ease;
+    }
+
+    .cell.filled {
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* ===== SHAPE COLORS ===== */
+    .cell[data-color="cyan"] { background: linear-gradient(135deg, #00f5ff, #00c9ff); }
+    .cell[data-color="blue"] { background: linear-gradient(135deg, #4d79ff, #1e4dff); }
+    .cell[data-color="orange"] { background: linear-gradient(135deg, #ffb347, #ff8c1a); }
+    .cell[data-color="yellow"] { background: linear-gradient(135deg, #ffeb3b, #ffd600); }
+    .cell[data-color="green"] { background: linear-gradient(135deg, #66ff66, #00ff00); }
+    .cell[data-color="purple"] { background: linear-gradient(135deg, #d966ff, #b833ff); }
+    .cell[data-color="red"] { background: linear-gradient(135deg, #ff6666, #ff3333); }
+
+    /* ===== NEXT PIECE PREVIEW ===== */
+    .next-piece-container {
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .next-piece-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    #next-piece {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      margin: 0 auto;
+      width: 80px;
+    }
+
+    #next-piece .cell {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ===== CONTROLS ===== */
+    .controls-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      position: relative;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      font-weight: bold;
+      transition: background 0.2s ease;
+    }
+
+    .btn:hover {
+      background: var(--hover);
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .btn:hover::before {
+      left: 125%;
+    }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      background: #9bb8ff;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ===== TOGGLE SWITCH ===== */
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 24px;
+      background: var(--hover);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .toggle-switch.active {
+      background: var(--accent);
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--text-primary);
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(24px);
+    }
+
+    /* ===== MOBILE CONTROLS ===== */
+    .mobile-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .mobile-btn {
+      padding: 16px;
+      font-size: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .mobile-btn:active {
+      background: var(--hover);
+      transform: scale(0.95);
+    }
+
+    .mobile-btn.wide {
+      grid-column: span 3;
+    }
+
+    /* ===== GAME OVER OVERLAY ===== */
+    .game-over-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .game-over-overlay.show {
+      display: flex;
+    }
+
+    .game-over-content {
+      background: var(--card-bg);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .game-over-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .game-over-score {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    /* ===== INSTRUCTIONS ===== */
+    .instructions {
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 20px;
+    }
+
+    .instructions h3 {
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .instructions p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .instructions p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 480px) {
+      body {
+        padding: 16px 8px;
+      }
+
+      .game-container {
+        padding: 16px 12px;
+      }
+
+      #game-board {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== GAME CONTAINER ===== -->
+  <div class="game-container">
+    
+    <!-- ===== VERSION NUMBER ===== -->
+    <div class="version">ShapeStack v1.0</div>
+
+    <!-- ===== STATS SECTION ===== -->
+    <div class="stats-section">
+      <div class="stat-card">
+        <div class="stat-label">Score</div>
+        <div class="stat-value" id="score">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Lines</div>
+        <div class="stat-value" id="lines">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Games Won</div>
+        <div class="stat-value" id="wins">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Games Lost</div>
+        <div class="stat-value" id="losses">0</div>
+      </div>
+    </div>
+
+    <!-- ===== GAME BOARD ===== -->
+    <div class="game-board-container">
+      <div class="board-wrapper">
+        <div id="game-board"></div>
+      </div>
+      
+      <!-- ===== NEXT PIECE PREVIEW ===== -->
+      <div class="next-piece-container">
+        <div class="next-piece-label">Next Shape</div>
+        <div id="next-piece"></div>
+      </div>
+    </div>
+
+    <!-- ===== SPEED TOGGLE ===== -->
+    <div class="toggle-container">
+      <span class="toggle-label">Progressive Speed</span>
+      <div class="toggle-switch active" id="speed-toggle">
+        <div class="toggle-slider"></div>
+      </div>
+    </div>
+
+    <!-- ===== CONTROLS ===== -->
+    <div class="controls-section">
+      <button class="btn btn-primary" id="start-btn">Start Game</button>
+      <button class="btn" id="pause-btn" disabled>Pause</button>
+    </div>
+
+    <!-- ===== MOBILE CONTROLS ===== -->
+    <div class="mobile-controls">
+      <button class="mobile-btn" id="left-btn">←</button>
+      <button class="mobile-btn" id="rotate-btn">↻</button>
+      <button class="mobile-btn" id="right-btn">→</button>
+      <button class="mobile-btn wide" id="drop-btn">Drop ↓</button>
+    </div>
+
+    <!-- ===== INSTRUCTIONS ===== -->
+    <div class="instructions">
+      <h3>How to Play</h3>
+      <p><strong>Desktop Controls:</strong> Arrow keys (←/→ to move, ↑ to rotate, ↓ to drop faster)</p>
+      <p><strong>Mobile Controls:</strong> Use the control buttons above</p>
+      <p><strong>Keyboard Shortcuts:</strong></p>
+      <p>• <strong>P</strong> - Pause/Resume game</p>
+      <p>• <strong>R</strong> - Restart game</p>
+      <p>• <strong>Spacebar</strong> - Hard drop (instant drop)</p>
+      <p>• <strong>S</strong> - Toggle progressive speed on/off</p>
+      <p>• <strong>Shift + ↓</strong> - Speed up current piece (hold)</p>
+      <p><strong>Scoring:</strong> 1 line = 100pts, 2 lines = 300pts, 3 lines = 500pts, 4 lines = 800pts</p>
+      <p><strong>Progressive Speed:</strong> When enabled, blocks fall 2% faster every 5 shapes placed</p>
+    </div>
+  </div>
+
+  <!-- ===== GAME OVER OVERLAY ===== -->
+  <div class="game-over-overlay" id="game-over-overlay">
+    <div class="game-over-content">
+      <div class="game-over-title">Game Over!</div>
+      <div class="game-over-score" id="final-score"></div>
+      <button class="btn btn-primary" id="play-again-btn">Play Again</button>
+    </div>
+  </div>
+
+  <script>
+    // ===== GAME CONSTANTS =====
+    const ROWS = 20;
+    const COLS = 10;
+    const CELL_SIZE = 24;
+    const BASE_SPEED = 800;
+    const FAST_DROP_SPEED = 50; // Speed when holding Shift+Down
+    const SPEED_INCREMENT = 0.02; // 2% increase
+    const SPEED_INTERVAL = 5; // Every 5 pieces
+
+    // ===== SHAPE DEFINITIONS =====
+    const SHAPES = {
+      I: {
+        shape: [[1, 1, 1, 1]],
+        color: 'cyan'
+      },
+      J: {
+        shape: [
+          [1, 0, 0],
+          [1, 1, 1]
+        ],
+        color: 'blue'
+      },
+      L: {
+        shape: [
+          [0, 0, 1],
+          [1, 1, 1]
+        ],
+        color: 'orange'
+      },
+      O: {
+        shape: [
+          [1, 1],
+          [1, 1]
+        ],
+        color: 'yellow'
+      },
+      S: {
+        shape: [
+          [0, 1, 1],
+          [1, 1, 0]
+        ],
+        color: 'green'
+      },
+      T: {
+        shape: [
+          [0, 1, 0],
+          [1, 1, 1]
+        ],
+        color: 'purple'
+      },
+      Z: {
+        shape: [
+          [1, 1, 0],
+          [0, 1, 1]
+        ],
+        color: 'red'
+      }
+    };
+
+    // ===== GAME STATE =====
+    let board = [];
+    let currentPiece = null;
+    let nextPiece = null;
+    let score = 0;
+    let lines = 0;
+    let wins = 0;
+    let losses = 0;
+    let gameLoop = null;
+    let isPlaying = false;
+    let isPaused = false;
+    let progressiveSpeed = true;
+    let currentSpeed = BASE_SPEED;
+    let piecesPlaced = 0;
+    let isFastDropping = false;
+
+    // ===== DOM ELEMENTS =====
+    const gameBoard = document.getElementById('game-board');
+    const nextPieceBoard = document.getElementById('next-piece');
+    const scoreEl = document.getElementById('score');
+    const linesEl = document.getElementById('lines');
+    const winsEl = document.getElementById('wins');
+    const lossesEl = document.getElementById('losses');
+    const startBtn = document.getElementById('start-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    const speedToggle = document.getElementById('speed-toggle');
+    const gameOverOverlay = document.getElementById('game-over-overlay');
+    const finalScoreEl = document.getElementById('final-score');
+    const playAgainBtn = document.getElementById('play-again-btn');
+
+    // ===== MOBILE CONTROLS =====
+    const leftBtn = document.getElementById('left-btn');
+    const rightBtn = document.getElementById('right-btn');
+    const rotateBtn = document.getElementById('rotate-btn');
+    const dropBtn = document.getElementById('drop-btn');
+
+    // ===== INITIALIZE BOARD =====
+    function initBoard() {
+      board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+      gameBoard.innerHTML = '';
+      
+      for (let i = 0; i < ROWS * COLS; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        gameBoard.appendChild(cell);
+      }
+    }
+
+    // ===== INITIALIZE NEXT PIECE PREVIEW =====
+    function initNextPieceBoard() {
+      nextPieceBoard.innerHTML = '';
+      for (let i = 0; i < 16; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        nextPieceBoard.appendChild(cell);
+      }
+    }
+
+    // ===== GET RANDOM SHAPE =====
+    function getRandomShape() {
+      const pieces = Object.keys(SHAPES);
+      const randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
+      const shape = SHAPES[randomPiece];
+      
+      return {
+        shape: shape.shape,
+        color: shape.color,
+        x: Math.floor(COLS / 2) - Math.floor(shape.shape[0].length / 2),
+        y: 0
+      };
+    }
+
+    // ===== DRAW BOARD =====
+    function drawBoard() {
+      const cells = gameBoard.querySelectorAll('.cell');
+      
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          const index = row * COLS + col;
+          const cell = cells[index];
+          
+          if (board[row][col]) {
+            cell.classList.add('filled');
+            cell.setAttribute('data-color', board[row][col]);
+          } else {
+            cell.classList.remove('filled');
+            cell.removeAttribute('data-color');
+          }
+        }
+      }
+    }
+
+    // ===== DRAW CURRENT PIECE =====
+    function drawCurrentPiece() {
+      if (!currentPiece) return;
+      
+      const cells = gameBoard.querySelectorAll('.cell');
+      
+      for (let row = 0; row < currentPiece.shape.length; row++) {
+        for (let col = 0; col < currentPiece.shape[row].length; col++) {
+          if (currentPiece.shape[row][col]) {
+            const boardRow = currentPiece.y + row;
+            const boardCol = currentPiece.x + col;
+            
+            if (boardRow >= 0 && boardRow < ROWS && boardCol >= 0 && boardCol < COLS) {
+              const index = boardRow * COLS + boardCol;
+              const cell = cells[index];
+              cell.classList.add('filled');
+              cell.setAttribute('data-color', currentPiece.color);
+            }
+          }
+        }
+      }
+    }
+
+    // ===== DRAW NEXT PIECE =====
+    function drawNextPiece() {
+      if (!nextPiece) return;
+      
+      const cells = nextPieceBoard.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        cell.classList.remove('filled');
+        cell.removeAttribute('data-color');
+      });
+      
+      const offsetRow = Math.floor((4 - nextPiece.shape.length) / 2);
+      const offsetCol = Math.floor((4 - nextPiece.shape[0].length) / 2);
+      
+      for (let row = 0; row < nextPiece.shape.length; row++) {
+        for (let col = 0; col < nextPiece.shape[row].length; col++) {
+          if (nextPiece.shape[row][col]) {
+            const index = (offsetRow + row) * 4 + (offsetCol + col);
+            const cell = cells[index];
+            cell.classList.add('filled');
+            cell.setAttribute('data-color', nextPiece.color);
+          }
+        }
+      }
+    }
+
+    // ===== CHECK COLLISION =====
+    function checkCollision(piece, x, y) {
+      for (let row = 0; row < piece.shape.length; row++) {
+        for (let col = 0; col < piece.shape[row].length; col++) {
+          if (piece.shape[row][col]) {
+            const newX = x + col;
+            const newY = y + row;
+            
+            if (newX < 0 || newX >= COLS || newY >= ROWS) {
+              return true;
+            }
+            
+            if (newY >= 0 && board[newY][newX]) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    // ===== MERGE PIECE TO BOARD =====
+    function mergePiece() {
+      for (let row = 0; row < currentPiece.shape.length; row++) {
+        for (let col = 0; col < currentPiece.shape[row].length; col++) {
+          if (currentPiece.shape[row][col]) {
+            const boardRow = currentPiece.y + row;
+            const boardCol = currentPiece.x + col;
+            
+            if (boardRow >= 0) {
+              board[boardRow][boardCol] = currentPiece.color;
+            }
+          }
+        }
+      }
+      
+      piecesPlaced++;
+      updateSpeed();
+    }
+
+    // ===== UPDATE SPEED =====
+    function updateSpeed() {
+      if (!progressiveSpeed) return;
+      
+      if (piecesPlaced % SPEED_INTERVAL === 0 && piecesPlaced > 0) {
+        currentSpeed = Math.max(100, currentSpeed * (1 - SPEED_INCREMENT));
+        restartGameLoop();
+      }
+    }
+
+    // ===== RESTART GAME LOOP WITH NEW SPEED =====
+    function restartGameLoop() {
+      if (gameLoop) {
+        clearInterval(gameLoop);
+        const activeSpeed = isFastDropping ? FAST_DROP_SPEED : currentSpeed;
+        gameLoop = setInterval(gameStep, activeSpeed);
+      }
+    }
+
+    // ===== CLEAR LINES =====
+    function clearLines() {
+      let linesCleared = 0;
+      
+      for (let row = ROWS - 1; row >= 0; row--) {
+        if (board[row].every(cell => cell !== 0)) {
+          board.splice(row, 1);
+          board.unshift(Array(COLS).fill(0));
+          linesCleared++;
+          row++;
+        }
+      }
+      
+      if (linesCleared > 0) {
+        lines += linesCleared;
+        
+        // Scoring: 1=100, 2=300, 3=500, 4=800
+        const points = [0, 100, 300, 500, 800];
+        score += points[linesCleared] || 800;
+        
+        updateStats();
+      }
+    }
+
+    // ===== ROTATE PIECE =====
+    function rotatePiece() {
+      const rotated = currentPiece.shape[0].map((_, i) =>
+        currentPiece.shape.map(row => row[i]).reverse()
+      );
+      
+      const newPiece = { ...currentPiece, shape: rotated };
+      
+      if (!checkCollision(newPiece, newPiece.x, newPiece.y)) {
+        currentPiece = newPiece;
+        render();
+      }
+    }
+
+    // ===== MOVE PIECE =====
+    function movePiece(dx, dy) {
+      const newX = currentPiece.x + dx;
+      const newY = currentPiece.y + dy;
+      
+      if (!checkCollision(currentPiece, newX, newY)) {
+        currentPiece.x = newX;
+        currentPiece.y = newY;
+        render();
+        return true;
+      }
+      return false;
+    }
+
+    // ===== DROP PIECE =====
+    function dropPiece() {
+      while (movePiece(0, 1)) {}
+    }
+
+    // ===== GAME STEP =====
+    function gameStep() {
+      if (isPaused) return;
+      
+      if (!movePiece(0, 1)) {
+        mergePiece();
+        clearLines();
+        currentPiece = nextPiece;
+        nextPiece = getRandomShape();
+        drawNextPiece();
+        
+        if (checkCollision(currentPiece, currentPiece.x, currentPiece.y)) {
+          gameOver();
+        }
+      }
+      
+      render();
+    }
+
+    // ===== RENDER =====
+    function render() {
+      drawBoard();
+      drawCurrentPiece();
+    }
+
+    // ===== UPDATE STATS =====
+    function updateStats() {
+      scoreEl.textContent = score;
+      linesEl.textContent = lines;
+      winsEl.textContent = wins;
+      lossesEl.textContent = losses;
+    }
+
+    // ===== START GAME =====
+    function startGame() {
+      initBoard();
+      score = 0;
+      lines = 0;
+      currentSpeed = BASE_SPEED;
+      piecesPlaced = 0;
+      isFastDropping = false;
+      updateStats();
+      
+      currentPiece = getRandomShape();
+      nextPiece = getRandomShape();
+      drawNextPiece();
+      
+      isPlaying = true;
+      isPaused = false;
+      startBtn.textContent = 'Restart';
+      pauseBtn.disabled = false;
+      pauseBtn.textContent = 'Pause';
+      
+      if (gameLoop) clearInterval(gameLoop);
+      gameLoop = setInterval(gameStep, currentSpeed);
+      
+      render();
+      scheduleHeightCheck();
+    }
+
+    // ===== PAUSE GAME =====
+    function pauseGame() {
+      if (!isPlaying) return;
+      isPaused = !isPaused;
+      pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+    }
+
+    // ===== TOGGLE PROGRESSIVE SPEED =====
+    function toggleProgressiveSpeed() {
+      progressiveSpeed = !progressiveSpeed;
+      speedToggle.classList.toggle('active');
+      
+      if (!progressiveSpeed) {
+        currentSpeed = BASE_SPEED;
+        restartGameLoop();
+      }
+    }
+
+    // ===== GAME OVER =====
+    function gameOver() {
+      isPlaying = false;
+      clearInterval(gameLoop);
+      losses++;
+      updateStats();
+      
+      finalScoreEl.textContent = `Final Score: ${score} | Lines: ${lines}`;
+      gameOverOverlay.classList.add('show');
+      scheduleHeightCheck();
+    }
+
+    // ===== ENABLE FAST DROP =====
+    function enableFastDrop() {
+      if (!isPlaying || isPaused || isFastDropping) return;
+      isFastDropping = true;
+      clearInterval(gameLoop);
+      gameLoop = setInterval(gameStep, FAST_DROP_SPEED);
+    }
+
+    // ===== DISABLE FAST DROP =====
+    function disableFastDrop() {
+      if (!isFastDropping) return;
+      isFastDropping = false;
+      clearInterval(gameLoop);
+      gameLoop = setInterval(gameStep, currentSpeed);
+    }
+
+    // ===== KEYBOARD CONTROLS =====
+    document.addEventListener('keydown', (e) => {
+      // Global shortcuts (work even when game not active)
+      if (e.key.toLowerCase() === 'r' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        startGame();
+        return;
+      }
+
+      if (e.key.toLowerCase() === 'p' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        pauseGame();
+        return;
+      }
+
+      if (e.key.toLowerCase() === 's' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        toggleProgressiveSpeed();
+        return;
+      }
+
+      // Game controls (only work when game is active)
+      if (!isPlaying || isPaused) return;
+      
+      switch(e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          movePiece(-1, 0);
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          movePiece(1, 0);
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          if (e.shiftKey) {
+            enableFastDrop();
+          } else {
+            movePiece(0, 1);
+          }
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          rotatePiece();
+          break;
+        case ' ':
+          e.preventDefault();
+          dropPiece();
+          break;
+      }
+    });
+
+    // ===== KEYBOARD KEY UP (for fast drop) =====
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowDown') {
+        disableFastDrop();
+      }
+    });
+
+    // ===== MOBILE CONTROLS =====
+    leftBtn.addEventListener('click', () => {
+      if (isPlaying && !isPaused) movePiece(-1, 0);
+    });
+
+    rightBtn.addEventListener('click', () => {
+      if (isPlaying && !isPaused) movePiece(1, 0);
+    });
+
+    rotateBtn.addEventListener('click', () => {
+      if (isPlaying && !isPaused) rotatePiece();
+    });
+
+    dropBtn.addEventListener('click', () => {
+      if (isPlaying && !isPaused) dropPiece();
+    });
+
+    // ===== BUTTON LISTENERS =====
+    startBtn.addEventListener('click', startGame);
+    pauseBtn.addEventListener('click', pauseGame);
+    playAgainBtn.addEventListener('click', () => {
+      gameOverOverlay.classList.remove('show');
+      startGame();
+    });
+
+    // ===== SPEED TOGGLE =====
+    speedToggle.addEventListener('click', toggleProgressiveSpeed);
+
+    // ===== INITIALIZE =====
+    initBoard();
+    initNextPieceBoard();
+    updateStats();
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+      scheduleHeightCheck();
+    });
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+</body>
+</html>
