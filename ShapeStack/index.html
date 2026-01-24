@@ -32,12 +32,8 @@
 
     /* ===== MAIN CONTAINER ===== */
     .game-container {
-      max-width: 500px;
+      max-width: 600px;
       margin: 0 auto;
-      background: var(--card-bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      padding: 24px 16px;
     }
 
     /* ===== VERSION NUMBER ===== */
@@ -49,6 +45,199 @@
       opacity: 0.6;
     }
 
+    /* ===== GAME BOARD SECTION ===== */
+    .game-board-section {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    /* ===== GAME STATUS INDICATOR ===== */
+    .game-status {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 6px 12px;
+      background: rgba(25, 25, 25, 0.8);
+      border-radius: 20px;
+      border: 1px solid var(--outline);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-secondary);
+      transition: all 0.3s ease;
+    }
+
+    .game-status.playing .status-dot {
+      background: #66ff66;
+      box-shadow: 0 0 8px rgba(102, 255, 102, 0.6);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .game-status.paused .status-dot {
+      background: #ffeb3b;
+      box-shadow: 0 0 8px rgba(255, 235, 59, 0.6);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ===== GAME BOARD ===== */
+    .board-wrapper {
+      position: relative;
+      background: var(--bg);
+      border: 2px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      margin: 0 auto;
+      max-width: 400px;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 2px;
+      background: rgba(50, 50, 50, 0.3);
+      border-radius: 4px;
+      padding: 4px;
+      width: 100%;
+      aspect-ratio: 10 / 20;
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      background: var(--card-bg);
+      border-radius: 3px;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .cell.filled {
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* ===== SHIMMER ANIMATION ===== */
+    @keyframes shimmer {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    .cell.filled.shimmer {
+      animation: shimmer 1.5s ease-in-out;
+    }
+
+    /* ===== GLOW EFFECT ===== */
+    @keyframes glow {
+      0%, 100% { 
+        filter: brightness(1);
+        box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3);
+      }
+      50% { 
+        filter: brightness(1.3);
+        box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.2);
+      }
+    }
+
+    .cell.filled.glow {
+      animation: glow 2s ease-in-out;
+    }
+
+    /* ===== INDIVIDUAL SHAPE COLORS ===== */
+    .cell[data-color="cyan"] { 
+      background: linear-gradient(135deg, #00f5ff 0%, #00c9ff 100%);
+    }
+    .cell[data-color="blue"] { 
+      background: linear-gradient(135deg, #4d79ff 0%, #1e4dff 100%);
+    }
+    .cell[data-color="orange"] { 
+      background: linear-gradient(135deg, #ffb347 0%, #ff8c1a 100%);
+    }
+    .cell[data-color="yellow"] { 
+      background: linear-gradient(135deg, #ffeb3b 0%, #ffd600 100%);
+    }
+    .cell[data-color="green"] { 
+      background: linear-gradient(135deg, #66ff66 0%, #00ff00 100%);
+    }
+    .cell[data-color="purple"] { 
+      background: linear-gradient(135deg, #d966ff 0%, #b833ff 100%);
+    }
+    .cell[data-color="red"] { 
+      background: linear-gradient(135deg, #ff6666 0%, #ff3333 100%);
+    }
+    .cell[data-color="pink"] { 
+      background: linear-gradient(135deg, #ff66b3 0%, #ff3385 100%);
+    }
+    .cell[data-color="lime"] { 
+      background: linear-gradient(135deg, #b3ff66 0%, #85ff33 100%);
+    }
+    .cell[data-color="teal"] { 
+      background: linear-gradient(135deg, #66ffcc 0%, #33ff99 100%);
+    }
+    .cell[data-color="violet"] { 
+      background: linear-gradient(135deg, #b366ff 0%, #8533ff 100%);
+    }
+    .cell[data-color="coral"] { 
+      background: linear-gradient(135deg, #ff9966 0%, #ff6633 100%);
+    }
+    .cell[data-color="sky"] { 
+      background: linear-gradient(135deg, #66ccff 0%, #3399ff 100%);
+    }
+    .cell[data-color="gold"] { 
+      background: linear-gradient(135deg, #ffd966 0%, #ffcc33 100%);
+    }
+
+    /* ===== NEXT PIECE OVERLAY ===== */
+    .next-piece-overlay {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(25, 25, 25, 0.9);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 12px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .next-piece-label {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #next-piece {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      width: 60px;
+    }
+
+    #next-piece .cell {
+      width: 13px;
+      height: 13px;
+    }
+
     /* ===== STATS SECTION ===== */
     .stats-section {
       display: grid;
@@ -58,112 +247,82 @@
     }
 
     .stat-card {
-      background: var(--bg);
+      background: var(--card-bg);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
-      padding: 12px;
+      padding: 16px;
       text-align: center;
     }
 
     .stat-label {
       font-size: 12px;
       color: var(--text-secondary);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .stat-value {
-      font-size: 20px;
+      font-size: 24px;
       font-weight: bold;
       color: var(--accent);
     }
 
-    /* ===== GAME BOARD ===== */
-    .game-board-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
+    /* ===== CONTROLS ===== */
+    .controls-section {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 20px 16px;
       margin-bottom: 20px;
     }
 
-    .board-wrapper {
-      position: relative;
-      background: var(--bg);
-      border: 2px solid var(--outline);
-      border-radius: var(--radius);
-      padding: 8px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    }
-
-    #game-board {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 1px;
-      background: rgba(50, 50, 50, 0.3);
-      border-radius: 4px;
-      padding: 2px;
-    }
-
-    .cell {
-      aspect-ratio: 1;
-      background: var(--card-bg);
-      border-radius: 2px;
-      transition: all 0.15s ease;
-    }
-
-    .cell.filled {
-      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    /* ===== SHAPE COLORS ===== */
-    .cell[data-color="cyan"] { background: linear-gradient(135deg, #00f5ff, #00c9ff); }
-    .cell[data-color="blue"] { background: linear-gradient(135deg, #4d79ff, #1e4dff); }
-    .cell[data-color="orange"] { background: linear-gradient(135deg, #ffb347, #ff8c1a); }
-    .cell[data-color="yellow"] { background: linear-gradient(135deg, #ffeb3b, #ffd600); }
-    .cell[data-color="green"] { background: linear-gradient(135deg, #66ff66, #00ff00); }
-    .cell[data-color="purple"] { background: linear-gradient(135deg, #d966ff, #b833ff); }
-    .cell[data-color="red"] { background: linear-gradient(135deg, #ff6666, #ff3333); }
-
-    /* ===== NEXT PIECE PREVIEW ===== */
-    .next-piece-container {
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       background: var(--bg);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
-      padding: 12px;
-      text-align: center;
+      padding: 12px 16px;
+      margin-bottom: 12px;
     }
 
-    .next-piece-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
+    .toggle-label {
+      font-size: 14px;
+      color: var(--text-primary);
     }
 
-    #next-piece {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 2px;
-      margin: 0 auto;
-      width: 80px;
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 24px;
+      background: var(--hover);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s ease;
     }
 
-    #next-piece .cell {
-      width: 18px;
-      height: 18px;
+    .toggle-switch.active {
+      background: var(--accent);
     }
 
-    /* ===== CONTROLS ===== */
-    .controls-section {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 20px;
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--text-primary);
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(24px);
     }
 
     .btn {
       position: relative;
-      padding: 12px 16px;
+      padding: 14px 16px;
       border-radius: var(--radius);
       background: var(--card-bg);
       color: var(--text-primary);
@@ -173,6 +332,12 @@
       font-size: 14px;
       font-weight: bold;
       transition: background 0.2s ease;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    .btn:last-child {
+      margin-bottom: 0;
     }
 
     .btn:hover {
@@ -214,69 +379,25 @@
       cursor: not-allowed;
     }
 
-    /* ===== TOGGLE SWITCH ===== */
-    .toggle-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      padding: 12px 16px;
-    }
-
-    .toggle-label {
-      font-size: 14px;
-      color: var(--text-primary);
-    }
-
-    .toggle-switch {
-      position: relative;
-      width: 48px;
-      height: 24px;
-      background: var(--hover);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .toggle-switch.active {
-      background: var(--accent);
-    }
-
-    .toggle-slider {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 20px;
-      height: 20px;
-      background: var(--text-primary);
-      border-radius: 50%;
-      transition: transform 0.3s ease;
-    }
-
-    .toggle-switch.active .toggle-slider {
-      transform: translateX(24px);
-    }
-
     /* ===== MOBILE CONTROLS ===== */
     .mobile-controls {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      margin-bottom: 20px;
+      margin-top: 12px;
     }
 
     .mobile-btn {
       padding: 16px;
       font-size: 20px;
-      background: var(--card-bg);
+      background: var(--bg);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
       color: var(--text-primary);
       cursor: pointer;
       transition: all 0.2s ease;
       user-select: none;
+      font-weight: bold;
     }
 
     .mobile-btn:active {
@@ -344,27 +465,42 @@
 
     /* ===== INSTRUCTIONS ===== */
     .instructions {
-      background: var(--bg);
+      background: var(--card-bg);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
       padding: 16px;
-      margin-top: 20px;
     }
 
     .instructions h3 {
       font-size: 14px;
       color: var(--accent);
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
 
-    .instructions p {
+    .key-group {
+      margin-bottom: 12px;
+    }
+
+    .key-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .key-group-title {
       font-size: 12px;
+      color: var(--text-primary);
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .key-item {
+      font-size: 11px;
       color: var(--text-secondary);
       line-height: 1.6;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
+      padding-left: 8px;
     }
 
-    .instructions p:last-child {
+    .key-item:last-child {
       margin-bottom: 0;
     }
 
@@ -374,12 +510,29 @@
         padding: 16px 8px;
       }
 
-      .game-container {
+      .game-board-section {
         padding: 16px 12px;
       }
 
-      #game-board {
-        max-width: 100%;
+      .board-wrapper {
+        padding: 8px;
+      }
+
+      .next-piece-overlay {
+        top: 12px;
+        left: 12px;
+        padding: 10px;
+      }
+
+      .game-status {
+        top: 10px;
+        right: 10px;
+        padding: 4px 8px;
+        font-size: 10px;
+      }
+
+      .stat-value {
+        font-size: 20px;
       }
     }
   </style>
@@ -390,6 +543,26 @@
     
     <!-- ===== VERSION NUMBER ===== -->
     <div class="version">ShapeStack v1.0</div>
+
+    <!-- ===== GAME BOARD SECTION ===== -->
+    <div class="game-board-section">
+      <!-- ===== GAME STATUS INDICATOR ===== -->
+      <div class="game-status" id="game-status">
+        <div class="status-dot"></div>
+        <span id="status-text">Ready</span>
+      </div>
+
+      <!-- ===== GAME BOARD ===== -->
+      <div class="board-wrapper">
+        <div id="game-board"></div>
+        
+        <!-- ===== NEXT PIECE OVERLAY ===== -->
+        <div class="next-piece-overlay">
+          <div class="next-piece-label">Next</div>
+          <div id="next-piece"></div>
+        </div>
+      </div>
+    </div>
 
     <!-- ===== STATS SECTION ===== -->
     <div class="stats-section">
@@ -411,54 +584,52 @@
       </div>
     </div>
 
-    <!-- ===== GAME BOARD ===== -->
-    <div class="game-board-container">
-      <div class="board-wrapper">
-        <div id="game-board"></div>
+    <!-- ===== CONTROLS SECTION ===== -->
+    <div class="controls-section">
+      <div class="toggle-container">
+        <span class="toggle-label">Progressive Speed</span>
+        <div class="toggle-switch active" id="speed-toggle">
+          <div class="toggle-slider"></div>
+        </div>
       </div>
       
-      <!-- ===== NEXT PIECE PREVIEW ===== -->
-      <div class="next-piece-container">
-        <div class="next-piece-label">Next Shape</div>
-        <div id="next-piece"></div>
+      <button class="btn btn-primary" id="start-btn">Start Game (P / Enter)</button>
+      <button class="btn" id="restart-btn">Restart Game (R)</button>
+
+      <!-- ===== MOBILE CONTROLS ===== -->
+      <div class="mobile-controls">
+        <button class="mobile-btn" id="left-btn">←</button>
+        <button class="mobile-btn" id="rotate-btn">↻</button>
+        <button class="mobile-btn" id="right-btn">→</button>
+        <button class="mobile-btn wide" id="drop-btn">Drop ↓</button>
       </div>
-    </div>
-
-    <!-- ===== SPEED TOGGLE ===== -->
-    <div class="toggle-container">
-      <span class="toggle-label">Progressive Speed</span>
-      <div class="toggle-switch active" id="speed-toggle">
-        <div class="toggle-slider"></div>
-      </div>
-    </div>
-
-    <!-- ===== CONTROLS ===== -->
-    <div class="controls-section">
-      <button class="btn btn-primary" id="start-btn">Start Game</button>
-      <button class="btn" id="pause-btn" disabled>Pause</button>
-    </div>
-
-    <!-- ===== MOBILE CONTROLS ===== -->
-    <div class="mobile-controls">
-      <button class="mobile-btn" id="left-btn">←</button>
-      <button class="mobile-btn" id="rotate-btn">↻</button>
-      <button class="mobile-btn" id="right-btn">→</button>
-      <button class="mobile-btn wide" id="drop-btn">Drop ↓</button>
     </div>
 
     <!-- ===== INSTRUCTIONS ===== -->
     <div class="instructions">
-      <h3>How to Play</h3>
-      <p><strong>Desktop Controls:</strong> Arrow keys (←/→ to move, ↑ to rotate, ↓ to drop faster)</p>
-      <p><strong>Mobile Controls:</strong> Use the control buttons above</p>
-      <p><strong>Keyboard Shortcuts:</strong></p>
-      <p>• <strong>P</strong> - Pause/Resume game</p>
-      <p>• <strong>R</strong> - Restart game</p>
-      <p>• <strong>Spacebar</strong> - Hard drop (instant drop)</p>
-      <p>• <strong>S</strong> - Toggle progressive speed on/off</p>
-      <p>• <strong>Shift + ↓</strong> - Speed up current piece (hold)</p>
-      <p><strong>Scoring:</strong> 1 line = 100pts, 2 lines = 300pts, 3 lines = 500pts, 4 lines = 800pts</p>
-      <p><strong>Progressive Speed:</strong> When enabled, blocks fall 2% faster every 5 shapes placed</p>
+      <h3>Keyboard Controls</h3>
+      
+      <div class="key-group">
+        <div class="key-group-title">Movement</div>
+        <div class="key-item">• W / F / Up Arrow - Rotate shape</div>
+        <div class="key-item">• A / Left Arrow - Move left</div>
+        <div class="key-item">• S / Down Arrow - Move down faster</div>
+        <div class="key-item">• D / Right Arrow - Move right</div>
+        <div class="key-item">• Spacebar - Instant drop</div>
+      </div>
+
+      <div class="key-group">
+        <div class="key-group-title">Game Controls</div>
+        <div class="key-item">• P / Enter - Play / Pause game</div>
+        <div class="key-item">• R - Restart game</div>
+        <div class="key-item">• T - Toggle progressive speed</div>
+      </div>
+
+      <div class="key-group">
+        <div class="key-group-title">Scoring</div>
+        <div class="key-item">• 1 line = 100pts, 2 lines = 300pts</div>
+        <div class="key-item">• 3 lines = 500pts, 4 lines = 800pts</div>
+      </div>
     </div>
   </div>
 
@@ -475,60 +646,28 @@
     // ===== GAME CONSTANTS =====
     const ROWS = 20;
     const COLS = 10;
-    const CELL_SIZE = 24;
     const BASE_SPEED = 800;
-    const FAST_DROP_SPEED = 50; // Speed when holding Shift+Down
-    const SPEED_INCREMENT = 0.02; // 2% increase
-    const SPEED_INTERVAL = 5; // Every 5 pieces
+    const FAST_DROP_SPEED = 50;
+    const SPEED_INCREMENT = 0.02;
+    const SPEED_INTERVAL = 5;
+    const SHIMMER_INTERVAL = 2500; // Shimmer every 2.5 seconds
 
-    // ===== SHAPE DEFINITIONS =====
+    // ===== SHAPE DEFINITIONS (Each shape gets unique color) =====
     const SHAPES = {
-      I: {
-        shape: [[1, 1, 1, 1]],
-        color: 'cyan'
-      },
-      J: {
-        shape: [
-          [1, 0, 0],
-          [1, 1, 1]
-        ],
-        color: 'blue'
-      },
-      L: {
-        shape: [
-          [0, 0, 1],
-          [1, 1, 1]
-        ],
-        color: 'orange'
-      },
-      O: {
-        shape: [
-          [1, 1],
-          [1, 1]
-        ],
-        color: 'yellow'
-      },
-      S: {
-        shape: [
-          [0, 1, 1],
-          [1, 1, 0]
-        ],
-        color: 'green'
-      },
-      T: {
-        shape: [
-          [0, 1, 0],
-          [1, 1, 1]
-        ],
-        color: 'purple'
-      },
-      Z: {
-        shape: [
-          [1, 1, 0],
-          [0, 1, 1]
-        ],
-        color: 'red'
-      }
+      I: { shape: [[1, 1, 1, 1]], color: 'cyan' },
+      J: { shape: [[1, 0, 0], [1, 1, 1]], color: 'blue' },
+      L: { shape: [[0, 0, 1], [1, 1, 1]], color: 'orange' },
+      O: { shape: [[1, 1], [1, 1]], color: 'yellow' },
+      S: { shape: [[0, 1, 1], [1, 1, 0]], color: 'green' },
+      T: { shape: [[0, 1, 0], [1, 1, 1]], color: 'purple' },
+      Z: { shape: [[1, 1, 0], [0, 1, 1]], color: 'red' },
+      I2: { shape: [[1, 1, 1, 1]], color: 'pink' },
+      J2: { shape: [[1, 0, 0], [1, 1, 1]], color: 'lime' },
+      L2: { shape: [[0, 0, 1], [1, 1, 1]], color: 'teal' },
+      S2: { shape: [[0, 1, 1], [1, 1, 0]], color: 'violet' },
+      T2: { shape: [[0, 1, 0], [1, 1, 1]], color: 'coral' },
+      Z2: { shape: [[1, 1, 0], [0, 1, 1]], color: 'sky' },
+      O2: { shape: [[1, 1], [1, 1]], color: 'gold' }
     };
 
     // ===== GAME STATE =====
@@ -540,6 +679,7 @@
     let wins = 0;
     let losses = 0;
     let gameLoop = null;
+    let shimmerLoop = null;
     let isPlaying = false;
     let isPaused = false;
     let progressiveSpeed = true;
@@ -555,13 +695,15 @@
     const winsEl = document.getElementById('wins');
     const lossesEl = document.getElementById('losses');
     const startBtn = document.getElementById('start-btn');
-    const pauseBtn = document.getElementById('pause-btn');
+    const restartBtn = document.getElementById('restart-btn');
     const speedToggle = document.getElementById('speed-toggle');
     const gameOverOverlay = document.getElementById('game-over-overlay');
     const finalScoreEl = document.getElementById('final-score');
     const playAgainBtn = document.getElementById('play-again-btn');
+    const gameStatus = document.getElementById('game-status');
+    const statusText = document.getElementById('status-text');
 
-    // ===== MOBILE CONTROLS =====
+    // Mobile controls
     const leftBtn = document.getElementById('left-btn');
     const rightBtn = document.getElementById('right-btn');
     const rotateBtn = document.getElementById('rotate-btn');
@@ -601,6 +743,38 @@
         x: Math.floor(COLS / 2) - Math.floor(shape.shape[0].length / 2),
         y: 0
       };
+    }
+
+    // ===== SHIMMER EFFECT =====
+    function triggerShimmer() {
+      const cells = gameBoard.querySelectorAll('.cell.filled');
+      cells.forEach(cell => {
+        if (Math.random() > 0.5) { // Random shimmer
+          cell.classList.add('shimmer');
+          setTimeout(() => cell.classList.remove('shimmer'), 1500);
+        }
+      });
+    }
+
+    // ===== GLOW EFFECT =====
+    function triggerGlow() {
+      const cells = gameBoard.querySelectorAll('.cell.filled');
+      cells.forEach(cell => {
+        if (Math.random() > 0.6) { // Random glow
+          cell.classList.add('glow');
+          setTimeout(() => cell.classList.remove('glow'), 2000);
+        }
+      });
+    }
+
+    // ===== START SHIMMER LOOP =====
+    function startShimmerLoop() {
+      if (shimmerLoop) clearInterval(shimmerLoop);
+      shimmerLoop = setInterval(() => {
+        if (!isPaused && isPlaying) {
+          Math.random() > 0.5 ? triggerShimmer() : triggerGlow();
+        }
+      }, SHIMMER_INTERVAL);
     }
 
     // ===== DRAW BOARD =====
@@ -668,6 +842,20 @@
             cell.setAttribute('data-color', nextPiece.color);
           }
         }
+      }
+    }
+
+    // ===== UPDATE GAME STATUS =====
+    function updateGameStatus() {
+      if (!isPlaying) {
+        gameStatus.className = 'game-status';
+        statusText.textContent = 'Ready';
+      } else if (isPaused) {
+        gameStatus.className = 'game-status paused';
+        statusText.textContent = 'Paused';
+      } else {
+        gameStatus.className = 'game-status playing';
+        statusText.textContent = 'Playing';
       }
     }
 
@@ -745,11 +933,8 @@
       
       if (linesCleared > 0) {
         lines += linesCleared;
-        
-        // Scoring: 1=100, 2=300, 3=500, 4=800
         const points = [0, 100, 300, 500, 800];
         score += points[linesCleared] || 800;
-        
         updateStats();
       }
     }
@@ -836,12 +1021,11 @@
       
       isPlaying = true;
       isPaused = false;
-      startBtn.textContent = 'Restart';
-      pauseBtn.disabled = false;
-      pauseBtn.textContent = 'Pause';
+      updateGameStatus();
       
       if (gameLoop) clearInterval(gameLoop);
       gameLoop = setInterval(gameStep, currentSpeed);
+      startShimmerLoop();
       
       render();
       scheduleHeightCheck();
@@ -849,9 +1033,13 @@
 
     // ===== PAUSE GAME =====
     function pauseGame() {
-      if (!isPlaying) return;
+      if (!isPlaying) {
+        startGame();
+        return;
+      }
+      
       isPaused = !isPaused;
-      pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+      updateGameStatus();
     }
 
     // ===== TOGGLE PROGRESSIVE SPEED =====
@@ -869,8 +1057,10 @@
     function gameOver() {
       isPlaying = false;
       clearInterval(gameLoop);
+      if (shimmerLoop) clearInterval(shimmerLoop);
       losses++;
       updateStats();
+      updateGameStatus();
       
       finalScoreEl.textContent = `Final Score: ${score} | Lines: ${lines}`;
       gameOverOverlay.classList.add('show');
@@ -895,59 +1085,62 @@
 
     // ===== KEYBOARD CONTROLS =====
     document.addEventListener('keydown', (e) => {
-      // Global shortcuts (work even when game not active)
+      // Global shortcuts
+      if ((e.key.toLowerCase() === 'p' || e.key === 'Enter') && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        pauseGame();
+        return;
+      }
+
       if (e.key.toLowerCase() === 'r' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
         e.preventDefault();
         startGame();
         return;
       }
 
-      if (e.key.toLowerCase() === 'p' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-        e.preventDefault();
-        pauseGame();
-        return;
-      }
-
-      if (e.key.toLowerCase() === 's' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+      if (e.key.toLowerCase() === 't' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
         e.preventDefault();
         toggleProgressiveSpeed();
         return;
       }
 
-      // Game controls (only work when game is active)
+      // Game controls
       if (!isPlaying || isPaused) return;
       
-      switch(e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          movePiece(-1, 0);
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          movePiece(1, 0);
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          if (e.shiftKey) {
-            enableFastDrop();
-          } else {
-            movePiece(0, 1);
-          }
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          rotatePiece();
-          break;
-        case ' ':
-          e.preventDefault();
-          dropPiece();
-          break;
+      // Move left - A or Left Arrow
+      if (e.key.toLowerCase() === 'a' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        movePiece(-1, 0);
+      }
+      
+      // Move right - D or Right Arrow
+      if (e.key.toLowerCase() === 'd' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        movePiece(1, 0);
+      }
+      
+      // Rotate - W, F, or Up Arrow
+      if (e.key.toLowerCase() === 'w' || e.key.toLowerCase() === 'f' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        rotatePiece();
+      }
+      
+      // Move down faster - S or Down Arrow
+      if (e.key.toLowerCase() === 's' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        enableFastDrop();
+      }
+      
+      // Instant drop - Spacebar
+      if (e.key === ' ') {
+        e.preventDefault();
+        dropPiece();
       }
     });
 
-    // ===== KEYBOARD KEY UP (for fast drop) =====
+    // ===== KEYBOARD KEY UP =====
     document.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowDown') {
+      if (e.key.toLowerCase() === 's' || e.key === 'ArrowDown') {
         disableFastDrop();
       }
     });
@@ -970,20 +1163,20 @@
     });
 
     // ===== BUTTON LISTENERS =====
-    startBtn.addEventListener('click', startGame);
-    pauseBtn.addEventListener('click', pauseGame);
+    startBtn.addEventListener('click', pauseGame);
+    restartBtn.addEventListener('click', startGame);
     playAgainBtn.addEventListener('click', () => {
       gameOverOverlay.classList.remove('show');
       startGame();
     });
 
-    // ===== SPEED TOGGLE =====
     speedToggle.addEventListener('click', toggleProgressiveSpeed);
 
     // ===== INITIALIZE =====
     initBoard();
     initNextPieceBoard();
     updateStats();
+    updateGameStatus();
 
     // ===== FOURTHWALL SCROLLBAR FIX =====
     let lastHeight = 0;
