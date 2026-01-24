@@ -73,6 +73,13 @@
       color: var(--text-secondary);
     }
 
+    .version-tag {
+      margin-top: 12px;
+      font-size: 10px;
+      color: var(--text-secondary);
+      opacity: 0.6;
+    }
+
     #fileInput {
       display: none;
     }
@@ -402,36 +409,14 @@
       display: block;
     }
 
-    .action-section {
+    .action-buttons {
       background: var(--card-bg);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
       padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .action-section:last-child {
-      margin-bottom: 0;
-    }
-
-    .action-section-title {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .action-buttons {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-    }
-
-    .button-separator {
-      height: 1px;
-      background: var(--outline);
-      margin: 16px 0;
     }
 
     /* ===== STATS BAR ===== */
@@ -467,6 +452,29 @@
       color: var(--text-primary);
     }
 
+    /* ===== AI BADGE ===== */
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      background: rgba(135, 169, 255, 0.2);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .ai-badge-container {
+      display: none;
+      margin-top: 8px;
+    }
+
+    .ai-badge-container.active {
+      display: block;
+    }
+
     /* ===== MOBILE OPTIMIZATION ===== */
     @media (max-width: 768px) {
       .upload-area {
@@ -492,6 +500,10 @@
 
       .modal-buttons .btn {
         flex: 1;
+      }
+
+      .action-buttons {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -536,6 +548,7 @@
       <div class="upload-icon">📷</div>
       <div class="upload-text">Drop image here or click to upload</div>
       <div class="upload-subtext">Supports JPEG, PNG, TIFF, WebP</div>
+      <div class="version-tag">v1.0</div>
     </div>
     <input type="file" id="fileInput" accept="image/*">
   </div>
@@ -553,6 +566,9 @@
     <div class="stat-item">
       <div class="stat-label">EXIF Tags</div>
       <div class="stat-value" id="statExifCount">-</div>
+      <div class="ai-badge-container" id="aiBadgeContainer">
+        <span class="ai-badge">AI Generated</span>
+      </div>
     </div>
   </div>
 
@@ -571,22 +587,10 @@
 
   <!-- ===== ACTION BUTTONS ===== -->
   <div class="action-buttons-wrapper" id="actionButtonsWrapper">
-    <div class="action-section">
-      <div class="action-section-title">Edit & Export</div>
-      <div class="action-buttons">
-        <button class="btn btn-danger" id="stripExifBtn">Remove EXIF Data</button>
-        <button class="btn btn-accent" id="downloadBtn">Download Updated Image</button>
-      </div>
-    </div>
-
-    <div class="button-separator"></div>
-
-    <div class="action-section">
-      <div class="action-section-title">Original File</div>
-      <div class="action-buttons">
-        <button class="btn" id="downloadOriginalBtn">Download Original</button>
-        <button class="btn" id="clearBtn">Clear & Upload New</button>
-      </div>
+    <div class="action-buttons">
+      <button class="btn btn-danger" id="stripExifBtn">Remove EXIF Data & Download</button>
+      <button class="btn" id="downloadOriginalBtn">Download Original</button>
+      <button class="btn" id="clearBtn">Clear</button>
     </div>
   </div>
 
@@ -627,12 +631,12 @@
     const exifContainer = document.getElementById('exifContainer');
     const actionButtonsWrapper = document.getElementById('actionButtonsWrapper');
     const statsBar = document.getElementById('statsBar');
+    const aiBadgeContainer = document.getElementById('aiBadgeContainer');
     const editModal = document.getElementById('editModal');
     const modalTagName = document.getElementById('modalTagName');
     const modalTagValue = document.getElementById('modalTagValue');
     const modalCancelBtn = document.getElementById('modalCancelBtn');
     const modalSaveBtn = document.getElementById('modalSaveBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
     const downloadOriginalBtn = document.getElementById('downloadOriginalBtn');
     const stripExifBtn = document.getElementById('stripExifBtn');
     const clearBtn = document.getElementById('clearBtn');
@@ -690,13 +694,61 @@
         const exifObj = piexif.load(dataUrl);
         currentExifData = exifObj;
         modifiedExifData = JSON.parse(JSON.stringify(exifObj)); // Deep copy
+        
+        // Check for AI-generated indicators
+        checkAIGenerated(exifObj);
+        
         displayExifData(exifObj);
         scheduleHeightCheck();
       } catch (error) {
         exifContainer.innerHTML = '<div class="no-data"><div class="no-data-icon">ℹ️</div><div>No EXIF data found or unable to read EXIF data from this image.</div></div>';
         exifContainer.classList.add('active');
         document.getElementById('statExifCount').textContent = '0';
+        aiBadgeContainer.classList.remove('active');
         scheduleHeightCheck();
+      }
+    }
+
+    // ===== AI DETECTION =====
+    function checkAIGenerated(exifObj) {
+      const aiIndicators = [
+        'midjourney',
+        'stable diffusion',
+        'dall-e',
+        'dalle',
+        'openai',
+        'artificial intelligence',
+        'ai generated',
+        'deepdream',
+        'runway',
+        'adobe firefly',
+        'leonardo.ai',
+        'craiyon',
+        'nightcafe',
+        'artbreeder'
+      ];
+
+      let isAI = false;
+
+      // Check all EXIF sections for AI indicators
+      Object.keys(exifObj).forEach(section => {
+        if (typeof exifObj[section] === 'object') {
+          Object.values(exifObj[section]).forEach(value => {
+            if (typeof value === 'string') {
+              const lowerValue = value.toLowerCase();
+              if (aiIndicators.some(indicator => lowerValue.includes(indicator))) {
+                isAI = true;
+              }
+            }
+          });
+        }
+      });
+
+      // Show AI badge if detected
+      if (isAI) {
+        aiBadgeContainer.classList.add('active');
+      } else {
+        aiBadgeContainer.classList.remove('active');
       }
     }
 
@@ -927,16 +979,6 @@
     });
 
     // ===== ACTION BUTTONS =====
-    downloadBtn.addEventListener('click', () => {
-      try {
-        const exifStr = piexif.dump(modifiedExifData);
-        const inserted = piexif.insert(exifStr, currentImage);
-        downloadImage(inserted, `modified_${originalFileName}`);
-      } catch (error) {
-        alert('Error creating image with EXIF data. The image may not support EXIF.');
-      }
-    });
-
     downloadOriginalBtn.addEventListener('click', () => {
       downloadImage(currentImage, originalFileName);
     });
@@ -962,6 +1004,7 @@
       exifContainer.classList.remove('active');
       actionButtonsWrapper.classList.remove('active');
       statsBar.classList.remove('active');
+      aiBadgeContainer.classList.remove('active');
       fileInput.value = '';
       
       scheduleHeightCheck();
