@@ -701,6 +701,7 @@
         displayExifData(exifObj);
         scheduleHeightCheck();
       } catch (error) {
+        console.log('EXIF Error:', error);
         exifContainer.innerHTML = '<div class="no-data"><div class="no-data-icon">ℹ️</div><div>No EXIF data found or unable to read EXIF data from this image.</div></div>';
         exifContainer.classList.add('active');
         document.getElementById('statExifCount').textContent = '0';
@@ -725,24 +726,43 @@
         'leonardo.ai',
         'craiyon',
         'nightcafe',
-        'artbreeder'
+        'artbreeder',
+        'gemini',
+        'google',
+        'nano banana',
+        'imagen',
+        'bard'
       ];
 
       let isAI = false;
 
       // Check all EXIF sections for AI indicators
-      Object.keys(exifObj).forEach(section => {
-        if (typeof exifObj[section] === 'object') {
-          Object.values(exifObj[section]).forEach(value => {
-            if (typeof value === 'string') {
-              const lowerValue = value.toLowerCase();
-              if (aiIndicators.some(indicator => lowerValue.includes(indicator))) {
-                isAI = true;
+      try {
+        Object.keys(exifObj).forEach(section => {
+          if (exifObj[section] && typeof exifObj[section] === 'object') {
+            Object.values(exifObj[section]).forEach(value => {
+              if (typeof value === 'string') {
+                const lowerValue = value.toLowerCase();
+                if (aiIndicators.some(indicator => lowerValue.includes(indicator))) {
+                  isAI = true;
+                }
+              } else if (Array.isArray(value)) {
+                // Check arrays for string values
+                value.forEach(item => {
+                  if (typeof item === 'string') {
+                    const lowerItem = item.toLowerCase();
+                    if (aiIndicators.some(indicator => lowerItem.includes(indicator))) {
+                      isAI = true;
+                    }
+                  }
+                });
               }
-            }
-          });
-        }
-      });
+            });
+          }
+        });
+      } catch (e) {
+        console.log('AI Detection Error:', e);
+      }
 
       // Show AI badge if detected
       if (isAI) {
@@ -770,6 +790,8 @@
 
     // ===== EXIF DATA DISPLAY =====
     function displayExifData(exifObj) {
+      console.log('Displaying EXIF data:', exifObj);
+      
       const sections = {
         '0th': { title: 'Image Info', icon: '🖼️', tags: exifObj['0th'] || {} },
         'Exif': { title: 'Camera Settings', icon: '📸', tags: exifObj['Exif'] || {} },
@@ -784,7 +806,10 @@
       Object.keys(sections).forEach(key => {
         const section = sections[key];
         const tags = section.tags;
-        const tagCount = Object.keys(tags).length;
+        const tagKeys = Object.keys(tags);
+        const tagCount = tagKeys.length;
+        
+        console.log(`Section ${key}: ${tagCount} tags`, tags);
         
         if (tagCount === 0) return;
         totalTags += tagCount;
@@ -825,7 +850,7 @@
       let items = '';
       
       Object.keys(tags).forEach(tagId => {
-        const tagName = piexif.TAGS[section][tagId]?.name || `Unknown (${tagId})`;
+        const tagName = piexif.TAGS[section] && piexif.TAGS[section][tagId] ? piexif.TAGS[section][tagId].name : `Tag ${tagId}`;
         let tagValue = tags[tagId];
         
         // Format the value
@@ -834,12 +859,12 @@
         // Make certain tags editable
         const editable = isEditableTag(section, tagId);
         const editableClass = editable ? 'editable' : '';
-        const onclick = editable ? `onclick="openEditModal('${section}', '${tagId}', '${tagName}')"` : '';
+        const onclick = editable ? `onclick="openEditModal('${section}', '${tagId}', '${escapeHtml(tagName)}')"` : '';
         
         items += `
           <div class="exif-item">
-            <div class="exif-label">${tagName}</div>
-            <div class="exif-value ${editableClass}" ${onclick}>${tagValue}</div>
+            <div class="exif-label">${escapeHtml(tagName)}</div>
+            <div class="exif-value ${editableClass}" ${onclick}>${escapeHtml(String(tagValue))}</div>
           </div>
         `;
       });
@@ -861,6 +886,12 @@
       return items;
     }
 
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
     function formatExifValue(value, tagName) {
       if (value === null || value === undefined) return 'N/A';
       
@@ -868,7 +899,7 @@
         // Handle byte arrays
         if (value.length > 50) return `[${value.length} bytes]`;
         // Handle rational numbers
-        if (value.length === 2 && typeof value[0] === 'number') {
+        if (value.length === 2 && typeof value[0] === 'number' && typeof value[1] === 'number') {
           const result = value[0] / value[1];
           return isNaN(result) ? value.join('/') : result.toFixed(2);
         }
@@ -896,7 +927,7 @@
         ]
       };
       
-      return editableTags[section]?.includes(parseInt(tagId)) || false;
+      return editableTags[section] && editableTags[section].includes(parseInt(tagId));
     }
 
     function parseGPSCoordinates(gpsData) {
@@ -989,7 +1020,8 @@
           const removed = piexif.remove(currentImage);
           downloadImage(removed, `no-exif_${originalFileName}`);
         } catch (error) {
-          alert('Error removing EXIF data.');
+          alert('Error removing EXIF data: ' + error.message);
+          console.error('Strip EXIF error:', error);
         }
       }
     });
