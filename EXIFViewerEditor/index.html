@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EXIF Viewer & Editor</title>
+  <style>
+    :root {
+      --bg: #191919;
+      --card-bg: #1F1F1F;
+      --hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: var(--bg);
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+      font-size: 12px;
+    }
+
+    /* ===== UPLOAD AREA ===== */
+    .upload-container {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .upload-area {
+      border: 2px dashed var(--outline);
+      border-radius: var(--radius);
+      padding: 32px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .upload-area:hover,
+    .upload-area.drag-over {
+      border-color: var(--accent);
+      background: rgba(135, 169, 255, 0.05);
+    }
+
+    .upload-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+
+    .upload-text {
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .upload-subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    /* ===== IMAGE PREVIEW ===== */
+    .preview-container {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .preview-container.active {
+      display: block;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .preview-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-primary);
+    }
+
+    .preview-filename {
+      font-size: 12px;
+      color: var(--text-secondary);
+      word-break: break-all;
+    }
+
+    .preview-image-wrapper {
+      width: 100%;
+      max-height: 400px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .preview-image {
+      max-width: 100%;
+      max-height: 400px;
+      display: block;
+      border-radius: var(--radius);
+    }
+
+    /* ===== EXIF DATA DISPLAY ===== */
+    .exif-container {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .exif-container.active {
+      display: block;
+    }
+
+    .exif-section {
+      margin-bottom: 16px;
+    }
+
+    .exif-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .exif-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.2s ease;
+      margin-bottom: 8px;
+    }
+
+    .exif-section-header:hover {
+      background: var(--hover);
+    }
+
+    .exif-section-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-primary);
+    }
+
+    .exif-section-count {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-right: 8px;
+    }
+
+    .exif-toggle {
+      color: var(--accent);
+      font-size: 12px;
+      transition: transform 0.3s ease;
+    }
+
+    .exif-toggle.rotated {
+      transform: rotate(180deg);
+    }
+
+    .exif-section-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .exif-section-content.expanded {
+      max-height: 2000px;
+    }
+
+    .exif-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 8px;
+    }
+
+    .exif-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 8px;
+      background: var(--bg);
+      border-radius: 4px;
+      gap: 12px;
+    }
+
+    .exif-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      min-width: 120px;
+      flex-shrink: 0;
+    }
+
+    .exif-value {
+      font-size: 12px;
+      color: var(--text-primary);
+      word-break: break-word;
+      text-align: right;
+      flex-grow: 1;
+    }
+
+    .exif-value.editable {
+      cursor: pointer;
+      color: var(--accent);
+      text-decoration: underline dotted;
+    }
+
+    .exif-value.editable:hover {
+      text-decoration: underline solid;
+    }
+
+    /* ===== EDIT MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .modal-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .modal-input,
+    .modal-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-family: inherit;
+      margin-bottom: 16px;
+      transition: border-color 0.2s ease;
+    }
+
+    .modal-input:focus,
+    .modal-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .modal-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* ===== GPS MAP ===== */
+    .gps-map {
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: var(--radius);
+      text-align: center;
+    }
+
+    .gps-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .gps-link:hover {
+      text-decoration: underline;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+
+    .btn:hover::before {
+      left: 125%;
+    }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #000;
+      font-weight: 500;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .btn-danger {
+      background: #ff4444;
+      color: #fff;
+    }
+
+    /* ===== ACTION BUTTONS ===== */
+    .action-buttons-wrapper {
+      display: none;
+      margin-bottom: 16px;
+    }
+
+    .action-buttons-wrapper.active {
+      display: block;
+    }
+
+    .action-section {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .action-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .action-section-title {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .button-separator {
+      height: 1px;
+      background: var(--outline);
+      margin: 16px 0;
+    }
+
+    /* ===== STATS BAR ===== */
+    .stats-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: none;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .stats-bar.active {
+      display: flex;
+    }
+
+    .stat-item {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-primary);
+    }
+
+    /* ===== MOBILE OPTIMIZATION ===== */
+    @media (max-width: 768px) {
+      .upload-area {
+        padding: 24px 12px;
+      }
+
+      .preview-image-wrapper {
+        max-height: 300px;
+      }
+
+      .exif-label {
+        min-width: 100px;
+        font-size: 11px;
+      }
+
+      .exif-value {
+        font-size: 11px;
+      }
+
+      .modal-content {
+        padding: 20px 12px;
+      }
+
+      .modal-buttons .btn {
+        flex: 1;
+      }
+    }
+
+    /* ===== LOADING STATE ===== */
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .loading::after {
+      content: '...';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    /* ===== NO DATA STATE ===== */
+    .no-data {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .no-data-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== UPLOAD AREA ===== -->
+  <div class="upload-container">
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">📷</div>
+      <div class="upload-text">Drop image here or click to upload</div>
+      <div class="upload-subtext">Supports JPEG, PNG, TIFF, WebP</div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*">
+  </div>
+
+  <!-- ===== STATS BAR ===== -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-item">
+      <div class="stat-label">File Size</div>
+      <div class="stat-value" id="statFileSize">-</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Dimensions</div>
+      <div class="stat-value" id="statDimensions">-</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">EXIF Tags</div>
+      <div class="stat-value" id="statExifCount">-</div>
+    </div>
+  </div>
+
+  <!-- ===== IMAGE PREVIEW ===== -->
+  <div class="preview-container" id="previewContainer">
+    <div class="preview-header">
+      <div>
+        <div class="preview-title">Image Preview</div>
+        <div class="preview-filename" id="previewFilename">filename.jpg</div>
+      </div>
+    </div>
+    <div class="preview-image-wrapper">
+      <img class="preview-image" id="previewImage" alt="Preview">
+    </div>
+  </div>
+
+  <!-- ===== ACTION BUTTONS ===== -->
+  <div class="action-buttons-wrapper" id="actionButtonsWrapper">
+    <div class="action-section">
+      <div class="action-section-title">Edit & Export</div>
+      <div class="action-buttons">
+        <button class="btn btn-danger" id="stripExifBtn">Remove EXIF Data</button>
+        <button class="btn btn-accent" id="downloadBtn">Download Updated Image</button>
+      </div>
+    </div>
+
+    <div class="button-separator"></div>
+
+    <div class="action-section">
+      <div class="action-section-title">Original File</div>
+      <div class="action-buttons">
+        <button class="btn" id="downloadOriginalBtn">Download Original</button>
+        <button class="btn" id="clearBtn">Clear & Upload New</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EXIF DATA CONTAINER ===== -->
+  <div class="exif-container" id="exifContainer">
+    <!-- Sections will be dynamically added here -->
+  </div>
+
+  <!-- ===== EDIT MODAL ===== -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+      <div class="modal-header" id="modalTitle">Edit EXIF Tag</div>
+      <label class="modal-label">Tag Name</label>
+      <input type="text" class="modal-input" id="modalTagName" readonly>
+      <label class="modal-label">Current Value</label>
+      <textarea class="modal-textarea" id="modalTagValue"></textarea>
+      <div class="modal-buttons">
+        <button class="btn" id="modalCancelBtn">Cancel</button>
+        <button class="btn btn-accent" id="modalSaveBtn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/piexifjs@1.0.6/piexif.min.js"></script>
+  <script>
+    // ===== STATE MANAGEMENT =====
+    let currentImage = null;
+    let currentExifData = null;
+    let modifiedExifData = {};
+    let originalFileName = '';
+
+    // ===== DOM ELEMENTS =====
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewImage = document.getElementById('previewImage');
+    const previewFilename = document.getElementById('previewFilename');
+    const exifContainer = document.getElementById('exifContainer');
+    const actionButtonsWrapper = document.getElementById('actionButtonsWrapper');
+    const statsBar = document.getElementById('statsBar');
+    const editModal = document.getElementById('editModal');
+    const modalTagName = document.getElementById('modalTagName');
+    const modalTagValue = document.getElementById('modalTagValue');
+    const modalCancelBtn = document.getElementById('modalCancelBtn');
+    const modalSaveBtn = document.getElementById('modalSaveBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const downloadOriginalBtn = document.getElementById('downloadOriginalBtn');
+    const stripExifBtn = document.getElementById('stripExifBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    // ===== FILE UPLOAD HANDLERS =====
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('drag-over');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('drag-over');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        handleFileSelect(file);
+      }
+    });
+
+    // ===== FILE PROCESSING =====
+    function handleFileSelect(file) {
+      if (!file) return;
+
+      originalFileName = file.name;
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        currentImage = e.target.result;
+        processImage(currentImage, file);
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    function processImage(dataUrl, file) {
+      // Display preview
+      previewImage.src = dataUrl;
+      previewFilename.textContent = originalFileName;
+      previewContainer.classList.add('active');
+      actionButtonsWrapper.classList.add('active');
+      statsBar.classList.add('active');
+
+      // Update stats
+      updateStats(file);
+
+      // Extract EXIF data
+      try {
+        const exifObj = piexif.load(dataUrl);
+        currentExifData = exifObj;
+        modifiedExifData = JSON.parse(JSON.stringify(exifObj)); // Deep copy
+        displayExifData(exifObj);
+        scheduleHeightCheck();
+      } catch (error) {
+        exifContainer.innerHTML = '<div class="no-data"><div class="no-data-icon">ℹ️</div><div>No EXIF data found or unable to read EXIF data from this image.</div></div>';
+        exifContainer.classList.add('active');
+        document.getElementById('statExifCount').textContent = '0';
+        scheduleHeightCheck();
+      }
+    }
+
+    // ===== STATS UPDATE =====
+    function updateStats(file) {
+      const img = new Image();
+      img.onload = () => {
+        document.getElementById('statDimensions').textContent = `${img.width} × ${img.height}`;
+        scheduleHeightCheck();
+      };
+      img.src = currentImage;
+
+      const sizeKB = (file.size / 1024).toFixed(1);
+      const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+      document.getElementById('statFileSize').textContent = file.size > 1024 * 1024 
+        ? `${sizeMB} MB` 
+        : `${sizeKB} KB`;
+    }
+
+    // ===== EXIF DATA DISPLAY =====
+    function displayExifData(exifObj) {
+      const sections = {
+        '0th': { title: 'Image Info', icon: '🖼️', tags: exifObj['0th'] || {} },
+        'Exif': { title: 'Camera Settings', icon: '📸', tags: exifObj['Exif'] || {} },
+        'GPS': { title: 'GPS Location', icon: '📍', tags: exifObj['GPS'] || {} },
+        'Interop': { title: 'Interoperability', icon: '🔗', tags: exifObj['Interop'] || {} },
+        '1st': { title: 'Thumbnail', icon: '🔍', tags: exifObj['1st'] || {} }
+      };
+
+      let totalTags = 0;
+      let html = '';
+
+      Object.keys(sections).forEach(key => {
+        const section = sections[key];
+        const tags = section.tags;
+        const tagCount = Object.keys(tags).length;
+        
+        if (tagCount === 0) return;
+        totalTags += tagCount;
+
+        html += `
+          <div class="exif-section">
+            <div class="exif-section-header" onclick="toggleSection('${key}')">
+              <div>
+                <span style="margin-right: 8px;">${section.icon}</span>
+                <span class="exif-section-title">${section.title}</span>
+              </div>
+              <div style="display: flex; align-items: center;">
+                <span class="exif-section-count">${tagCount} tags</span>
+                <span class="exif-toggle" id="toggle-${key}">▼</span>
+              </div>
+            </div>
+            <div class="exif-section-content expanded" id="content-${key}">
+              <div class="exif-grid">
+                ${generateExifItems(key, tags)}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      if (totalTags === 0) {
+        exifContainer.innerHTML = '<div class="no-data"><div class="no-data-icon">ℹ️</div><div>No EXIF data found in this image.</div></div>';
+      } else {
+        exifContainer.innerHTML = html;
+      }
+
+      exifContainer.classList.add('active');
+      document.getElementById('statExifCount').textContent = totalTags;
+      scheduleHeightCheck();
+    }
+
+    function generateExifItems(section, tags) {
+      let items = '';
+      
+      Object.keys(tags).forEach(tagId => {
+        const tagName = piexif.TAGS[section][tagId]?.name || `Unknown (${tagId})`;
+        let tagValue = tags[tagId];
+        
+        // Format the value
+        tagValue = formatExifValue(tagValue, tagName);
+        
+        // Make certain tags editable
+        const editable = isEditableTag(section, tagId);
+        const editableClass = editable ? 'editable' : '';
+        const onclick = editable ? `onclick="openEditModal('${section}', '${tagId}', '${tagName}')"` : '';
+        
+        items += `
+          <div class="exif-item">
+            <div class="exif-label">${tagName}</div>
+            <div class="exif-value ${editableClass}" ${onclick}>${tagValue}</div>
+          </div>
+        `;
+      });
+
+      // Add GPS map link if GPS data exists
+      if (section === 'GPS' && tags[piexif.GPSIFD.GPSLatitude] && tags[piexif.GPSIFD.GPSLongitude]) {
+        const coords = parseGPSCoordinates(tags);
+        if (coords) {
+          items += `
+            <div class="gps-map">
+              <a href="https://www.google.com/maps?q=${coords.lat},${coords.lng}" target="_blank" class="gps-link">
+                📍 View on Google Maps
+              </a>
+            </div>
+          `;
+        }
+      }
+
+      return items;
+    }
+
+    function formatExifValue(value, tagName) {
+      if (value === null || value === undefined) return 'N/A';
+      
+      if (Array.isArray(value)) {
+        // Handle byte arrays
+        if (value.length > 50) return `[${value.length} bytes]`;
+        // Handle rational numbers
+        if (value.length === 2 && typeof value[0] === 'number') {
+          const result = value[0] / value[1];
+          return isNaN(result) ? value.join('/') : result.toFixed(2);
+        }
+        return value.join(', ');
+      }
+      
+      if (typeof value === 'string') {
+        return value.trim() || 'N/A';
+      }
+      
+      return String(value);
+    }
+
+    function isEditableTag(section, tagId) {
+      // Allow editing of common text fields
+      const editableTags = {
+        '0th': [
+          piexif.ImageIFD.Artist,
+          piexif.ImageIFD.Copyright,
+          piexif.ImageIFD.ImageDescription,
+          piexif.ImageIFD.Software
+        ],
+        'Exif': [
+          piexif.ExifIFD.UserComment
+        ]
+      };
+      
+      return editableTags[section]?.includes(parseInt(tagId)) || false;
+    }
+
+    function parseGPSCoordinates(gpsData) {
+      try {
+        const lat = gpsData[piexif.GPSIFD.GPSLatitude];
+        const latRef = gpsData[piexif.GPSIFD.GPSLatitudeRef];
+        const lng = gpsData[piexif.GPSIFD.GPSLongitude];
+        const lngRef = gpsData[piexif.GPSIFD.GPSLongitudeRef];
+        
+        if (!lat || !lng) return null;
+        
+        const latDecimal = convertDMSToDD(lat[0][0]/lat[0][1], lat[1][0]/lat[1][1], lat[2][0]/lat[2][1]);
+        const lngDecimal = convertDMSToDD(lng[0][0]/lng[0][1], lng[1][0]/lng[1][1], lng[2][0]/lng[2][1]);
+        
+        return {
+          lat: latRef === 'S' ? -latDecimal : latDecimal,
+          lng: lngRef === 'W' ? -lngDecimal : lngDecimal
+        };
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function convertDMSToDD(degrees, minutes, seconds) {
+      return degrees + (minutes / 60) + (seconds / 3600);
+    }
+
+    // ===== SECTION TOGGLE =====
+    function toggleSection(sectionId) {
+      const content = document.getElementById(`content-${sectionId}`);
+      const toggle = document.getElementById(`toggle-${sectionId}`);
+      
+      if (content.classList.contains('expanded')) {
+        content.classList.remove('expanded');
+        toggle.classList.add('rotated');
+      } else {
+        content.classList.add('expanded');
+        toggle.classList.remove('rotated');
+      }
+      
+      scheduleHeightCheck();
+    }
+
+    // ===== EDIT MODAL =====
+    let currentEditSection = '';
+    let currentEditTagId = '';
+
+    function openEditModal(section, tagId, tagName) {
+      currentEditSection = section;
+      currentEditTagId = tagId;
+      
+      modalTagName.value = tagName;
+      const currentValue = modifiedExifData[section][tagId];
+      modalTagValue.value = formatExifValue(currentValue, tagName);
+      
+      editModal.classList.add('active');
+      scheduleHeightCheck();
+    }
+
+    modalCancelBtn.addEventListener('click', () => {
+      editModal.classList.remove('active');
+      scheduleHeightCheck();
+    });
+
+    modalSaveBtn.addEventListener('click', () => {
+      const newValue = modalTagValue.value.trim();
+      modifiedExifData[currentEditSection][currentEditTagId] = newValue;
+      
+      editModal.classList.remove('active');
+      displayExifData(modifiedExifData);
+      scheduleHeightCheck();
+    });
+
+    // Close modal on overlay click
+    editModal.addEventListener('click', (e) => {
+      if (e.target === editModal) {
+        editModal.classList.remove('active');
+        scheduleHeightCheck();
+      }
+    });
+
+    // ===== ACTION BUTTONS =====
+    downloadBtn.addEventListener('click', () => {
+      try {
+        const exifStr = piexif.dump(modifiedExifData);
+        const inserted = piexif.insert(exifStr, currentImage);
+        downloadImage(inserted, `modified_${originalFileName}`);
+      } catch (error) {
+        alert('Error creating image with EXIF data. The image may not support EXIF.');
+      }
+    });
+
+    downloadOriginalBtn.addEventListener('click', () => {
+      downloadImage(currentImage, originalFileName);
+    });
+
+    stripExifBtn.addEventListener('click', () => {
+      if (confirm('Remove all EXIF data from this image?')) {
+        try {
+          const removed = piexif.remove(currentImage);
+          downloadImage(removed, `no-exif_${originalFileName}`);
+        } catch (error) {
+          alert('Error removing EXIF data.');
+        }
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      currentImage = null;
+      currentExifData = null;
+      modifiedExifData = {};
+      originalFileName = '';
+      
+      previewContainer.classList.remove('active');
+      exifContainer.classList.remove('active');
+      actionButtonsWrapper.classList.remove('active');
+      statsBar.classList.remove('active');
+      fileInput.value = '';
+      
+      scheduleHeightCheck();
+    });
+
+    function downloadImage(dataUrl, filename) {
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = filename;
+      link.click();
+    }
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+      scheduleHeightCheck();
+    });
+    
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
+</body>
+</html>
