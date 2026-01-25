@@ -47,54 +47,11 @@
       position: relative;
     }
 
-    /* ===== GAME STATUS INDICATOR ===== */
-    .game-status {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      color: var(--text-secondary);
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 6px 12px;
-      background: rgba(25, 25, 25, 0.8);
-      border-radius: 20px;
-      border: 1px solid var(--outline);
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--text-secondary);
-      transition: all 0.3s ease;
-    }
-
-    .game-status.playing .status-dot {
-      background: #66ff66;
-      box-shadow: 0 0 8px rgba(102, 255, 102, 0.6);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    .game-status.paused .status-dot {
-      background: #ffeb3b;
-      box-shadow: 0 0 8px rgba(255, 235, 59, 0.6);
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
     /* ===== MOBILE PLAY/PAUSE BUTTON ===== */
     .mobile-play-pause {
       position: absolute;
       top: 12px;
-      left: 12px;
+      right: 12px;
       width: 44px;
       height: 44px;
       background: rgba(25, 25, 25, 0.9);
@@ -132,6 +89,22 @@
       margin: 0 auto;
       max-width: 400px;
       touch-action: none;
+      transition: border-color 0.3s ease;
+    }
+
+    /* Game state borders */
+    .board-wrapper.ready {
+      border-color: var(--outline);
+    }
+
+    .board-wrapper.playing {
+      border-color: rgba(102, 255, 102, 0.5);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(102, 255, 102, 0.15);
+    }
+
+    .board-wrapper.paused {
+      border-color: rgba(255, 235, 59, 0.5);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 235, 59, 0.15);
     }
 
     #game-board {
@@ -205,8 +178,8 @@
     /* ===== NEXT PIECE OVERLAY ===== */
     .next-piece-overlay {
       position: absolute;
-      bottom: 16px;
-      right: 16px;
+      top: 16px;
+      left: 16px;
       background: rgba(25, 25, 25, 0.9);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
@@ -551,16 +524,9 @@
       }
 
       .next-piece-overlay {
-        bottom: 12px;
-        right: 12px;
+        top: 12px;
+        left: 12px;
         padding: 10px;
-      }
-
-      .game-status {
-        top: 10px;
-        right: 10px;
-        padding: 4px 8px;
-        font-size: 10px;
       }
 
       .stat-value {
@@ -579,12 +545,6 @@
 
     <!-- ===== GAME BOARD SECTION ===== -->
     <div class="game-board-section">
-      <!-- ===== GAME STATUS INDICATOR ===== -->
-      <div class="game-status" id="game-status">
-        <div class="status-dot"></div>
-        <span id="status-text">Ready</span>
-      </div>
-
       <!-- ===== MOBILE PLAY/PAUSE BUTTON ===== -->
       <div class="mobile-play-pause" id="mobile-play-pause">
         <svg id="play-icon" viewBox="0 0 24 24">
@@ -596,7 +556,7 @@
       </div>
 
       <!-- ===== GAME BOARD ===== -->
-      <div class="board-wrapper" id="board-wrapper">
+      <div class="board-wrapper ready" id="board-wrapper">
         <div id="game-board"></div>
         
         <!-- ===== NEXT PIECE OVERLAY ===== -->
@@ -671,7 +631,7 @@
     <!-- ===== INSTRUCTIONS (Desktop Only) ===== -->
     <div class="instructions">
       <h3>How to Play</h3>
-      <p><strong>Mobile:</strong> Tap shapes to rotate, drag to move, hold to speed up. Use play button to start/pause.</p>
+      <p><strong>Mobile:</strong> Tap shapes to rotate. Swipe left/right to move continuously. Hold still to speed up drop. Use play button to start/pause.</p>
       <p><strong>Desktop:</strong> Use keyboard shortcuts above to control the game.</p>
       <p><strong>Scoring:</strong> 1 line = 100pts, 2 lines = 300pts, 3 lines = 500pts, 4 lines = 800pts</p>
       <p><strong>Progressive Speed:</strong> Blocks fall 2% faster every 5 shapes when enabled</p>
@@ -702,6 +662,7 @@
     const SPEED_INCREMENT = 0.02;
     const SPEED_INTERVAL = 5;
     const SHIMMER_INTERVAL = 2500;
+    const SWIPE_REPEAT_INTERVAL = 150; // How often to move when swiping
 
     // ===== SHAPE DEFINITIONS =====
     const SHAPES = {
@@ -739,9 +700,12 @@
     // Touch controls
     let touchStartX = 0;
     let touchStartY = 0;
+    let lastTouchX = 0;
     let isDragging = false;
     let isHolding = false;
     let holdTimeout = null;
+    let swipeInterval = null;
+    let lastSwipeDirection = null;
 
     // ===== DOM ELEMENTS =====
     const gameBoard = document.getElementById('game-board');
@@ -754,8 +718,6 @@
     const finalScoreEl = document.getElementById('final-score');
     const playAgainBtn = document.getElementById('play-again-btn');
     const closeBtn = document.getElementById('close-btn');
-    const gameStatus = document.getElementById('game-status');
-    const statusText = document.getElementById('status-text');
     const mobilePlayPause = document.getElementById('mobile-play-pause');
     const playIcon = document.getElementById('play-icon');
     const pauseIcon = document.getElementById('pause-icon');
@@ -894,19 +856,18 @@
 
     // ===== UPDATE GAME STATUS =====
     function updateGameStatus() {
+      boardWrapper.classList.remove('ready', 'playing', 'paused');
+      
       if (!isPlaying) {
-        gameStatus.className = 'game-status';
-        statusText.textContent = 'Ready';
+        boardWrapper.classList.add('ready');
         playIcon.style.display = 'block';
         pauseIcon.style.display = 'none';
       } else if (isPaused) {
-        gameStatus.className = 'game-status paused';
-        statusText.textContent = 'Paused';
+        boardWrapper.classList.add('paused');
         playIcon.style.display = 'block';
         pauseIcon.style.display = 'none';
       } else {
-        gameStatus.className = 'game-status playing';
-        statusText.textContent = 'Playing';
+        boardWrapper.classList.add('playing');
         playIcon.style.display = 'none';
         pauseIcon.style.display = 'block';
       }
@@ -1135,6 +1096,26 @@
       gameLoop = setInterval(gameStep, currentSpeed);
     }
 
+    // ===== CONTINUOUS SWIPE MOVEMENT =====
+    function startSwipeMovement(direction) {
+      if (swipeInterval) clearInterval(swipeInterval);
+      lastSwipeDirection = direction;
+      
+      swipeInterval = setInterval(() => {
+        if (isPlaying && !isPaused && lastSwipeDirection) {
+          movePiece(lastSwipeDirection, 0);
+        }
+      }, SWIPE_REPEAT_INTERVAL);
+    }
+
+    function stopSwipeMovement() {
+      if (swipeInterval) {
+        clearInterval(swipeInterval);
+        swipeInterval = null;
+      }
+      lastSwipeDirection = null;
+    }
+
     // ===== TOUCH CONTROLS =====
     boardWrapper.addEventListener('touchstart', (e) => {
       if (!isPlaying || isPaused) return;
@@ -1143,13 +1124,16 @@
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
+      lastTouchX = touch.clientX;
       isDragging = false;
       
-      // Start hold timer
+      // Start hold timer for speed up
       holdTimeout = setTimeout(() => {
-        isHolding = true;
-        enableFastDrop();
-      }, 200);
+        if (!isDragging) {
+          isHolding = true;
+          enableFastDrop();
+        }
+      }, 300);
     });
 
     boardWrapper.addEventListener('touchmove', (e) => {
@@ -1158,27 +1142,33 @@
       e.preventDefault();
       const touch = e.touches[0];
       const deltaX = touch.clientX - touchStartX;
-      const deltaY = touch.clientY - touchStartY;
+      const currentDeltaX = touch.clientX - lastTouchX;
       
-      if (!isDragging && (Math.abs(deltaX) > 20 || Math.abs(deltaY) > 20)) {
-        isDragging = true;
+      // If user moves, cancel hold timer
+      if (Math.abs(deltaX) > 10) {
         clearTimeout(holdTimeout);
         isHolding = false;
-        
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-          // Horizontal movement
-          if (deltaX > 0) {
-            movePiece(1, 0);
-          } else {
-            movePiece(-1, 0);
-          }
-        } else if (deltaY > 0) {
-          // Downward movement
-          movePiece(0, 1);
+        if (isFastDropping) {
+          disableFastDrop();
         }
         
-        touchStartX = touch.clientX;
-        touchStartY = touch.clientY;
+        if (!isDragging) {
+          isDragging = true;
+        }
+        
+        // Determine swipe direction
+        if (Math.abs(currentDeltaX) > 5) {
+          const direction = currentDeltaX > 0 ? 1 : -1;
+          
+          // Start continuous movement if not already moving
+          if (!swipeInterval || lastSwipeDirection !== direction) {
+            stopSwipeMovement();
+            movePiece(direction, 0); // Immediate move
+            startSwipeMovement(direction);
+          }
+          
+          lastTouchX = touch.clientX;
+        }
       }
     });
 
@@ -1187,15 +1177,27 @@
       
       e.preventDefault();
       clearTimeout(holdTimeout);
+      stopSwipeMovement();
       
       if (isHolding) {
         disableFastDrop();
         isHolding = false;
       } else if (!isDragging) {
-        // Tap to rotate
+        // Quick tap = rotate
         rotatePiece();
       }
       
+      isDragging = false;
+    });
+
+    // Cancel touch events when touch is cancelled
+    boardWrapper.addEventListener('touchcancel', (e) => {
+      clearTimeout(holdTimeout);
+      stopSwipeMovement();
+      if (isHolding) {
+        disableFastDrop();
+        isHolding = false;
+      }
       isDragging = false;
     });
 
