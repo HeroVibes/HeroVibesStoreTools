@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>ShapeStack Game</title>
   <style>
     :root {
@@ -28,21 +28,13 @@
       color: var(--text-primary);
       padding: 24px 16px;
       overflow-x: hidden;
+      touch-action: manipulation;
     }
 
     /* ===== MAIN CONTAINER ===== */
     .game-container {
       max-width: 600px;
       margin: 0 auto;
-    }
-
-    /* ===== VERSION NUMBER ===== */
-    .version {
-      text-align: center;
-      font-size: 10px;
-      color: var(--text-secondary);
-      margin-bottom: 16px;
-      opacity: 0.6;
     }
 
     /* ===== GAME BOARD SECTION ===== */
@@ -98,6 +90,37 @@
       50% { opacity: 0.5; }
     }
 
+    /* ===== MOBILE PLAY/PAUSE BUTTON ===== */
+    .mobile-play-pause {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 44px;
+      height: 44px;
+      background: rgba(25, 25, 25, 0.9);
+      border: 1px solid var(--outline);
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+      transition: all 0.2s ease;
+    }
+
+    .mobile-play-pause:active {
+      transform: scale(0.95);
+      background: rgba(50, 50, 50, 0.9);
+    }
+
+    .mobile-play-pause svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--text-primary);
+    }
+
     /* ===== GAME BOARD ===== */
     .board-wrapper {
       position: relative;
@@ -108,6 +131,7 @@
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
       margin: 0 auto;
       max-width: 400px;
+      touch-action: none;
     }
 
     #game-board {
@@ -119,6 +143,7 @@
       padding: 4px;
       width: 100%;
       aspect-ratio: 10 / 20;
+      touch-action: none;
     }
 
     .cell {
@@ -162,54 +187,26 @@
     }
 
     /* ===== INDIVIDUAL SHAPE COLORS ===== */
-    .cell[data-color="cyan"] { 
-      background: linear-gradient(135deg, #00f5ff 0%, #00c9ff 100%);
-    }
-    .cell[data-color="blue"] { 
-      background: linear-gradient(135deg, #4d79ff 0%, #1e4dff 100%);
-    }
-    .cell[data-color="orange"] { 
-      background: linear-gradient(135deg, #ffb347 0%, #ff8c1a 100%);
-    }
-    .cell[data-color="yellow"] { 
-      background: linear-gradient(135deg, #ffeb3b 0%, #ffd600 100%);
-    }
-    .cell[data-color="green"] { 
-      background: linear-gradient(135deg, #66ff66 0%, #00ff00 100%);
-    }
-    .cell[data-color="purple"] { 
-      background: linear-gradient(135deg, #d966ff 0%, #b833ff 100%);
-    }
-    .cell[data-color="red"] { 
-      background: linear-gradient(135deg, #ff6666 0%, #ff3333 100%);
-    }
-    .cell[data-color="pink"] { 
-      background: linear-gradient(135deg, #ff66b3 0%, #ff3385 100%);
-    }
-    .cell[data-color="lime"] { 
-      background: linear-gradient(135deg, #b3ff66 0%, #85ff33 100%);
-    }
-    .cell[data-color="teal"] { 
-      background: linear-gradient(135deg, #66ffcc 0%, #33ff99 100%);
-    }
-    .cell[data-color="violet"] { 
-      background: linear-gradient(135deg, #b366ff 0%, #8533ff 100%);
-    }
-    .cell[data-color="coral"] { 
-      background: linear-gradient(135deg, #ff9966 0%, #ff6633 100%);
-    }
-    .cell[data-color="sky"] { 
-      background: linear-gradient(135deg, #66ccff 0%, #3399ff 100%);
-    }
-    .cell[data-color="gold"] { 
-      background: linear-gradient(135deg, #ffd966 0%, #ffcc33 100%);
-    }
+    .cell[data-color="cyan"] { background: linear-gradient(135deg, #00f5ff 0%, #00c9ff 100%); }
+    .cell[data-color="blue"] { background: linear-gradient(135deg, #4d79ff 0%, #1e4dff 100%); }
+    .cell[data-color="orange"] { background: linear-gradient(135deg, #ffb347 0%, #ff8c1a 100%); }
+    .cell[data-color="yellow"] { background: linear-gradient(135deg, #ffeb3b 0%, #ffd600 100%); }
+    .cell[data-color="green"] { background: linear-gradient(135deg, #66ff66 0%, #00ff00 100%); }
+    .cell[data-color="purple"] { background: linear-gradient(135deg, #d966ff 0%, #b833ff 100%); }
+    .cell[data-color="red"] { background: linear-gradient(135deg, #ff6666 0%, #ff3333 100%); }
+    .cell[data-color="pink"] { background: linear-gradient(135deg, #ff66b3 0%, #ff3385 100%); }
+    .cell[data-color="lime"] { background: linear-gradient(135deg, #b3ff66 0%, #85ff33 100%); }
+    .cell[data-color="teal"] { background: linear-gradient(135deg, #66ffcc 0%, #33ff99 100%); }
+    .cell[data-color="violet"] { background: linear-gradient(135deg, #b366ff 0%, #8533ff 100%); }
+    .cell[data-color="coral"] { background: linear-gradient(135deg, #ff9966 0%, #ff6633 100%); }
+    .cell[data-color="sky"] { background: linear-gradient(135deg, #66ccff 0%, #3399ff 100%); }
+    .cell[data-color="gold"] { background: linear-gradient(135deg, #ffd966 0%, #ffcc33 100%); }
 
     /* ===== NEXT PIECE OVERLAY ===== */
     .next-piece-overlay {
       position: absolute;
-      top: 16px;
-      left: 16px;
+      bottom: 16px;
+      right: 16px;
       background: rgba(25, 25, 25, 0.9);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
@@ -283,7 +280,6 @@
       border: 1px solid var(--outline);
       border-radius: var(--radius);
       padding: 12px 16px;
-      margin-bottom: 12px;
     }
 
     .toggle-label {
@@ -320,6 +316,130 @@
       transform: translateX(24px);
     }
 
+    /* ===== KEYBOARD SHORTCUTS OVERLAY ===== */
+    .keyboard-shortcuts {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .keyboard-shortcuts h3 {
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .shortcuts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .shortcut-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .key-badge {
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--text-primary);
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .key-description {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* ===== GAME OVER OVERLAY ===== */
+    .game-over-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      padding-top: 80px;
+    }
+
+    .game-over-overlay.show {
+      display: flex;
+    }
+
+    .game-over-content {
+      background: var(--card-bg);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      animation: slideIn 0.3s ease;
+      position: relative;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-secondary);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .close-btn:hover {
+      background: var(--hover);
+      color: var(--text-primary);
+    }
+
+    .game-over-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .game-over-score {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
     .btn {
       position: relative;
       padding: 14px 16px;
@@ -333,11 +453,6 @@
       font-weight: bold;
       transition: background 0.2s ease;
       width: 100%;
-      margin-bottom: 8px;
-    }
-
-    .btn:last-child {
-      margin-bottom: 0;
     }
 
     .btn:hover {
@@ -360,11 +475,6 @@
       left: 125%;
     }
 
-    .btn:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.12);
-    }
-
     .btn-primary {
       background: var(--accent);
       color: var(--bg);
@@ -374,93 +484,16 @@
       background: #9bb8ff;
     }
 
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* ===== MOBILE CONTROLS ===== */
-    .mobile-controls {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .mobile-btn {
-      padding: 16px;
-      font-size: 20px;
-      background: var(--bg);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      color: var(--text-primary);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      user-select: none;
-      font-weight: bold;
-    }
-
-    .mobile-btn:active {
-      background: var(--hover);
-      transform: scale(0.95);
-    }
-
-    .mobile-btn.wide {
-      grid-column: span 3;
-    }
-
-    /* ===== GAME OVER OVERLAY ===== */
-    .game-over-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 20px;
-    }
-
-    .game-over-overlay.show {
-      display: flex;
-    }
-
-    .game-over-content {
-      background: var(--card-bg);
-      border: 2px solid var(--accent);
-      border-radius: var(--radius);
-      padding: 32px 24px;
+    /* ===== VERSION AND INFO ===== */
+    .footer-info {
       text-align: center;
-      max-width: 400px;
-      width: 100%;
-      animation: slideIn 0.3s ease;
+      margin-top: 20px;
     }
 
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .game-over-title {
-      font-size: 28px;
-      font-weight: bold;
-      color: var(--accent);
-      margin-bottom: 16px;
-    }
-
-    .game-over-score {
-      font-size: 16px;
+    .version {
+      font-size: 10px;
       color: var(--text-secondary);
-      margin-bottom: 24px;
+      opacity: 0.5;
     }
 
     /* ===== INSTRUCTIONS ===== */
@@ -469,6 +502,7 @@
       border: 1px solid var(--outline);
       border-radius: var(--radius);
       padding: 16px;
+      margin-bottom: 12px;
     }
 
     .instructions h3 {
@@ -477,34 +511,32 @@
       margin-bottom: 12px;
     }
 
-    .key-group {
-      margin-bottom: 12px;
-    }
-
-    .key-group:last-child {
-      margin-bottom: 0;
-    }
-
-    .key-group-title {
-      font-size: 12px;
-      color: var(--text-primary);
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    .key-item {
+    .instructions p {
       font-size: 11px;
       color: var(--text-secondary);
       line-height: 1.6;
-      margin-bottom: 4px;
-      padding-left: 8px;
+      margin-bottom: 8px;
     }
 
-    .key-item:last-child {
+    .instructions p:last-child {
       margin-bottom: 0;
     }
 
     /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .keyboard-shortcuts {
+        display: none;
+      }
+
+      .mobile-play-pause {
+        display: flex;
+      }
+
+      .instructions {
+        display: none;
+      }
+    }
+
     @media (max-width: 480px) {
       body {
         padding: 16px 8px;
@@ -519,8 +551,8 @@
       }
 
       .next-piece-overlay {
-        top: 12px;
-        left: 12px;
+        bottom: 12px;
+        right: 12px;
         padding: 10px;
       }
 
@@ -534,15 +566,16 @@
       .stat-value {
         font-size: 20px;
       }
+
+      .game-over-overlay {
+        padding-top: 60px;
+      }
     }
   </style>
 </head>
 <body>
   <!-- ===== GAME CONTAINER ===== -->
   <div class="game-container">
-    
-    <!-- ===== VERSION NUMBER ===== -->
-    <div class="version">ShapeStack v1.0</div>
 
     <!-- ===== GAME BOARD SECTION ===== -->
     <div class="game-board-section">
@@ -552,8 +585,18 @@
         <span id="status-text">Ready</span>
       </div>
 
+      <!-- ===== MOBILE PLAY/PAUSE BUTTON ===== -->
+      <div class="mobile-play-pause" id="mobile-play-pause">
+        <svg id="play-icon" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+        <svg id="pause-icon" viewBox="0 0 24 24" style="display:none;">
+          <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+        </svg>
+      </div>
+
       <!-- ===== GAME BOARD ===== -->
-      <div class="board-wrapper">
+      <div class="board-wrapper" id="board-wrapper">
         <div id="game-board"></div>
         
         <!-- ===== NEXT PIECE OVERLAY ===== -->
@@ -571,16 +614,47 @@
         <div class="stat-value" id="score">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Lines</div>
-        <div class="stat-value" id="lines">0</div>
+        <div class="stat-label">High Score</div>
+        <div class="stat-value" id="highscore">0</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Games Won</div>
-        <div class="stat-value" id="wins">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Games Lost</div>
-        <div class="stat-value" id="losses">0</div>
+    </div>
+
+    <!-- ===== KEYBOARD SHORTCUTS (Desktop Only) ===== -->
+    <div class="keyboard-shortcuts">
+      <h3>Keyboard Shortcuts</h3>
+      <div class="shortcuts-grid">
+        <div class="shortcut-item">
+          <span class="key-badge">W/F/↑</span>
+          <span class="key-description">Rotate</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="key-badge">A/←</span>
+          <span class="key-description">Move Left</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="key-badge">D/→</span>
+          <span class="key-description">Move Right</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="key-badge">S/↓</span>
+          <span class="key-description">Speed Up</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="key-badge">Space</span>
+          <span class="key-description">Instant Drop</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="key-badge">P/Enter</span>
+          <span class="key-description">Play/Pause</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="key-badge">R</span>
+          <span class="key-description">Restart</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="key-badge">T</span>
+          <span class="key-description">Toggle Speed</span>
+        </div>
       </div>
     </div>
 
@@ -592,50 +666,27 @@
           <div class="toggle-slider"></div>
         </div>
       </div>
-      
-      <button class="btn btn-primary" id="start-btn">Start Game (P / Enter)</button>
-      <button class="btn" id="restart-btn">Restart Game (R)</button>
-
-      <!-- ===== MOBILE CONTROLS ===== -->
-      <div class="mobile-controls">
-        <button class="mobile-btn" id="left-btn">←</button>
-        <button class="mobile-btn" id="rotate-btn">↻</button>
-        <button class="mobile-btn" id="right-btn">→</button>
-        <button class="mobile-btn wide" id="drop-btn">Drop ↓</button>
-      </div>
     </div>
 
-    <!-- ===== INSTRUCTIONS ===== -->
+    <!-- ===== INSTRUCTIONS (Desktop Only) ===== -->
     <div class="instructions">
-      <h3>Keyboard Controls</h3>
-      
-      <div class="key-group">
-        <div class="key-group-title">Movement</div>
-        <div class="key-item">• W / F / Up Arrow - Rotate shape</div>
-        <div class="key-item">• A / Left Arrow - Move left</div>
-        <div class="key-item">• S / Down Arrow - Move down faster</div>
-        <div class="key-item">• D / Right Arrow - Move right</div>
-        <div class="key-item">• Spacebar - Instant drop</div>
-      </div>
+      <h3>How to Play</h3>
+      <p><strong>Mobile:</strong> Tap shapes to rotate, drag to move, hold to speed up. Use play button to start/pause.</p>
+      <p><strong>Desktop:</strong> Use keyboard shortcuts above to control the game.</p>
+      <p><strong>Scoring:</strong> 1 line = 100pts, 2 lines = 300pts, 3 lines = 500pts, 4 lines = 800pts</p>
+      <p><strong>Progressive Speed:</strong> Blocks fall 2% faster every 5 shapes when enabled</p>
+    </div>
 
-      <div class="key-group">
-        <div class="key-group-title">Game Controls</div>
-        <div class="key-item">• P / Enter - Play / Pause game</div>
-        <div class="key-item">• R - Restart game</div>
-        <div class="key-item">• T - Toggle progressive speed</div>
-      </div>
-
-      <div class="key-group">
-        <div class="key-group-title">Scoring</div>
-        <div class="key-item">• 1 line = 100pts, 2 lines = 300pts</div>
-        <div class="key-item">• 3 lines = 500pts, 4 lines = 800pts</div>
-      </div>
+    <!-- ===== VERSION NUMBER ===== -->
+    <div class="footer-info">
+      <div class="version">ShapeStack v1.0</div>
     </div>
   </div>
 
   <!-- ===== GAME OVER OVERLAY ===== -->
   <div class="game-over-overlay" id="game-over-overlay">
     <div class="game-over-content">
+      <div class="close-btn" id="close-btn">×</div>
       <div class="game-over-title">Game Over!</div>
       <div class="game-over-score" id="final-score"></div>
       <button class="btn btn-primary" id="play-again-btn">Play Again</button>
@@ -650,9 +701,9 @@
     const FAST_DROP_SPEED = 50;
     const SPEED_INCREMENT = 0.02;
     const SPEED_INTERVAL = 5;
-    const SHIMMER_INTERVAL = 2500; // Shimmer every 2.5 seconds
+    const SHIMMER_INTERVAL = 2500;
 
-    // ===== SHAPE DEFINITIONS (Each shape gets unique color) =====
+    // ===== SHAPE DEFINITIONS =====
     const SHAPES = {
       I: { shape: [[1, 1, 1, 1]], color: 'cyan' },
       J: { shape: [[1, 0, 0], [1, 1, 1]], color: 'blue' },
@@ -675,9 +726,7 @@
     let currentPiece = null;
     let nextPiece = null;
     let score = 0;
-    let lines = 0;
-    let wins = 0;
-    let losses = 0;
+    let highScore = localStorage.getItem('shapestack_highscore') || 0;
     let gameLoop = null;
     let shimmerLoop = null;
     let isPlaying = false;
@@ -687,27 +736,29 @@
     let piecesPlaced = 0;
     let isFastDropping = false;
 
+    // Touch controls
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isDragging = false;
+    let isHolding = false;
+    let holdTimeout = null;
+
     // ===== DOM ELEMENTS =====
     const gameBoard = document.getElementById('game-board');
+    const boardWrapper = document.getElementById('board-wrapper');
     const nextPieceBoard = document.getElementById('next-piece');
     const scoreEl = document.getElementById('score');
-    const linesEl = document.getElementById('lines');
-    const winsEl = document.getElementById('wins');
-    const lossesEl = document.getElementById('losses');
-    const startBtn = document.getElementById('start-btn');
-    const restartBtn = document.getElementById('restart-btn');
+    const highScoreEl = document.getElementById('highscore');
     const speedToggle = document.getElementById('speed-toggle');
     const gameOverOverlay = document.getElementById('game-over-overlay');
     const finalScoreEl = document.getElementById('final-score');
     const playAgainBtn = document.getElementById('play-again-btn');
+    const closeBtn = document.getElementById('close-btn');
     const gameStatus = document.getElementById('game-status');
     const statusText = document.getElementById('status-text');
-
-    // Mobile controls
-    const leftBtn = document.getElementById('left-btn');
-    const rightBtn = document.getElementById('right-btn');
-    const rotateBtn = document.getElementById('rotate-btn');
-    const dropBtn = document.getElementById('drop-btn');
+    const mobilePlayPause = document.getElementById('mobile-play-pause');
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
 
     // ===== INITIALIZE BOARD =====
     function initBoard() {
@@ -745,29 +796,27 @@
       };
     }
 
-    // ===== SHIMMER EFFECT =====
+    // ===== SHIMMER & GLOW EFFECTS =====
     function triggerShimmer() {
       const cells = gameBoard.querySelectorAll('.cell.filled');
       cells.forEach(cell => {
-        if (Math.random() > 0.5) { // Random shimmer
+        if (Math.random() > 0.5) {
           cell.classList.add('shimmer');
           setTimeout(() => cell.classList.remove('shimmer'), 1500);
         }
       });
     }
 
-    // ===== GLOW EFFECT =====
     function triggerGlow() {
       const cells = gameBoard.querySelectorAll('.cell.filled');
       cells.forEach(cell => {
-        if (Math.random() > 0.6) { // Random glow
+        if (Math.random() > 0.6) {
           cell.classList.add('glow');
           setTimeout(() => cell.classList.remove('glow'), 2000);
         }
       });
     }
 
-    // ===== START SHIMMER LOOP =====
     function startShimmerLoop() {
       if (shimmerLoop) clearInterval(shimmerLoop);
       shimmerLoop = setInterval(() => {
@@ -777,7 +826,7 @@
       }, SHIMMER_INTERVAL);
     }
 
-    // ===== DRAW BOARD =====
+    // ===== DRAW FUNCTIONS =====
     function drawBoard() {
       const cells = gameBoard.querySelectorAll('.cell');
       
@@ -797,7 +846,6 @@
       }
     }
 
-    // ===== DRAW CURRENT PIECE =====
     function drawCurrentPiece() {
       if (!currentPiece) return;
       
@@ -820,7 +868,6 @@
       }
     }
 
-    // ===== DRAW NEXT PIECE =====
     function drawNextPiece() {
       if (!nextPiece) return;
       
@@ -850,12 +897,18 @@
       if (!isPlaying) {
         gameStatus.className = 'game-status';
         statusText.textContent = 'Ready';
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
       } else if (isPaused) {
         gameStatus.className = 'game-status paused';
         statusText.textContent = 'Paused';
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
       } else {
         gameStatus.className = 'game-status playing';
         statusText.textContent = 'Playing';
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'block';
       }
     }
 
@@ -880,7 +933,7 @@
       return false;
     }
 
-    // ===== MERGE PIECE TO BOARD =====
+    // ===== MERGE PIECE =====
     function mergePiece() {
       for (let row = 0; row < currentPiece.shape.length; row++) {
         for (let col = 0; col < currentPiece.shape[row].length; col++) {
@@ -909,7 +962,6 @@
       }
     }
 
-    // ===== RESTART GAME LOOP WITH NEW SPEED =====
     function restartGameLoop() {
       if (gameLoop) {
         clearInterval(gameLoop);
@@ -932,9 +984,14 @@
       }
       
       if (linesCleared > 0) {
-        lines += linesCleared;
         const points = [0, 100, 300, 500, 800];
         score += points[linesCleared] || 800;
+        
+        if (score > highScore) {
+          highScore = score;
+          localStorage.setItem('shapestack_highscore', highScore);
+        }
+        
         updateStats();
       }
     }
@@ -1000,16 +1057,13 @@
     // ===== UPDATE STATS =====
     function updateStats() {
       scoreEl.textContent = score;
-      linesEl.textContent = lines;
-      winsEl.textContent = wins;
-      lossesEl.textContent = losses;
+      highScoreEl.textContent = highScore;
     }
 
     // ===== START GAME =====
     function startGame() {
       initBoard();
       score = 0;
-      lines = 0;
       currentSpeed = BASE_SPEED;
       piecesPlaced = 0;
       isFastDropping = false;
@@ -1058,16 +1112,15 @@
       isPlaying = false;
       clearInterval(gameLoop);
       if (shimmerLoop) clearInterval(shimmerLoop);
-      losses++;
       updateStats();
       updateGameStatus();
       
-      finalScoreEl.textContent = `Final Score: ${score} | Lines: ${lines}`;
+      finalScoreEl.textContent = `Score: ${score} | High Score: ${highScore}`;
       gameOverOverlay.classList.add('show');
       scheduleHeightCheck();
     }
 
-    // ===== ENABLE FAST DROP =====
+    // ===== FAST DROP =====
     function enableFastDrop() {
       if (!isPlaying || isPaused || isFastDropping) return;
       isFastDropping = true;
@@ -1075,7 +1128,6 @@
       gameLoop = setInterval(gameStep, FAST_DROP_SPEED);
     }
 
-    // ===== DISABLE FAST DROP =====
     function disableFastDrop() {
       if (!isFastDropping) return;
       isFastDropping = false;
@@ -1083,9 +1135,78 @@
       gameLoop = setInterval(gameStep, currentSpeed);
     }
 
+    // ===== TOUCH CONTROLS =====
+    boardWrapper.addEventListener('touchstart', (e) => {
+      if (!isPlaying || isPaused) return;
+      
+      e.preventDefault();
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      isDragging = false;
+      
+      // Start hold timer
+      holdTimeout = setTimeout(() => {
+        isHolding = true;
+        enableFastDrop();
+      }, 200);
+    });
+
+    boardWrapper.addEventListener('touchmove', (e) => {
+      if (!isPlaying || isPaused) return;
+      
+      e.preventDefault();
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
+      
+      if (!isDragging && (Math.abs(deltaX) > 20 || Math.abs(deltaY) > 20)) {
+        isDragging = true;
+        clearTimeout(holdTimeout);
+        isHolding = false;
+        
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          // Horizontal movement
+          if (deltaX > 0) {
+            movePiece(1, 0);
+          } else {
+            movePiece(-1, 0);
+          }
+        } else if (deltaY > 0) {
+          // Downward movement
+          movePiece(0, 1);
+        }
+        
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+      }
+    });
+
+    boardWrapper.addEventListener('touchend', (e) => {
+      if (!isPlaying || isPaused) return;
+      
+      e.preventDefault();
+      clearTimeout(holdTimeout);
+      
+      if (isHolding) {
+        disableFastDrop();
+        isHolding = false;
+      } else if (!isDragging) {
+        // Tap to rotate
+        rotatePiece();
+      }
+      
+      isDragging = false;
+    });
+
+    // ===== MOBILE PLAY/PAUSE BUTTON =====
+    mobilePlayPause.addEventListener('click', (e) => {
+      e.stopPropagation();
+      pauseGame();
+    });
+
     // ===== KEYBOARD CONTROLS =====
     document.addEventListener('keydown', (e) => {
-      // Global shortcuts
       if ((e.key.toLowerCase() === 'p' || e.key === 'Enter') && !e.shiftKey && !e.ctrlKey && !e.altKey) {
         e.preventDefault();
         pauseGame();
@@ -1104,70 +1225,49 @@
         return;
       }
 
-      // Game controls
       if (!isPlaying || isPaused) return;
       
-      // Move left - A or Left Arrow
       if (e.key.toLowerCase() === 'a' || e.key === 'ArrowLeft') {
         e.preventDefault();
         movePiece(-1, 0);
       }
       
-      // Move right - D or Right Arrow
       if (e.key.toLowerCase() === 'd' || e.key === 'ArrowRight') {
         e.preventDefault();
         movePiece(1, 0);
       }
       
-      // Rotate - W, F, or Up Arrow
       if (e.key.toLowerCase() === 'w' || e.key.toLowerCase() === 'f' || e.key === 'ArrowUp') {
         e.preventDefault();
         rotatePiece();
       }
       
-      // Move down faster - S or Down Arrow
       if (e.key.toLowerCase() === 's' || e.key === 'ArrowDown') {
         e.preventDefault();
         enableFastDrop();
       }
       
-      // Instant drop - Spacebar
       if (e.key === ' ') {
         e.preventDefault();
         dropPiece();
       }
     });
 
-    // ===== KEYBOARD KEY UP =====
     document.addEventListener('keyup', (e) => {
       if (e.key.toLowerCase() === 's' || e.key === 'ArrowDown') {
         disableFastDrop();
       }
     });
 
-    // ===== MOBILE CONTROLS =====
-    leftBtn.addEventListener('click', () => {
-      if (isPlaying && !isPaused) movePiece(-1, 0);
-    });
-
-    rightBtn.addEventListener('click', () => {
-      if (isPlaying && !isPaused) movePiece(1, 0);
-    });
-
-    rotateBtn.addEventListener('click', () => {
-      if (isPlaying && !isPaused) rotatePiece();
-    });
-
-    dropBtn.addEventListener('click', () => {
-      if (isPlaying && !isPaused) dropPiece();
-    });
-
-    // ===== BUTTON LISTENERS =====
-    startBtn.addEventListener('click', pauseGame);
-    restartBtn.addEventListener('click', startGame);
+    // ===== GAME OVER BUTTONS =====
     playAgainBtn.addEventListener('click', () => {
       gameOverOverlay.classList.remove('show');
       startGame();
+    });
+
+    closeBtn.addEventListener('click', () => {
+      gameOverOverlay.classList.remove('show');
+      scheduleHeightCheck();
     });
 
     speedToggle.addEventListener('click', toggleProgressiveSpeed);
