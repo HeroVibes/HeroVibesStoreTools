@@ -474,16 +474,17 @@
                 description: "Quickly organise your OBS/Meld recordings and clips with a single tap of a button, creating a new folder and placing your clip inside.",
                 downloads: [
                     { name: "Custom Icon", url: "https://herovibes.github.io/HeroVibesStoreTools/StreamDeckActions/Icons/ClipOrganiserIcon.jpg", filename: "Clip Organiser Icon.png" },
-                    { name: "Download .BAT", url: "https://raw.githubusercontent.com/HeroVibes/ClipOrganiser/adebf507e3f222ad0fcb7f941c9dc4c8d4f4c9c9/FileOrganiser.bat", filename: "ClipOrganiser.bat" }
+                    { name: "Download SINGLE .BAT", url: "https://raw.githubusercontent.com/HeroVibes/ClipOrganiser/e7dbb0844180d4b0ef36eceb6ed1ffc283b3c7ad/SingleClipOrganiser.bat", filename: "SingleClipOrganiser.bat" }
+                    { name: "Download DOUBLE .BAT", url: "https://raw.githubusercontent.com/HeroVibes/ClipOrganiser/e7dbb0844180d4b0ef36eceb6ed1ffc283b3c7ad/DoubleClipOrganiser.bat", filename: "DoubleClipOrganiser.bat" }
                 ],
                 plugins: [
                     { name: "None", url: "#" }
                 ],
                 tutorial: `
                     <p>Automatically organise your recordings and "replay captures" from OBS, Meld and other apps by creating a folder - with a name of your choosing - and moving the latest capture to it.<br>
-                    To use this, you'll need to modify two elements in the script, and a short third step:</p>
+                    To use this, you'll need to modify two elements in the script, and a short third step. ALSO, please use the SINGLE clip organise if you're only capturing one clip at a time (eg. Replay Buffer), or DOUBLE clip organiser if you're capturing multiple clips/formats at once (eg. Replay Buffer and Aitum Vertical):</p>
                     <p><strong>Step 1: The Directory</strong><br>
-                    The directory is defined on (default is on Line 8 - <strong>sourceFolder=%USERPROFILE%\Documents\Recordings</strong>. Set this to the folder OBS saves all recordings and clips to - simply replace <strong>%USERPROFILE%\Documents\Recordings</strong> for your folder path. The default folder for OBS, for instance, would be <strong>C:\Users<username>\Videos.</strong></p>
+                    The directory is defined on (default is on Line 8 - <strong>sourceFolder=%USERPROFILE%\Documents\Recordings</strong>. Set this to the folder OBS saves all recordings and clips to - simply replace <strong>%USERPROFILE%\Documents\Recordings</strong> for your folder path. The default folder for OBS, for instance, would be <strong>C:\Users<username>\Videos. If you're capturing MULTIPLE clips at once, make sure that Replay Buffer and Aitum Vertical are both saving their clips to the same location.</strong></p>
                     
                     <p><strong>Step 2: The Folder Name</strong><br>
                     To customise the name of the folder that will be created - this is where the clips will be moved to - you'll want to change the name on Line 28 - <strong>"call :MoveLatest "%sourceFolder%" "%sourceFolder%\Gameplay""</strong>. Simply change <strong>"Gameplay"</strong> to the name of the folder; eg. <strong>"Funny Moments", "Boss Fights", "Deaths".</strong></p>
