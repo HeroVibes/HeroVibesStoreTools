@@ -69,6 +69,14 @@
         margin-bottom: 6px;
         font-weight: 600;
     }
+    
+    .val-display {
+        float: right;
+        color: var(--accent);
+        font-weight: 500;
+        font-size: 12px;
+        margin-top: 2px;
+    }
 
     p, .desc {
         font-size: 12px;
@@ -101,7 +109,7 @@
     .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(135,169,255,0.12); }
     .btn.primary { background: var(--hover); color: var(--accent); border-color: var(--outline); }
 
-    input[type="text"], input[type="number"], select {
+    input[type="text"], select {
         width: 100%;
         padding: 10px;
         border-radius: var(--radius);
@@ -114,7 +122,7 @@
         transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+    input[type="text"]:focus, select:focus {
         border-color: var(--accent);
         box-shadow: 0 0 0 2px rgba(135,169,255,0.1);
     }
@@ -133,15 +141,14 @@
     input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
     input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
 
-    /* Custom Sliders */
-    .slider-combo { display: flex; align-items: center; gap: 12px; }
-    .slider-combo input[type="range"] {
+    input[type="range"] {
         -webkit-appearance: none;
-        flex: 1;
+        width: 100%;
         background: transparent;
         height: 24px;
+        margin: 0;
     }
-    .slider-combo input[type="range"]::-webkit-slider-thumb {
+    input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
         height: 16px;
         width: 16px;
@@ -150,18 +157,12 @@
         cursor: pointer;
         margin-top: -6px;
     }
-    .slider-combo input[type="range"]::-webkit-slider-runnable-track {
+    input[type="range"]::-webkit-slider-runnable-track {
         width: 100%;
         height: 4px;
         cursor: pointer;
         background: var(--hover);
         border-radius: 2px;
-    }
-    .slider-combo input[type="number"] {
-        width: 70px;
-        padding: 6px;
-        text-align: center;
-        margin-bottom: 0;
     }
 
     .tabs-header {
@@ -194,7 +195,7 @@
 
     .sd-key-bg, .sd-key-texture, .sd-key-outline { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
     .sd-key-bg { z-index: 1; }
-    .sd-key-texture { z-index: 2; mix-blend-mode: overlay; }
+    .sd-key-texture { z-index: 2; } /* Alpha controlled via JS, removed overlay blend */
     .sd-key-outline { z-index: 3; pointer-events: none; }
 
     .sd-key-icon {
@@ -248,6 +249,7 @@
         cursor: pointer; transition: transform 0.2s, border-color 0.2s;
     }
     .set-item-preview:hover { transform: scale(1.03); border-color: var(--accent); }
+    .set-item-preview img { width: 100%; height: 100%; object-fit: contain; } /* Exact canvas export image */
 
     .controls-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .control-group { display: flex; flex-direction: column; }
@@ -262,7 +264,6 @@
     }
     
     .divider { height: 1px; background: var(--outline); margin: 4px 0; }
-    #export-canvas { display: none; }
 </style>
 </head>
 <body>
@@ -312,35 +313,23 @@
             <div class="divider"></div>
 
             <div class="control-group">
-                <label>Scale (%)</label>
-                <div class="slider-combo">
-                    <input type="range" id="icon-scale-r" value="100" min="10" max="250" oninput="syncVal('icon-scale', this.value); updatePreview()">
-                    <input type="number" id="icon-scale-n" value="100" min="10" max="250" oninput="syncVal('icon-scale', this.value); updatePreview()">
-                </div>
+                <label>Scale (%) <span id="icon-scale-val" class="val-display">100</span></label>
+                <input type="range" id="icon-scale" value="100" min="10" max="250" oninput="updateVal('icon-scale'); updatePreview()">
             </div>
 
             <div class="control-group">
-                <label>Rotation (Deg)</label>
-                <div class="slider-combo">
-                    <input type="range" id="icon-rotation-r" value="0" min="-180" max="180" oninput="syncVal('icon-rotation', this.value); updatePreview()">
-                    <input type="number" id="icon-rotation-n" value="0" oninput="syncVal('icon-rotation', this.value); updatePreview()">
-                </div>
+                <label>Rotation (Deg) <span id="icon-rotation-val" class="val-display">0</span></label>
+                <input type="range" id="icon-rotation" value="0" min="-180" max="180" oninput="updateVal('icon-rotation'); updatePreview()">
             </div>
 
             <div class="controls-row">
                 <div class="control-group">
-                    <label>Offset X (%)</label>
-                    <div class="slider-combo">
-                        <input type="range" id="icon-x-r" value="0" min="-100" max="100" oninput="syncVal('icon-x', this.value); updatePreview()">
-                        <input type="number" id="icon-x-n" value="0" oninput="syncVal('icon-x', this.value); updatePreview()">
-                    </div>
+                    <label>Offset X (%) <span id="icon-x-val" class="val-display">0</span></label>
+                    <input type="range" id="icon-x" value="0" min="-100" max="100" oninput="updateVal('icon-x'); updatePreview()">
                 </div>
                 <div class="control-group">
-                    <label>Offset Y (%)</label>
-                    <div class="slider-combo">
-                        <input type="range" id="icon-y-r" value="0" min="-100" max="100" oninput="syncVal('icon-y', this.value); updatePreview()">
-                        <input type="number" id="icon-y-n" value="0" oninput="syncVal('icon-y', this.value); updatePreview()">
-                    </div>
+                    <label>Offset Y (%) <span id="icon-y-val" class="val-display">0</span></label>
+                    <input type="range" id="icon-y" value="0" min="-100" max="100" oninput="updateVal('icon-y'); updatePreview()">
                 </div>
             </div>
 
@@ -367,11 +356,8 @@
                     <input type="color" id="icon-stroke-color" value="#ffffff" onchange="updatePreview()">
                 </div>
                 <div class="control-group">
-                    <label>Stroke Thickness</label>
-                    <div class="slider-combo">
-                        <input type="range" id="icon-stroke-w-r" value="4" min="1" max="20" oninput="syncVal('icon-stroke-w', this.value); updatePreview()">
-                        <input type="number" id="icon-stroke-w-n" value="4" oninput="syncVal('icon-stroke-w', this.value); updatePreview()">
-                    </div>
+                    <label>Stroke Thick. <span id="icon-stroke-w-val" class="val-display">4</span></label>
+                    <input type="range" id="icon-stroke-w" value="4" min="1" max="20" oninput="updateVal('icon-stroke-w'); updatePreview()">
                 </div>
             </div>
         </div>
@@ -417,18 +403,14 @@
                 </div>
             </div>
             
-            <div class="control-group">
-                <label>Texture Opacity (%)</label>
-                <div class="slider-combo">
-                    <input type="range" id="bg-texture-opacity-r" value="15" min="1" max="100" oninput="syncVal('bg-texture-opacity', this.value); updatePreview()">
-                    <input type="number" id="bg-texture-opacity-n" value="15" oninput="syncVal('bg-texture-opacity', this.value); updatePreview()">
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Opacity (%) <span id="bg-texture-opacity-val" class="val-display">15</span></label>
+                    <input type="range" id="bg-texture-opacity" value="15" min="1" max="100" oninput="updateVal('bg-texture-opacity'); updatePreview()">
                 </div>
-            </div>
-            <div class="control-group">
-                <label>Texture Scale</label>
-                <div class="slider-combo">
-                    <input type="range" id="bg-texture-scale-r" value="20" min="4" max="64" oninput="syncVal('bg-texture-scale', this.value); updatePreview()">
-                    <input type="number" id="bg-texture-scale-n" value="20" oninput="syncVal('bg-texture-scale', this.value); updatePreview()">
+                <div class="control-group">
+                    <label>Scale <span id="bg-texture-scale-val" class="val-display">20</span></label>
+                    <input type="range" id="bg-texture-scale" value="20" min="4" max="64" oninput="updateVal('bg-texture-scale'); updatePreview()">
                 </div>
             </div>
 
@@ -453,19 +435,14 @@
                 </div>
             </div>
 
-            <div class="control-group">
-                <label>Border Thickness</label>
-                <div class="slider-combo">
-                    <input type="range" id="bg-border-w-r" value="4" min="1" max="20" oninput="syncVal('bg-border-w', this.value); updatePreview()">
-                    <input type="number" id="bg-border-w-n" value="4" oninput="syncVal('bg-border-w', this.value); updatePreview()">
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Thickness <span id="bg-border-w-val" class="val-display">4</span></label>
+                    <input type="range" id="bg-border-w" value="4" min="1" max="20" oninput="updateVal('bg-border-w'); updatePreview()">
                 </div>
-            </div>
-
-            <div class="control-group">
-                <label>Border Padding (%)</label>
-                <div class="slider-combo">
-                    <input type="range" id="bg-border-padding-r" value="5" min="0" max="30" oninput="syncVal('bg-border-padding', this.value); updatePreview()">
-                    <input type="number" id="bg-border-padding-n" value="5" oninput="syncVal('bg-border-padding', this.value); updatePreview()">
+                <div class="control-group">
+                    <label>Padding (%) <span id="bg-border-padding-val" class="val-display">5</span></label>
+                    <input type="range" id="bg-border-padding" value="5" min="0" max="30" oninput="updateVal('bg-border-padding'); updatePreview()">
                 </div>
             </div>
 
@@ -516,8 +493,6 @@
     </div>
 </div>
 
-<canvas id="export-canvas"></canvas>
-
 <script>
     const builtInIcons = [
         { id: 'adobe-acrobat',     name: 'Acrobat',      src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-acrobat.svg' },
@@ -555,18 +530,22 @@
     let currentIconIsImg = false;
     let iconSet = [];
 
-    // Helper to sync Range and Number inputs
-    function syncVal(baseId, val) {
-        const r = document.getElementById(baseId + '-r');
-        const n = document.getElementById(baseId + '-n');
-        if(r) r.value = val;
-        if(n) n.value = val;
+    // Slider Helper Functions
+    function updateVal(id) {
+        const el = document.getElementById(id);
+        const valSpan = document.getElementById(id + '-val');
+        if(el && valSpan) valSpan.innerText = el.value;
     }
-    function getVal(baseId) {
-        return parseFloat(document.getElementById(baseId + '-n').value) || 0;
+    function getVal(id) {
+        const el = document.getElementById(id);
+        return el ? parseFloat(el.value) || 0 : 0;
     }
-    function setVal(baseId, val) {
-        syncVal(baseId, val);
+    function setVal(id, val) {
+        const el = document.getElementById(id);
+        if(el) {
+            el.value = val;
+            updateVal(id);
+        }
     }
 
     function init() {
@@ -676,11 +655,7 @@
                 const data = event.target.result;
                 
                 customIcons.push({
-                    id: id,
-                    name: file.name,
-                    isCustom: true,
-                    isSvg: isSvg,
-                    data: data
+                    id: id, name: file.name, isCustom: true, isSvg: isSvg, data: data
                 });
                 
                 if(index === files.length - 1) {
@@ -694,7 +669,7 @@
                 reader.readAsDataURL(file);
             }
         });
-        e.target.value = ''; // Reset input
+        e.target.value = ''; 
     }
 
     function drawBorderNatively(ctx, style, color, size, paddingPct, thickness) {
@@ -863,6 +838,92 @@
         };
     }
 
+    // Core function to perfectly recreate a set item visually as a Canvas Data URL
+    async function renderItemToCanvas(item, size) {
+        const canvas = document.createElement('canvas');
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const s = item.settings;
+
+        if (s.bgType === 'solid') {
+            ctx.fillStyle = s.color1; ctx.fillRect(0,0,size,size);
+        } else if (s.bgType === 'gradient') {
+            const grd = ctx.createLinearGradient(0, 0, size, size);
+            grd.addColorStop(0, s.color1); grd.addColorStop(1, s.color2);
+            ctx.fillStyle = grd; ctx.fillRect(0,0,size,size);
+        }
+
+        const scaleRatio = size / 144; 
+        const texCan = generateTextureCanvas(s.texture, s.texColor, s.texScale * scaleRatio);
+        if(texCan) {
+            ctx.save();
+            ctx.globalAlpha = s.texOpacity / 100;
+            ctx.fillStyle = ctx.createPattern(texCan, 'repeat');
+            ctx.fillRect(0,0,size,size);
+            ctx.restore();
+        }
+
+        if(s.glow === 'active') { ctx.shadowColor = s.borderColor; ctx.shadowBlur = size * 0.08; } 
+        else { ctx.shadowBlur = 0; }
+        
+        const expBorderThick = s.borderThickness * scaleRatio;
+        drawBorderNatively(ctx, s.border, s.borderColor, size, s.borderPadding, expBorderThick);
+        
+        let iconDataUrl = "";
+        if(!item.isImg) {
+            let cleanSvg = item.iconSvg;
+            const styleTag = `<style>path, rect, circle, polygon, polyline, line { fill: ${s.color} !important; } ${s.effect === 'stroke' ? `* { stroke: ${s.strokeColor} !important; stroke-width: ${s.strokeW}px !important; overflow: visible !important; }` : ''}</style>`;
+            cleanSvg = cleanSvg.replace(/<svg([^>]*)>/, `<svg$1>${styleTag}`);
+            if(!cleanSvg.includes('width=')) cleanSvg = cleanSvg.replace(/<svg([^>]*)>/, `<svg$1 width="${size}" height="${size}">`);
+            
+            const svgBlob = new Blob([cleanSvg], {type: 'image/svg+xml;charset=utf-8'});
+            iconDataUrl = URL.createObjectURL(svgBlob);
+        } else {
+            const match = item.iconSvg.match(/src="([^"]+)"/);
+            if(match) iconDataUrl = match[1];
+        }
+
+        await new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = () => {
+                ctx.save();
+                const targetSize = size * 0.6;
+                let drawW = targetSize; let drawH = targetSize;
+                
+                if(img.width && img.height) {
+                    const aspect = img.width / img.height;
+                    if (aspect > 1) drawH = targetSize / aspect;
+                    else drawW = targetSize * aspect;
+                }
+
+                const offsetX = (s.offsetX / 100) * targetSize;
+                const offsetY = (s.offsetY / 100) * targetSize;
+
+                ctx.translate(size/2 + offsetX, size/2 + offsetY);
+                ctx.rotate(s.rotate * Math.PI / 180);
+                ctx.scale(s.scale, s.scale);
+
+                if(s.effect === 'stroke' && item.isImg) {
+                    ctx.shadowColor = s.strokeColor; ctx.shadowBlur = 2;
+                    ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 2; ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+                    ctx.shadowOffsetX = -2; ctx.shadowOffsetY = -2; ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+                } 
+                
+                if(s.glow === 'active') { ctx.shadowColor = s.color; ctx.shadowBlur = size * 0.08; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0; } 
+                else { ctx.shadowBlur = 0; }
+                
+                ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+                ctx.restore();
+                resolve();
+            };
+            img.onerror = () => resolve(); 
+            img.src = iconDataUrl;
+        });
+
+        return canvas.toDataURL("image/png");
+    }
+
     function addToSet() {
         if(!currentIconSvg) return;
         iconSet.push({
@@ -944,36 +1005,22 @@
 
             actions.append(btnEdit, btnDup, btnRem);
 
+            // Container mimics Stream Deck radius visually, but inner image is square.
             const preview = document.createElement('div');
             preview.className = 'set-item-preview';
             preview.onclick = () => loadToEditor(index);
             
-            let bgStyle = '';
-            if(item.settings.bgType === 'solid') bgStyle = `background: ${item.settings.color1};`;
-            if(item.settings.bgType === 'gradient') bgStyle = `background: linear-gradient(135deg, ${item.settings.color1}, ${item.settings.color2});`;
-            preview.setAttribute('style', bgStyle);
-            
-            const iconDiv = document.createElement('div');
-            iconDiv.style.width = '60%'; iconDiv.style.height = '60%';
-            iconDiv.style.display = 'flex'; iconDiv.style.alignItems = 'center'; iconDiv.style.justifyContent = 'center';
-            iconDiv.style.transform = `translate(${item.settings.offsetX}%, ${item.settings.offsetY}%) scale(${item.settings.scale}) rotate(${item.settings.rotate}deg)`;
-            iconDiv.innerHTML = item.iconSvg;
-            
-            if(!item.isImg) {
-                const svgEl = iconDiv.querySelector('svg');
-                if(svgEl) {
-                    svgEl.style.fill = item.settings.color; svgEl.style.color = item.settings.color;
-                    const paths = svgEl.querySelectorAll('path, rect, circle, polygon, line, polyline');
-                    paths.forEach(p => { p.style.fill = 'currentColor'; p.removeAttribute('fill'); });
-                    if(item.settings.effect === 'stroke') {
-                        svgEl.style.stroke = item.settings.strokeColor;
-                        svgEl.style.strokeWidth = item.settings.strokeW + 'px';
-                        svgEl.style.overflow = 'visible';
-                    }
-                }
-            }
-            
-            preview.appendChild(iconDiv); wrap.appendChild(actions); wrap.appendChild(preview); grid.appendChild(wrap);
+            const imgEl = document.createElement('img');
+            preview.appendChild(imgEl);
+            wrap.appendChild(actions); 
+            wrap.appendChild(preview); 
+            grid.appendChild(wrap);
+
+            // Render exact replica via Canvas to ensure 100% parity with export
+            renderItemToCanvas(item, 144).then(dataUrl => {
+                imgEl.src = dataUrl;
+                scheduleHeightCheck();
+            });
         });
         scheduleHeightCheck();
     }
@@ -993,107 +1040,21 @@
         let useZip = method === 'zip' || (resolutions.length > 1 && method === 'individual');
         let zip; if(useZip) zip = new JSZip();
 
-        const canvas = document.getElementById('export-canvas');
-        const ctx = canvas.getContext('2d');
-
         for(let i=0; i < iconSet.length; i++) {
             const item = iconSet[i];
-            const s = item.settings;
-            
             for(let r=0; r < resolutions.length; r++) {
                 const size = resolutions[r];
-                canvas.width = size; canvas.height = size;
-                ctx.clearRect(0, 0, size, size);
-
-                if (s.bgType === 'solid') {
-                    ctx.fillStyle = s.color1; ctx.fillRect(0,0,size,size);
-                } else if (s.bgType === 'gradient') {
-                    const grd = ctx.createLinearGradient(0, 0, size, size);
-                    grd.addColorStop(0, s.color1); grd.addColorStop(1, s.color2);
-                    ctx.fillStyle = grd; ctx.fillRect(0,0,size,size);
-                }
-
-                // Textures via Overlay emulation
-                const scaleRatio = size / 144; 
-                const texCan = generateTextureCanvas(s.texture, s.texColor, s.texScale * scaleRatio);
-                if(texCan) {
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'overlay'; // Matches preview CSS mix-blend-mode
-                    ctx.globalAlpha = s.texOpacity / 100;
-                    ctx.fillStyle = ctx.createPattern(texCan, 'repeat');
-                    ctx.fillRect(0,0,size,size);
-                    ctx.restore();
-                }
-
-                if(s.glow === 'active') { ctx.shadowColor = s.borderColor; ctx.shadowBlur = size * 0.08; } 
-                else { ctx.shadowBlur = 0; }
                 
-                const expBorderThick = s.borderThickness * scaleRatio;
-                drawBorderNatively(ctx, s.border, s.borderColor, size, s.borderPadding, expBorderThick);
-                
-                let iconDataUrl = "";
-                if(!item.isImg) {
-                    let cleanSvg = item.iconSvg.replace(/fill="[^"]*"/g, `fill="${s.color}"`);
-                    if(!cleanSvg.includes('fill=')) cleanSvg = cleanSvg.replace('<svg', `<svg fill="${s.color}"`);
-                    if(s.effect === 'stroke') {
-                        cleanSvg = cleanSvg.replace('<svg', `<svg stroke="${s.strokeColor}" stroke-width="${s.strokeW}" overflow="visible"`);
-                    }
-                    if(!cleanSvg.includes('width=')) cleanSvg = cleanSvg.replace('<svg', `<svg width="${size}" height="${size}"`);
-                    
-                    const svgBlob = new Blob([cleanSvg], {type: 'image/svg+xml;charset=utf-8'});
-                    iconDataUrl = URL.createObjectURL(svgBlob);
-                } else {
-                    const match = item.iconSvg.match(/src="([^"]+)"/);
-                    if(match) iconDataUrl = match[1];
-                }
-
-                await new Promise((resolve) => {
-                    const img = new Image();
-                    img.crossOrigin = "Anonymous";
-                    img.onload = () => {
-                        ctx.save();
-                        const targetSize = size * 0.6;
-                        let drawW = targetSize; let drawH = targetSize;
-                        
-                        // Prevent aspect ratio squishing
-                        if(img.width && img.height) {
-                            const aspect = img.width / img.height;
-                            if (aspect > 1) drawH = targetSize / aspect;
-                            else drawW = targetSize * aspect;
-                        }
-
-                        const offsetX = (s.offsetX / 100) * targetSize;
-                        const offsetY = (s.offsetY / 100) * targetSize;
-
-                        ctx.translate(size/2 + offsetX, size/2 + offsetY);
-                        ctx.rotate(s.rotate * Math.PI / 180);
-                        ctx.scale(s.scale, s.scale);
-
-                        if(s.effect === 'stroke' && item.isImg) {
-                            ctx.shadowColor = s.strokeColor; ctx.shadowBlur = 2;
-                            ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 2; ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
-                            ctx.shadowOffsetX = -2; ctx.shadowOffsetY = -2; ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
-                        } 
-                        
-                        if(s.glow === 'active') { ctx.shadowColor = s.color; ctx.shadowBlur = size * 0.08; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0; } 
-                        else { ctx.shadowBlur = 0; }
-                        
-                        ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
-                        ctx.restore();
-                        resolve();
-                    };
-                    img.onerror = () => resolve(); 
-                    img.src = iconDataUrl;
-                });
-
-                const b64Data = canvas.toDataURL("image/png").replace(/^data:image\/(png|jpg);base64,/, "");
+                // Leverage the exact same robust function used for the set previews!
+                const dataUrl = await renderItemToCanvas(item, size);
+                const b64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
                 const fileName = `${baseName}-${i+1}${resolutions.length > 1 ? `_${size}px` : ''}.png`;
 
                 if(useZip) {
                     if(resolutions.length > 1) zip.folder(`${size}px`).file(fileName, b64Data, {base64: true});
                     else zip.file(fileName, b64Data, {base64: true});
                 } else {
-                    const link = document.createElement('a'); link.download = fileName; link.href = canvas.toDataURL("image/png"); link.click();
+                    const link = document.createElement('a'); link.download = fileName; link.href = dataUrl; link.click();
                 }
             }
         }
