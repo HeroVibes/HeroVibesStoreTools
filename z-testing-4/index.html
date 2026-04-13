@@ -25,12 +25,15 @@
 
     body {
         margin: 0;
-        min-height: 100vh;
         background: var(--bg);
         color: var(--text-primary);
         font-family: system-ui, sans-serif;
         padding: 24px 16px;
     }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--hover); border-radius: 4px; }
 
     .app-container {
         display: grid;
@@ -63,7 +66,7 @@
         color: var(--text-primary);
     }
 
-    label, .title {
+    label {
         font-size: 14px;
         color: var(--text-primary);
         display: block;
@@ -141,11 +144,12 @@
         font-size: 14px;
         margin-bottom: 12px;
         outline: none;
-        transition: border-color 0.2s;
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     input[type="text"]:focus, input[type="number"]:focus, select:focus {
         border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(135,169,255,0.1);
     }
 
     input[type="color"] {
@@ -169,7 +173,32 @@
         border-radius: 4px;
     }
 
-    /* Tabs Layout */
+    input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        background: transparent;
+        margin-bottom: 12px;
+        margin-top: 8px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        margin-top: -6px;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 4px;
+        cursor: pointer;
+        background: var(--hover);
+        border-radius: 2px;
+    }
+
     .tabs-header {
         display: flex;
         gap: 8px;
@@ -205,7 +234,6 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Previews & Grids */
     .preview-stage {
         display: flex;
         align-items: center;
@@ -229,7 +257,7 @@
         align-items: center;
         justify-content: center;
         box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-        transition: all 0.3s ease;
+        transition: box-shadow 0.3s ease, border-radius 0.2s ease;
     }
 
     .sd-key-bg {
@@ -252,6 +280,7 @@
         z-index: 3;
         border-radius: var(--sd-radius);
         pointer-events: none;
+        transition: border-radius 0.2s ease;
     }
 
     .sd-key-icon {
@@ -262,7 +291,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: transform 0.2s ease, filter 0.2s ease;
+        transition: transform 0.2s ease;
     }
 
     .sd-key-icon svg, .sd-key-icon img {
@@ -279,10 +308,6 @@
         overflow-y: auto;
         padding-right: 4px;
     }
-
-    .icon-grid::-webkit-scrollbar { width: 6px; }
-    .icon-grid::-webkit-scrollbar-track { background: var(--bg); }
-    .icon-grid::-webkit-scrollbar-thumb { background: var(--hover); border-radius: 4px; }
 
     .icon-item {
         background: var(--bg);
@@ -322,6 +347,12 @@
     .set-item-wrap {
         position: relative;
         aspect-ratio: 1;
+        animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes scaleIn {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
     }
 
     .set-item-wrap .remove-btn {
@@ -340,12 +371,17 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: transform 0.2s;
+    }
+
+    .set-item-wrap .remove-btn:hover {
+        transform: scale(1.2);
     }
 
     .set-item-preview {
         width: 100%;
         height: 100%;
-        border-radius: 12px; /* Small preview radius */
+        border-radius: var(--sd-radius);
         border: 1px solid var(--outline);
         overflow: hidden;
         position: relative;
@@ -393,20 +429,10 @@
         margin-top: 16px;
     }
 
-    /* Effects Classes */
-    .effect-glitch {
-        filter: drop-shadow(3px 0 0 rgba(255,0,0,0.7)) drop-shadow(-3px 0 0 rgba(0,255,255,0.7));
-    }
-
-    .effect-stroke {
-        filter: drop-shadow(2px 2px 0 var(--outline)) drop-shadow(-2px -2px 0 var(--outline)) drop-shadow(2px -2px 0 var(--outline)) drop-shadow(-2px 2px 0 var(--outline));
-    }
-    
     .glow-active {
         box-shadow: 0 0 15px var(--accent), inset 0 0 15px var(--accent) !important;
     }
 
-    /* Hidden element for canvas exports */
     #export-canvas {
         display: none;
     }
@@ -416,7 +442,6 @@
 
 <div class="app-container">
     <div class="left-panel" style="display: flex; flex-direction: column; gap: 24px;">
-        
         <div class="card">
             <h3>Live Preview</h3>
             <p class="desc">How your icon will look on the Stream Deck.</p>
@@ -426,7 +451,7 @@
                     <div class="sd-key-texture" id="preview-texture"></div>
                     <div class="sd-key-outline" id="preview-outline"></div>
                     <div class="sd-key-icon" id="preview-icon">
-                        </div>
+                    </div>
                 </div>
             </div>
             <button class="btn primary" onclick="addToSet()">Add to Set +</button>
@@ -436,9 +461,8 @@
             <h3>Your Icon Set (<span id="set-count">0</span>)</h3>
             <p class="desc">These icons are ready for export.</p>
             <div class="set-grid" id="set-grid">
-                </div>
+            </div>
         </div>
-
     </div>
 
     <div class="card controls-panel">
@@ -454,7 +478,7 @@
             </div>
             
             <div class="icon-grid" id="library-grid">
-                </div>
+            </div>
 
             <div class="control-group" style="margin-top: 8px;">
                 <label>Upload Custom SVG/PNG</label>
@@ -474,6 +498,17 @@
 
             <div class="controls-row">
                 <div class="control-group">
+                    <label>Offset X (%)</label>
+                    <input type="number" id="icon-x" value="0" step="5" onchange="updatePreview()">
+                </div>
+                <div class="control-group">
+                    <label>Offset Y (%)</label>
+                    <input type="number" id="icon-y" value="0" step="5" onchange="updatePreview()">
+                </div>
+            </div>
+
+            <div class="controls-row">
+                <div class="control-group">
                     <label>Color</label>
                     <input type="color" id="icon-color" value="#ffffff" onchange="updatePreview()">
                 </div>
@@ -488,7 +523,7 @@
             </div>
             
             <div class="troubleshoot">
-                <strong>Tip:</strong> You can modify an icon, add it to your set, change its color or rotation, and add it again to quickly build variations!
+                <strong>Tip:</strong> You can modify an icon, add it to your set, change its color, offset, or rotation, and add it again to quickly build variations!
             </div>
         </div>
 
@@ -511,6 +546,11 @@
                     <label>Secondary (Gradient)</label>
                     <input type="color" id="bg-color-2" value="#323232" onchange="updatePreview()">
                 </div>
+            </div>
+
+            <div class="control-group">
+                <label>Corner Radius (%)</label>
+                <input type="range" id="bg-radius" value="20" min="0" max="50" oninput="updatePreview()" onchange="scheduleHeightCheck()">
             </div>
 
             <div class="control-group">
@@ -615,11 +655,9 @@
     let currentIconSvg = '';
     let currentIconIsImg = false;
     let iconSet = [];
-    let customIconCounter = 0;
 
     function init() {
         renderLibrary();
-        // Load default first icon
         if(iconsData.length > 0) selectIcon(iconsData[0].id);
         updatePreview();
     }
@@ -643,8 +681,7 @@
                 const div = document.createElement('div');
                 div.className = 'icon-item';
                 div.title = icon.name;
-                div.onclick = () => selectIcon(icon.id);
-                // Use img for grid to avoid CORS issues fetching 50 SVGs instantly
+                div.onclick = (e) => selectIcon(icon.id, e);
                 div.innerHTML = `<img src="${icon.src}" style="filter: invert(1) opacity(0.8);" />`;
                 grid.appendChild(div);
             }
@@ -656,9 +693,9 @@
         renderLibrary();
     }
 
-    async function selectIcon(id) {
+    async function selectIcon(id, e) {
         document.querySelectorAll('.icon-item').forEach(el => el.classList.remove('selected'));
-        if(event && event.currentTarget) event.currentTarget.classList.add('selected');
+        if(e && e.currentTarget) e.currentTarget.classList.add('selected');
 
         const icon = iconsData.find(i => i.id === id);
         if(!icon) return;
@@ -672,8 +709,7 @@
             } else {
                 throw new Error("Not a valid SVG text");
             }
-        } catch(e) {
-            // Fallback if fetch fails (CORS)
+        } catch(err) {
             currentIconSvg = `<img src="${icon.src}" crossorigin="anonymous"/>`;
             currentIconIsImg = true;
         }
@@ -710,38 +746,51 @@
         const outlineContainer = document.getElementById('preview-outline');
         const previewStage = document.getElementById('live-preview');
 
-        // 1. Icon Customizations
         const scale = document.getElementById('icon-scale').value / 100;
         const rotate = document.getElementById('icon-rotation').value;
+        const offsetX = document.getElementById('icon-x').value;
+        const offsetY = document.getElementById('icon-y').value;
         const color = document.getElementById('icon-color').value;
         const effect = document.getElementById('icon-effect').value;
+        const glow = document.getElementById('bg-glow').value;
 
-        iconContainer.style.transform = `scale(${scale}) rotate(${rotate}deg)`;
-        iconContainer.className = 'sd-key-icon';
-        if(effect !== 'none') iconContainer.classList.add(`effect-${effect}`);
+        iconContainer.style.transform = `translate(${offsetX}%, ${offsetY}%) scale(${scale}) rotate(${rotate}deg)`;
         
-        // Inject icon
         iconContainer.innerHTML = currentIconSvg;
         
-        // Colorize SVG dynamically
         if(!currentIconIsImg) {
             const svgEl = iconContainer.querySelector('svg');
             if(svgEl) {
                 svgEl.style.fill = color;
-                // Force all child paths to inherit fill
                 const paths = svgEl.querySelectorAll('path, rect, circle, polygon');
                 paths.forEach(p => { p.style.fill = 'currentColor'; p.removeAttribute('fill'); });
                 svgEl.style.color = color; 
             }
-        } else {
-            // Very basic tinting fallback for PNGs using CSS filters
-            iconContainer.style.filter = `drop-shadow(0 0 0 ${color})`;
         }
 
-        // 2. Background Customizations
+        let customFilter = '';
+        if (effect === 'stroke') {
+            customFilter += `drop-shadow(2px 2px 0 ${color}) drop-shadow(-2px -2px 0 ${color}) drop-shadow(2px -2px 0 ${color}) drop-shadow(-2px 2px 0 ${color}) `;
+        } else if (effect === 'glitch') {
+            customFilter += `drop-shadow(3px 0 0 rgba(255,0,0,0.7)) drop-shadow(-3px 0 0 rgba(0,255,255,0.7)) `;
+        }
+
+        if(glow === 'active') {
+            customFilter += `drop-shadow(0 0 8px ${color})`;
+            previewStage.classList.add('glow-active');
+            previewStage.style.setProperty('--accent', color);
+        } else {
+            previewStage.classList.remove('glow-active');
+        }
+        
+        iconContainer.style.filter = customFilter.trim();
+
         const bgType = document.getElementById('bg-type').value;
         const color1 = document.getElementById('bg-color-1').value;
         const color2 = document.getElementById('bg-color-2').value;
+        const cornerRadius = document.getElementById('bg-radius').value + '%';
+
+        previewStage.style.setProperty('--sd-radius', cornerRadius);
 
         if (bgType === 'solid') {
             bgContainer.style.background = color1;
@@ -751,7 +800,6 @@
             bgContainer.style.background = 'transparent';
         }
 
-        // 3. Textures
         const texture = document.getElementById('bg-texture').value;
         textureContainer.style.background = 'none';
         if (texture === 'checkerboard') {
@@ -768,26 +816,17 @@
             textureContainer.style.opacity = '0.3';
         }
 
-        // 4. Borders & Glow
         const border = document.getElementById('bg-border').value;
-        const glow = document.getElementById('bg-glow').value;
         
         outlineContainer.style.border = 'none';
         outlineContainer.style.background = 'none';
+        outlineContainer.style.clipPath = 'none';
         
         if (border === 'solid') {
             outlineContainer.style.border = `4px solid ${color}`;
         } else if (border === 'brackets') {
             outlineContainer.style.border = `4px solid ${color}`;
             outlineContainer.style.clipPath = 'polygon(0 0, 20% 0, 20% 10%, 10% 10%, 10% 20%, 0 20%, 0 80%, 10% 80%, 10% 90%, 20% 90%, 20% 100%, 0 100%, 0 0, 100% 0, 100% 20%, 90% 20%, 90% 10%, 80% 10%, 80% 0%, 100% 0%, 100% 100%, 80% 100%, 80% 90%, 90% 90%, 90% 80%, 100% 80%)';
-        }
-
-        if(glow === 'active') {
-            previewStage.classList.add('glow-active');
-            previewStage.style.setProperty('--accent', color);
-            iconContainer.style.filter += ` drop-shadow(0 0 8px ${color})`;
-        } else {
-            previewStage.classList.remove('glow-active');
         }
     }
 
@@ -801,11 +840,14 @@
             settings: {
                 scale: document.getElementById('icon-scale').value / 100,
                 rotate: document.getElementById('icon-rotation').value,
+                offsetX: document.getElementById('icon-x').value,
+                offsetY: document.getElementById('icon-y').value,
                 color: document.getElementById('icon-color').value,
                 effect: document.getElementById('icon-effect').value,
                 bgType: document.getElementById('bg-type').value,
                 color1: document.getElementById('bg-color-1').value,
                 color2: document.getElementById('bg-color-2').value,
+                bgRadius: document.getElementById('bg-radius').value,
                 texture: document.getElementById('bg-texture').value,
                 border: document.getElementById('bg-border').value,
                 glow: document.getElementById('bg-glow').value
@@ -835,22 +877,21 @@
 
             const preview = document.createElement('div');
             preview.className = 'set-item-preview';
+            preview.style.setProperty('--sd-radius', item.settings.bgRadius + '%');
             
-            // Replicate background styling for tiny preview
             let bgStyle = '';
             if(item.settings.bgType === 'solid') bgStyle = `background: ${item.settings.color1};`;
             if(item.settings.bgType === 'gradient') bgStyle = `background: linear-gradient(135deg, ${item.settings.color1}, ${item.settings.color2});`;
             
             preview.setAttribute('style', bgStyle);
             
-            // Replicate icon
             const iconDiv = document.createElement('div');
             iconDiv.style.width = '60%';
             iconDiv.style.height = '60%';
             iconDiv.style.display = 'flex';
             iconDiv.style.alignItems = 'center';
             iconDiv.style.justifyContent = 'center';
-            iconDiv.style.transform = `scale(${item.settings.scale}) rotate(${item.settings.rotate}deg)`;
+            iconDiv.style.transform = `translate(${item.settings.offsetX}%, ${item.settings.offsetY}%) scale(${item.settings.scale}) rotate(${item.settings.rotate}deg)`;
             iconDiv.innerHTML = item.iconSvg;
             
             if(!item.isImg) {
@@ -893,7 +934,6 @@
             resolutions = [parseInt(rawRes)];
         }
 
-        // Force ZIP if "ALL" is selected and "individual" is chosen to avoid massive spam
         let useZip = method === 'zip';
         if(resolutions.length > 1 && method === 'individual') {
             useZip = true;
@@ -902,7 +942,6 @@
         let zip;
         if(useZip) zip = new JSZip();
 
-        // Canvas for drawing
         const canvas = document.getElementById('export-canvas');
         const ctx = canvas.getContext('2d');
 
@@ -916,9 +955,9 @@
                 ctx.clearRect(0, 0, size, size);
 
                 const s = item.settings;
-                const radius = size * 0.2; // 20% border radius
+                const radiusPct = s.bgRadius / 100;
+                const radius = size * radiusPct;
 
-                // Draw Background
                 ctx.beginPath();
                 ctx.moveTo(radius, 0);
                 ctx.lineTo(size - radius, 0);
@@ -930,7 +969,7 @@
                 ctx.lineTo(0, radius);
                 ctx.quadraticCurveTo(0, 0, radius, 0);
                 ctx.closePath();
-                ctx.clip(); // Clip everything to rounded bounds
+                ctx.clip(); 
 
                 if (s.bgType === 'solid') {
                     ctx.fillStyle = s.color1;
@@ -943,7 +982,6 @@
                     ctx.fill();
                 }
 
-                // Draw Textures (Simplified for canvas export)
                 ctx.globalAlpha = 0.2;
                 if(s.texture === 'checkerboard') {
                     ctx.fillStyle = '#000000';
@@ -961,10 +999,8 @@
                 }
                 ctx.globalAlpha = 1.0;
 
-                // Draw Icon (Using SVG blob to Image method)
                 let iconDataUrl = "";
                 if(!item.isImg) {
-                    // Inject color into SVG wrapper
                     let cleanSvg = item.iconSvg.replace(/fill="[^"]*"/g, `fill="${s.color}"`);
                     if(!cleanSvg.includes('fill=')) {
                         cleanSvg = cleanSvg.replace('<svg', `<svg fill="${s.color}"`);
@@ -972,7 +1008,6 @@
                     const svgBlob = new Blob([cleanSvg], {type: 'image/svg+xml;charset=utf-8'});
                     iconDataUrl = URL.createObjectURL(svgBlob);
                 } else {
-                    // Extract src from <img src="...">
                     const match = item.iconSvg.match(/src="([^"]+)"/);
                     if(match) iconDataUrl = match[1];
                 }
@@ -982,15 +1017,16 @@
                     img.crossOrigin = "Anonymous";
                     img.onload = () => {
                         ctx.save();
-                        // Transform
-                        ctx.translate(size/2, size/2);
-                        ctx.rotate(s.rotate * Math.PI / 180);
-                        ctx.scale(s.scale, s.scale);
                         
                         const iWidth = size * 0.6;
                         const iHeight = size * 0.6;
+                        const offsetX = (s.offsetX / 100) * iWidth;
+                        const offsetY = (s.offsetY / 100) * iHeight;
 
-                        // Effects
+                        ctx.translate(size/2 + offsetX, size/2 + offsetY);
+                        ctx.rotate(s.rotate * Math.PI / 180);
+                        ctx.scale(s.scale, s.scale);
+
                         if(s.effect === 'stroke') {
                             ctx.shadowColor = s.color;
                             ctx.shadowBlur = 2;
@@ -998,7 +1034,9 @@
                             ctx.drawImage(img, -iWidth/2, -iHeight/2, iWidth, iHeight);
                             ctx.shadowOffsetX = -2; ctx.shadowOffsetY = -2;
                             ctx.drawImage(img, -iWidth/2, -iHeight/2, iWidth, iHeight);
-                        } else if(s.glow === 'active') {
+                        } 
+                        
+                        if(s.glow === 'active') {
                             ctx.shadowColor = s.color;
                             ctx.shadowBlur = size * 0.1;
                             ctx.drawImage(img, -iWidth/2, -iHeight/2, iWidth, iHeight);
@@ -1009,22 +1047,20 @@
                         ctx.drawImage(img, -iWidth/2, -iHeight/2, iWidth, iHeight);
                         ctx.restore();
                         
-                        // Border Outline
                         if(s.border !== 'none') {
                             ctx.strokeStyle = s.color;
                             ctx.lineWidth = size * 0.04;
                             if(s.border === 'solid') {
-                                ctx.stroke(); // strokes the rounded rect path established earlier
+                                ctx.stroke(); 
                             }
                         }
                         
                         resolve();
                     };
-                    img.onerror = () => resolve(); // Skip on error
+                    img.onerror = () => resolve(); 
                     img.src = iconDataUrl;
                 });
 
-                // Get PNG Data
                 const dataUrl = canvas.toDataURL("image/png");
                 const b64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
                 
@@ -1037,7 +1073,6 @@
                         zip.file(fileName, b64Data, {base64: true});
                     }
                 } else {
-                    // Trigger single download
                     const link = document.createElement('a');
                     link.download = fileName;
                     link.href = dataUrl;
@@ -1064,27 +1099,42 @@
     let lastHeight = 0;
     let resizeTimer;
 
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
     function sendHeight() {
       const height = document.body.scrollHeight;
       
+      // Only send message if height has *actually* changed
       if (height !== lastHeight) {
         lastHeight = height;
         window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
 
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
     function scheduleHeightCheck() {
+        // Clear any pending checks
         clearTimeout(resizeTimer);
+        // Schedule a new check
         resizeTimer = setTimeout(sendHeight, 150);
     }
 
+    // Send height on initial load (with a slight delay)
     window.addEventListener('load', () => {
         setTimeout(sendHeight, 100);
     });
 
+    // Send height on window resize (debounced)
     window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
         scheduleHeightCheck();
     });
+    // ===== END OF SCROLLBAR FIX =====
 </script>
 </body>
 </html>
