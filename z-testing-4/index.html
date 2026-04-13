@@ -257,31 +257,16 @@
         align-items: center;
         justify-content: center;
         box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-        transition: box-shadow 0.3s ease, border-radius 0.2s ease;
     }
 
-    .sd-key-bg {
+    .sd-key-bg, .sd-key-texture, .sd-key-outline {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        z-index: 1;
     }
 
-    .sd-key-texture {
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        z-index: 2;
-        opacity: 0.5;
-        mix-blend-mode: overlay;
-    }
-
-    .sd-key-outline {
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        z-index: 3;
-        border-radius: var(--sd-radius);
-        pointer-events: none;
-        transition: border-radius 0.2s ease;
-    }
+    .sd-key-bg { z-index: 1; }
+    .sd-key-texture { z-index: 2; mix-blend-mode: overlay; }
+    .sd-key-outline { z-index: 3; pointer-events: none; }
 
     .sd-key-icon {
         position: relative;
@@ -291,7 +276,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: transform 0.2s ease;
     }
 
     .sd-key-icon svg, .sd-key-icon img {
@@ -429,10 +413,6 @@
         margin-top: 16px;
     }
 
-    .glow-active {
-        box-shadow: 0 0 15px var(--accent), inset 0 0 15px var(--accent) !important;
-    }
-
     #export-canvas {
         display: none;
     }
@@ -450,8 +430,7 @@
                     <div class="sd-key-bg" id="preview-bg"></div>
                     <div class="sd-key-texture" id="preview-texture"></div>
                     <div class="sd-key-outline" id="preview-outline"></div>
-                    <div class="sd-key-icon" id="preview-icon">
-                    </div>
+                    <div class="sd-key-icon" id="preview-icon"></div>
                 </div>
             </div>
             <button class="btn primary" onclick="addToSet()">Add to Set +</button>
@@ -459,7 +438,7 @@
 
         <div class="card">
             <h3>Your Icon Set (<span id="set-count">0</span>)</h3>
-            <p class="desc">These icons are ready for export.</p>
+            <p class="desc">These icons are ready for export. (Exports are processed as squares)</p>
             <div class="set-grid" id="set-grid">
             </div>
         </div>
@@ -510,7 +489,7 @@
             <div class="controls-row">
                 <div class="control-group">
                     <label>Color</label>
-                    <input type="color" id="icon-color" value="#ffffff" onchange="updatePreview()">
+                    <input type="color" id="icon-color" value="#000000" onchange="updatePreview()">
                 </div>
                 <div class="control-group">
                     <label>Effect</label>
@@ -530,8 +509,8 @@
         <div class="tab-content" id="tab-bg">
             <div class="control-group">
                 <label>Background Type</label>
-                <select id="bg-type" onchange="updatePreview()">
-                    <option value="solid">Solid Color</option>
+                <select id="bg-type" onchange="handleBgTypeChange()">
+                    <option value="solid" selected>Solid Color</option>
                     <option value="gradient">Gradient</option>
                     <option value="transparent">Transparent</option>
                 </select>
@@ -540,45 +519,76 @@
             <div class="controls-row">
                 <div class="control-group">
                     <label>Primary Color</label>
-                    <input type="color" id="bg-color-1" value="#191919" onchange="updatePreview()">
+                    <input type="color" id="bg-color-1" value="#ffffff" onchange="updatePreview()">
                 </div>
                 <div class="control-group">
                     <label>Secondary (Gradient)</label>
-                    <input type="color" id="bg-color-2" value="#323232" onchange="updatePreview()">
+                    <input type="color" id="bg-color-2" value="#eeeeee" onchange="updatePreview()">
                 </div>
             </div>
 
             <div class="control-group">
-                <label>Corner Radius (%)</label>
+                <label>Corner Radius (Preview Only)</label>
                 <input type="range" id="bg-radius" value="20" min="0" max="50" oninput="updatePreview()" onchange="scheduleHeightCheck()">
             </div>
 
-            <div class="control-group">
-                <label>Texture Overlay</label>
-                <select id="bg-texture" onchange="updatePreview()">
-                    <option value="none">None</option>
-                    <option value="checkerboard">Checkerboard</option>
-                    <option value="lines">Scanlines</option>
-                    <option value="dots">Halftone Dots</option>
-                </select>
-            </div>
+            <div style="height: 1px; background: var(--outline); margin: 8px 0;"></div>
 
             <div class="controls-row">
                 <div class="control-group">
-                    <label>Border / Corners</label>
-                    <select id="bg-border" onchange="updatePreview()">
+                    <label>Texture</label>
+                    <select id="bg-texture" onchange="updatePreview()">
                         <option value="none">None</option>
-                        <option value="solid">Solid Border</option>
-                        <option value="brackets">Corner Brackets</option>
+                        <option value="checkerboard">Checkerboard</option>
+                        <option value="lines">Scanlines</option>
+                        <option value="dots">Halftone Dots</option>
+                        <option value="grid">Grid</option>
+                        <option value="diagonal">Diagonal Lines</option>
                     </select>
                 </div>
                 <div class="control-group">
-                    <label>Glow Toggle</label>
-                    <select id="bg-glow" onchange="updatePreview()">
-                        <option value="none">Off</option>
-                        <option value="active">On</option>
+                    <label>Texture Color</label>
+                    <input type="color" id="bg-texture-color" value="#000000" onchange="updatePreview()">
+                </div>
+            </div>
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Texture Opacity (%)</label>
+                    <input type="range" id="bg-texture-opacity" value="15" min="1" max="100" oninput="updatePreview()">
+                </div>
+                <div class="control-group">
+                    <label>Texture Scale</label>
+                    <input type="range" id="bg-texture-scale" value="20" min="4" max="64" oninput="updatePreview()">
+                </div>
+            </div>
+
+            <div style="height: 1px; background: var(--outline); margin: 8px 0;"></div>
+
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Border Style</label>
+                    <select id="bg-border" onchange="updatePreview()">
+                        <option value="none">None</option>
+                        <option value="solid">Solid Border</option>
+                        <option value="corners-all">Corners (All)</option>
+                        <option value="corners-tr-bl">Corners (Top-Right / Bottom-Left)</option>
+                        <option value="corners-tl-br">Corners (Top-Left / Bottom-Right)</option>
+                        <option value="lines-tb">Top & Bottom Lines</option>
+                        <option value="lines-lr">Left & Right Lines</option>
                     </select>
                 </div>
+                <div class="control-group">
+                    <label>Border Padding (%)</label>
+                    <input type="range" id="bg-border-padding" value="5" min="0" max="30" oninput="updatePreview()">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Glow (Applies to Icon & Border)</label>
+                <select id="bg-glow" onchange="updatePreview()">
+                    <option value="none" selected>Off</option>
+                    <option value="active">On</option>
+                </select>
             </div>
         </div>
 
@@ -590,7 +600,7 @@
             </div>
 
             <div class="control-group">
-                <label>Resolutions</label>
+                <label>Resolutions (Square Export)</label>
                 <select id="export-resolution">
                     <option value="72">72 x 72 px</option>
                     <option value="144" selected>144 x 144 px (Standard)</option>
@@ -609,9 +619,9 @@
             </div>
 
             <button class="btn primary" style="margin-top: 16px; padding: 14px;" onclick="exportIcons()">Export Set</button>
-
+            
             <div class="troubleshoot">
-                <strong>Troubleshooting Exports:</strong> If you select "Individual Files" but also choose "ALL Resolutions", we will automatically wrap them in a ZIP file to prevent your browser from blocking mass downloads or becoming disorganized.
+                <strong>Important:</strong> Your exported images will be perfectly square, regardless of the preview's rounded corners. This is intentional to ensure perfect fits on Stream Decks and other grid systems!
             </div>
         </div>
 
@@ -658,7 +668,8 @@
 
     function init() {
         renderLibrary();
-        if(iconsData.length > 0) selectIcon(iconsData[0].id);
+        const startIcon = iconsData.find(i => i.id === 'elgato') || iconsData[0];
+        if(startIcon) selectIcon(startIcon.id);
         updatePreview();
     }
 
@@ -689,8 +700,14 @@
         scheduleHeightCheck();
     }
 
-    function filterIcons() {
-        renderLibrary();
+    function filterIcons() { renderLibrary(); }
+
+    function handleBgTypeChange() {
+        const type = document.getElementById('bg-type').value;
+        if(type === 'transparent') {
+            document.getElementById('bg-texture').value = 'none';
+        }
+        updatePreview();
     }
 
     async function selectIcon(id, e) {
@@ -739,6 +756,79 @@
         }
     }
 
+    // Advanced Border Drawing Function (Shared by UI & Export)
+    function drawBorderNatively(ctx, style, color, size, paddingPct) {
+        if(style === 'none') return;
+        const th = Math.max(2, size * 0.04); 
+        const pad = Math.max(th/2, size * (paddingPct / 100)); // Prevent clipping at 0%
+        const w = size - pad * 2;
+        const h = size - pad * 2;
+        const cl = size * 0.2; // corner bracket length
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = th;
+        ctx.lineCap = 'square';
+        ctx.lineJoin = 'miter';
+
+        if(style === 'solid') {
+            ctx.strokeRect(pad, pad, w, h);
+        } else if(style === 'corners-all') {
+            ctx.beginPath(); ctx.moveTo(pad, pad+cl); ctx.lineTo(pad, pad); ctx.lineTo(pad+cl, pad); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(size-pad-cl, pad); ctx.lineTo(size-pad, pad); ctx.lineTo(size-pad, pad+cl); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(pad, size-pad-cl); ctx.lineTo(pad, size-pad); ctx.lineTo(pad+cl, size-pad); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(size-pad-cl, size-pad); ctx.lineTo(size-pad, size-pad); ctx.lineTo(size-pad, size-pad-cl); ctx.stroke();
+        } else if(style === 'corners-tr-bl') {
+            ctx.beginPath(); ctx.moveTo(size-pad-cl, pad); ctx.lineTo(size-pad, pad); ctx.lineTo(size-pad, pad+cl); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(pad, size-pad-cl); ctx.lineTo(pad, size-pad); ctx.lineTo(pad+cl, size-pad); ctx.stroke();
+        } else if(style === 'corners-tl-br') {
+            ctx.beginPath(); ctx.moveTo(pad, pad+cl); ctx.lineTo(pad, pad); ctx.lineTo(pad+cl, pad); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(size-pad-cl, size-pad); ctx.lineTo(size-pad, size-pad); ctx.lineTo(size-pad, size-pad-cl); ctx.stroke();
+        } else if(style === 'lines-tb') {
+            ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(size-pad, pad); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(pad, size-pad); ctx.lineTo(size-pad, size-pad); ctx.stroke();
+        } else if(style === 'lines-lr') {
+            ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(pad, size-pad); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(size-pad, pad); ctx.lineTo(size-pad, size-pad); ctx.stroke();
+        }
+    }
+
+    // Dynamic Texture Generator
+    function generateTextureCanvas(type, color, scale, opacity) {
+        if(type === 'none') return null;
+        const can = document.createElement('canvas');
+        const ctx = can.getContext('2d');
+        const s = parseInt(scale); 
+        can.width = s; can.height = s;
+
+        let r=0, g=0, b=0;
+        if (color.length === 7) {
+            r = parseInt(color.substr(1,2), 16);
+            g = parseInt(color.substr(3,2), 16);
+            b = parseInt(color.substr(5,2), 16);
+        }
+        ctx.fillStyle = `rgba(${r},${g},${b},${opacity/100})`;
+        ctx.strokeStyle = `rgba(${r},${g},${b},${opacity/100})`;
+
+        if (type === 'checkerboard') {
+            ctx.fillRect(0,0,s/2,s/2);
+            ctx.fillRect(s/2,s/2,s/2,s/2);
+        } else if (type === 'lines') {
+            ctx.fillRect(0,0,s, s*0.2);
+        } else if (type === 'dots') {
+            ctx.beginPath();
+            ctx.arc(s/2, s/2, s*0.2, 0, Math.PI*2);
+            ctx.fill();
+        } else if (type === 'grid') {
+            ctx.fillRect(0,0,s, s*0.1);
+            ctx.fillRect(0,0,s*0.1, s);
+        } else if (type === 'diagonal') {
+            ctx.lineWidth = s*0.2;
+            ctx.beginPath(); ctx.moveTo(-s*0.5, s*0.5); ctx.lineTo(s*1.5, -s*0.5); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-s*0.5, s*1.5); ctx.lineTo(s*1.5, s*0.5); ctx.stroke();
+        }
+        return can;
+    }
+
     function updatePreview() {
         const iconContainer = document.getElementById('preview-icon');
         const bgContainer = document.getElementById('preview-bg');
@@ -746,6 +836,7 @@
         const outlineContainer = document.getElementById('preview-outline');
         const previewStage = document.getElementById('live-preview');
 
+        // Capture Inputs
         const scale = document.getElementById('icon-scale').value / 100;
         const rotate = document.getElementById('icon-rotation').value;
         const offsetX = document.getElementById('icon-x').value;
@@ -753,9 +844,22 @@
         const color = document.getElementById('icon-color').value;
         const effect = document.getElementById('icon-effect').value;
         const glow = document.getElementById('bg-glow').value;
-
-        iconContainer.style.transform = `translate(${offsetX}%, ${offsetY}%) scale(${scale}) rotate(${rotate}deg)`;
         
+        const bgType = document.getElementById('bg-type').value;
+        const color1 = document.getElementById('bg-color-1').value;
+        const color2 = document.getElementById('bg-color-2').value;
+        const cornerRadius = document.getElementById('bg-radius').value + '%';
+        
+        const texture = document.getElementById('bg-texture').value;
+        const texColor = document.getElementById('bg-texture-color').value;
+        const texOpacity = document.getElementById('bg-texture-opacity').value;
+        const texScale = document.getElementById('bg-texture-scale').value;
+
+        const border = document.getElementById('bg-border').value;
+        const borderPadding = document.getElementById('bg-border-padding').value;
+
+        // 1. Icon Prep
+        iconContainer.style.transform = `translate(${offsetX}%, ${offsetY}%) scale(${scale}) rotate(${rotate}deg)`;
         iconContainer.innerHTML = currentIconSvg;
         
         if(!currentIconIsImg) {
@@ -768,6 +872,7 @@
             }
         }
 
+        // 2. Base Filters & Glow Logic
         let customFilter = '';
         if (effect === 'stroke') {
             customFilter += `drop-shadow(2px 2px 0 ${color}) drop-shadow(-2px -2px 0 ${color}) drop-shadow(2px -2px 0 ${color}) drop-shadow(-2px 2px 0 ${color}) `;
@@ -776,22 +881,12 @@
         }
 
         if(glow === 'active') {
-            customFilter += `drop-shadow(0 0 8px ${color})`;
-            previewStage.classList.add('glow-active');
-            previewStage.style.setProperty('--accent', color);
-        } else {
-            previewStage.classList.remove('glow-active');
+            customFilter += `drop-shadow(0 0 8px ${color}) `;
         }
-        
         iconContainer.style.filter = customFilter.trim();
 
-        const bgType = document.getElementById('bg-type').value;
-        const color1 = document.getElementById('bg-color-1').value;
-        const color2 = document.getElementById('bg-color-2').value;
-        const cornerRadius = document.getElementById('bg-radius').value + '%';
-
+        // 3. Background Setup
         previewStage.style.setProperty('--sd-radius', cornerRadius);
-
         if (bgType === 'solid') {
             bgContainer.style.background = color1;
         } else if (bgType === 'gradient') {
@@ -800,34 +895,24 @@
             bgContainer.style.background = 'transparent';
         }
 
-        const texture = document.getElementById('bg-texture').value;
-        textureContainer.style.background = 'none';
-        if (texture === 'checkerboard') {
-            textureContainer.style.background = 'repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000)';
-            textureContainer.style.backgroundPosition = '0 0, 10px 10px';
-            textureContainer.style.backgroundSize = '20px 20px';
-            textureContainer.style.opacity = '0.1';
-        } else if (texture === 'lines') {
-            textureContainer.style.background = 'repeating-linear-gradient(0deg, transparent, transparent 2px, #000 2px, #000 4px)';
-            textureContainer.style.opacity = '0.2';
-        } else if (texture === 'dots') {
-            textureContainer.style.background = 'radial-gradient(circle, #000 1px, transparent 1px)';
-            textureContainer.style.backgroundSize = '10px 10px';
-            textureContainer.style.opacity = '0.3';
+        // 4. Texture Setup
+        const texCan = generateTextureCanvas(texture, texColor, texScale, texOpacity);
+        if(texCan) {
+            textureContainer.style.backgroundImage = `url(${texCan.toDataURL()})`;
+            textureContainer.style.backgroundRepeat = 'repeat';
+        } else {
+            textureContainer.style.backgroundImage = 'none';
         }
 
-        const border = document.getElementById('bg-border').value;
+        // 5. Border Setup (Draw locally on temp canvas, apply as background)
+        const bCan = document.createElement('canvas');
+        bCan.width = 144; bCan.height = 144; // Preview size approx
+        const bCtx = bCan.getContext('2d');
+        drawBorderNatively(bCtx, border, color, 144, borderPadding);
         
-        outlineContainer.style.border = 'none';
-        outlineContainer.style.background = 'none';
-        outlineContainer.style.clipPath = 'none';
-        
-        if (border === 'solid') {
-            outlineContainer.style.border = `4px solid ${color}`;
-        } else if (border === 'brackets') {
-            outlineContainer.style.border = `4px solid ${color}`;
-            outlineContainer.style.clipPath = 'polygon(0 0, 20% 0, 20% 10%, 10% 10%, 10% 20%, 0 20%, 0 80%, 10% 80%, 10% 90%, 20% 90%, 20% 100%, 0 100%, 0 0, 100% 0, 100% 20%, 90% 20%, 90% 10%, 80% 10%, 80% 0%, 100% 0%, 100% 100%, 80% 100%, 80% 90%, 90% 90%, 90% 80%, 100% 80%)';
-        }
+        outlineContainer.style.backgroundImage = `url(${bCan.toDataURL()})`;
+        outlineContainer.style.backgroundSize = '100% 100%';
+        outlineContainer.style.filter = glow === 'active' ? `drop-shadow(0 0 8px ${color})` : 'none';
     }
 
     function addToSet() {
@@ -849,7 +934,11 @@
                 color2: document.getElementById('bg-color-2').value,
                 bgRadius: document.getElementById('bg-radius').value,
                 texture: document.getElementById('bg-texture').value,
+                texColor: document.getElementById('bg-texture-color').value,
+                texOpacity: document.getElementById('bg-texture-opacity').value,
+                texScale: document.getElementById('bg-texture-scale').value,
                 border: document.getElementById('bg-border').value,
+                borderPadding: document.getElementById('bg-border-padding').value,
                 glow: document.getElementById('bg-glow').value
             }
         };
@@ -882,7 +971,6 @@
             let bgStyle = '';
             if(item.settings.bgType === 'solid') bgStyle = `background: ${item.settings.color1};`;
             if(item.settings.bgType === 'gradient') bgStyle = `background: linear-gradient(135deg, ${item.settings.color1}, ${item.settings.color2});`;
-            
             preview.setAttribute('style', bgStyle);
             
             const iconDiv = document.createElement('div');
@@ -947,6 +1035,7 @@
 
         for(let i=0; i < iconSet.length; i++) {
             const item = iconSet[i];
+            const s = item.settings;
             
             for(let r=0; r < resolutions.length; r++) {
                 const size = resolutions[r];
@@ -954,51 +1043,37 @@
                 canvas.height = size;
                 ctx.clearRect(0, 0, size, size);
 
-                const s = item.settings;
-                const radiusPct = s.bgRadius / 100;
-                const radius = size * radiusPct;
-
-                ctx.beginPath();
-                ctx.moveTo(radius, 0);
-                ctx.lineTo(size - radius, 0);
-                ctx.quadraticCurveTo(size, 0, size, radius);
-                ctx.lineTo(size, size - radius);
-                ctx.quadraticCurveTo(size, size, size - radius, size);
-                ctx.lineTo(radius, size);
-                ctx.quadraticCurveTo(0, size, 0, size - radius);
-                ctx.lineTo(0, radius);
-                ctx.quadraticCurveTo(0, 0, radius, 0);
-                ctx.closePath();
-                ctx.clip(); 
-
+                // Export is SQUARE (no clip-path for rounded corners)
                 if (s.bgType === 'solid') {
                     ctx.fillStyle = s.color1;
-                    ctx.fill();
+                    ctx.fillRect(0,0,size,size);
                 } else if (s.bgType === 'gradient') {
                     const grd = ctx.createLinearGradient(0, 0, size, size);
                     grd.addColorStop(0, s.color1);
                     grd.addColorStop(1, s.color2);
                     ctx.fillStyle = grd;
-                    ctx.fill();
+                    ctx.fillRect(0,0,size,size);
                 }
 
-                ctx.globalAlpha = 0.2;
-                if(s.texture === 'checkerboard') {
-                    ctx.fillStyle = '#000000';
-                    const sq = size / 10;
-                    for(let cx=0; cx<10; cx++) {
-                        for(let cy=0; cy<10; cy++) {
-                            if((cx+cy)%2===0) ctx.fillRect(cx*sq, cy*sq, sq, sq);
-                        }
-                    }
-                } else if (s.texture === 'lines') {
-                    ctx.fillStyle = '#000000';
-                    for(let ly=0; ly<size; ly+=4) {
-                        ctx.fillRect(0, ly, size, 2);
-                    }
+                // Textures (Scaled proportionally for export)
+                const scaleRatio = size / 144; // base logic off 144px standard preview
+                const texCan = generateTextureCanvas(s.texture, s.texColor, s.texScale * scaleRatio, s.texOpacity);
+                if(texCan) {
+                    const pat = ctx.createPattern(texCan, 'repeat');
+                    ctx.fillStyle = pat;
+                    ctx.fillRect(0,0,size,size);
                 }
-                ctx.globalAlpha = 1.0;
 
+                // Border (with Glow)
+                if(s.glow === 'active') {
+                    ctx.shadowColor = s.color;
+                    ctx.shadowBlur = size * 0.08;
+                } else {
+                    ctx.shadowBlur = 0;
+                }
+                drawBorderNatively(ctx, s.border, s.color, size, s.borderPadding);
+                
+                // Icon Process
                 let iconDataUrl = "";
                 if(!item.isImg) {
                     let cleanSvg = item.iconSvg.replace(/fill="[^"]*"/g, `fill="${s.color}"`);
@@ -1027,6 +1102,7 @@
                         ctx.rotate(s.rotate * Math.PI / 180);
                         ctx.scale(s.scale, s.scale);
 
+                        // Icon Effects
                         if(s.effect === 'stroke') {
                             ctx.shadowColor = s.color;
                             ctx.shadowBlur = 2;
@@ -1038,23 +1114,14 @@
                         
                         if(s.glow === 'active') {
                             ctx.shadowColor = s.color;
-                            ctx.shadowBlur = size * 0.1;
-                            ctx.drawImage(img, -iWidth/2, -iHeight/2, iWidth, iHeight);
+                            ctx.shadowBlur = size * 0.08;
+                            ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+                        } else {
+                            ctx.shadowBlur = 0;
                         }
                         
-                        ctx.shadowBlur = 0;
-                        ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
                         ctx.drawImage(img, -iWidth/2, -iHeight/2, iWidth, iHeight);
                         ctx.restore();
-                        
-                        if(s.border !== 'none') {
-                            ctx.strokeStyle = s.color;
-                            ctx.lineWidth = size * 0.04;
-                            if(s.border === 'solid') {
-                                ctx.stroke(); 
-                            }
-                        }
-                        
                         resolve();
                     };
                     img.onerror = () => resolve(); 
@@ -1063,7 +1130,6 @@
 
                 const dataUrl = canvas.toDataURL("image/png");
                 const b64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
-                
                 const fileName = `${baseName}-${i+1}${resolutions.length > 1 ? `_${size}px` : ''}.png`;
 
                 if(useZip) {
@@ -1098,42 +1164,19 @@
     // ===== FOURTHWALL SCROLLBAR FIX =====
     let lastHeight = 0;
     let resizeTimer;
-
-    /**
-     * Sends the current scrollHeight to the parent window if it has changed.
-     * This is the *only* function that should send a postMessage.
-     */
     function sendHeight() {
       const height = document.body.scrollHeight;
-      
-      // Only send message if height has *actually* changed
       if (height !== lastHeight) {
         lastHeight = height;
         window.parent.postMessage({ frameHeight: height }, '*');
       }
     }
-
-    /**
-     * A debounced version of sendHeight() to be called on content changes.
-     * This ensures we don't spam messages during rapid changes.
-     */
     function scheduleHeightCheck() {
-        // Clear any pending checks
         clearTimeout(resizeTimer);
-        // Schedule a new check
         resizeTimer = setTimeout(sendHeight, 150);
     }
-
-    // Send height on initial load (with a slight delay)
-    window.addEventListener('load', () => {
-        setTimeout(sendHeight, 100);
-    });
-
-    // Send height on window resize (debounced)
-    window.addEventListener('resize', () => {
-        // Use scheduleHeightCheck for built-in debounce
-        scheduleHeightCheck();
-    });
+    window.addEventListener('load', () => { setTimeout(sendHeight, 100); });
+    window.addEventListener('resize', () => { scheduleHeightCheck(); });
     // ===== END OF SCROLLBAR FIX =====
 </script>
 </body>
