@@ -1,2010 +1,1086 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Deck Icon Generator</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <style>
-
-        /* ===== ROOT VARIABLES ===== */
-        :root {
-            --bg-primary: #191919;
-            --bg-secondary: #1F1F1F;
-            --bg-hover: #323232;
-            --outline: #323232;
-            --accent: #87A9FF;
-            --text-primary: #D4D4D4;
-            --text-secondary: #8C8C8C;
-            --success: #4CAF50;
-            --radius: 8px;
-        }
-
-        /* ===== GLOBAL STYLES ===== */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            padding: 24px 16px;
-        }
-
-        /* ===== LAYOUT ===== */
-        .main-wrapper { max-width: 1200px; margin: 0 auto; }
-
-        .layout-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-        }
-
-        @media (min-width: 768px) {
-            .layout-container {
-                grid-template-columns: 1fr 1fr;
-                gap: 24px;
-            }
-        }
-
-        .left-column,
-        .right-column {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        /* ===== COLLAPSIBLE SECTIONS ===== */
-        .collapsible-section {
-            background: var(--bg-secondary);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            overflow: hidden;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        .collapsible-section:hover {
-            border-color: var(--accent);
-            box-shadow: 0 4px 16px rgba(135, 169, 255, 0.1);
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 24px;
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
-        }
-
-        .section-header:hover { background: var(--bg-hover); }
-
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .section-title i { color: var(--accent); font-size: 18px; }
-
-        .section-header-right { display: flex; align-items: center; gap: 12px; }
-
-        .toggle-icon { color: var(--text-secondary); transition: transform 0.3s; }
-        .toggle-icon.collapsed { transform: rotate(-90deg); }
-
-        .section-content {
-            padding: 0 24px 24px;
-            max-height: 5000px;
-            opacity: 1;
-            overflow: hidden;
-            transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-        }
-
-        .section-content.collapsed {
-            max-height: 0;
-            opacity: 0;
-            padding: 0 24px;
-        }
-
-        /* ===== HELP BUTTON ===== */
-        .help-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: var(--bg-primary);
-            border: 1px solid var(--outline);
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s, border-color 0.2s, transform 0.2s;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-
-        .help-btn:hover {
-            background: var(--accent);
-            color: var(--bg-primary);
-            border-color: var(--accent);
-            transform: scale(1.1);
-        }
-
-        /* ===== HELP MODAL ===== */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal-overlay.active { display: flex; animation: fadeIn 0.25s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .modal-content {
-            background: var(--bg-secondary);
-            border: 1px solid var(--accent);
-            border-radius: var(--radius);
-            max-width: 500px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 8px 32px rgba(135, 169, 255, 0.3);
-            animation: slideUp 0.25s ease;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .modal-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--outline);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .modal-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--bg-primary);
-            border: 1px solid var(--outline);
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
-        }
-
-        .modal-close:hover {
-            background: var(--accent);
-            color: var(--bg-primary);
-            border-color: var(--accent);
-        }
-
-        .modal-body { padding: 24px; }
-
-        .help-section { margin-bottom: 16px; }
-        .help-section:last-child { margin-bottom: 0; }
-        .help-section h3 { font-size: 14px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
-        .help-section p { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
-
-        .modal-content::-webkit-scrollbar { width: 8px; }
-        .modal-content::-webkit-scrollbar-track { background: var(--bg-primary); border-radius: 4px; }
-        .modal-content::-webkit-scrollbar-thumb { background: var(--outline); border-radius: 4px; }
-        .modal-content::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-        /* ===== PREVIEW SECTION ===== */
-        .preview-container {
-            position: relative;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            border-radius: var(--radius);
-            padding: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            border: 1px solid var(--outline);
-            overflow: hidden;
-        }
-
-        .preview-container::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(135, 169, 255, 0.1) 0%, transparent 70%);
-            animation: rotateBg 20s linear infinite;
-        }
-
-        @keyframes rotateBg { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        .preview-area {
-            position: relative;
-            width: 300px;
-            height: 300px;
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            z-index: 1;
-            flex-shrink: 0;
-        }
-
-        @media (max-width: 767px) {
-            .preview-area { width: 240px; height: 240px; }
-            .preview-container { padding: 24px; }
-        }
-
-        #iconPreview { display: block; width: 100%; height: 100%; }
-
-        .preview-placeholder {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-align: center;
-            pointer-events: none;
-            opacity: 0.5;
-            letter-spacing: 0.5px;
-        }
-
-        /* ===== STATS ===== */
-        .preview-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .stat-card {
-            background: var(--bg-primary);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            padding: 12px;
-            text-align: center;
-            transition: background 0.2s, border-color 0.2s;
-        }
-
-        .stat-card.clickable { cursor: pointer; }
-        .stat-card.clickable:hover { border-color: var(--accent); background: var(--bg-hover); }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .stat-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-        }
-
-        /* ===== FORM INPUTS ===== */
-        .input-group { margin-bottom: 16px; }
-        .input-group:last-child { margin-bottom: 0; }
-
-        .input-group > label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            background: var(--bg-primary);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            color: var(--text-primary);
-            font-size: 14px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.1);
-        }
-
-        /* ===== CHECKBOXES ===== */
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        @media (max-width: 640px) { .checkbox-grid { grid-template-columns: 1fr; } }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            padding: 10px;
-            background: var(--bg-primary);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            transition: background 0.2s, border-color 0.2s;
-        }
-
-        .checkbox-item:hover { background: var(--bg-hover); border-color: var(--accent); }
-
-        .checkbox-item input[type="checkbox"] {
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border: 2px solid var(--outline);
-            border-radius: 4px;
-            cursor: pointer;
-            position: relative;
-            transition: background 0.2s, border-color 0.2s;
-            flex-shrink: 0;
-        }
-
-        .checkbox-item input[type="checkbox"]:checked {
-            background: var(--accent);
-            border-color: var(--accent);
-        }
-
-        .checkbox-item input[type="checkbox"]:checked::after {
-            content: '✓';
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: var(--bg-primary);
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .checkbox-item label { font-size: 12px; color: var(--text-primary); cursor: pointer; }
-
-        /* ===== COLOR PICKERS ===== */
-        .color-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-
-        @media (max-width: 640px) { .color-grid { grid-template-columns: 1fr; } }
-
-        .color-picker-item { display: flex; flex-direction: column; gap: 8px; }
-
-        .color-picker-item > label {
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .color-input-wrapper { display: flex; flex-direction: column; gap: 6px; }
-
-        input[type="color"] {
-            width: 100%;
-            height: 48px;
-            border: 2px solid var(--outline);
-            border-radius: var(--radius);
-            cursor: pointer;
-            background: transparent;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        input[type="color"]:hover {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.1);
-        }
-
-        .hex-input {
-            width: 100%;
-            padding: 6px 8px;
-            background: var(--bg-primary);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            color: var(--text-primary);
-            font-size: 11px;
-            font-family: 'Courier New', monospace;
-            text-transform: uppercase;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            text-align: center;
-        }
-
-        .hex-input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(135, 169, 255, 0.1);
-        }
-
-        /* ===== GRADIENT WARNING ===== */
-        .gradient-warning {
-            display: none;
-            background: rgba(255, 165, 0, 0.1);
-            border: 1px solid rgba(255, 165, 0, 0.3);
-            border-radius: var(--radius);
-            padding: 8px 12px;
-            margin-top: 8px;
-            font-size: 11px;
-            color: #FFA500;
-            line-height: 1.5;
-        }
-
-        .gradient-warning.active { display: block; }
-
-        /* ===== BUTTONS ===== */
-        .btn {
-            position: relative;
-            padding: 14px 24px;
-            border-radius: var(--radius);
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--outline);
-            cursor: pointer;
-            overflow: hidden;
-            font-size: 14px;
-            font-weight: 600;
-            transition: background 0.2s, border-color 0.2s;
-            width: 100%;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 75%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: skewX(-25deg);
-            transition: left 0.7s ease-in-out;
-        }
-
-        .btn:hover::before { left: 125%; }
-        .btn:hover { background: var(--bg-hover); border-color: var(--accent); }
-
-        .btn-success {
-            background: var(--success);
-            border-color: var(--success);
-            color: white;
-            font-weight: 700;
-        }
-
-        .btn-success:hover {
-            background: #5cb85f;
-            border-color: #5cb85f;
-            box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
-        }
-
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* ===== TAB NAVIGATION ===== */
-        .tab-navigation { display: flex; gap: 8px; margin-bottom: 16px; }
-
-        .tab-btn {
-            flex: 1;
-            padding: 10px 12px;
-            background: var(--bg-primary);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            color: var(--text-secondary);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s, border-color 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .tab-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
-
-        .tab-btn.active {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: var(--bg-primary);
-            box-shadow: 0 4px 12px rgba(135, 169, 255, 0.2);
-        }
-
-        /* ===== ICON TOOLS BAR ===== */
-        .icon-tools-bar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            align-items: stretch;
-        }
-
-        /* ===== ROTATE CONTROL ===== */
-        .rotate-control {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-            background: var(--bg-primary);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            padding: 8px 10px;
-            transition: border-color 0.2s;
-        }
-
-        .rotate-control-label {
-            font-size: 11px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            flex-shrink: 0;
-        }
-
-        .rotate-buttons {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            margin-left: auto;
-        }
-
-        .rotate-btn {
-            width: 26px;
-            height: 26px;
-            border-radius: 6px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--outline);
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s, border-color 0.2s, color 0.2s;
-            font-size: 11px;
-            flex-shrink: 0;
-        }
-
-        .rotate-btn:hover { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); }
-
-        .rotate-angle-display {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--accent);
-            min-width: 36px;
-            text-align: center;
-            font-family: 'Courier New', monospace;
-        }
-
-        /* ===== DUPLICATE BUTTON ===== */
-        .duplicate-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 12px;
-            background: var(--bg-primary);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            color: var(--text-secondary);
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: border-color 0.2s, color 0.2s, background 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            white-space: nowrap;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .duplicate-btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 75%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-            transform: skewX(-25deg);
-            transition: left 0.6s ease-in-out;
-        }
-
-        .duplicate-btn:hover::before { left: 125%; }
-        .duplicate-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(135, 169, 255, 0.06); }
-        .duplicate-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-        .duplicate-btn i { font-size: 12px; }
-
-        /* ===== CONTENT GRID WRAPPER ===== */
-        .content-wrapper {
-            background: var(--bg-primary);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            padding: 12px;
-        }
-
-        /* ===== LOADING STATE ===== */
-        .grid-loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 32px 16px;
-        }
-
-        .loading-spinner {
-            width: 28px;
-            height: 28px;
-            border: 3px solid var(--outline);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .loading-text {
-            font-size: 12px;
-            color: var(--text-secondary);
-            text-align: center;
-        }
-
-        .loading-progress {
-            font-size: 11px;
-            color: var(--accent);
-            font-family: 'Courier New', monospace;
-        }
-
-        /* ===== CONTENT GRIDS ===== */
-        .content-grid {
-            display: none;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            max-height: 380px;
-            overflow-y: auto;
-        }
-
-        .content-grid.active { display: grid; }
-
-        @media (max-width: 640px) {
-            .content-grid {
-                grid-template-columns: repeat(3, 1fr);
-                max-height: 320px;
-            }
-        }
-
-        .content-grid::-webkit-scrollbar { width: 6px; }
-        .content-grid::-webkit-scrollbar-track { background: transparent; }
-        .content-grid::-webkit-scrollbar-thumb { background: var(--outline); border-radius: 3px; }
-        .content-grid::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-        /* ===== GRID ITEMS ===== */
-        .grid-item {
-            /* Fixed square cells — no more stretch/compress */
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-secondary);
-            border: 2px solid var(--outline);
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-            padding: 6px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .grid-item:hover {
-            border-color: var(--accent);
-            transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(135, 169, 255, 0.18);
-        }
-
-        .grid-item.selected {
-            border-color: var(--accent);
-            background: rgba(135, 169, 255, 0.1);
-            box-shadow: 0 0 0 2px rgba(135, 169, 255, 0.2);
-        }
-
-        /* Icon image inside grid cell — fixed 50% of cell, no distortion */
-        .grid-item-img {
-            width: 50%;
-            height: 50%;
-            object-fit: contain;
-            display: block;
-            flex-shrink: 0;
-            /* Rotation applied inline via style.transform */
-        }
-
-        /* Skeleton placeholder shown while SVG loads */
-        .grid-item-skeleton {
-            width: 50%;
-            height: 50%;
-            border-radius: 4px;
-            background: linear-gradient(90deg, var(--outline) 25%, var(--bg-hover) 50%, var(--outline) 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.2s infinite;
-            flex-shrink: 0;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .icon-name {
-            font-size: 8px;
-            color: var(--text-secondary);
-            text-align: center;
-            margin-top: 4px;
-            width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            line-height: 1.2;
-        }
-
-        /* ===== ROTATION BADGE ===== */
-        .rotation-badge {
-            position: absolute;
-            top: 3px; right: 3px;
-            background: var(--accent);
-            color: var(--bg-primary);
-            font-size: 7px;
-            font-weight: 700;
-            border-radius: 3px;
-            padding: 2px 3px;
-            line-height: 1;
-            pointer-events: none;
-        }
-
-        /* ===== BACKGROUND/TEXTURE OVERLAY ===== */
-        .bg-name-overlay {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
-            color: var(--text-primary);
-            font-size: 8px;
-            padding: 8px 4px 3px;
-            text-align: center;
-            font-weight: 600;
-            pointer-events: none;
-        }
-
-        /* ===== UPLOAD AREA ===== */
-        .upload-area {
-            background: linear-gradient(135deg, rgba(76,175,80,0.1), rgba(76,175,80,0.05));
-            border: 2px dashed var(--success) !important;
-            cursor: pointer;
-        }
-
-        .upload-area:hover { background: rgba(76, 175, 80, 0.15); }
-
-        .upload-area-label {
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--success);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            pointer-events: none;
-        }
-
-        .upload-area input[type="file"] {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        /* ===== DOWNLOAD AREA ===== */
-        .download-area { padding: 24px; }
-
-        /* ===== DUPLICATE FLASH ===== */
-        @keyframes duplicateFlash {
-            0%   { border-color: var(--accent); background: rgba(135,169,255,0.15); }
-            100% { border-color: var(--outline); background: var(--bg-primary); }
-        }
-
-        .duplicate-flash { animation: duplicateFlash 0.4s ease-out forwards; }
-
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Stream Deck Icon Maker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<style>
+    :root {
+        --bg: #191919;
+        --btn-bg: #1F1F1F;
+        --hover: #323232;
+        --outline: #323232;
+        --accent: #87A9FF;
+        --text-primary: #D4D4D4;
+        --text-secondary: #8C8C8C;
+        --radius: 8px;
+        --sd-radius: 20%;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text-primary);
+        font-family: system-ui, sans-serif;
+        padding: 24px 16px;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--hover); border-radius: 4px; }
+
+    .app-container {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+        .app-container { grid-template-columns: 1fr; }
+    }
+
+    .card {
+        background: var(--btn-bg);
+        border: 1px solid var(--outline);
+        border-radius: var(--radius);
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    h3 {
+        margin: 0 0 8px 0;
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--text-primary);
+    }
+
+    label {
+        font-size: 14px;
+        color: var(--text-primary);
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+    }
+    
+    .val-display {
+        float: right;
+        color: var(--accent);
+        font-weight: 500;
+        font-size: 12px;
+        margin-top: 2px;
+    }
+
+    p, .desc {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin: 0 0 12px 0;
+        line-height: 1.4;
+    }
+
+    .btn {
+        position: relative;
+        padding: 10px 16px;
+        border-radius: var(--radius);
+        background: var(--btn-bg);
+        color: var(--text-primary);
+        border: 1px solid rgba(255,255,255,0.06);
+        cursor: pointer;
+        overflow: hidden;
+        font-size: 14px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        text-align: center;
+        transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn:hover { background: var(--hover); border-color: var(--outline); }
+    .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(135,169,255,0.12); }
+    .btn.primary { background: var(--hover); color: var(--accent); border-color: var(--outline); }
+
+    input[type="text"], select {
+        width: 100%;
+        padding: 10px;
+        border-radius: var(--radius);
+        background: var(--bg);
+        border: 1px solid var(--outline);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus, select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(135,169,255,0.1);
+    }
+
+    input[type="color"] {
+        -webkit-appearance: none;
+        border: none;
+        width: 100%;
+        height: 36px;
+        border-radius: var(--radius);
+        cursor: pointer;
+        background: var(--bg);
+        padding: 2px;
+        border: 1px solid var(--outline);
+    }
+    input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
+
+    input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        background: transparent;
+        height: 24px;
+        margin: 0;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        margin-top: -6px;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 4px;
+        cursor: pointer;
+        background: var(--hover);
+        border-radius: 2px;
+    }
+
+    .tabs-header {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    .tab-btn { flex: 1; white-space: nowrap; }
+    .tab-btn.active { background: var(--hover); color: var(--accent); border-color: var(--accent); }
+    
+    .tab-content { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 16px; }
+    .tab-content.active { display: flex; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .preview-stage {
+        display: flex; align-items: center; justify-content: center;
+        background: var(--bg); border: 1px solid var(--outline); border-radius: var(--radius);
+        padding: 40px; min-height: 250px; margin-bottom: 24px; position: relative;
+    }
+
+    .sd-key-preview {
+        width: 144px; height: 144px; border-radius: var(--sd-radius);
+        position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+
+    .sd-key-bg, .sd-key-texture, .sd-key-outline { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+    .sd-key-bg { z-index: 1; }
+    .sd-key-texture { z-index: 2; } /* Alpha controlled via JS, removed overlay blend */
+    .sd-key-outline { z-index: 3; pointer-events: none; }
+
+    .sd-key-icon {
+        position: relative; z-index: 4; width: 60%; height: 60%;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .sd-key-icon svg, .sd-key-icon img { width: 100%; height: 100%; object-fit: contain; overflow: visible; }
+
+    .icon-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px;
+        max-height: 200px; overflow-y: auto; padding-right: 4px;
+    }
+
+    .icon-item {
+        background: var(--bg); border: 1px solid var(--outline); border-radius: var(--radius);
+        padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        aspect-ratio: 1; transition: border-color 0.2s, transform 0.1s; position: relative;
+    }
+    .icon-item:hover { border-color: var(--accent); transform: scale(1.05); }
+    .icon-item.selected { border-color: var(--accent); background: var(--hover); }
+    .icon-item img, .icon-item svg { width: 100%; height: 100%; object-fit: contain; }
+    
+    .icon-item.custom::after {
+        content: '★'; position: absolute; top: 2px; right: 4px; font-size: 10px; color: var(--accent);
+    }
+
+    .set-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 14px; }
+    .set-item-wrap { position: relative; aspect-ratio: 1; animation: scaleIn 0.3s ease; }
+    @keyframes scaleIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .set-actions {
+        position: absolute; top: -8px; right: -8px; z-index: 10;
+        display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s;
+    }
+    .set-item-wrap:hover .set-actions { opacity: 1; }
+    
+    .set-btn {
+        width: 22px; height: 22px; border-radius: 50%; border: none; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white;
+    }
+    .btn-remove { background: #ff4a4a; }
+    .btn-remove:hover { background: #ff2a2a; }
+    .btn-edit { background: var(--accent); }
+    .btn-edit:hover { background: #6b93ff; }
+    .btn-dup { background: #4caf50; }
+    .btn-dup:hover { background: #3d8c40; }
+
+    .set-item-preview {
+        width: 100%; height: 100%; border-radius: var(--sd-radius); border: 1px solid var(--outline);
+        overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: transform 0.2s, border-color 0.2s;
+    }
+    .set-item-preview:hover { transform: scale(1.03); border-color: var(--accent); }
+    .set-item-preview img { width: 100%; height: 100%; object-fit: contain; } /* Exact canvas export image */
+
+    .controls-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .control-group { display: flex; flex-direction: column; }
+
+    .search-box { position: relative; }
+    .search-box input { padding-left: 32px; }
+    .search-box::before { content: '🔍'; position: absolute; left: 10px; top: 10px; font-size: 12px; opacity: 0.5; }
+
+    .troubleshoot {
+        background: rgba(135, 169, 255, 0.1); border-left: 3px solid var(--accent);
+        padding: 12px; border-radius: 0 var(--radius) var(--radius) 0; font-size: 12px; color: var(--text-primary);
+    }
+    
+    .divider { height: 1px; background: var(--outline); margin: 4px 0; }
+</style>
 </head>
 <body>
-<div class="main-wrapper">
-    <div class="layout-container">
 
-        <!-- ===== LEFT COLUMN ===== -->
-        <div class="left-column">
-
-            <!-- CONTENT SECTION -->
-            <div class="collapsible-section">
-                <div class="section-header" onclick="toggleSection(this)">
-                    <div class="section-title">
-                        <i class="fas fa-images"></i>
-                        <span>Content</span>
-                    </div>
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </div>
-                <div class="section-content">
-
-                    <!-- ICON TOOLS BAR -->
-                    <div class="icon-tools-bar" id="iconToolsBar">
-
-                        <!-- ROTATE CONTROL -->
-                        <div class="rotate-control">
-                            <span class="rotate-control-label">Rotate</span>
-                            <div class="rotate-buttons">
-                                <button class="rotate-btn" id="rotateCCWBtn" title="Rotate -45°">
-                                    <i class="fas fa-undo"></i>
-                                </button>
-                                <span class="rotate-angle-display" id="rotateAngleDisplay">0°</span>
-                                <button class="rotate-btn" id="rotateCWBtn" title="Rotate +45°">
-                                    <i class="fas fa-redo"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- DUPLICATE BUTTON -->
-                        <button class="duplicate-btn" id="duplicateBtn" disabled title="Duplicate selected icon(s)">
-                            <i class="fas fa-copy"></i>
-                            Duplicate
-                        </button>
-
-                    </div>
-
-                    <div class="tab-navigation">
-                        <button class="tab-btn active" id="showIconsBtn">Icons</button>
-                        <button class="tab-btn" id="showTxBtn">Textures</button>
-                        <button class="tab-btn" id="showBgBtn">Gradients</button>
-                    </div>
-
-                    <div class="content-wrapper">
-
-                        <!-- ICONS GRID -->
-                        <div id="iconsContent" class="content-grid active">
-                            <!-- populated by JS -->
-                        </div>
-
-                        <!-- TEXTURES GRID -->
-                        <div id="txContent" class="content-grid">
-                            <!-- populated by JS -->
-                        </div>
-
-                        <!-- GRADIENTS GRID -->
-                        <div id="bgContent" class="content-grid">
-                            <!-- populated by JS -->
-                        </div>
-
-                    </div>
-
+<div class="app-container">
+    <div class="left-panel" style="display: flex; flex-direction: column; gap: 24px;">
+        <div class="card">
+            <h3>Live Preview</h3>
+            <p class="desc">How your icon will look on the Stream Deck.</p>
+            <div class="preview-stage">
+                <div class="sd-key-preview" id="live-preview">
+                    <div class="sd-key-bg" id="preview-bg"></div>
+                    <div class="sd-key-texture" id="preview-texture"></div>
+                    <div class="sd-key-outline" id="preview-outline"></div>
+                    <div class="sd-key-icon" id="preview-icon"></div>
                 </div>
             </div>
-
-            <!-- SETTINGS SECTION -->
-            <div class="collapsible-section">
-                <div class="section-header" onclick="toggleSection(this)">
-                    <div class="section-title">
-                        <i class="fas fa-sliders-h"></i>
-                        <span>Settings</span>
-                    </div>
-                    <div class="section-header-right">
-                        <button class="help-btn" onclick="openHelpModal(event)" title="Help">
-                            <i class="fas fa-question"></i>
-                        </button>
-                        <i class="fas fa-chevron-down toggle-icon"></i>
-                    </div>
-                </div>
-                <div class="section-content">
-
-                    <!-- ICON NAME INPUT -->
-                    <div class="input-group">
-                        <label for="iconName">Icon Name</label>
-                        <input type="text" id="iconName" value="Custom Icon" placeholder="Enter icon name...">
-                    </div>
-
-                    <!-- OPTIONS CHECKBOXES -->
-                    <div class="input-group">
-                        <label>Options</label>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="saveAsZip">
-                                <label for="saveAsZip">Multi-Size &amp; ZIP</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="edgeOnOff" checked>
-                                <label for="edgeOnOff">Edge On/Off</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="edgeGlowOnOff" checked>
-                                <label for="edgeGlowOnOff">Edge Glow</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="logoGlowOnOff">
-                                <label for="logoGlowOnOff">Logo Glow</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- COLOR PICKERS -->
-                    <div class="input-group">
-                        <div class="color-grid">
-                            <div class="color-picker-item">
-                                <label for="iconColor">Icon</label>
-                                <div class="color-input-wrapper">
-                                    <input type="color" id="iconColor" value="#FFFFFF">
-                                    <input type="text" id="iconColorHex" value="#FFFFFF" class="hex-input" maxlength="7">
-                                </div>
-                            </div>
-                            <div class="color-picker-item">
-                                <label for="backgroundColor">Background</label>
-                                <div class="color-input-wrapper">
-                                    <input type="color" id="backgroundColor" value="#000000">
-                                    <input type="text" id="backgroundColorHex" value="#000000" class="hex-input" maxlength="7">
-                                </div>
-                            </div>
-                            <div class="color-picker-item">
-                                <label for="glowColor">Glow</label>
-                                <div class="color-input-wrapper">
-                                    <input type="color" id="glowColor" value="#87A9FF">
-                                    <input type="text" id="glowColorHex" value="#87A9FF" class="hex-input" maxlength="7">
-                                </div>
-                            </div>
-                        </div>
-                        <!-- GRADIENT WARNING -->
-                        <div class="gradient-warning" id="gradientWarning">
-                            ⚠️ A gradient is active. Deselect the gradient first to use a solid background colour.
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
+            <button class="btn primary" onclick="addToSet()">Add to Set +</button>
         </div>
 
-        <!-- ===== RIGHT COLUMN ===== -->
-        <div class="right-column">
-
-            <!-- PREVIEW SECTION -->
-            <div class="collapsible-section">
-                <div class="section-header" onclick="toggleSection(this)">
-                    <div class="section-title">
-                        <i class="fas fa-eye"></i>
-                        <span>Preview</span>
-                    </div>
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </div>
-                <div class="section-content">
-                    <div class="preview-container">
-                        <div class="preview-area">
-                            <!-- PREVIEW CANVAS -->
-                            <canvas id="iconPreview" width="300" height="300"></canvas>
-                            <div class="preview-placeholder" id="previewPlaceholder">SELECT AN ICON</div>
-                        </div>
-                    </div>
-                    <!-- PREVIEW STATS -->
-                    <div class="preview-stats">
-                        <div class="stat-card">
-                            <div class="stat-label">Icons Selected</div>
-                            <div class="stat-value" id="selectedCount">0</div>
-                        </div>
-                        <div class="stat-card clickable" id="sizeCard">
-                            <div class="stat-label">Resolution</div>
-                            <div class="stat-value"><span id="currentSize">144</span>px</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- DOWNLOAD SECTION -->
-            <div class="collapsible-section">
-                <div class="download-area">
-                    <button id="downloadBtn" class="btn btn-success">
-                        <i class="fas fa-download"></i> Download Icons
-                    </button>
-                </div>
-            </div>
-
+        <div class="card">
+            <h3>Your Icon Set (<span id="set-count">0</span>)</h3>
+            <p class="desc">Click an icon to quickly edit it, or use the hover actions. (Exports process as squares).</p>
+            <div class="set-grid" id="set-grid"></div>
         </div>
-
     </div>
-</div>
 
-<!-- HELP MODAL -->
-<div class="modal-overlay" id="helpModal" onclick="closeHelpModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <div class="modal-title">
-                <i class="fas fa-circle-info"></i>
-                <span>Quick Guide</span>
-            </div>
-            <button class="modal-close" onclick="closeHelpModal()">
-                <i class="fas fa-times"></i>
-            </button>
+    <div class="card controls-panel">
+        <div class="tabs-header">
+            <button class="btn tab-btn active" onclick="switchTab('icon')">1. Icon</button>
+            <button class="btn tab-btn" onclick="switchTab('bg')">2. Background</button>
+            <button class="btn tab-btn" onclick="switchTab('export')">3. Export</button>
         </div>
-        <div class="modal-body">
-            <div class="help-section">
-                <h3>Rotate</h3>
-                <p>Use ↺ / ↻ to rotate the currently active (most recently selected) icon in 45° steps. Rotation is stored per-icon — each icon in your selection remembers its own angle independently. The badge on the grid tile and the preview both reflect the active icon's rotation.</p>
+
+        <div class="tab-content active" id="tab-icon">
+            <div class="control-group search-box">
+                <input type="text" id="icon-search" placeholder="Search icons..." onkeyup="filterIcons()">
             </div>
-            <div class="help-section">
-                <h3>Duplicate</h3>
-                <p>Select one or more icons then click <strong>Duplicate</strong>. Copies are added to the top of the grid. Duplicating is separate from rotating — use rotate on a duplicate just like any other icon.</p>
+            
+            <div class="icon-grid" id="library-grid"></div>
+
+            <div class="control-group">
+                <label>Upload Custom SVG/PNG (Multi-select supported)</label>
+                <input type="file" id="custom-upload" accept=".svg, .png" multiple style="font-size: 12px; color: var(--text-secondary);" onchange="handleFileUpload(event)">
             </div>
-            <div class="help-section">
-                <h3>Resolution</h3>
-                <p>Click the Resolution card to cycle through sizes: 72px, 96px, 144px (default), 288px, 500px.</p>
+
+            <div class="divider"></div>
+
+            <div class="control-group">
+                <label>Scale (%) <span id="icon-scale-val" class="val-display">100</span></label>
+                <input type="range" id="icon-scale" value="100" min="10" max="250" oninput="updateVal('icon-scale'); updatePreview()">
             </div>
-            <div class="help-section">
-                <h3>Multi-Size &amp; ZIP</h3>
-                <p>Generates all 5 sizes and packages them into a ZIP, organised into folders by resolution.</p>
+
+            <div class="control-group">
+                <label>Rotation (Deg) <span id="icon-rotation-val" class="val-display">0</span></label>
+                <input type="range" id="icon-rotation" value="0" min="-180" max="180" oninput="updateVal('icon-rotation'); updatePreview()">
             </div>
-            <div class="help-section">
-                <h3>Effects</h3>
-                <p><strong>Edge On/Off:</strong> Toggle corner bracket decorations.<br>
-                <strong>Edge Glow:</strong> Adds glow to brackets (requires Edge On).<br>
-                <strong>Logo Glow:</strong> Adds glow behind the icon.</p>
+
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Offset X (%) <span id="icon-x-val" class="val-display">0</span></label>
+                    <input type="range" id="icon-x" value="0" min="-100" max="100" oninput="updateVal('icon-x'); updatePreview()">
+                </div>
+                <div class="control-group">
+                    <label>Offset Y (%) <span id="icon-y-val" class="val-display">0</span></label>
+                    <input type="range" id="icon-y" value="0" min="-100" max="100" oninput="updateVal('icon-y'); updatePreview()">
+                </div>
             </div>
-            <div class="help-section">
-                <h3>Content Tabs</h3>
-                <p><strong>Icons:</strong> Select or upload logos.<br>
-                <strong>Textures:</strong> Add overlay patterns.<br>
-                <strong>Gradients:</strong> Apply gradient backgrounds (overrides solid background colour).</p>
+
+            <div class="divider"></div>
+
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Icon Color</label>
+                    <input type="color" id="icon-color" value="#000000" onchange="updatePreview()">
+                </div>
+                <div class="control-group">
+                    <label>Effect</label>
+                    <select id="icon-effect" onchange="toggleEffectControls(); updatePreview()">
+                        <option value="none" selected>None</option>
+                        <option value="stroke">Outline/Stroke</option>
+                        <option value="glitch">Glitch</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="controls-row" id="stroke-controls" style="display: none;">
+                <div class="control-group">
+                    <label>Stroke Color</label>
+                    <input type="color" id="icon-stroke-color" value="#ffffff" onchange="updatePreview()">
+                </div>
+                <div class="control-group">
+                    <label>Stroke Thick. <span id="icon-stroke-w-val" class="val-display">4</span></label>
+                    <input type="range" id="icon-stroke-w" value="4" min="1" max="20" oninput="updateVal('icon-stroke-w'); updatePreview()">
+                </div>
             </div>
         </div>
+
+        <div class="tab-content" id="tab-bg">
+            <div class="control-group">
+                <label>Background Type</label>
+                <select id="bg-type" onchange="handleBgTypeChange()">
+                    <option value="solid" selected>Solid Color</option>
+                    <option value="gradient">Gradient</option>
+                    <option value="transparent">Transparent</option>
+                </select>
+            </div>
+
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Primary Color</label>
+                    <input type="color" id="bg-color-1" value="#ffffff" onchange="updatePreview()">
+                </div>
+                <div class="control-group">
+                    <label>Secondary (Gradient)</label>
+                    <input type="color" id="bg-color-2" value="#eeeeee" onchange="updatePreview()">
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Texture</label>
+                    <select id="bg-texture" onchange="updatePreview()">
+                        <option value="none">None</option>
+                        <option value="checkerboard">Checkerboard</option>
+                        <option value="lines">Scanlines</option>
+                        <option value="dots">Halftone Dots</option>
+                        <option value="grid">Grid</option>
+                        <option value="diagonal">Diagonal Lines</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Texture Color</label>
+                    <input type="color" id="bg-texture-color" value="#000000" onchange="updatePreview()">
+                </div>
+            </div>
+            
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Opacity (%) <span id="bg-texture-opacity-val" class="val-display">15</span></label>
+                    <input type="range" id="bg-texture-opacity" value="15" min="1" max="100" oninput="updateVal('bg-texture-opacity'); updatePreview()">
+                </div>
+                <div class="control-group">
+                    <label>Scale <span id="bg-texture-scale-val" class="val-display">20</span></label>
+                    <input type="range" id="bg-texture-scale" value="20" min="4" max="64" oninput="updateVal('bg-texture-scale'); updatePreview()">
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Border Style</label>
+                    <select id="bg-border" onchange="updatePreview()">
+                        <option value="none">None</option>
+                        <option value="solid">Solid Border</option>
+                        <option value="corners-all">Corners (All)</option>
+                        <option value="corners-tr-bl">Corners (Top-Right / Bottom-Left)</option>
+                        <option value="corners-tl-br">Corners (Top-Left / Bottom-Right)</option>
+                        <option value="lines-tb">Top & Bottom Lines</option>
+                        <option value="lines-lr">Left & Right Lines</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Border Color</label>
+                    <input type="color" id="bg-border-color" value="#000000" onchange="updatePreview()">
+                </div>
+            </div>
+
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>Thickness <span id="bg-border-w-val" class="val-display">4</span></label>
+                    <input type="range" id="bg-border-w" value="4" min="1" max="20" oninput="updateVal('bg-border-w'); updatePreview()">
+                </div>
+                <div class="control-group">
+                    <label>Padding (%) <span id="bg-border-padding-val" class="val-display">5</span></label>
+                    <input type="range" id="bg-border-padding" value="5" min="0" max="30" oninput="updateVal('bg-border-padding'); updatePreview()">
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="control-group">
+                <label>Glow (Applies to Icon & Border)</label>
+                <select id="bg-glow" onchange="updatePreview()">
+                    <option value="none" selected>Off</option>
+                    <option value="active">On</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-export">
+            <div class="control-group">
+                <label>Base Filename</label>
+                <input type="text" id="export-filename" value="HV-Icons" placeholder="HV-Icons">
+                <p class="desc">A number will be added to the end automatically.</p>
+            </div>
+
+            <div class="control-group">
+                <label>Resolutions (Square Export)</label>
+                <select id="export-resolution">
+                    <option value="72">72 x 72 px</option>
+                    <option value="144" selected>144 x 144 px (Standard)</option>
+                    <option value="288">288 x 288 px</option>
+                    <option value="500">500 x 500 px (HD)</option>
+                    <option value="ALL">ALL Resolutions</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Export Method</label>
+                <select id="export-method">
+                    <option value="zip">Download as ZIP (Recommended)</option>
+                    <option value="individual">Download Individual Files</option>
+                </select>
+            </div>
+
+            <button class="btn primary" style="margin-top: 16px; padding: 14px;" onclick="exportIcons()">Export Set</button>
+            
+            <div class="troubleshoot">
+                <strong>Important:</strong> Your exported images will be perfectly square, regardless of the preview's rounded corners. This is intentional to ensure perfect fits on Stream Decks!
+            </div>
+        </div>
+
     </div>
 </div>
 
 <script>
-
-    // ===== COLLAPSIBLE SECTIONS =====
-    function toggleSection(header) {
-        const content = header.nextElementSibling;
-        const icon = header.querySelector('.toggle-icon');
-        content.classList.toggle('collapsed');
-        icon.classList.toggle('collapsed');
-        setTimeout(scheduleHeightCheck, 350);
-    }
-
-    // ===== HELP MODAL =====
-    function openHelpModal(event) {
-        event.stopPropagation();
-        document.getElementById('helpModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeHelpModal(event) {
-        if (!event || event.target.classList.contains('modal-overlay') || event.target.closest('.modal-close')) {
-            document.getElementById('helpModal').classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    }
-
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeHelpModal(); });
-
-    // ===== SIZE CYCLER =====
-    const SIZES = [72, 96, 144, 288, 500];
-    let sizeIndex = 2;
-    let selectedSize = SIZES[sizeIndex];
-
-    document.getElementById('sizeCard').addEventListener('click', () => {
-        sizeIndex = (sizeIndex + 1) % SIZES.length;
-        selectedSize = SIZES[sizeIndex];
-        document.getElementById('currentSize').textContent = selectedSize;
-    });
-
-    // ===== DATA =====
-    const iconsData = [
-        { id: 'adobe-acrobat',     name: 'Acrobat',      type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-acrobat.svg' },
-        { id: 'adobe-illustrator', name: 'Illustrator',  type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-illustrator.svg' },
-        { id: 'adobe-lightroom',   name: 'Lightroom',    type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-lightroom.svg' },
-        { id: 'adobe-photoshop',   name: 'Photoshop',    type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-photoshop.svg' },
-        { id: 'adobe-premiere-pro',name: 'Premiere Pro', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-premiere-pro.svg' },
-        { id: 'amazon',            name: 'Amazon',       type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/amazon.svg' },
-        { id: 'arrow-down',        name: 'Arrow Down',   type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-down.svg' },
-        { id: 'arrow-left',        name: 'Arrow Left',   type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-left.svg' },
-        { id: 'arrow-right',       name: 'Arrow Right',  type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-right.svg' },
-        { id: 'arrow-up',          name: 'Arrow Up',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-up.svg' },
-        { id: 'arrows-h',          name: 'Arrows H',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows-h.svg' },
-        { id: 'arrows-spin',       name: 'Arrows Spin',  type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows-spin.svg' },
-        { id: 'arrows',            name: 'Arrows',       type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows.svg' },
-        { id: 'calendar',          name: 'Calendar',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/calendar.svg' },
-        { id: 'discord',           name: 'Discord',      type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/discord.svg' },
-        { id: 'download',          name: 'Download',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/download.svg' },
-        { id: 'elgato',            name: 'Elgato',       type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/elgato.svg' },
-        { id: 'facebook',          name: 'Facebook',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/facebook.svg' },
-        { id: 'google-drive',      name: 'Google Drive', type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/google-drive.svg' },
-        { id: 'google',            name: 'Google',       type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/google.svg' },
-        { id: 'instagram',         name: 'Instagram',    type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/instagram.svg' },
-        { id: 'number0',           name: 'Number 0',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Number-0.svg' },
-        { id: 'number1',           name: 'Number 1',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Number-1.svg' },
-        { id: 'number2',           name: 'Number 2',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Number-2.svg' },
-        { id: 'number3',           name: 'Number 3',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Number-3.svg' },
-        { id: 'number4',           name: 'Number 4',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Number-4.svg' },
-        { id: 'number5',           name: 'Number 5',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Number-5.svg' },
-        { id: 'number6',           name: 'Number 6',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Number-6.svg' },
-        { id: 'number7',           name: 'Number 7',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Number-7.svg' },
-        { id: 'number8',           name: 'Number 8',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Number-8.svg' },
-        { id: 'number9',           name: 'Number 9',     type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Number-9.svg' },
-        { id: 'numbers',           name: 'Numbers',      type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Numbers.svg' },
-        { id: 'reddit',            name: 'Reddit',       type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/reddit.svg' },
-        { id: 'safari',            name: 'Safari',       type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/safari.svg' },
-        { id: 'text',              name: 'Text',         type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/text.svg' },
-        { id: 'tiktok',            name: 'TikTok',       type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/tiktok.svg' },
-        { id: 'twitch',            name: 'Twitch',       type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/twitch.svg' },
-        { id: 'x-twitter',        name: 'X (Twitter)',  type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/x-twitter.svg' },
-        { id: 'youtube',           name: 'YouTube',      type: 'custom-svg', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/youtube.svg' }
+    const builtInIcons = [
+        { id: 'adobe-acrobat',     name: 'Acrobat',      src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-acrobat.svg' },
+        { id: 'adobe-illustrator', name: 'Illustrator',  src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-illustrator.svg' },
+        { id: 'adobe-lightroom',   name: 'Lightroom',    src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-lightroom.svg' },
+        { id: 'adobe-photoshop',   name: 'Photoshop',    src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-photoshop.svg' },
+        { id: 'adobe-premiere-pro',name: 'Premiere Pro', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/adobe-premiere-pro.svg' },
+        { id: 'amazon',            name: 'Amazon',       src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/amazon.svg' },
+        { id: 'arrow-down',        name: 'Arrow Down',   src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-down.svg' },
+        { id: 'arrow-left',        name: 'Arrow Left',   src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-left.svg' },
+        { id: 'arrow-right',       name: 'Arrow Right',  src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-right.svg' },
+        { id: 'arrow-up',          name: 'Arrow Up',     src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-up.svg' },
+        { id: 'arrows-h',          name: 'Arrows H',     src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows-h.svg' },
+        { id: 'arrows-spin',       name: 'Arrows Spin',  src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows-spin.svg' },
+        { id: 'arrows',            name: 'Arrows',       src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrows.svg' },
+        { id: 'calendar',          name: 'Calendar',     src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/calendar.svg' },
+        { id: 'discord',           name: 'Discord',      src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/discord.svg' },
+        { id: 'download',          name: 'Download',     src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/download.svg' },
+        { id: 'elgato',            name: 'Elgato',       src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/elgato.svg' },
+        { id: 'facebook',          name: 'Facebook',     src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/facebook.svg' },
+        { id: 'google-drive',      name: 'Google Drive', src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/google-drive.svg' },
+        { id: 'google',            name: 'Google',       src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/google.svg' },
+        { id: 'instagram',         name: 'Instagram',    src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/instagram.svg' },
+        { id: 'reddit',            name: 'Reddit',       src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/reddit.svg' },
+        { id: 'safari',            name: 'Safari',       src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/safari.svg' },
+        { id: 'text',              name: 'Text',         src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/text.svg' },
+        { id: 'tiktok',            name: 'TikTok',       src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/tiktok.svg' },
+        { id: 'twitch',            name: 'Twitch',       src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/twitch.svg' },
+        { id: 'x-twitter',         name: 'X (Twitter)',  src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/x-twitter.svg' },
+        { id: 'youtube',           name: 'YouTube',      src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/youtube.svg' }
     ];
 
-    const backgroundsData = [
-        { id: 'off',                name: 'Off',           type: 'color',    value: '#333333' },
-        { id: 'gradient_blue',      name: 'Blue',          type: 'gradient', colors: ['#007bff','#66bbff'] },
-        { id: 'gradient_green',     name: 'Green',         type: 'gradient', colors: ['#28a745','#76e091'] },
-        { id: 'gradient_purple',    name: 'Purple',        type: 'gradient', colors: ['#6f42c1','#b388ff'] },
-        { id: 'gradient_red',       name: 'Red',           type: 'gradient', colors: ['#dc3545','#ff7f8c'] },
-        { id: 'gradient_orange',    name: 'Orange',        type: 'gradient', colors: ['#fd7e14','#ffc107'] },
-        { id: 'gradient_teal',      name: 'Teal',          type: 'gradient', colors: ['#20c997','#6eead7'] },
-        { id: 'gradient_grey',      name: 'Grey',          type: 'gradient', colors: ['#6c757d','#adb5bd'] },
-        { id: 'gradient_pink',      name: 'Pink',          type: 'gradient', colors: ['#e83e8c','#ff85d2'] },
-        { id: 'gradient_brown',     name: 'Brown',         type: 'gradient', colors: ['#795548','#a1887f'] },
-        { id: 'gradient_gold',      name: 'Gold',          type: 'gradient', colors: ['#FFD700','#FFA500'] },
-        { id: 'gradient_indigo',    name: 'Indigo',        type: 'gradient', colors: ['#4b0082','#8a2be2'] },
-        { id: 'gradient_emerald',   name: 'Emerald',       type: 'gradient', colors: ['#50C878','#3D9970'] },
-        { id: 'gradient_violet',    name: 'Violet',        type: 'gradient', colors: ['#EE82EE','#D8BFD8'] },
-        { id: 'gradient_sky',       name: 'Sky',           type: 'gradient', colors: ['#87CEEB','#ADD8E6'] },
-        { id: 'gradient_forest',    name: 'Forest',        type: 'gradient', colors: ['#228B22','#6B8E23'] },
-        { id: 'gradient_sunset',    name: 'Sunset',        type: 'gradient', colors: ['#FF6B6B','#FFE66B'] },
-        { id: 'gradient_ocean',     name: 'Ocean',         type: 'gradient', colors: ['#1A2980','#26D0CE'] },
-        { id: 'gradient_spring',    name: 'Spring',        type: 'gradient', colors: ['#00FF87','#60BF60'] },
-        { id: 'gradient_autumn',    name: 'Autumn',        type: 'gradient', colors: ['#C79081','#F29C6B'] },
-        { id: 'gradient_dawn',      name: 'Dawn',          type: 'gradient', colors: ['#FFC371','#FF5F6D'] },
-        { id: 'gradient_twilight',  name: 'Twilight',      type: 'gradient', colors: ['#5F2C82','#49A09D'] },
-        { id: 'gradient_royal',     name: 'Royal',         type: 'gradient', colors: ['#4C4C4C','#5C5C5C'] },
-        { id: 'gradient_electric',  name: 'Electric',      type: 'gradient', colors: ['#6A057F','#88B04B'] },
-        { id: 'gradient_softblue',  name: 'Soft Blue',     type: 'gradient', colors: ['#D6E6F2','#B9D7EA'] },
-        { id: 'gradient_warmgrey',  name: 'Warm Grey',     type: 'gradient', colors: ['#D3CFCF','#EAEAEA'] },
-        { id: 'gradient_coolgrey',  name: 'Cool Grey',     type: 'gradient', colors: ['#ECEFF1','#CFD8DC'] },
-        { id: 'gradient_deepblue',  name: 'Deep Blue',     type: 'gradient', colors: ['#213A50','#07244D'] },
-        { id: 'gradient_darkred',   name: 'Dark Red',      type: 'gradient', colors: ['#8B0000','#CD5C5C'] },
-        { id: 'gradient_lime',      name: 'Lime',          type: 'gradient', colors: ['#8BC34A','#CDDC39'] },
-        { id: 'gradient_peach',     name: 'Peach',         type: 'gradient', colors: ['#FFCBA4','#FFAB91'] },
-        { id: 'gradient_mint',      name: 'Mint',          type: 'gradient', colors: ['#98FB98','#66CDAA'] },
-        { id: 'gradient_lavender',  name: 'Lavender',      type: 'gradient', colors: ['#E6E6FA','#D8BFD8'] },
-        { id: 'gradient_chocolate', name: 'Choco',         type: 'gradient', colors: ['#5C3317','#A0522D'] },
-        { id: 'gradient_charcoal',  name: 'Charcoal',      type: 'gradient', colors: ['#36454F','#525252'] }
-    ];
+    let customIcons = [];
+    let currentIconSvg = '';
+    let currentIconIsImg = false;
+    let iconSet = [];
 
-    const texturesData = [
-        { id: 'off_texture',              name: 'Off',          type: 'texture', textureOpacity: 0 },
-        { id: 'texture_dots_light',       name: 'Dots Light',   type: 'texture', pattern: 'dots',             textureOpacity: 0.08, dotSize: 1,   dotGap: 15 },
-        { id: 'texture_dots_medium',      name: 'Dots Med',     type: 'texture', pattern: 'dots',             textureOpacity: 0.15, dotSize: 2,   dotGap: 10 },
-        { id: 'texture_dots_dense',       name: 'Dots Dense',   type: 'texture', pattern: 'dots',             textureOpacity: 0.2,  dotSize: 1.5, dotGap: 8 },
-        { id: 'texture_stripes_thin',     name: 'Stripes Thin', type: 'texture', pattern: 'stripes',          textureOpacity: 0.1,  width: 3,     gap: 10 },
-        { id: 'texture_stripes_thick',    name: 'Stripes Thick',type: 'texture', pattern: 'stripes',          textureOpacity: 0.1,  width: 8,     gap: 18 },
-        { id: 'texture_lines_horizontal', name: 'H Lines',      type: 'texture', pattern: 'lines',            textureOpacity: 0.1,  thickness: 3, spacing: 15 },
-        { id: 'texture_lines_vertical',   name: 'V Lines',      type: 'texture', pattern: 'lines_v',          textureOpacity: 0.1,  thickness: 3, spacing: 15 },
-        { id: 'texture_crosshatch',       name: 'Crosshatch',   type: 'texture', pattern: 'crosshatch',       textureOpacity: 0.1,  lineThickness: 2, lineSpacing: 10 },
-        { id: 'texture_squares',          name: 'Squares',      type: 'texture', pattern: 'squares',          textureOpacity: 0.08, squareSize: 10, squareGap: 20 },
-        { id: 'texture_grid',             name: 'Grid',         type: 'texture', pattern: 'grid',             textureOpacity: 0.12, lineThickness: 2, lineSpacing: 15 },
-        { id: 'texture_diamond',          name: 'Diamond',      type: 'texture', pattern: 'diamond',          textureOpacity: 0.1,  diamondSize: 10, spacing: 20 },
-        { id: 'texture_noise',            name: 'Noise',        type: 'texture', pattern: 'noise',            textureOpacity: 0.05 },
-        { id: 'texture_diagonal_stripes', name: 'Diag Stripes', type: 'texture', pattern: 'diagonal_stripes', textureOpacity: 0.1,  width: 4, gap: 12 },
-        { id: 'texture_checkerboard',     name: 'Checker',      type: 'texture', pattern: 'checkerboard',     textureOpacity: 0.05, squareSize: 15 },
-        { id: 'texture_wave',             name: 'Wave',         type: 'texture', pattern: 'wave',             textureOpacity: 0.07 },
-        { id: 'texture_honeycomb',        name: 'Honeycomb',    type: 'texture', pattern: 'honeycomb',        textureOpacity: 0.09 },
-        { id: 'texture_circles',          name: 'Circles',      type: 'texture', pattern: 'circles',          textureOpacity: 0.07, circleRadius: 5, circleGap: 20 },
-        { id: 'texture_hex_grid',         name: 'Hex Grid',     type: 'texture', pattern: 'hex_grid',         textureOpacity: 0.08, hexSize: 10 },
-        { id: 'texture_pyramids',         name: 'Pyramids',     type: 'texture', pattern: 'pyramids',         textureOpacity: 0.06 },
-        { id: 'texture_concentric',       name: 'Concentric',   type: 'texture', pattern: 'concentric',       textureOpacity: 0.08, ringCount: 3, ringGap: 5 },
-        { id: 'texture_diagonal_cross',   name: 'Diag Cross',   type: 'texture', pattern: 'diagonal_cross',   textureOpacity: 0.1,  lineThickness: 3, lineSpacing: 15 },
-        { id: 'texture_woven',            name: 'Woven',        type: 'texture', pattern: 'woven',            textureOpacity: 0.1,  weaveSize: 8 },
-        { id: 'texture_brick',            name: 'Brick',        type: 'texture', pattern: 'brick',            textureOpacity: 0.09, brickWidth: 25, brickHeight: 12 },
-        { id: 'texture_fish_scale',       name: 'Fish Scale',   type: 'texture', pattern: 'fish_scale',       textureOpacity: 0.07, scaleRadius: 10 },
-        { id: 'texture_stars',            name: 'Stars',        type: 'texture', pattern: 'stars',            textureOpacity: 0.06, starSize: 3, starCount: 15 },
-        { id: 'texture_doodle',           name: 'Doodle',       type: 'texture', pattern: 'doodle',           textureOpacity: 0.05 },
-        { id: 'texture_bubble',           name: 'Bubble',       type: 'texture', pattern: 'bubble',           textureOpacity: 0.08, bubbleSize: 6 },
-        { id: 'texture_cloud',            name: 'Cloud',        type: 'texture', pattern: 'cloud',            textureOpacity: 0.04 },
-        { id: 'texture_mesh',             name: 'Mesh',         type: 'texture', pattern: 'mesh',             textureOpacity: 0.1,  meshDensity: 10 },
-        { id: 'texture_ripples',          name: 'Ripples',      type: 'texture', pattern: 'ripples',          textureOpacity: 0.07, rippleStrength: 5 },
-        { id: 'texture_fractal',          name: 'Fractal',      type: 'texture', pattern: 'fractal',          textureOpacity: 0.06 },
-        { id: 'texture_circuit',          name: 'Circuit',      type: 'texture', pattern: 'circuit',          textureOpacity: 0.09 },
-        { id: 'texture_camo',             name: 'Camo',         type: 'texture', pattern: 'camo',             textureOpacity: 0.12 }
-    ];
-
-    // ===== SELECTION STATE =====
-    let selectedIcons   = [];      // array of icon IDs currently selected
-    let activeIconId    = null;    // the most recently clicked icon (drives preview + rotate)
-    let iconRotations   = {};      // { iconId: rotationDegrees } — per-icon, independent
-    let selectedTextureId    = 'off_texture';
-    let selectedBackgroundId = 'off';
-    let customIconCount = 0;
-    let customTextureCount = 0;
-    let customBackgroundCount = 0;
-
-    // ===== ROTATE CONTROL =====
-    const ROTATION_STEPS = [0, 45, 90, 135, 180, 225, 270, 315];
-
-    function getIconRotation(id) {
-        return iconRotations[id] || 0;
+    // Slider Helper Functions
+    function updateVal(id) {
+        const el = document.getElementById(id);
+        const valSpan = document.getElementById(id + '-val');
+        if(el && valSpan) valSpan.innerText = el.value;
     }
-
-    function setIconRotation(id, deg) {
-        iconRotations[id] = deg;
+    function getVal(id) {
+        const el = document.getElementById(id);
+        return el ? parseFloat(el.value) || 0 : 0;
     }
-
-    function rotationStepFor(deg) {
-        return ROTATION_STEPS.indexOf(deg);
-    }
-
-    function updateRotateDisplay() {
-        const deg = activeIconId ? getIconRotation(activeIconId) : 0;
-        document.getElementById('rotateAngleDisplay').textContent = deg + '°';
-    }
-
-    document.getElementById('rotateCWBtn').addEventListener('click', () => {
-        if (!activeIconId) return;
-        const current = getIconRotation(activeIconId);
-        const idx = (ROTATION_STEPS.indexOf(current) + 1) % ROTATION_STEPS.length;
-        setIconRotation(activeIconId, ROTATION_STEPS[idx]);
-        updateRotateDisplay();
-        refreshGridItemRotation(activeIconId);
-        debouncedDrawPreview();
-    });
-
-    document.getElementById('rotateCCWBtn').addEventListener('click', () => {
-        if (!activeIconId) return;
-        const current = getIconRotation(activeIconId);
-        const idx = (ROTATION_STEPS.indexOf(current) - 1 + ROTATION_STEPS.length) % ROTATION_STEPS.length;
-        setIconRotation(activeIconId, ROTATION_STEPS[idx]);
-        updateRotateDisplay();
-        refreshGridItemRotation(activeIconId);
-        debouncedDrawPreview();
-    });
-
-    function refreshGridItemRotation(iconId) {
-        const el = document.querySelector(`#iconsContent .grid-item[data-id="${iconId}"]`);
-        if (!el) return;
-        const img = el.querySelector('.grid-item-img');
-        const badge = el.querySelector('.rotation-badge');
-        const deg = getIconRotation(iconId);
-        if (img) img.style.transform = deg ? `rotate(${deg}deg)` : '';
-        if (badge) {
-            badge.textContent = deg + '°';
-            badge.style.display = deg ? '' : 'none';
+    function setVal(id, val) {
+        const el = document.getElementById(id);
+        if(el) {
+            el.value = val;
+            updateVal(id);
         }
     }
 
-    // ===== DUPLICATE =====
-    document.getElementById('duplicateBtn').addEventListener('click', async () => {
-        if (selectedIcons.length === 0) return;
-
-        const newIds = [];
-        for (const iconId of selectedIcons) {
-            const src = iconsData.find(i => i.id === iconId);
-            if (!src) continue;
-            const newId   = `dup_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
-            const newName = src.name + ' (copy)';
-            iconsData.unshift({ ...src, id: newId, name: newName });
-            iconRotations[newId] = 0;
-            newIds.push(newId);
-        }
-
-        await buildIconsGrid();
-
-        selectedIcons = [...newIds];
-        activeIconId  = newIds[0] || null;
-
-        newIds.forEach(id => {
-            const el = document.querySelector(`#iconsContent .grid-item[data-id="${id}"]`);
-            if (el) el.classList.add('selected');
-        });
-
-        updateSelectedCount();
-        updateDuplicateBtn();
-        updateRotateDisplay();
-        debouncedDrawPreview();
-        scheduleHeightCheck();
-
-        const btn = document.getElementById('duplicateBtn');
-        btn.classList.remove('duplicate-flash');
-        void btn.offsetWidth;
-        btn.classList.add('duplicate-flash');
-    });
-
-    function updateDuplicateBtn() {
-        document.getElementById('duplicateBtn').disabled = selectedIcons.length === 0;
+    function init() {
+        renderLibrary();
+        const startIcon = builtInIcons.find(i => i.id === 'elgato') || builtInIcons[0];
+        if(startIcon) selectIcon(startIcon.id);
+        updatePreview();
     }
 
-    // ===== SVG CACHE & FETCH =====
-    const svgTextCache = {};
-    const svgImageCache = {};
-
-    async function fetchSvgText(url) {
-        if (svgTextCache[url]) return svgTextCache[url];
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`SVG fetch failed: ${res.status}`);
-        svgTextCache[url] = await res.text();
-        return svgTextCache[url];
-    }
-
-    async function buildColoredSvgDataUrl(url, color) {
-        const key = `${url}::${color}`;
-        if (svgImageCache[key]) return svgImageCache[key];
-
-        const text = await fetchSvgText(url);
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, 'image/svg+xml');
-        const svg = doc.documentElement;
-        svg.setAttribute('width', '300px');
-        svg.setAttribute('height', '300px');
-        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-        svg.querySelectorAll('style').forEach(s => s.remove());
-        svg.querySelectorAll('path,circle,rect,polygon,polyline,ellipse,text,g').forEach(el => {
-            const f = el.getAttribute('fill');
-            const s = el.getAttribute('stroke');
-            el.removeAttribute('fill');
-            el.removeAttribute('stroke');
-            el.removeAttribute('style');
-            if (f === 'none') { el.setAttribute('fill', 'none'); }
-            else if (el.tagName !== 'g') { el.setAttribute('fill', color); }
-            if (s === 'none') { el.setAttribute('stroke', 'none'); }
-            else if (s)       { el.setAttribute('stroke', color); }
-        });
-        if (svg.getAttribute('fill') !== 'none') svg.setAttribute('fill', color);
-
-        const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(doc))}`;
-        svgImageCache[key] = dataUrl;
-        return dataUrl;
-    }
-
-    function loadImageFromSrc(src) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload  = () => resolve(img);
-            img.onerror = () => reject(new Error(`Image load failed: ${src}`));
-            img.src = src;
-        });
-    }
-
-    // ===== GRID BUILD — icons load individually with skeleton placeholders =====
-    async function buildIconsGrid() {
-        const container = document.getElementById('iconsContent');
-        container.innerHTML = '';
-
-        const uploadCell = makeUploadCell();
-        container.appendChild(uploadCell);
-
-        for (const item of iconsData) {
-            const cell = makeIconCell(item);
-            container.appendChild(cell);
-            loadIconCellImage(cell, item);
-        }
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+        event.target.classList.add('active');
         scheduleHeightCheck();
     }
 
-    function makeIconCell(item) {
-        const div = document.createElement('div');
-        div.className = 'grid-item';
-        div.dataset.id = item.id;
-
-        const skeleton = document.createElement('div');
-        skeleton.className = 'grid-item-skeleton';
-        div.appendChild(skeleton);
-
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'icon-name';
-        nameSpan.textContent = item.name;
-        div.appendChild(nameSpan);
-
-        const badge = document.createElement('span');
-        badge.className = 'rotation-badge';
-        const deg = getIconRotation(item.id);
-        badge.textContent = deg + '°';
-        badge.style.display = deg ? '' : 'none';
-        div.appendChild(badge);
-
-        if (selectedIcons.includes(item.id)) div.classList.add('selected');
-
-        div.addEventListener('click', () => handleIconClick(item, div));
-        return div;
+    function toggleEffectControls() {
+        const effect = document.getElementById('icon-effect').value;
+        document.getElementById('stroke-controls').style.display = effect === 'stroke' ? 'flex' : 'none';
+        scheduleHeightCheck();
     }
 
-    async function loadIconCellImage(cell, item) {
+    function handleBgTypeChange() {
+        const type = document.getElementById('bg-type').value;
+        if(type === 'transparent') {
+            document.getElementById('bg-texture').value = 'none';
+        }
+        updatePreview();
+    }
+
+    function renderLibrary() {
+        const grid = document.getElementById('library-grid');
+        grid.innerHTML = '';
+        const search = document.getElementById('icon-search').value.toLowerCase();
+        
+        const allIcons = [...builtInIcons, ...customIcons];
+
+        allIcons.forEach(icon => {
+            if (icon.name.toLowerCase().includes(search)) {
+                const div = document.createElement('div');
+                div.className = 'icon-item' + (icon.isCustom ? ' custom' : '');
+                div.title = icon.name;
+                div.dataset.id = icon.id;
+                div.onclick = (e) => selectIcon(icon.id, e);
+                
+                if(icon.isCustom && icon.isSvg) {
+                    div.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">${icon.data}</div>`;
+                    const s = div.querySelector('svg');
+                    if(s) { s.style.fill = '#ffffff'; s.style.width='100%'; s.style.height='100%'; }
+                } else if (icon.isCustom && !icon.isSvg) {
+                    div.innerHTML = `<img src="${icon.data}" />`;
+                } else {
+                    div.innerHTML = `<img src="${icon.src}" style="filter: invert(1) opacity(0.8);" />`;
+                }
+                grid.appendChild(div);
+            }
+        });
+        scheduleHeightCheck();
+    }
+
+    function filterIcons() { renderLibrary(); }
+
+    async function selectIcon(id, e) {
+        document.querySelectorAll('.icon-item').forEach(el => el.classList.remove('selected'));
+        if(e && e.currentTarget) {
+            e.currentTarget.classList.add('selected');
+        } else {
+            const el = document.querySelector(`.icon-item[data-id="${id}"]`);
+            if(el) el.classList.add('selected');
+        }
+
+        const customMatch = customIcons.find(i => i.id === id);
+        if(customMatch) {
+            currentIconSvg = customMatch.isSvg ? customMatch.data : `<img src="${customMatch.data}" crossorigin="anonymous"/>`;
+            currentIconIsImg = !customMatch.isSvg;
+            updatePreview();
+            return;
+        }
+
+        const icon = builtInIcons.find(i => i.id === id);
+        if(!icon) return;
+
         try {
-            let src;
-            if (item.type === 'custom-svg') {
-                src = await buildColoredSvgDataUrl(item.src, '#FFFFFF');
+            const res = await fetch(icon.src);
+            const text = await res.text();
+            if (text.includes('<svg')) {
+                currentIconSvg = text;
+                currentIconIsImg = false;
+            } else { throw new Error("Not SVG"); }
+        } catch(err) {
+            currentIconSvg = `<img src="${icon.src}" crossorigin="anonymous"/>`;
+            currentIconIsImg = true;
+        }
+        updatePreview();
+    }
+
+    function handleFileUpload(e) {
+        const files = e.target.files;
+        if(!files.length) return;
+
+        Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const id = 'custom-' + Date.now() + '-' + index;
+                const isSvg = file.type === 'image/svg+xml';
+                const data = event.target.result;
+                
+                customIcons.push({
+                    id: id, name: file.name, isCustom: true, isSvg: isSvg, data: data
+                });
+                
+                if(index === files.length - 1) {
+                    renderLibrary();
+                    selectIcon(id);
+                }
+            };
+            if (file.type === 'image/svg+xml') {
+                reader.readAsText(file);
             } else {
-                src = item.src;
+                reader.readAsDataURL(file);
             }
-            const img = document.createElement('img');
-            img.className = 'grid-item-img';
-            img.alt = item.name;
-            img.src = src;
-            const deg = getIconRotation(item.id);
-            if (deg) img.style.transform = `rotate(${deg}deg)`;
-
-            const skeleton = cell.querySelector('.grid-item-skeleton');
-            if (skeleton) skeleton.replaceWith(img);
-        } catch (e) {
-            const skeleton = cell.querySelector('.grid-item-skeleton');
-            if (skeleton) {
-                skeleton.className = '';
-                skeleton.style.cssText = 'width:50%;height:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text-secondary);';
-                skeleton.textContent = 'ERR';
-            }
-        }
-    }
-
-    function makeUploadCell() {
-        const div = document.createElement('div');
-        div.className = 'grid-item upload-area';
-        const label = document.createElement('span');
-        label.className = 'upload-area-label';
-        label.textContent = '+ Upload';
-        div.appendChild(label);
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.id = 'uploadIcon';
-        input.accept = 'image/*,.svg';
-        input.addEventListener('change', handleIconUpload);
-        div.appendChild(input);
-        return div;
-    }
-
-    // ===== BACKGROUND / TEXTURE GRIDS =====
-    function buildBackgroundsGrid() {
-        const container = document.getElementById('bgContent');
-        container.innerHTML = '';
-
-        const uploadCell = makeSimpleUploadCell('uploadBg', 'image/*', handleBgUpload);
-        container.appendChild(uploadCell);
-
-        backgroundsData.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'grid-item';
-            div.dataset.id = item.id;
-            if (selectedBackgroundId === item.id) div.classList.add('selected');
-
-            const mini = document.createElement('canvas');
-            mini.width = mini.height = 60;
-            renderMiniBackground(mini.getContext('2d'), item, 60);
-            div.style.backgroundImage = `url(${mini.toDataURL()})`;
-            div.style.backgroundSize = 'cover';
-
-            const overlay = document.createElement('span');
-            overlay.className = 'bg-name-overlay';
-            overlay.textContent = item.name;
-            div.appendChild(overlay);
-
-            div.addEventListener('click', () => {
-                container.querySelectorAll('.grid-item').forEach(el => el.classList.remove('selected'));
-                div.classList.add('selected');
-                selectedBackgroundId = item.id;
-                checkGradientWarning();
-                debouncedDrawPreview();
-            });
-            container.appendChild(div);
         });
+        e.target.value = ''; 
     }
 
-    function buildTexturesGrid() {
-        const container = document.getElementById('txContent');
-        container.innerHTML = '';
+    function drawBorderNatively(ctx, style, color, size, paddingPct, thickness) {
+        if(style === 'none') return;
+        const th = thickness; 
+        const pad = Math.max(th/2, size * (paddingPct / 100));
+        const w = size - pad * 2;
+        const h = size - pad * 2;
+        const cl = size * 0.2; 
 
-        const uploadCell = makeSimpleUploadCell('uploadTx', 'image/*', handleTxUpload);
-        container.appendChild(uploadCell);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = th;
+        ctx.lineCap = 'square';
+        ctx.lineJoin = 'miter';
 
-        texturesData.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'grid-item';
-            div.dataset.id = item.id;
-            if (selectedTextureId === item.id) div.classList.add('selected');
-
-            const mini = document.createElement('canvas');
-            mini.width = mini.height = 60;
-            renderMiniTexture(mini.getContext('2d'), item, 60);
-            div.style.backgroundImage = `url(${mini.toDataURL()})`;
-            div.style.backgroundSize = 'cover';
-
-            const overlay = document.createElement('span');
-            overlay.className = 'bg-name-overlay';
-            overlay.textContent = item.name;
-            div.appendChild(overlay);
-
-            div.addEventListener('click', () => {
-                container.querySelectorAll('.grid-item').forEach(el => el.classList.remove('selected'));
-                div.classList.add('selected');
-                selectedTextureId = item.id;
-                debouncedDrawPreview();
-            });
-            container.appendChild(div);
-        });
-    }
-
-    function makeSimpleUploadCell(inputId, accept, handler) {
-        const div = document.createElement('div');
-        div.className = 'grid-item upload-area';
-        const label = document.createElement('span');
-        label.className = 'upload-area-label';
-        label.textContent = '+ Upload';
-        div.appendChild(label);
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.id = inputId;
-        input.accept = accept;
-        input.addEventListener('change', handler);
-        div.appendChild(input);
-        return div;
-    }
-
-    function renderMiniBackground(ctx, item, size) {
-        ctx.fillStyle = '#333';
-        ctx.fillRect(0, 0, size, size);
-        if (item.type === 'color') {
-            ctx.fillStyle = item.value;
-            ctx.fillRect(0, 0, size, size);
-        } else if (item.type === 'gradient') {
-            const g = ctx.createLinearGradient(0, 0, size, size);
-            g.addColorStop(0, item.colors[0]);
-            g.addColorStop(1, item.colors[1]);
-            ctx.fillStyle = g;
-            ctx.fillRect(0, 0, size, size);
-        } else if (item.type === 'custom-image' && item.src) {
-            loadImageFromSrc(item.src).then(img => ctx.drawImage(img, 0, 0, size, size)).catch(() => {});
+        if(style === 'solid') {
+            ctx.strokeRect(pad, pad, w, h);
+        } else if(style === 'corners-all') {
+            ctx.beginPath(); ctx.moveTo(pad, pad+cl); ctx.lineTo(pad, pad); ctx.lineTo(pad+cl, pad); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(size-pad-cl, pad); ctx.lineTo(size-pad, pad); ctx.lineTo(size-pad, pad+cl); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(pad, size-pad-cl); ctx.lineTo(pad, size-pad); ctx.lineTo(pad+cl, size-pad); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(size-pad-cl, size-pad); ctx.lineTo(size-pad, size-pad); ctx.lineTo(size-pad, size-pad-cl); ctx.stroke();
+        } else if(style === 'corners-tr-bl') {
+            ctx.beginPath(); ctx.moveTo(size-pad-cl, pad); ctx.lineTo(size-pad, pad); ctx.lineTo(size-pad, pad+cl); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(pad, size-pad-cl); ctx.lineTo(pad, size-pad); ctx.lineTo(pad+cl, size-pad); ctx.stroke();
+        } else if(style === 'corners-tl-br') {
+            ctx.beginPath(); ctx.moveTo(pad, pad+cl); ctx.lineTo(pad, pad); ctx.lineTo(pad+cl, pad); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(size-pad-cl, size-pad); ctx.lineTo(size-pad, size-pad); ctx.lineTo(size-pad, size-pad-cl); ctx.stroke();
+        } else if(style === 'lines-tb') {
+            ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(size-pad, pad); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(pad, size-pad); ctx.lineTo(size-pad, size-pad); ctx.stroke();
+        } else if(style === 'lines-lr') {
+            ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(pad, size-pad); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(size-pad, pad); ctx.lineTo(size-pad, size-pad); ctx.stroke();
         }
     }
 
-    function renderMiniTexture(ctx, item, size) {
-        ctx.fillStyle = '#666';
-        ctx.fillRect(0, 0, size, size);
-        if (item.type === 'custom-image' && item.src) {
-            loadImageFromSrc(item.src).then(img => ctx.drawImage(img, 0, 0, size, size)).catch(() => {});
-        } else if (item.textureOpacity > 0) {
-            drawPattern(ctx, item, size / 30, size, size, true);
+    function generateTextureCanvas(type, color, scale) {
+        if(type === 'none') return null;
+        const can = document.createElement('canvas');
+        const ctx = can.getContext('2d');
+        const s = parseInt(scale); 
+        can.width = s; can.height = s;
+
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+
+        if (type === 'checkerboard') {
+            ctx.fillRect(0,0,s/2,s/2);
+            ctx.fillRect(s/2,s/2,s/2,s/2);
+        } else if (type === 'lines') {
+            ctx.fillRect(0,0,s, s*0.2);
+        } else if (type === 'dots') {
+            ctx.beginPath(); ctx.arc(s/2, s/2, s*0.2, 0, Math.PI*2); ctx.fill();
+        } else if (type === 'grid') {
+            ctx.fillRect(0,0,s, s*0.1); ctx.fillRect(0,0,s*0.1, s);
+        } else if (type === 'diagonal') {
+            ctx.lineWidth = s*0.2;
+            ctx.beginPath(); ctx.moveTo(-s*0.5, s*0.5); ctx.lineTo(s*1.5, -s*0.5); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-s*0.5, s*1.5); ctx.lineTo(s*1.5, s*0.5); ctx.stroke();
         }
+        return can;
     }
 
-    // ===== ICON CLICK HANDLER =====
-    function handleIconClick(item, element) {
-        const wasSelected = element.classList.contains('selected');
-        if (wasSelected) {
-            element.classList.remove('selected');
-            selectedIcons = selectedIcons.filter(id => id !== item.id);
-            if (activeIconId === item.id) {
-                activeIconId = selectedIcons.length > 0 ? selectedIcons[selectedIcons.length - 1] : null;
+    function updatePreview() {
+        if(!currentIconSvg) return;
+        const iconContainer = document.getElementById('preview-icon');
+        const bgContainer = document.getElementById('preview-bg');
+        const textureContainer = document.getElementById('preview-texture');
+        const outlineContainer = document.getElementById('preview-outline');
+        
+        const scale = getVal('icon-scale') / 100;
+        const rotate = getVal('icon-rotation');
+        const offsetX = getVal('icon-x');
+        const offsetY = getVal('icon-y');
+        const color = document.getElementById('icon-color').value;
+        const effect = document.getElementById('icon-effect').value;
+        const strokeColor = document.getElementById('icon-stroke-color').value;
+        const strokeW = getVal('icon-stroke-w');
+
+        iconContainer.style.transform = `translate(${offsetX}%, ${offsetY}%) scale(${scale}) rotate(${rotate}deg)`;
+        iconContainer.innerHTML = currentIconSvg;
+        
+        let customFilter = '';
+        if(!currentIconIsImg) {
+            const svgEl = iconContainer.querySelector('svg');
+            if(svgEl) {
+                svgEl.style.fill = color;
+                const paths = svgEl.querySelectorAll('path, rect, circle, polygon, polyline, line');
+                paths.forEach(p => { p.style.fill = 'currentColor'; p.removeAttribute('fill'); });
+                svgEl.style.color = color; 
+                svgEl.style.overflow = 'visible';
+
+                if (effect === 'stroke') {
+                    svgEl.style.stroke = strokeColor;
+                    svgEl.style.strokeWidth = strokeW + 'px';
+                    paths.forEach(p => { p.style.stroke = 'inherit'; p.style.strokeWidth = 'inherit'; });
+                }
             }
         } else {
-            element.classList.add('selected');
-            selectedIcons.push(item.id);
-            activeIconId = item.id;
-        }
-        updateSelectedCount();
-        updateDuplicateBtn();
-        updateRotateDisplay();
-        debouncedDrawPreview();
-    }
-
-    function updateSelectedCount() {
-        document.getElementById('selectedCount').textContent = selectedIcons.length;
-    }
-
-    // ===== GRADIENT WARNING =====
-    function checkGradientWarning() {
-        const bg = backgroundsData.find(b => b.id === selectedBackgroundId);
-        document.getElementById('gradientWarning').classList.toggle('active', !!(bg && bg.type === 'gradient'));
-    }
-
-    document.getElementById('backgroundColor').addEventListener('click', checkGradientWarning);
-    document.getElementById('backgroundColorHex').addEventListener('focus', checkGradientWarning);
-
-    // ===== PATTERN DRAWERS =====
-    const patternDrawers = {
-        dots:             (c,i,s)     => { c.beginPath(); c.arc(i.dotGap*s,i.dotGap*s,(i.dotSize||1)*s,0,Math.PI*2); c.arc(i.dotGap*4*s,i.dotGap*3*s,(i.dotSize||1)*s,0,Math.PI*2); c.arc(i.dotGap*2*s,i.dotGap*5*s,(i.dotSize||1)*s,0,Math.PI*2); c.fill(); },
-        stripes:          (c,i,s,w,h) => { c.fillRect(0,0,(i.width||5)*s,h); c.fillRect((i.gap||15)*s,0,(i.width||5)*s,h); },
-        lines:            (c,i,s,w,h) => { c.fillRect(0,0,w,(i.thickness||5)*s); c.fillRect(0,(i.spacing||15)*s,w,(i.thickness||5)*s); },
-        lines_v:          (c,i,s,w,h) => { c.fillRect(0,0,(i.thickness||5)*s,h); c.fillRect((i.spacing||15)*s,0,(i.thickness||5)*s,h); },
-        crosshatch:       (c,i,s,w,h) => { c.fillRect(0,0,w,(i.lineThickness||2)*s); c.fillRect(0,(i.lineSpacing||10)*s,w,(i.lineThickness||2)*s); c.fillRect(0,0,(i.lineThickness||2)*s,h); c.fillRect((i.lineSpacing||10)*s,0,(i.lineThickness||2)*s,h); },
-        squares:          (c,i,s)     => { c.fillRect(0,0,(i.squareSize||10)*s,(i.squareSize||10)*s); c.fillRect((i.squareGap||20)*s,(i.squareGap||20)*s,(i.squareSize||10)*s,(i.squareSize||10)*s); },
-        grid:             (c,i,s,w,h) => { c.fillRect(0,0,w,(i.lineThickness||2)*s); c.fillRect(0,0,(i.lineThickness||2)*s,h); c.fillRect(w-(i.lineThickness||2)*s,0,(i.lineThickness||2)*s,h); c.fillRect(0,h-(i.lineThickness||2)*s,w,(i.lineThickness||2)*s); c.fillRect(w/2-(i.lineThickness||2)*s/2,0,(i.lineThickness||2)*s,h); c.fillRect(0,h/2-(i.lineThickness||2)*s/2,w,(i.lineThickness||2)*s); },
-        diamond:          (c,i,s,w,h) => { c.save(); c.translate(w/2,h/2); c.rotate(Math.PI/4); c.fillRect(-(i.diamondSize||5)*s,-(i.diamondSize||5)*s,(i.diamondSize||10)*s,(i.diamondSize||10)*s); c.restore(); },
-        noise:            (c,i,s,w,h) => { for(let n=0;n<w*h/5;n++){c.fillRect(Math.random()*w,Math.random()*h,Math.random()*1.5*s,Math.random()*1.5*s);} },
-        diagonal_stripes: (c,i,s,w,h) => { c.save(); c.rotate(Math.PI/4); c.fillRect(0,-h,(i.width||4)*s,h*2); c.fillRect((i.gap||12)*s,-h,(i.width||4)*s,h*2); c.restore(); },
-        checkerboard:     (c,i,s)     => { const sz=(i.squareSize||15)*s; c.fillRect(0,0,sz,sz); c.fillRect(sz,sz,sz,sz); },
-        wave:             (c,i,s,w,h) => { c.beginPath(); c.moveTo(0,h/2); c.bezierCurveTo(w/4,h/4,w/2,3*h/4,w,h/2); c.lineWidth=2*s; c.stroke(); },
-        honeycomb:        (c,i,s,w,h) => { const hs=(i.hexSize||8)*s; function dh(cx,cy){c.beginPath();for(let n=0;n<6;n++)c.lineTo(cx+hs*Math.cos(n*Math.PI/3),cy+hs*Math.sin(n*Math.PI/3));c.closePath();c.fill();} c.fillStyle=`rgba(255,255,255,${i.textureOpacity||.09})`; dh(hs*Math.sqrt(3)/2,hs); dh(hs*Math.sqrt(3)/2,hs*4); },
-        circles:          (c,i,s)     => { c.beginPath(); c.arc((i.circleGap||10)*s,(i.circleGap||10)*s,(i.circleRadius||5)*s,0,Math.PI*2); c.arc((i.circleGap||10)*2*s,(i.circleGap||10)*s,(i.circleRadius||5)*s,0,Math.PI*2); c.fill(); },
-        hex_grid:         (c,i,s,w,h) => { const hs=(i.hexSize||10)*s; function dho(cx,cy){c.beginPath();for(let n=0;n<6;n++)c.lineTo(cx+hs*Math.cos(n*Math.PI/3),cy+hs*Math.sin(n*Math.PI/3));c.closePath();c.stroke();} c.strokeStyle=`rgba(255,255,255,${i.textureOpacity||.08})`; dho(hs*Math.sqrt(3)/2,hs); dho(hs*Math.sqrt(3)/2,hs*4); },
-        pyramids:         (c,i,s,w,h) => { c.save(); c.translate(w/2,h/2); c.beginPath(); c.moveTo(-10*s,10*s); c.lineTo(0,-10*s); c.lineTo(10*s,10*s); c.closePath(); c.fill(); c.restore(); },
-        concentric:       (c,i,s,w,h) => { c.beginPath(); for(let n=0;n<(i.ringCount||3);n++) c.arc(w/2,h/2,(n+1)*(i.ringGap||5)*s,0,Math.PI*2); c.stroke(); },
-        diagonal_cross:   (c,i,s,w,h) => { c.fillRect(0,0,(i.lineThickness||3)*s,h); c.fillRect((i.lineSpacing||15)*s,0,(i.lineThickness||3)*s,h); c.save(); c.rotate(Math.PI/2); c.fillRect(0,-(i.lineSpacing||15)*s,(i.lineThickness||3)*s,h); c.fillRect(0,0,(i.lineThickness||3)*s,h); c.restore(); },
-        woven:            (c,i,s)     => { c.fillRect(0,0,(i.weaveSize||8)*s,(i.weaveSize||8)*2*s); c.fillRect((i.weaveSize||8)*2*s,(i.weaveSize||8)*s,(i.weaveSize||8)*s,(i.weaveSize||8)*2*s); },
-        brick:            (c,i,s)     => { c.fillRect(0,0,(i.brickWidth||25)*s,(i.brickHeight||12)*s); c.fillRect((i.brickWidth||25)/2*s,(i.brickHeight||12)*s,(i.brickWidth||25)*s,(i.brickHeight||12)*s); },
-        fish_scale:       (c,i,s)     => { c.beginPath(); c.arc((i.scaleRadius||10)*s,0,(i.scaleRadius||10)*s,0,Math.PI,true); c.arc((i.scaleRadius||10)*3*s,0,(i.scaleRadius||10)*s,0,Math.PI,true); c.fill(); },
-        stars:            (c,i,s,w,h) => { for(let n=0;n<(i.starCount||5);n++){const x=Math.random()*w,y=Math.random()*h,r=(i.starSize||3)*s; c.beginPath(); c.moveTo(x,y+r); for(let j=0;j<5;j++){c.lineTo(x+r*Math.sin(j*Math.PI*2/5),y+r*Math.cos(j*Math.PI*2/5));c.lineTo(x+r/2*Math.sin((j+.5)*Math.PI*2/5),y+r/2*Math.cos((j+.5)*Math.PI*2/5));} c.closePath(); c.fill();} },
-        doodle:           (c,i,s)     => { c.beginPath(); c.moveTo(0,0); c.bezierCurveTo(10*s,20*s,20*s,0,30*s,20*s); c.bezierCurveTo(10*s,0,0,20*s,0,0); c.stroke(); },
-        bubble:           (c,i,s)     => { c.beginPath(); c.arc((i.bubbleSize||6)*s,(i.bubbleSize||6)*s,(i.bubbleSize||6)*s,0,Math.PI*2); c.arc((i.bubbleSize||6)*3*s,(i.bubbleSize||6)*2*s,(i.bubbleSize||6)*s,0,Math.PI*2); c.fill(); },
-        cloud:            (c,i,s)     => { c.beginPath(); c.arc(5*s,10*s,5*s,0,Math.PI*2); c.arc(15*s,8*s,7*s,0,Math.PI*2); c.arc(25*s,10*s,5*s,0,Math.PI*2); c.fill(); },
-        mesh:             (c,i,s,w,h) => { c.strokeStyle=`rgba(255,255,255,${i.textureOpacity||.1})`; c.lineWidth=s; for(let n=0;n<w;n+=(i.meshDensity||10)*s){c.beginPath();c.moveTo(n,0);c.lineTo(n,h);c.stroke();c.beginPath();c.moveTo(0,n);c.lineTo(w,n);c.stroke();} },
-        ripples:          (c,i,s,w,h) => { c.strokeStyle=`rgba(255,255,255,${i.textureOpacity||.07})`; c.lineWidth=1.5*s; c.beginPath(); c.arc(w/2,h/2,(i.rippleStrength||5)*s,0,Math.PI*2); c.arc(w/2,h/2,(i.rippleStrength||5)*2*s,0,Math.PI*2); c.stroke(); },
-        fractal:          (c,i,s,w,h) => { c.strokeStyle=`rgba(255,255,255,${i.textureOpacity||.06})`; c.lineWidth=s; function dl(x1,y1,x2,y2,d){if(d>3)return;const mx=(x1+x2)/2,my=(y1+y2)/2,dx=x2-x1,dy=y2-y1;if(Math.hypot(dx,dy)<5*s)return;const px=mx+dy*.1*Math.random()*s,py=my-dx*.1*Math.random()*s;c.beginPath();c.moveTo(x1,y1);c.lineTo(px,py);c.lineTo(x2,y2);c.stroke();dl(x1,y1,px,py,d+1);dl(px,py,x2,y2,d+1);}dl(0,0,w,h,0);dl(w,0,0,h,0); },
-        circuit:          (c,i,s,w,h) => { c.strokeStyle=`rgba(255,255,255,${i.textureOpacity||.09})`; c.lineWidth=s; for(let n=0;n<w;n+=5*s){c.beginPath();c.moveTo(n,0);c.lineTo(n,Math.random()*h);c.stroke();c.beginPath();c.arc(n,Math.random()*h,2*s,0,Math.PI*2);c.fill();} },
-        camo:             (c,i,s)     => { c.fillStyle=`rgba(0,0,0,${i.textureOpacity||.12})`; c.beginPath(); c.arc(5*s,5*s,10*s,0,Math.PI*2); c.arc(20*s,10*s,8*s,0,Math.PI*2); c.arc(10*s,20*s,12*s,0,Math.PI*2); c.fill(); }
-    };
-
-    function drawPattern(ctx, item, scaleFactor, canvasWidth, canvasHeight, isPreview) {
-        if (!item || item.textureOpacity === 0) return;
-        const pc = document.createElement('canvas');
-        pc.width = pc.height = 30 * scaleFactor;
-        const px = pc.getContext('2d');
-        const alpha = item.textureOpacity || 0.1;
-        const col = isPreview ? `rgba(0,0,0,${alpha})` : `rgba(255,255,255,${alpha})`;
-        px.fillStyle = px.strokeStyle = col;
-        px.lineWidth = scaleFactor;
-        const drawer = patternDrawers[item.pattern];
-        if (drawer) { px.save(); drawer(px, item, scaleFactor, pc.width, pc.height); px.restore(); }
-        ctx.fillStyle = ctx.createPattern(pc, 'repeat');
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    }
-
-    // ===== CANVAS RENDER =====
-    async function renderIconToCanvas(iconData, bgData, txData, iconColor, bgColor, glowColor, edgeOn, logoGlowOn, edgeGlowOn, canvas, ctx, size, rotationDeg) {
-        ctx.clearRect(0, 0, size, size);
-        ctx.shadowBlur = 0; ctx.shadowColor = 'transparent'; ctx.shadowOffsetX = ctx.shadowOffsetY = 0;
-
-        // Background
-        if (!bgData || bgData.id === 'off') {
-            ctx.fillStyle = bgColor;
-            ctx.fillRect(0, 0, size, size);
-        } else if (bgData.type === 'color') {
-            ctx.fillStyle = bgData.value;
-            ctx.fillRect(0, 0, size, size);
-        } else if (bgData.type === 'gradient') {
-            const g = ctx.createLinearGradient(0, 0, size, size);
-            g.addColorStop(0, bgData.colors[0]);
-            g.addColorStop(1, bgData.colors[1]);
-            ctx.fillStyle = g;
-            ctx.fillRect(0, 0, size, size);
-        } else if (bgData.type === 'custom-image') {
-            try { const img = await loadImageFromSrc(bgData.src); ctx.drawImage(img, 0, 0, size, size); }
-            catch { ctx.fillStyle = bgColor; ctx.fillRect(0, 0, size, size); }
-        }
-
-        // Texture
-        if (txData) {
-            if (txData.textureOpacity > 0) {
-                drawPattern(ctx, txData, size / 300, size, size, false);
-            } else if (txData.type === 'custom-image') {
-                try {
-                    const img = await loadImageFromSrc(txData.src);
-                    ctx.globalAlpha = txData.textureOpacity || 1;
-                    ctx.drawImage(img, 0, 0, size, size);
-                    ctx.globalAlpha = 1;
-                } catch {}
+            if (effect === 'stroke') {
+                customFilter += `drop-shadow(${strokeW}px ${strokeW}px 0 ${strokeColor}) drop-shadow(-${strokeW}px -${strokeW}px 0 ${strokeColor}) drop-shadow(${strokeW}px -${strokeW}px 0 ${strokeColor}) drop-shadow(-${strokeW}px ${strokeW}px 0 ${strokeColor}) `;
             }
         }
 
-        // Icon
-        if (iconData) {
-            if (logoGlowOn) { ctx.shadowColor = glowColor; ctx.shadowBlur = 15 * (size / 300); }
-            const drawSize = size * 0.7;
-            const rotRad   = (rotationDeg || 0) * Math.PI / 180;
+        if (effect === 'glitch') {
+            customFilter += `drop-shadow(3px 0 0 rgba(255,0,0,0.7)) drop-shadow(-3px 0 0 rgba(0,255,255,0.7)) `;
+        }
+        
+        const glow = document.getElementById('bg-glow').value;
+        if(glow === 'active') customFilter += `drop-shadow(0 0 8px ${color}) `;
+        iconContainer.style.filter = customFilter.trim();
+
+        const bgType = document.getElementById('bg-type').value;
+        const color1 = document.getElementById('bg-color-1').value;
+        const color2 = document.getElementById('bg-color-2').value;
+        
+        if (bgType === 'solid') bgContainer.style.background = color1;
+        else if (bgType === 'gradient') bgContainer.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+        else bgContainer.style.background = 'transparent';
+
+        const texture = document.getElementById('bg-texture').value;
+        const texColor = document.getElementById('bg-texture-color').value;
+        const texOpacity = getVal('bg-texture-opacity');
+        const texScale = getVal('bg-texture-scale');
+
+        const texCan = generateTextureCanvas(texture, texColor, texScale);
+        if(texCan) {
+            textureContainer.style.backgroundImage = `url(${texCan.toDataURL()})`;
+            textureContainer.style.backgroundRepeat = 'repeat';
+            textureContainer.style.opacity = texOpacity / 100;
+        } else {
+            textureContainer.style.backgroundImage = 'none';
+        }
+
+        const border = document.getElementById('bg-border').value;
+        const borderColor = document.getElementById('bg-border-color').value;
+        const borderPadding = getVal('bg-border-padding');
+        const borderThickness = getVal('bg-border-w');
+
+        const bCan = document.createElement('canvas');
+        bCan.width = 144; bCan.height = 144; 
+        const bCtx = bCan.getContext('2d');
+        drawBorderNatively(bCtx, border, borderColor, 144, borderPadding, borderThickness);
+        
+        outlineContainer.style.backgroundImage = `url(${bCan.toDataURL()})`;
+        outlineContainer.style.backgroundSize = '100% 100%';
+        outlineContainer.style.filter = glow === 'active' ? `drop-shadow(0 0 8px ${borderColor})` : 'none';
+    }
+
+    function gatherSettings() {
+        return {
+            scale: getVal('icon-scale') / 100, rotate: getVal('icon-rotation'),
+            offsetX: getVal('icon-x'), offsetY: getVal('icon-y'),
+            color: document.getElementById('icon-color').value,
+            effect: document.getElementById('icon-effect').value,
+            strokeColor: document.getElementById('icon-stroke-color').value,
+            strokeW: getVal('icon-stroke-w'),
+            bgType: document.getElementById('bg-type').value,
+            color1: document.getElementById('bg-color-1').value, color2: document.getElementById('bg-color-2').value,
+            texture: document.getElementById('bg-texture').value, texColor: document.getElementById('bg-texture-color').value,
+            texOpacity: getVal('bg-texture-opacity'), texScale: getVal('bg-texture-scale'),
+            border: document.getElementById('bg-border').value, borderColor: document.getElementById('bg-border-color').value,
+            borderPadding: getVal('bg-border-padding'), borderThickness: getVal('bg-border-w'),
+            glow: document.getElementById('bg-glow').value
+        };
+    }
+
+    // Core function to perfectly recreate a set item visually as a Canvas Data URL
+    async function renderItemToCanvas(item, size) {
+        const canvas = document.createElement('canvas');
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const s = item.settings;
+
+        if (s.bgType === 'solid') {
+            ctx.fillStyle = s.color1; ctx.fillRect(0,0,size,size);
+        } else if (s.bgType === 'gradient') {
+            const grd = ctx.createLinearGradient(0, 0, size, size);
+            grd.addColorStop(0, s.color1); grd.addColorStop(1, s.color2);
+            ctx.fillStyle = grd; ctx.fillRect(0,0,size,size);
+        }
+
+        const scaleRatio = size / 144; 
+        const texCan = generateTextureCanvas(s.texture, s.texColor, s.texScale * scaleRatio);
+        if(texCan) {
             ctx.save();
-            ctx.translate(size / 2, size / 2);
-            ctx.rotate(rotRad);
-            if (iconData.type === 'fa-icon') {
-                ctx.fillStyle = iconColor;
-                const ff = iconData.class.includes('fa-brands') ? '"Font Awesome 6 Brands"' : '"Font Awesome 6 Free"';
-                ctx.font = `900 ${150 * (size / 300)}px ${ff}`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(iconData.unicode, 0, 0);
-            } else {
-                try {
-                    let src;
-                    if (iconData.type === 'custom-svg') {
-                        src = await buildColoredSvgDataUrl(iconData.src, iconColor);
-                    } else {
-                        src = iconData.src;
-                    }
-                    const img = await loadImageFromSrc(src);
-                    const ratio = img.width / img.height;
-                    let dw = drawSize, dh = drawSize;
-                    if (ratio > 1) dh = dw / ratio; else dw = dh * ratio;
-                    ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
-                } catch {
-                    ctx.fillStyle = iconColor;
-                    ctx.font = `bold ${50*(size/300)}px Arial`;
-                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText('?', 0, 0);
-                }
-            }
+            ctx.globalAlpha = s.texOpacity / 100;
+            ctx.fillStyle = ctx.createPattern(texCan, 'repeat');
+            ctx.fillRect(0,0,size,size);
             ctx.restore();
-            ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
         }
 
-        // Edge brackets
-        if (edgeOn) {
-            if (edgeGlowOn) { ctx.shadowColor = glowColor; ctx.shadowBlur = 15 * (size / 300); }
-            ctx.strokeStyle = glowColor;
-            ctx.lineWidth   = 6 * (size / 300);
-            ctx.lineCap = ctx.lineJoin = 'round';
-            const o = 20 * (size / 300);
-            const l = 55 * (size / 300);
-            ctx.beginPath();
-            ctx.moveTo(o, o + l); ctx.lineTo(o, o); ctx.lineTo(o + l, o);
-            ctx.moveTo(size - o - l, o); ctx.lineTo(size - o, o); ctx.lineTo(size - o, o + l);
-            ctx.moveTo(size - o, size - o - l); ctx.lineTo(size - o, size - o); ctx.lineTo(size - o - l, size - o);
-            ctx.moveTo(o + l, size - o); ctx.lineTo(o, size - o); ctx.lineTo(o, size - o - l);
-            ctx.stroke();
-            ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+        if(s.glow === 'active') { ctx.shadowColor = s.borderColor; ctx.shadowBlur = size * 0.08; } 
+        else { ctx.shadowBlur = 0; }
+        
+        const expBorderThick = s.borderThickness * scaleRatio;
+        drawBorderNatively(ctx, s.border, s.borderColor, size, s.borderPadding, expBorderThick);
+        
+        let iconDataUrl = "";
+        if(!item.isImg) {
+            let cleanSvg = item.iconSvg;
+            const styleTag = `<style>path, rect, circle, polygon, polyline, line { fill: ${s.color} !important; } ${s.effect === 'stroke' ? `* { stroke: ${s.strokeColor} !important; stroke-width: ${s.strokeW}px !important; overflow: visible !important; }` : ''}</style>`;
+            cleanSvg = cleanSvg.replace(/<svg([^>]*)>/, `<svg$1>${styleTag}`);
+            if(!cleanSvg.includes('width=')) cleanSvg = cleanSvg.replace(/<svg([^>]*)>/, `<svg$1 width="${size}" height="${size}">`);
+            
+            const svgBlob = new Blob([cleanSvg], {type: 'image/svg+xml;charset=utf-8'});
+            iconDataUrl = URL.createObjectURL(svgBlob);
+        } else {
+            const match = item.iconSvg.match(/src="([^"]+)"/);
+            if(match) iconDataUrl = match[1];
         }
-    }
 
-    // ===== PREVIEW =====
-    const previewCanvas = document.getElementById('iconPreview');
-    const previewCtx    = previewCanvas.getContext('2d');
-
-    function debounce(fn, ms) {
-        let t;
-        return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
-    }
-
-    const debouncedDrawPreview = debounce(drawPreview, 120);
-
-    async function drawPreview() {
-        const iconData = iconsData.find(i => i.id === activeIconId);
-        const bgData   = backgroundsData.find(b => b.id === selectedBackgroundId);
-        const txData   = texturesData.find(t => t.id === selectedTextureId);
-        const rotDeg   = activeIconId ? getIconRotation(activeIconId) : 0;
-
-        document.getElementById('previewPlaceholder').style.display = iconData ? 'none' : '';
-
-        await renderIconToCanvas(
-            iconData, bgData, txData,
-            document.getElementById('iconColor').value,
-            document.getElementById('backgroundColor').value,
-            document.getElementById('glowColor').value,
-            document.getElementById('edgeOnOff').checked,
-            document.getElementById('logoGlowOnOff').checked,
-            document.getElementById('edgeGlowOnOff').checked,
-            previewCanvas, previewCtx, 300, rotDeg
-        );
-    }
-
-    // ===== COLOR SYNC =====
-    function normalizeHex(hex) {
-        if (!hex) return '';
-        hex = hex.startsWith('#') ? hex : '#' + hex;
-        if (hex.length === 4 && /^#[0-9a-fA-F]{3}$/.test(hex)) {
-            return '#' + hex[1]+hex[1] + hex[2]+hex[2] + hex[3]+hex[3];
-        }
-        return hex.toUpperCase();
-    }
-
-    function isValidHex(h) { return /^#?([0-9a-fA-F]{3}){1,2}$/.test(h); }
-
-    function setupColorSync(pickerId, hexId) {
-        const picker = document.getElementById(pickerId);
-        const hex    = document.getElementById(hexId);
-        picker.addEventListener('input', () => { hex.value = normalizeHex(picker.value); debouncedDrawPreview(); });
-        let t;
-        hex.addEventListener('input', () => {
-            clearTimeout(t);
-            t = setTimeout(() => {
-                if (isValidHex(hex.value)) { picker.value = normalizeHex(hex.value); hex.value = normalizeHex(hex.value); debouncedDrawPreview(); }
-            }, 300);
-        });
-    }
-
-    setupColorSync('iconColor',       'iconColorHex');
-    setupColorSync('backgroundColor', 'backgroundColorHex');
-    setupColorSync('glowColor',       'glowColorHex');
-
-    document.querySelectorAll('.checkbox-item input, #iconName').forEach(el => {
-        el.addEventListener('change', debouncedDrawPreview);
-    });
-
-    // ===== TAB SWITCHING =====
-    document.getElementById('showIconsBtn').addEventListener('click', () => switchTab('icons'));
-    document.getElementById('showTxBtn').addEventListener('click',    () => switchTab('textures'));
-    document.getElementById('showBgBtn').addEventListener('click',    () => switchTab('backgrounds'));
-
-    function switchTab(tab) {
-        document.getElementById('showIconsBtn').classList.toggle('active', tab === 'icons');
-        document.getElementById('showTxBtn').classList.toggle('active',    tab === 'textures');
-        document.getElementById('showBgBtn').classList.toggle('active',    tab === 'backgrounds');
-        document.getElementById('iconsContent').classList.toggle('active', tab === 'icons');
-        document.getElementById('txContent').classList.toggle('active',    tab === 'textures');
-        document.getElementById('bgContent').classList.toggle('active',    tab === 'backgrounds');
-    }
-
-    // ===== UPLOAD HANDLERS =====
-    async function handleIconUpload(event) {
-        if (!event.target.files.length) return;
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = async e => {
-            customIconCount++;
-            const isSVG = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
-            const newIcon = { id: 'upload_' + Date.now(), name: `Custom ${customIconCount}`, type: isSVG ? 'custom-svg' : 'custom-image', src: e.target.result };
-            iconsData.unshift(newIcon);
-            iconRotations[newIcon.id] = 0;
-
-            await buildIconsGrid();
-            selectedIcons = [newIcon.id];
-            activeIconId  = newIcon.id;
-            const el = document.querySelector(`#iconsContent .grid-item[data-id="${newIcon.id}"]`);
-            if (el) el.classList.add('selected');
-            updateSelectedCount();
-            updateDuplicateBtn();
-            updateRotateDisplay();
-            debouncedDrawPreview();
-        };
-        reader.readAsDataURL(file);
-    }
-
-    async function handleTxUpload(event) {
-        if (!event.target.files.length) return;
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = e => {
-            customTextureCount++;
-            const newTx = { id: 'tx_' + Date.now(), name: `Custom ${customTextureCount}`, type: 'custom-image', src: e.target.result, textureOpacity: 0.8 };
-            texturesData.unshift(newTx);
-            buildTexturesGrid();
-            selectedTextureId = newTx.id;
-            const el = document.querySelector(`#txContent .grid-item[data-id="${newTx.id}"]`);
-            if (el) el.classList.add('selected');
-            debouncedDrawPreview();
-        };
-        reader.readAsDataURL(file);
-    }
-
-    async function handleBgUpload(event) {
-        if (!event.target.files.length) return;
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = e => {
-            customBackgroundCount++;
-            const newBg = { id: 'bg_' + Date.now(), name: `Custom ${customBackgroundCount}`, type: 'custom-image', src: e.target.result };
-            backgroundsData.unshift(newBg);
-            buildBackgroundsGrid();
-            selectedBackgroundId = newBg.id;
-            const el = document.querySelector(`#bgContent .grid-item[data-id="${newBg.id}"]`);
-            if (el) el.classList.add('selected');
-            debouncedDrawPreview();
-        };
-        reader.readAsDataURL(file);
-    }
-
-    // ===== DOWNLOAD =====
-    document.getElementById('downloadBtn').addEventListener('click', async () => {
-        if (!selectedIcons.length) { alert('Please select at least one icon.'); return; }
-
-        const baseName   = document.getElementById('iconName').value.trim() || 'CustomIcon';
-        const saveAsZip  = document.getElementById('saveAsZip').checked;
-        const bgData     = backgroundsData.find(b => b.id === selectedBackgroundId);
-        const txData     = texturesData.find(t => t.id === selectedTextureId);
-        const iconColor  = document.getElementById('iconColor').value;
-        const bgColor    = document.getElementById('backgroundColor').value;
-        const glowColor  = document.getElementById('glowColor').value;
-        const edgeOn     = document.getElementById('edgeOnOff').checked;
-        const logoGlowOn = document.getElementById('logoGlowOnOff').checked;
-        const edgeGlowOn = document.getElementById('edgeGlowOnOff').checked;
-        const dlBtn      = document.getElementById('downloadBtn');
-
-        dlBtn.disabled = true;
-        dlBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (saveAsZip ? 'Generating ZIP...' : 'Downloading...');
-
-        try {
-            if (saveAsZip) {
-                const zip   = new JSZip();
-                const sizes = [500, 288, 144, 96, 72];
-                for (const iconId of selectedIcons) {
-                    const icon    = iconsData.find(i => i.id === iconId);
-                    if (!icon) continue;
-                    const rotDeg  = getIconRotation(iconId);
-                    const safeName = icon.name.replace(/[^a-z0-9]/gi, '_');
-                    for (const sz of sizes) {
-                        const cv = document.createElement('canvas');
-                        cv.width = cv.height = sz;
-                        const cx = cv.getContext('2d');
-                        await renderIconToCanvas(icon, bgData, txData, iconColor, bgColor, glowColor, edgeOn, logoGlowOn, edgeGlowOn, cv, cx, sz, rotDeg);
-                        const folder = sz === 144 ? '144px (Recommended)' : `${sz}px`;
-                        zip.file(`${folder}/${baseName}_${safeName}.png`, cv.toDataURL('image/png').split(',')[1], { base64: true });
-                    }
+        await new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = () => {
+                ctx.save();
+                const targetSize = size * 0.6;
+                let drawW = targetSize; let drawH = targetSize;
+                
+                if(img.width && img.height) {
+                    const aspect = img.width / img.height;
+                    if (aspect > 1) drawH = targetSize / aspect;
+                    else drawW = targetSize * aspect;
                 }
-                const blob = await zip.generateAsync({ type: 'blob' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `${baseName}_Icons.zip`;
-                document.body.appendChild(a); a.click(); document.body.removeChild(a);
-                URL.revokeObjectURL(a.href);
-            } else {
-                for (const iconId of selectedIcons) {
-                    const icon   = iconsData.find(i => i.id === iconId);
-                    if (!icon) continue;
-                    const rotDeg = getIconRotation(iconId);
-                    const cv     = document.createElement('canvas');
-                    cv.width = cv.height = selectedSize;
-                    const cx = cv.getContext('2d');
-                    await renderIconToCanvas(icon, bgData, txData, iconColor, bgColor, glowColor, edgeOn, logoGlowOn, edgeGlowOn, cv, cx, selectedSize, rotDeg);
-                    const safeName = icon.name.replace(/[^a-z0-9]/gi, '_');
-                    const a = document.createElement('a');
-                    a.href = cv.toDataURL('image/png');
-                    a.download = `${baseName}_${safeName}.png`;
-                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+                const offsetX = (s.offsetX / 100) * targetSize;
+                const offsetY = (s.offsetY / 100) * targetSize;
+
+                ctx.translate(size/2 + offsetX, size/2 + offsetY);
+                ctx.rotate(s.rotate * Math.PI / 180);
+                ctx.scale(s.scale, s.scale);
+
+                if(s.effect === 'stroke' && item.isImg) {
+                    ctx.shadowColor = s.strokeColor; ctx.shadowBlur = 2;
+                    ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 2; ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+                    ctx.shadowOffsetX = -2; ctx.shadowOffsetY = -2; ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+                } 
+                
+                if(s.glow === 'active') { ctx.shadowColor = s.color; ctx.shadowBlur = size * 0.08; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0; } 
+                else { ctx.shadowBlur = 0; }
+                
+                ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+                ctx.restore();
+                resolve();
+            };
+            img.onerror = () => resolve(); 
+            img.src = iconDataUrl;
+        });
+
+        return canvas.toDataURL("image/png");
+    }
+
+    function addToSet() {
+        if(!currentIconSvg) return;
+        iconSet.push({
+            id: 'item_' + Date.now() + Math.random(),
+            iconSvg: currentIconSvg, isImg: currentIconIsImg,
+            settings: gatherSettings()
+        });
+        renderSet();
+    }
+
+    function loadToEditor(index) {
+        const item = iconSet[index];
+        currentIconSvg = item.iconSvg;
+        currentIconIsImg = item.isImg;
+        const s = item.settings;
+
+        setVal('icon-scale', s.scale * 100); setVal('icon-rotation', s.rotate);
+        setVal('icon-x', s.offsetX); setVal('icon-y', s.offsetY);
+        document.getElementById('icon-color').value = s.color;
+        document.getElementById('icon-effect').value = s.effect;
+        document.getElementById('icon-stroke-color').value = s.strokeColor;
+        setVal('icon-stroke-w', s.strokeW);
+        
+        document.getElementById('bg-type').value = s.bgType;
+        document.getElementById('bg-color-1').value = s.color1;
+        document.getElementById('bg-color-2').value = s.color2;
+        
+        document.getElementById('bg-texture').value = s.texture;
+        document.getElementById('bg-texture-color').value = s.texColor;
+        setVal('bg-texture-opacity', s.texOpacity); setVal('bg-texture-scale', s.texScale);
+        
+        document.getElementById('bg-border').value = s.border;
+        document.getElementById('bg-border-color').value = s.borderColor;
+        setVal('bg-border-padding', s.borderPadding); setVal('bg-border-w', s.borderThickness);
+        document.getElementById('bg-glow').value = s.glow;
+
+        toggleEffectControls();
+        updatePreview();
+        switchTab('icon');
+    }
+
+    function duplicateItem(index, e) {
+        e.stopPropagation();
+        const clone = JSON.parse(JSON.stringify(iconSet[index]));
+        clone.id = 'item_' + Date.now() + Math.random();
+        iconSet.push(clone);
+        renderSet();
+    }
+
+    function removeItem(index, e) {
+        e.stopPropagation();
+        iconSet.splice(index, 1);
+        renderSet();
+    }
+
+    function renderSet() {
+        const grid = document.getElementById('set-grid');
+        grid.innerHTML = '';
+        document.getElementById('set-count').innerText = iconSet.length;
+
+        iconSet.forEach((item, index) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'set-item-wrap';
+            
+            const actions = document.createElement('div');
+            actions.className = 'set-actions';
+            
+            const btnEdit = document.createElement('button');
+            btnEdit.className = 'set-btn btn-edit'; btnEdit.innerHTML = '✎'; btnEdit.title = "Edit";
+            btnEdit.onclick = (e) => { e.stopPropagation(); loadToEditor(index); };
+            
+            const btnDup = document.createElement('button');
+            btnDup.className = 'set-btn btn-dup'; btnDup.innerHTML = '⧉'; btnDup.title = "Duplicate";
+            btnDup.onclick = (e) => duplicateItem(index, e);
+
+            const btnRem = document.createElement('button');
+            btnRem.className = 'set-btn btn-remove'; btnRem.innerHTML = '✕'; btnRem.title = "Remove";
+            btnRem.onclick = (e) => removeItem(index, e);
+
+            actions.append(btnEdit, btnDup, btnRem);
+
+            // Container mimics Stream Deck radius visually, but inner image is square.
+            const preview = document.createElement('div');
+            preview.className = 'set-item-preview';
+            preview.onclick = () => loadToEditor(index);
+            
+            const imgEl = document.createElement('img');
+            preview.appendChild(imgEl);
+            wrap.appendChild(actions); 
+            wrap.appendChild(preview); 
+            grid.appendChild(wrap);
+
+            // Render exact replica via Canvas to ensure 100% parity with export
+            renderItemToCanvas(item, 144).then(dataUrl => {
+                imgEl.src = dataUrl;
+                scheduleHeightCheck();
+            });
+        });
+        scheduleHeightCheck();
+    }
+
+    async function exportIcons() {
+        if(iconSet.length === 0) { alert('Your set is empty! Add icons first.'); return; }
+
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "Generating..."; btn.disabled = true;
+
+        const baseName = document.getElementById('export-filename').value || 'HV-Icons';
+        const rawRes = document.getElementById('export-resolution').value;
+        const method = document.getElementById('export-method').value;
+        
+        let resolutions = rawRes === 'ALL' ? [72, 144, 288, 500] : [parseInt(rawRes)];
+        let useZip = method === 'zip' || (resolutions.length > 1 && method === 'individual');
+        let zip; if(useZip) zip = new JSZip();
+
+        for(let i=0; i < iconSet.length; i++) {
+            const item = iconSet[i];
+            for(let r=0; r < resolutions.length; r++) {
+                const size = resolutions[r];
+                
+                // Leverage the exact same robust function used for the set previews!
+                const dataUrl = await renderItemToCanvas(item, size);
+                const b64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
+                const fileName = `${baseName}-${i+1}${resolutions.length > 1 ? `_${size}px` : ''}.png`;
+
+                if(useZip) {
+                    if(resolutions.length > 1) zip.folder(`${size}px`).file(fileName, b64Data, {base64: true});
+                    else zip.file(fileName, b64Data, {base64: true});
+                } else {
+                    const link = document.createElement('a'); link.download = fileName; link.href = dataUrl; link.click();
                 }
             }
-        } catch (err) {
-            console.error('Download error:', err);
-            alert('An error occurred during download.');
-        } finally {
-            dlBtn.disabled = false;
-            dlBtn.innerHTML = '<i class="fas fa-download"></i> Download Icons';
         }
-    });
 
-    // ===== INITIALISE =====
-    document.fonts.ready.then(() => {
-        buildIconsGrid();
-        buildBackgroundsGrid();
-        buildTexturesGrid();
-        drawPreview();
-        document.getElementById('iconColorHex').value       = normalizeHex(document.getElementById('iconColor').value);
-        document.getElementById('backgroundColorHex').value = normalizeHex(document.getElementById('backgroundColor').value);
-        document.getElementById('glowColorHex').value       = normalizeHex(document.getElementById('glowColor').value);
-        updateSelectedCount();
-        updateDuplicateBtn();
-        updateRotateDisplay();
-        checkGradientWarning();
-    });
+        if(useZip) {
+            zip.generateAsync({type:"blob"}).then(function(content) {
+                saveAs(content, `${baseName}-Export.zip`);
+                btn.innerHTML = "Export Complete!"; setTimeout(()=> { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
+            });
+        } else {
+            btn.innerHTML = "Export Complete!"; setTimeout(()=> { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
+        }
+    }
+
+    window.onload = init;
 
     // ===== FOURTHWALL SCROLLBAR FIX =====
-    let lastHeight = 0;
-    let resizeTimer;
-
+    let lastHeight = 0; let resizeTimer;
     function sendHeight() {
-        const h = document.body.scrollHeight;
-        if (h !== lastHeight) { lastHeight = h; window.parent.postMessage({ frameHeight: h }, '*'); }
+      const height = document.body.scrollHeight;
+      if (height !== lastHeight) { lastHeight = height; window.parent.postMessage({ frameHeight: height }, '*'); }
     }
-
-    function scheduleHeightCheck() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(sendHeight, 150);
-    }
-
-    window.addEventListener('load',   () => setTimeout(sendHeight, 100));
-    window.addEventListener('resize', () => scheduleHeightCheck());
+    function scheduleHeightCheck() { clearTimeout(resizeTimer); resizeTimer = setTimeout(sendHeight, 150); }
+    window.addEventListener('load', () => { setTimeout(sendHeight, 100); });
+    window.addEventListener('resize', () => { scheduleHeightCheck(); });
     // ===== END OF SCROLLBAR FIX =====
-
 </script>
 </body>
 </html>
