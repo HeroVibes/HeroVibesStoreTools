@@ -620,11 +620,12 @@ const builtInIcons = [
 ];
 
 // ===== STATE =====
-let customIcons     = [];   // { id, name, isCustom, isSvg, rawSvg (string|null), dataSrc (string) }
-let currentIconSvg  = '';   // Raw SVG string or <img src="..."> fallback string
-let currentIconIsImg= false;// true = PNG or failed SVG fetch
-let currentIsCustom = false;// true = user-uploaded file
-let iconSet         = [];   // Array of set items
+let customIcons      = [];   // { id, name, isCustom, isSvg, rawSvg (string|null), dataSrc (string) }
+let currentIconSvg   = null; // Sanitised SVG string — only set when isImg is false
+let currentIconIsImg = false; // true = PNG/external image
+let currentIconPngUrl= null; // Data URL or external URL — only set when isImg is true
+let currentIsCustom  = false; // true = user-uploaded file
+let iconSet          = [];   // Array of set items
 
 // ===== HELPERS =====
 function updateVal(id) {
@@ -879,15 +880,17 @@ async function selectBuiltIn(id) {
         const res  = await fetch(icon.src);
         const text = await res.text();
         if (text.includes('<svg')) {
-            // Sanitise built-in SVGs too, for consistent colour injection
-            currentIconSvg  = sanitiseSvg(text);
-            currentIconIsImg = false;
+            currentIconSvg    = sanitiseSvg(text);
+            currentIconIsImg  = false;
+            currentIconPngUrl = null;
         } else {
             throw new Error('Not SVG');
         }
     } catch(err) {
-        currentIconSvg   = `<img src="${icon.src}" crossorigin="anonymous"/>`;
-        currentIconIsImg = true;
+        // Fallback: treat as external URL image
+        currentIconSvg    = null;
+        currentIconIsImg  = true;
+        currentIconPngUrl = icon.src;
     }
     updatePreview();
 }
@@ -901,12 +904,15 @@ function selectCustomIcon(id) {
     if (!icon) return;
 
     if (icon.isSvg) {
-        currentIconSvg   = icon.rawSvg;  // Use sanitised raw; colour injected at render time
-        currentIconIsImg = false;
+        currentIconSvg    = icon.rawSvg;
+        currentIconIsImg  = false;
+        currentIconPngUrl = null;
         document.getElementById('svg-color-note').classList.add('visible');
     } else {
-        currentIconSvg   = `<img src="${icon.dataSrc}" crossorigin="anonymous"/>`;
-        currentIconIsImg = true;
+        // PNG: store data URL directly — never wrap in an img tag string
+        currentIconSvg    = null;
+        currentIconIsImg  = true;
+        currentIconPngUrl = icon.dataSrc;
         document.getElementById('svg-color-note').classList.remove('visible');
     }
     updatePreview();
@@ -920,39 +926,38 @@ function setActiveIconItem(id) {
 
 // ===== PREVIEW RENDERING =====
 function updatePreview() {
-    if (!currentIconSvg) return;
+    if (!currentIconSvg && !currentIconPngUrl) return;
 
-    const iconContainer   = document.getElementById('preview-icon');
-    const bgContainer     = document.getElementById('preview-bg');
-    const textureContainer= document.getElementById('preview-texture');
-    const outlineContainer= document.getElementById('preview-outline');
+    const iconContainer    = document.getElementById('preview-icon');
+    const bgContainer      = document.getElementById('preview-bg');
+    const textureContainer = document.getElementById('preview-texture');
+    const outlineContainer = document.getElementById('preview-outline');
 
-    const scale    = getVal('icon-scale') / 100;
-    const rotate   = getVal('icon-rotation');
-    const offsetX  = getVal('icon-x');
-    const offsetY  = getVal('icon-y');
-    const colour   = document.getElementById('icon-color').value;
-    const effect   = document.getElementById('icon-effect').value;
-    const strokeC  = document.getElementById('icon-stroke-color').value;
-    const strokeW  = getVal('icon-stroke-w');
-    const glow     = document.getElementById('bg-glow').value;
+    const scale   = getVal('icon-scale') / 100;
+    const rotate  = getVal('icon-rotation');
+    const offsetX = getVal('icon-x');
+    const offsetY = getVal('icon-y');
+    const colour  = document.getElementById('icon-color').value;
+    const effect  = document.getElementById('icon-effect').value;
+    const strokeC = document.getElementById('icon-stroke-color').value;
+    const strokeW = getVal('icon-stroke-w');
+    const glow    = document.getElementById('bg-glow').value;
 
     iconContainer.style.transform = `translate(${offsetX}%, ${offsetY}%) scale(${scale}) rotate(${rotate}deg)`;
 
-    if (!currentIconIsImg) {
-        // Inject colour into SVG using sanitised + recolour approach
+    if (!currentIconIsImg && currentIconSvg) {
+        // SVG path — inject colour via sanitised string
         const coloured = colouriseSvg(currentIconSvg, colour, strokeC, strokeW, effect);
         iconContainer.innerHTML = coloured;
-
-        // Make root SVG fill 100% of container
         const svgEl = iconContainer.querySelector('svg');
         if (svgEl) {
             svgEl.setAttribute('width', '100%');
             svgEl.setAttribute('height', '100%');
             svgEl.style.overflow = 'visible';
         }
-    } else {
-        iconContainer.innerHTML = currentIconSvg;
+    } else if (currentIconIsImg && currentIconPngUrl) {
+        // PNG / external image path
+        iconContainer.innerHTML = `<img src="${currentIconPngUrl}" style="width:100%;height:100%;object-fit:contain;" crossorigin="anonymous"/>`;
     }
 
     // Glow + effect filters
@@ -1129,23 +1134,36 @@ async function renderItemToCanvas(item, size) {
 
     // Icon — get a renderable URL
     let iconUrl = '';
-    if (!item.isImg) {
-        // SVG: inject colour + sizing, convert to blob URL
-        const coloured  = colouriseSvg(item.iconSvg, s.color, s.strokeColor, s.strokeW * scaleRatio, s.effect);
-        // Force explicit width/height on root svg for canvas drawImage
-        const sized = coloured.replace(/(<svg[^>]*?)(?:\s+width="[^"]*")?(?:\s+height="[^"]*")?(\s*>)/, 
-            `$1 width="${size}" height="${size}"$2`);
-        const blob  = new Blob([sized], { type: 'image/svg+xml;charset=utf-8' });
-        iconUrl     = URL.createObjectURL(blob);
-    } else {
-        const match = item.iconSvg.match(/src="([^"]+)"/);
-        if (match) iconUrl = match[1];
+    let revokeAfter = false;
+
+    if (!item.isImg && item.iconSvg) {
+        // SVG path: inject colour, then force explicit viewBox-preserving width/height
+        const coloured = colouriseSvg(item.iconSvg, s.color, s.strokeColor, s.strokeW * scaleRatio, s.effect);
+
+        // Parse to DOM so we can set width/height reliably without regex
+        const parser  = new DOMParser();
+        const svgDoc  = parser.parseFromString(coloured, 'image/svg+xml');
+        const svgRoot = svgDoc.querySelector('svg');
+        if (svgRoot) {
+            svgRoot.setAttribute('width',  String(size));
+            svgRoot.setAttribute('height', String(size));
+        }
+        const finalSvg = new XMLSerializer().serializeToString(svgDoc.documentElement);
+        const blob     = new Blob([finalSvg], { type: 'image/svg+xml;charset=utf-8' });
+        iconUrl        = URL.createObjectURL(blob);
+        revokeAfter    = true;
+
+    } else if (item.isImg && item.pngUrl) {
+        // PNG / external image: use URL directly — no crossOrigin for data URLs
+        iconUrl = item.pngUrl;
     }
 
     if (iconUrl) {
         await new Promise(resolve => {
             const img = new Image();
-            img.crossOrigin = 'Anonymous';
+            // Only set crossOrigin for external http URLs — data URLs don't need it
+            // and setting it on a data URL can break loading in some browsers
+            if (iconUrl.startsWith('http')) img.crossOrigin = 'Anonymous';
             img.onload = () => {
                 const targetSize = size * 0.6;
                 let drawW = targetSize, drawH = targetSize;
@@ -1182,10 +1200,10 @@ async function renderItemToCanvas(item, size) {
                 ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
                 ctx.restore();
 
-                if (!item.isImg) URL.revokeObjectURL(iconUrl);
+                if (revokeAfter) URL.revokeObjectURL(iconUrl);
                 resolve();
             };
-            img.onerror = () => { if (!item.isImg) URL.revokeObjectURL(iconUrl); resolve(); };
+            img.onerror = () => { if (revokeAfter) URL.revokeObjectURL(iconUrl); resolve(); };
             img.src = iconUrl;
         });
     }
@@ -1195,10 +1213,11 @@ async function renderItemToCanvas(item, size) {
 
 // ===== ADD TO SET =====
 function addToSet() {
-    if (!currentIconSvg) return;
+    if (!currentIconSvg && !currentIconPngUrl) return;
     iconSet.push({
         id:       'item_' + Date.now() + Math.random(),
-        iconSvg:  currentIconSvg,
+        iconSvg:  currentIconSvg,    // sanitised SVG string, or null
+        pngUrl:   currentIconPngUrl, // data URL / external URL, or null
         isImg:    currentIconIsImg,
         settings: gatherSettings()
     });
@@ -1208,8 +1227,9 @@ function addToSet() {
 // ===== LOAD ITEM BACK INTO EDITOR =====
 function loadToEditor(index) {
     const item = iconSet[index];
-    currentIconSvg   = item.iconSvg;
-    currentIconIsImg = item.isImg;
+    currentIconSvg    = item.iconSvg;
+    currentIconPngUrl = item.pngUrl;
+    currentIconIsImg  = item.isImg;
     const s = item.settings;
 
     setVal('icon-scale',    s.scale * 100);
