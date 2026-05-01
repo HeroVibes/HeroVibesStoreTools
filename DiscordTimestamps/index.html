@@ -4,15 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
+    /* ===== CSS VARIABLES ===== */
     :root {
-      --bg-primary: #191919;
-      --bg-secondary: #1F1F1F;
-      --hover-interact: #323232;
-      --outline: #323232;
-      --accent: #87A9FF;
-      --text-primary: #D4D4D4;
+      --bg-primary:     #191919;
+      --bg-secondary:   #1F1F1F;
+      --hover:          #323232;
+      --outline:        #323232;
+      --accent:         #87A9FF;
+      --text-primary:   #D4D4D4;
       --text-secondary: #8C8C8C;
-      --radius: 8px;
+      --radius:         8px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,14 +27,14 @@
       overflow-x: hidden;
     }
 
+    /* ===== MAIN WRAPPER ===== */
     #TS-MAIN-WRAPPER {
-      position: relative;
-      max-width: 800px;
+      max-width: 640px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      height: auto;
+      gap: 12px;
+      position: relative;
     }
 
     #TS-VERSION-TAG {
@@ -42,341 +43,722 @@
       right: 4px;
       font-size: 10px;
       color: var(--text-secondary);
-      opacity: 0.7;
+      opacity: 0.6;
     }
 
-    .hero-card {
+    /* ===== HERO INPUT CARD ===== */
+    #TS-HERO-CARD {
       background: var(--bg-secondary);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
       padding: 24px 16px;
-      height: auto;
     }
 
-    .hero-header {
-      font-size: 20px;
+    /* ===== TIME ROW ===== */
+    #TS-TIME-ROW {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    /* ===== TIME DISPLAY BLOCK ===== */
+    #TS-TIME-BLOCK {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--bg-primary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      overflow: hidden;
+      min-width: 0;
+      transition: border-color 0.2s;
+    }
+    #TS-TIME-BLOCK:focus-within { border-color: var(--accent); }
+
+    /* Hour / minute number inputs */
+    .ts-time-segment {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 28px;
       font-weight: bold;
-      margin-bottom: 16px;
+      padding: 12px 4px;
+      outline: none;
+      text-align: center;
+      letter-spacing: 1px;
+      -moz-appearance: textfield;
+      min-width: 0;
+    }
+    .ts-time-segment::-webkit-inner-spin-button,
+    .ts-time-segment::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    .ts-time-sep {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--text-secondary);
+      user-select: none;
+      padding: 0 2px;
+      line-height: 1;
+    }
+
+    /* ===== SINGLE AM/PM TOGGLE ===== */
+    #TS-AMPM-BTN {
+      flex-shrink: 0;
+      width: 50px;
+      background: rgba(135,169,255,0.08);
+      border: none;
+      border-left: 1px solid var(--outline);
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+      letter-spacing: 0.05em;
+      height: 100%;
+    }
+    #TS-AMPM-BTN:hover {
+      background: var(--hover);
       color: var(--text-primary);
     }
 
-    .hero-label {
-      font-size: 14px;
+    /* ===== NOW BUTTON ===== */
+    #TS-NOW-BTN {
+      flex-shrink: 0;
+      position: relative;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      background: var(--bg-secondary);
       color: var(--text-secondary);
-      margin-bottom: 8px;
-      display: block;
+      border: 1px solid var(--outline);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 12px;
+      transition: color 0.2s;
     }
+    #TS-NOW-BTN::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 75%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: skewX(-25deg);
+      transition: left .7s ease-in-out;
+    }
+    #TS-NOW-BTN:hover::before { left: 125%; }
 
-    .hero-grid {
+    /* ===== DATE ROW ===== */
+    #TS-DATE-ROW {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
     }
 
-    @media (max-width: 600px) {
-      .hero-grid { grid-template-columns: 1fr; }
+    .ts-date-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
-    input, textarea {
+    .ts-date-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .ts-input {
       width: 100%;
       background: var(--bg-primary);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
       color: var(--text-primary);
-      padding: 12px;
-      font-size: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
       outline: none;
-      transition: border-color 0.2s ease, background 0.2s ease;
+      transition: border-color 0.2s;
+      text-align: center;
+      -moz-appearance: textfield;
+    }
+    .ts-input::-webkit-inner-spin-button,
+    .ts-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .ts-input:focus { border-color: var(--accent); }
+    .ts-input::placeholder { color: var(--text-secondary); font-size: 13px; font-weight: normal; opacity: 0.6; }
+
+    /* ===== LIVE PREVIEW BLOCK ===== */
+    #TS-PREVIEW-BLOCK {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--outline);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
-    input[type="date"], input[type="time"] {
-      cursor: pointer;
+    #TS-PREVIEW-LEFT { flex: 1; min-width: 0; }
+
+    #TS-PREVIEW-LABEL {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
     }
 
-    input:focus, textarea:focus { border-color: var(--accent); }
-
-    input::-webkit-calendar-picker-indicator {
-      cursor: pointer;
-      background-color: #FFFFFF;
-      color: #000000;
-      padding: 8px;
-      border-radius: 4px;
-      filter: none;
-      transition: opacity 0.2s;
-    }
-
-    input::-webkit-calendar-picker-indicator:hover, 
-    input::-webkit-calendar-picker-indicator:active {
-      background-color: #D4D4D4;
-    }
-
-    .btn {
-      position: relative;
-      padding: 10px 16px;
-      border-radius: var(--radius);
-      background: var(--bg-secondary);
+    #TS-PREVIEW-TEXT {
+      font-size: 20px;
+      font-weight: bold;
       color: var(--text-primary);
-      border: 1px solid rgba(255,255,255,0.06);
+      word-break: break-word;
+    }
+
+    #TS-PREVIEW-CODE {
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--accent);
+      margin-top: 4px;
+      opacity: 0.8;
+    }
+
+    /* Relative hint */
+    #TS-RELATIVE-HINT {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: rgba(135,169,255,0.05);
+      border: 1px solid rgba(135,169,255,0.15);
+      border-radius: var(--radius);
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    #TS-RELATIVE-HINT.visible { display: block; }
+    #TS-RELATIVE-HINT strong { color: var(--accent); font-weight: 600; }
+
+    /* ===== COPY MAIN BUTTON ===== */
+    #TS-COPY-MAIN {
+      flex-shrink: 0;
+      position: relative;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid var(--accent);
       cursor: pointer;
       overflow: hidden;
       font-size: 14px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      font-weight: bold;
+      transition: background 0.2s;
     }
-
-    .btn::before {
+    #TS-COPY-MAIN::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: -100%;
-      width: 75%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      top: 0; left: -100%;
+      width: 75%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(135,169,255,0.15), transparent);
       transform: skewX(-25deg);
       transition: left .7s ease-in-out;
     }
+    #TS-COPY-MAIN:hover::before { left: 125%; }
+    #TS-COPY-MAIN:hover { background: var(--hover); }
 
-    .btn:hover::before { left: 125%; }
-    .btn:hover { background: var(--hover-interact); }
-    .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(135,169,255,0.12); }
+    /* ===== FORMAT PILLS ===== */
+    #TS-FORMAT-ROW {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
 
-    .ts-list {
+    .ts-format-pill {
+      padding: 5px 11px;
+      border-radius: 20px;
+      border: 1px solid var(--outline);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      font-size: 11px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .ts-format-pill.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(135,169,255,0.08);
+    }
+    .ts-format-pill:hover:not(.active) {
+      border-color: var(--text-secondary);
+      color: var(--text-primary);
+    }
+
+    /* ===== PRESETS CARD ===== */
+    #TS-PRESETS-CARD {
+      background: var(--bg-secondary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+    }
+
+    #TS-PRESETS-HEADER {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+
+    #TS-RESULTS-AREA {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      height: auto;
+      gap: 8px;
     }
 
     .ts-row {
       display: grid;
-      grid-template-columns: 1fr 160px 80px;
+      grid-template-columns: 1fr auto;
       align-items: center;
-      gap: 12px;
-      padding: 12px;
+      gap: 10px;
+      padding: 10px 12px;
       background: var(--bg-primary);
       border-radius: var(--radius);
       border: 1px solid var(--outline);
     }
 
-    @media (max-width: 550px) {
-      .ts-row { grid-template-columns: 1fr 60px; }
-      .ts-code-cell { display: none; }
+    .ts-row-left { min-width: 0; }
+
+    .ts-preview-text {
+      font-size: 13px;
+      color: var(--text-primary);
     }
 
-    .ts-preview-text { font-size: 12px; color: var(--text-primary); }
-    .ts-code-cell { font-family: monospace; font-size: 11px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; }
-    
-    #TS-MESSAGE-FIELD { min-height: 100px; resize: vertical; margin-bottom: 12px; }
+    .ts-code-pill {
+      font-family: monospace;
+      font-size: 10px;
+      color: var(--accent);
+      margin-top: 3px;
+      opacity: 0.7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
+    .btn-copy {
+      position: relative;
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--outline);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 12px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: color 0.2s, background 0.2s;
+    }
+    .btn-copy::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 75%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: skewX(-25deg);
+      transition: left .7s ease-in-out;
+    }
+    .btn-copy:hover::before { left: 125%; }
+    .btn-copy:hover { color: var(--text-primary); background: var(--hover); }
+
+    /* ===== TOAST ===== */
     #TS-TOAST {
       position: fixed;
-      bottom: 20px;
+      bottom: 24px;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(-50%) translateY(8px);
       background: var(--accent);
-      color: var(--bg-primary);
-      padding: 8px 16px;
-      border-radius: 4px;
+      color: #0a0a0a;
+      padding: 8px 18px;
+      border-radius: 20px;
       font-size: 12px;
       font-weight: bold;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.25s ease, transform 0.25s ease;
       pointer-events: none;
       z-index: 1000;
+      letter-spacing: 0.05em;
+    }
+    #TS-TOAST.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
   </style>
 </head>
 <body>
 
 <div id="TS-MAIN-WRAPPER">
-  <div id="TS-VERSION-TAG">V1.0</div>
+  <div id="TS-VERSION-TAG">V2.0</div>
 
-  <div class="hero-card">
-    <div class="hero-header">Select Date & Time</div>
-    <div class="hero-grid">
-      <div>
-        <label class="hero-label">Date</label>
-        <input type="date" id="TS-DATE-INPUT">
+  <!-- ===== HERO INPUT CARD ===== -->
+  <div id="TS-HERO-CARD">
+
+    <!-- TIME ROW -->
+    <div id="TS-TIME-ROW">
+      <!-- Custom time display: hour : min + Single AM/PM toggle -->
+      <div id="TS-TIME-BLOCK">
+        <input type="number" id="TS-HOUR-INPUT" class="ts-time-segment" min="1" max="12" placeholder="12" />
+        <span class="ts-time-sep">:</span>
+        <input type="number" id="TS-MIN-INPUT"  class="ts-time-segment" min="0"  max="59" placeholder="00" />
+        <button id="TS-AMPM-BTN" type="button">AM</button>
       </div>
-      <div>
-        <label class="hero-label">Time</label>
-        <input type="time" id="TS-TIME-INPUT">
+
+      <!-- Now button -->
+      <button id="TS-NOW-BTN" type="button">Now</button>
+    </div>
+
+    <!-- DATE ROW -->
+    <div id="TS-DATE-ROW">
+      <div class="ts-date-field">
+        <span class="ts-date-label">Day</span>
+        <input type="number" class="ts-input" id="TS-DAY-INPUT"   placeholder="Day"   min="1"    max="31"   />
+      </div>
+      <div class="ts-date-field">
+        <span class="ts-date-label">Month</span>
+        <input type="number" class="ts-input" id="TS-MONTH-INPUT" placeholder="Month"   min="1"    max="12"   />
+      </div>
+      <div class="ts-date-field">
+        <span class="ts-date-label">Year</span>
+        <input type="number" class="ts-input" id="TS-YEAR-INPUT"  placeholder="Year" min="1" max="9999" />
       </div>
     </div>
-    <div style="margin-top: 16px;">
-      <button class="btn" id="TS-SYNC-BTN">Set to Current Time</button>
+
+    <!-- LIVE PREVIEW -->
+    <div id="TS-PREVIEW-BLOCK">
+      <div id="TS-PREVIEW-LEFT">
+        <div id="TS-PREVIEW-LABEL">Discord Preview</div>
+        <div id="TS-PREVIEW-TEXT">—</div>
+        <div id="TS-PREVIEW-CODE">—</div>
+        <div id="TS-RELATIVE-HINT">
+          Relative timestamps display <strong>how long ago</strong> or <strong>how soon</strong> something is — e.g. <strong>2 hours ago</strong>, <strong>in 3 days</strong>, or <strong>just now</strong>. Every viewer sees it relative to their own local time.
+        </div>
+      </div>
+      <button id="TS-COPY-MAIN" type="button">Copy</button>
     </div>
+
+    <!-- FORMAT PILLS -->
+    <div id="TS-FORMAT-ROW"></div>
   </div>
 
-  <div class="hero-card">
-    <div class="hero-header">Message Builder</div>
-    <textarea id="TS-MESSAGE-FIELD" placeholder="Draft your post here..."></textarea>
-    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-      <button class="btn" onclick="addStamp('t')">Add Time</button>
-      <button class="btn" onclick="addStamp('d')">Add Date</button>
-      <button class="btn" onclick="addStamp('f')">Add Date + Time</button>
-      <button class="btn" onclick="addStamp('R')">Add Relative</button>
-      <button class="btn" id="TS-COPY-MSG" style="border-color: var(--accent);">Copy Full Message</button>
-    </div>
-  </div>
-
-  <div class="hero-card">
-    <div class="hero-header">Quick Timestamps</div>
-    <div class="ts-list" id="TS-RESULTS-AREA"></div>
+  <!-- ===== ALL FORMATS CARD ===== -->
+  <div id="TS-PRESETS-CARD">
+    <div id="TS-PRESETS-HEADER">All Formats</div>
+    <div id="TS-RESULTS-AREA"></div>
   </div>
 </div>
 
-<div id="TS-TOAST">COPIED TO CLIPBOARD</div>
+<div id="TS-TOAST">Copied!</div>
 
 <script>
-    const dateInput = document.getElementById('TS-DATE-INPUT');
-    const timeInput = document.getElementById('TS-TIME-INPUT');
-    const resultsArea = document.getElementById('TS-RESULTS-AREA');
-    const messageField = document.getElementById('TS-MESSAGE-FIELD');
-    const syncBtn = document.getElementById('TS-SYNC-BTN');
-    const copyMsgBtn = document.getElementById('TS-COPY-MSG');
-    const toast = document.getElementById('TS-TOAST');
+  // ===== SCROLLBAR FIX — declared first, always safe to call =====
+  var lastHeight  = 0;
+  var resizeTimer = null;
+  var toastTimer  = null;
 
-    const FORMAT_STYLES = [
-        { f: 'F' },
-        { f: 'f' },
-        { f: 'D' },
-        { f: 'd' },
-        { f: 'T' },
-        { f: 't' },
-        { f: 'R' }
-    ];
-
-    function getUnix() {
-        const d = new Date(`${dateInput.value}T${timeInput.value}`);
-        return Math.floor(d.getTime() / 1000);
+  function sendHeight() {
+    var h = document.body.scrollHeight;
+    if (h !== lastHeight) {
+      lastHeight = h;
+      window.parent.postMessage({ frameHeight: h }, '*');
     }
+  }
+  function scheduleHeightCheck() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(sendHeight, 150);
+  }
+  window.addEventListener('load', function() { setTimeout(sendHeight, 100); });
+  window.addEventListener('resize', scheduleHeightCheck);
+  // ===== END SCROLLBAR FIX =====
 
-    function refreshTimestamps() {
-        const unix = getUnix();
-        if (isNaN(unix)) return;
+  // ===== ELEMENT REFS =====
+  var hourInput   = document.getElementById('TS-HOUR-INPUT');
+  var minInput    = document.getElementById('TS-MIN-INPUT');
+  var ampmBtn     = document.getElementById('TS-AMPM-BTN');
+  var dayInput    = document.getElementById('TS-DAY-INPUT');
+  var monthInput  = document.getElementById('TS-MONTH-INPUT');
+  var yearInput   = document.getElementById('TS-YEAR-INPUT');
+  var nowBtn      = document.getElementById('TS-NOW-BTN');
+  var previewText = document.getElementById('TS-PREVIEW-TEXT');
+  var previewCode = document.getElementById('TS-PREVIEW-CODE');
+  var relHint     = document.getElementById('TS-RELATIVE-HINT');
+  var copyMain    = document.getElementById('TS-COPY-MAIN');
+  var resultsArea = document.getElementById('TS-RESULTS-AREA');
+  var formatRow   = document.getElementById('TS-FORMAT-ROW');
+  var toast       = document.getElementById('TS-TOAST');
 
-        resultsArea.innerHTML = '';
-        FORMAT_STYLES.forEach(item => {
-            const code = `<t:${unix}:${item.f}>`;
-            const row = document.createElement('div');
-            row.className = 'ts-row';
-            
-            const d = new Date(unix * 1000);
-            let preview = "...";
-            
-            const timeOpts = { hour: 'numeric', minute: '2-digit', hour12: true };
-            const timeSecOpts = { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true };
+  var activeFormat = 't';
+  var ampm = 'AM'; // internal AM/PM state
 
-            if (item.f === 'F') preview = d.toLocaleString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' at ' + d.toLocaleTimeString([], timeOpts);
-            else if (item.f === 'f') preview = d.toLocaleString([], { year: 'numeric', month: 'long', day: 'numeric' }) + ' at ' + d.toLocaleTimeString([], timeOpts);
-            else if (item.f === 'D') preview = d.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' });
-            else if (item.f === 'd') preview = d.toLocaleDateString([], { year: '2-digit', month: 'numeric', day: 'numeric' });
-            else if (item.f === 'T') preview = d.toLocaleTimeString([], timeSecOpts);
-            else if (item.f === 't') preview = d.toLocaleTimeString([], timeOpts);
-            else if (item.f === 'R') preview = "40 seconds ago";
+  // ===== AM/PM SINGLE TOGGLE =====
+  function toggleAmPm() {
+    setAmPm(ampm === 'AM' ? 'PM' : 'AM');
+  }
 
-            row.innerHTML = `
-                <div class="ts-preview-text">${preview}</div>
-                <div class="ts-code-cell">${code}</div>
-                <button class="btn" onclick="copyToClipboard('${code}')">Copy</button>
-            `;
-            resultsArea.appendChild(row);
-        });
-    }
+  function setAmPm(val) {
+    ampm = val;
+    ampmBtn.textContent = val;
+    update();
+  }
+  ampmBtn.addEventListener('click', toggleAmPm);
 
-    function copyToClipboard(val) {
-        if (typeof val !== 'string') val = String(val);
-        
-        const textArea = document.createElement("textarea");
-        textArea.value = val;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-9999px";
-        textArea.style.top = "0";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
-        try {
-            const successful = document.execCommand('copy');
-            if (successful) showToast();
-        } catch (err) {
-            if (navigator.clipboard) {
-              navigator.clipboard.writeText(val).then(showToast);
-            }
-        }
-        document.body.removeChild(textArea);
-    }
-
-    function showToast() {
-        toast.style.opacity = '1';
-        setTimeout(() => toast.style.opacity = '0', 2000);
-    }
-
-    function addStamp(flag) {
-        const unix = getUnix();
-        if (isNaN(unix)) return;
-        const code = `<t:${unix}:${flag}>`;
-        const start = messageField.selectionStart;
-        const end = messageField.selectionEnd;
-        messageField.value = messageField.value.slice(0, start) + code + messageField.value.slice(end);
-        messageField.focus();
-    }
-
-    function setNow() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        
-        dateInput.value = `${year}-${month}-${day}`;
-        timeInput.value = `${hours}:${minutes}`;
-        refreshTimestamps();
-    }
-
-    dateInput.addEventListener('input', refreshTimestamps);
-    timeInput.addEventListener('input', refreshTimestamps);
-    syncBtn.addEventListener('click', setNow);
-    copyMsgBtn.addEventListener('click', () => copyToClipboard(messageField.value));
-
-    setNow();
-
-    let lastHeight = 0;
-    let resizeTimer;
-
-    function sendHeight() {
-        const height = document.body.scrollHeight;
-        if (height !== lastHeight) {
-            lastHeight = height;
-            window.parent.postMessage({ frameHeight: height }, '*');
-        }
-    }
-
-    function scheduleHeightCheck() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(sendHeight, 150);
-    }
-
-    const observer = new MutationObserver(() => {
-        scheduleHeightCheck();
+  // ===== INPUT CLAMPING & FOCUS =====
+  function clampInput(inputEl, min, max) {
+    // Select all text on click/focus so typing replaces it instantly
+    inputEl.addEventListener('focus', function() {
+      this.select();
     });
 
-    observer.observe(document.body, { 
-        childList: true, 
-        subtree: true, 
-        attributes: true 
+    // Don't enforce minimum immediately while typing to allow partial entries (like "2" for "2024")
+    inputEl.addEventListener('input', function() {
+      if (this.value !== '') {
+        var val = parseInt(this.value, 10);
+        if (val > max) this.value = max;
+      }
+      update();
     });
 
-    window.addEventListener('load', () => {
-        setTimeout(sendHeight, 100);
+    // Enforce minimum limit when user clicks away
+    inputEl.addEventListener('blur', function() {
+      if (this.value !== '') {
+        var val = parseInt(this.value, 10);
+        if (val < min) this.value = min;
+      }
+      update();
+    });
+  }
+
+  clampInput(hourInput, 1, 12);
+  clampInput(minInput, 0, 59);
+  clampInput(dayInput, 1, 31);
+  clampInput(monthInput, 1, 12);
+  
+  // Expanded year clamp to allow past and far-future years
+  clampInput(yearInput, 1, 9999);
+
+  // ===== FORMAT PILLS =====
+  var PILL_FORMATS = [
+    { f: 't', label: 'Time'              },
+    { f: 'd', label: 'Date'              },
+    { f: 'f', label: 'Date & Time'       },
+    { f: 'F', label: 'Day, Date & Time'  },
+    { f: 'R', label: 'Relative'          },
+  ];
+
+  var ALL_FORMATS = [
+    { f: 't', label: 'Short Time'        },
+    { f: 'T', label: 'Long Time'         },
+    { f: 'd', label: 'Short Date'        },
+    { f: 'D', label: 'Long Date'         },
+    { f: 'f', label: 'Date & Time'       },
+    { f: 'F', label: 'Day, Date & Time'  },
+    { f: 'R', label: 'Relative'          },
+  ];
+
+  PILL_FORMATS.forEach(function(item) {
+    var pill = document.createElement('button');
+    pill.className = 'ts-format-pill' + (item.f === activeFormat ? ' active' : '');
+    pill.textContent = item.label;
+    pill.type = 'button';
+    pill.addEventListener('click', function() {
+      activeFormat = item.f;
+      document.querySelectorAll('.ts-format-pill').forEach(function(p) { p.classList.remove('active'); });
+      pill.classList.add('active');
+      update();
+    });
+    formatRow.appendChild(pill);
+  });
+
+  // ===== HELPERS =====
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  // Returns formatted ordinal for days (e.g. "2nd")
+  function getOrdinal(n) {
+    var s = ["th", "st", "nd", "rd"], v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
+  // Returns dynamic Discord-like relative timestamp
+  function getRelative(unix) {
+    var diff = unix - Math.floor(Date.now() / 1000);
+    var abs = Math.abs(diff);
+    var isFuture = diff > 0;
+    var amt, unit;
+
+    if (abs < 60) { amt = abs; unit = amt === 1 ? 'second' : 'seconds'; }
+    else if (abs < 3600) { amt = Math.floor(abs / 60); unit = amt === 1 ? 'minute' : 'minutes'; }
+    else if (abs < 86400) { amt = Math.floor(abs / 3600); unit = amt === 1 ? 'hour' : 'hours'; }
+    else if (abs < 2592000) { amt = Math.floor(abs / 86400); unit = amt === 1 ? 'day' : 'days'; }
+    else if (abs < 31536000) { amt = Math.floor(abs / 2592000); unit = amt === 1 ? 'month' : 'months'; }
+    else { amt = Math.floor(abs / 31536000); unit = amt === 1 ? 'year' : 'years'; }
+
+    if (abs === 0) return 'just now';
+    return isFuture ? 'in ' + amt + ' ' + unit : amt + ' ' + unit + ' ago';
+  }
+
+  // ===== SET NOW =====
+  function setNow() {
+    var now  = new Date();
+    var h24  = now.getHours();
+    var mm   = now.getMinutes();
+    var isPM = h24 >= 12;
+    var h12  = h24 % 12 || 12;
+
+    hourInput.value  = h12;
+    minInput.value   = pad(mm);
+    dayInput.value   = now.getDate();
+    monthInput.value = now.getMonth() + 1;
+    yearInput.value  = now.getFullYear();
+    setAmPm(isPM ? 'PM' : 'AM'); // calls update()
+  }
+  nowBtn.addEventListener('click', setNow);
+
+  // ===== GET UNIX =====
+  function getUnix() {
+    var now = new Date();
+    
+    // Parse inputs, fallback to current time if emptied
+    var h = parseInt(hourInput.value, 10);
+    var hh;
+    if (isNaN(h)) {
+      hh = now.getHours();
+    } else {
+      if (h > 12) h = 12;
+      if (h < 1) h = 1;
+      if (ampm === 'AM') hh = (h === 12) ? 0 : h;
+      else hh = (h === 12) ? 12 : h + 12;
+    }
+
+    var mmRaw = parseInt(minInput.value, 10);
+    var mm = isNaN(mmRaw) ? now.getMinutes() : mmRaw;
+
+    var y   = parseInt(yearInput.value,  10) || now.getFullYear();
+    var mo  = parseInt(monthInput.value, 10) || (now.getMonth() + 1);
+    var d   = parseInt(dayInput.value,   10) || now.getDate();
+
+    var dt = new Date(y, mo - 1, d, hh, mm, 0);
+    return isNaN(dt.getTime()) ? null : Math.floor(dt.getTime() / 1000);
+  }
+
+  // ===== FORMAT PREVIEW =====
+  function formatPreview(unix, f) {
+    var d      = new Date(unix * 1000);
+    var tShort = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+    var tLong  = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+
+    // Custom date layout like "May 2nd, 2026"
+    var monthName = d.toLocaleDateString([], { month: 'long' });
+    var customDate = monthName + " " + getOrdinal(d.getDate()) + ", " + d.getFullYear();
+    var dayOfWeek = d.toLocaleDateString([], { weekday: 'long' });
+
+    switch (f) {
+      case 'F': return dayOfWeek + ', ' + customDate + ' at ' + tShort;
+      case 'f': return customDate + ' at ' + tShort;
+      case 'D': return customDate;
+      case 'd': return customDate;
+      case 'T': return tLong;
+      case 't': return tShort;
+      case 'R': return getRelative(unix);
+      default:  return '—';
+    }
+  }
+
+  // ===== UPDATE =====
+  function update() {
+    var unix = getUnix();
+    if (!unix) {
+      previewText.textContent = '—';
+      previewCode.textContent = '—';
+      relHint.classList.remove('visible');
+      resultsArea.innerHTML = '';
+      return;
+    }
+
+    var code = '<t:' + unix + ':' + activeFormat + '>';
+    previewText.textContent = formatPreview(unix, activeFormat);
+    previewCode.textContent = code;
+    relHint.classList.toggle('visible', activeFormat === 'R');
+
+    resultsArea.innerHTML = '';
+    ALL_FORMATS.forEach(function(item) {
+      var stamp = '<t:' + unix + ':' + item.f + '>';
+
+      var row   = document.createElement('div');
+      row.className = 'ts-row';
+
+      var left  = document.createElement('div');
+      left.className = 'ts-row-left';
+
+      var pText = document.createElement('div');
+      pText.className = 'ts-preview-text';
+      pText.textContent = formatPreview(unix, item.f);
+
+      var cPill = document.createElement('div');
+      cPill.className = 'ts-code-pill';
+      cPill.textContent = stamp;
+
+      left.appendChild(pText);
+      left.appendChild(cPill);
+
+      var btn   = document.createElement('button');
+      btn.className = 'btn-copy';
+      btn.type = 'button';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', (function(s) {
+        return function() { copyToClipboard(s); };
+      })(stamp));
+
+      row.appendChild(left);
+      row.appendChild(btn);
+      resultsArea.appendChild(row);
     });
 
-    window.addEventListener('resize', () => {
-        scheduleHeightCheck();
-    });
+    scheduleHeightCheck();
+  }
+
+  // ===== COPY MAIN =====
+  copyMain.addEventListener('click', function() {
+    var unix = getUnix();
+    if (!unix) return;
+    copyToClipboard('<t:' + unix + ':' + activeFormat + '>');
+  });
+
+  // ===== CLIPBOARD =====
+  function copyToClipboard(val) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(val).then(showToast).catch(function() { fallbackCopy(val); });
+    } else {
+      fallbackCopy(val);
+    }
+  }
+  function fallbackCopy(val) {
+    var el = document.createElement('textarea');
+    el.value = val;
+    el.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+    document.body.appendChild(el);
+    el.focus(); el.select();
+    try { document.execCommand('copy'); showToast(); } catch(e) {}
+    document.body.removeChild(el);
+  }
+  function showToast() {
+    clearTimeout(toastTimer);
+    toast.classList.add('show');
+    toastTimer = setTimeout(function() { toast.classList.remove('show'); }, 1800);
+  }
+
+  // ===== INIT =====
+  setNow();
 </script>
 
 </body>
