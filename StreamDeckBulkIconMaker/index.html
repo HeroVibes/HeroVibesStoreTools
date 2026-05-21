@@ -211,6 +211,37 @@
     }
     .sd-key-icon svg, .sd-key-icon img { width: 100%; height: 100%; object-fit: contain; overflow: visible; }
 
+    /* ===== ICON CATEGORY FILTERS ===== */
+    .category-filters {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+    }
+    .category-filters::-webkit-scrollbar { height: 6px; }
+    .cat-btn {
+        background: var(--btn-bg);
+        border: 1px solid var(--outline);
+        color: var(--text-secondary);
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 12px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s;
+    }
+    .cat-btn:hover {
+        border-color: var(--accent);
+        color: var(--text-primary);
+    }
+    .cat-btn.active {
+        background: var(--hover);
+        color: var(--accent);
+        border-color: var(--accent);
+        font-weight: 600;
+    }
+
     /* ===== ICON GRID ===== */
     .icon-grid {
         display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px;
@@ -230,7 +261,6 @@
     }
 
     /* ===== DRAG & DROP ZONE ===== */
-    /* #UPLOAD DROP ZONE */
     .drop-zone {
         border: 2px dashed var(--outline);
         border-radius: var(--radius);
@@ -313,7 +343,6 @@
     .divider { height: 1px; background: var(--outline); margin: 4px 0; }
 
     /* ===== CUSTOM ICON COLOUR NOTE ===== */
-    /* #CUSTOM SVG COLOUR NOTE */
     .svg-color-note {
         font-size: 12px;
         color: var(--accent);
@@ -370,9 +399,23 @@
         <!-- ===== TAB: ICON ===== -->
         <div class="tab-content active" id="tab-icon">
 
-            <!-- #ICON SEARCH -->
-            <div class="control-group search-box">
-                <input type="text" id="icon-search" placeholder="Search icons..." onkeyup="filterIcons()">
+            <!-- #ICON CATEGORIES & SEARCH -->
+            <div class="control-group">
+                <div class="category-filters" id="category-filters">
+                    <button class="cat-btn active" data-cat="all" onclick="setCategory('all')">All</button>
+                    <button class="cat-btn" data-cat="arrow" onclick="setCategory('arrow')">Arrows</button>
+                    <button class="cat-btn" data-cat="art" onclick="setCategory('art')">Art</button>
+                    <button class="cat-btn" data-cat="brands" onclick="setCategory('brands')">Brands</button>
+                    <button class="cat-btn" data-cat="capture" onclick="setCategory('capture')">Capture</button>
+                    <button class="cat-btn" data-cat="media" onclick="setCategory('media')">Media</button>
+                    <button class="cat-btn" data-cat="number" onclick="setCategory('number')">Numbers</button>
+                    <button class="cat-btn" data-cat="objects" onclick="setCategory('objects')">Objects</button>
+                    <button class="cat-btn" data-cat="person" onclick="setCategory('person')">Person</button>
+                    <button class="cat-btn" data-cat="ui" onclick="setCategory('ui')">UI</button>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="icon-search" placeholder="Search icons..." onkeyup="filterIcons()">
+                </div>
             </div>
 
             <!-- #ICON LIBRARY GRID -->
@@ -738,6 +781,7 @@ let currentIconIsImg = false; // true = PNG/external image
 let currentIconPngUrl= null; // Data URL or external URL — only set when isImg is true
 let currentIsCustom  = false; // true = user-uploaded file
 let iconSet          = [];   // Array of set items
+let currentCategory  = 'all'; // Current active category filter
 
 // ===== HELPERS =====
 function updateVal(id) {
@@ -755,8 +799,6 @@ function setVal(id, val) {
 }
 
 // ===== SVG SANITISATION =====
-// Strips all inline fill/stroke/color attributes and style rules so CSS colour
-// injection is reliable for ANY custom SVG the user uploads.
 function sanitiseSvg(rawSvg) {
     const parser  = new DOMParser();
     const doc     = parser.parseFromString(rawSvg, 'image/svg+xml');
@@ -820,7 +862,8 @@ function colouriseSvg(rawSvg, colour, strokeColour, strokeW, effectType) {
 function init() {
     setupDropZone();
     renderLibrary();
-    const startIcon = builtInIcons.find(i => i.id === 'elgato') || builtInIcons[0];
+    // Defaulting to the Elgato logo
+    const startIcon = builtInIcons.find(i => i.id === 'brands-elgato') || builtInIcons[0];
     if (startIcon) selectBuiltIn(startIcon.id);
 }
 
@@ -845,8 +888,26 @@ function handleBgTypeChange() {
     updatePreview();
 }
 
+// ===== CATEGORY FILTERS =====
+function setCategory(cat) {
+    currentCategory = cat;
+    
+    // Update active pill UI
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        if (btn.dataset.cat === cat) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // Clear search box to prevent hidden mismatches when changing categories
+    document.getElementById('icon-search').value = '';
+    
+    renderLibrary();
+}
+
 // ===== DROP ZONE SETUP =====
-// #DROP ZONE EVENT LISTENERS
 function setupDropZone() {
     const zone = document.getElementById('drop-zone');
 
@@ -935,6 +996,13 @@ function renderLibrary() {
     const allIcons = [...builtInIcons, ...customIcons];
 
     allIcons.forEach(icon => {
+        // Filter by category prefix
+        if (currentCategory !== 'all') {
+            // Allows custom icons to show only when 'All' is selected, or maps exactly to built-in prefixes.
+            if (!icon.id.startsWith(currentCategory)) return;
+        }
+
+        // Filter by search string
         if (!icon.name.toLowerCase().includes(search)) return;
 
         const div = document.createElement('div');
@@ -1211,7 +1279,6 @@ function gatherSettings() {
 }
 
 // ===== CANVAS EXPORT RENDERER =====
-// Renders a set item to a canvas at any resolution using the same SVG colour injection pipeline.
 async function renderItemToCanvas(item, size) {
     const canvas = document.createElement('canvas');
     canvas.width = size; canvas.height = size;
