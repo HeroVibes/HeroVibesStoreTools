@@ -16,6 +16,13 @@
       --muted:      #8C8C8C;
       --radius:     8px;
       --radius-lg:  12px;
+      --warn-bg:    rgba(225, 29, 72, 0.1);
+      --warn-br:    rgba(225, 29, 72, 0.3);
+      --warn-tx:    #ffb3c6;
+      --warn-st:    #ffcbd8;
+      --info-bg:    rgba(135,169,255,0.08);
+      --info-br:    rgba(135,169,255,0.2);
+      --info-tx:    #b3caff;
     }
 
     /* ===== RESET & BASE ===== */
@@ -103,6 +110,32 @@
     }
     @media (max-width: 540px) { .grid-2 { grid-template-columns: 1fr; } }
 
+    /* ===== NOTICES & WARNINGS ===== */
+    .warning-box {
+      background: var(--warn-bg);
+      border: 1px solid var(--warn-br);
+      color: var(--warn-tx);
+      padding: 14px;
+      border-radius: var(--radius);
+      font-size: 12px;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .warning-box strong { color: var(--warn-st); }
+    
+    .info-box {
+      background: var(--info-bg);
+      border: 1px solid var(--info-br);
+      color: var(--info-tx);
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 12px;
+      display: none; /* Toggled by JS */
+    }
+    .info-box strong { color: var(--accent); }
+
     /* ===== FORM ELEMENTS ===== */
     label {
       display: flex;
@@ -151,6 +184,40 @@
     input:focus, select:focus { border-color: var(--accent); }
     input::placeholder { color: var(--muted); }
     select option { background: var(--card); }
+
+    /* TOGGLE SWITCH */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--bg);
+      border: 1px solid var(--outline);
+      transition: .3s;
+      border-radius: 20px;
+    }
+    .slider:before {
+      position: absolute; content: "";
+      height: 12px; width: 12px;
+      left: 3px; bottom: 3px;
+      background-color: var(--muted);
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+    input:checked + .slider:before {
+      transform: translateX(16px);
+      background-color: #0d0d0d;
+    }
 
     /* ===== BUTTON ===== */
     .btn {
@@ -316,8 +383,7 @@
     }
     .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
     .avatar-placeholder { color: var(--muted); font-size: 28px; }
-    .avatar-controls { display: flex; flex-direction: column; gap: 8px; }
-    #avatar-file { display: none; }
+    .avatar-controls { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
 
     /* ===== PREVIEW PANEL ===== */
     .preview-outer {
@@ -450,7 +516,7 @@
   <div class="preview-outer" id="sec-preview">
     <div class="preview-label">
       <span>Live Preview</span>
-      <span style="color:var(--accent);font-size:11px;">Version 1.0.2</span>
+      <span style="color:var(--accent);font-size:11px;">Version 1.0.3</span>
     </div>
     <div class="preview-email-chrome">
       <div class="email-chrome-bar">
@@ -529,6 +595,11 @@
             Card
           </div>
         </div>
+        
+        <div id="layout-avatar-warning" class="info-box">
+          <strong>Note:</strong> This layout is designed to feature a profile picture. To ensure your image displays correctly in Gmail, make sure to add a <strong>public Image URL</strong> in the "Profile Info" section below.
+        </div>
+        
       </div>
     </div>
   </div>
@@ -584,19 +655,34 @@
       <div class="card-body">
 
         <div class="section-label">Profile Picture</div>
-        <div class="avatar-area">
-          <div class="avatar-preview" id="avatar-preview-wrap">
-            <span class="avatar-placeholder" id="avatar-placeholder">👤</span>
-            <img id="avatar-preview-img" src="" alt="avatar" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
-          </div>
-          <div class="avatar-controls">
-            <button class="btn" onclick="document.getElementById('avatar-file').click()">Upload Photo</button>
-            <button class="btn" onclick="clearAvatar()" style="font-size:12px;color:var(--muted);">Remove</button>
-          </div>
-          <input type="file" id="avatar-file" accept="image/*" onchange="handleAvatar(event)" />
+        
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 4px;">
+          <span style="font-size:14px; color:var(--text); font-weight:500;">Include Profile Picture</span>
+          <label class="switch">
+            <input type="checkbox" id="avatar-toggle" onchange="toggleAvatarSection(this.checked)">
+            <span class="slider"></span>
+          </label>
         </div>
 
-        <div class="section-label" style="margin-top:4px;">Details</div>
+        <div id="avatar-url-section" style="display:none; flex-direction:column; gap:12px;">
+          <div class="warning-box">
+            <strong>Important Fix:</strong> To stop Gmail from blocking your picture, you must provide a <strong>public image link</strong> instead of uploading a file. <br><br>
+            <strong>Easiest Method:</strong> Go to your LinkedIn or Twitter profile on a computer, right-click your profile picture, and select <strong>"Copy Image Address"</strong>. Paste that link below.
+          </div>
+          
+          <div class="avatar-area">
+            <div class="avatar-preview" id="avatar-preview-wrap">
+              <span class="avatar-placeholder" id="avatar-placeholder">👤</span>
+              <img id="avatar-preview-img" src="" alt="avatar" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+            </div>
+            <div class="avatar-controls">
+              <input type="url" id="inp-avatar-url" placeholder="Paste Image URL here (e.g., from LinkedIn)..." oninput="handleAvatarUrl(this.value)" />
+              <button class="btn" onclick="clearAvatar()" style="font-size:12px;color:var(--muted);padding:4px 8px;align-self:flex-start;">Clear Image</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:12px;">Details</div>
         <div class="grid-2">
           <label><span>Full Name</span><input type="text" id="inp-name" placeholder="Jane Smith" oninput="renderSig()" /></label>
           <label><span>Job Title</span><input type="text" id="inp-title" placeholder="Content Creator" oninput="renderSig()" /></label>
@@ -777,15 +863,31 @@ function getColors() {
 }
 
 /* ==================================================
-   LAYOUT SETTER
+   LAYOUT SETTER & WARNINGS
    ================================================== */
 function setLayout(layout) {
   state.layout = layout;
   document.querySelectorAll('.layout-card').forEach(el => {
     el.classList.toggle('selected', el.dataset.layout === layout);
   });
+  
+  checkLayoutWarning();
   renderSig();
   scheduleHeightCheck();
+}
+
+function checkLayoutWarning() {
+  const warningBox = document.getElementById('layout-avatar-warning');
+  if (!warningBox) return;
+  
+  const needsAvatar = ['classic', 'centered', 'banner', 'card'].includes(state.layout);
+  const isAvatarActive = document.getElementById('avatar-toggle').checked && state.avatar;
+  
+  if (needsAvatar && !isAvatarActive) {
+    warningBox.style.display = 'block';
+  } else {
+    warningBox.style.display = 'none';
+  }
 }
 
 /* ==================================================
@@ -833,31 +935,51 @@ function toggleSocial(id) {
 }
 
 /* ==================================================
-   AVATAR UPLOAD
+   AVATAR UPLOAD (URL BASED)
    ================================================== */
-function handleAvatar(evt) {
-  const file = evt.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    state.avatar = e.target.result;
-    document.getElementById('avatar-placeholder').style.display = 'none';
-    const img = document.getElementById('avatar-preview-img');
+function toggleAvatarSection(isActive) {
+  const sec = document.getElementById('avatar-url-section');
+  sec.style.display = isActive ? 'flex' : 'none';
+  
+  if (!isActive) {
+    clearAvatar();
+  } else {
+    checkLayoutWarning();
+    scheduleHeightCheck();
+  }
+}
+
+function handleAvatarUrl(url) {
+  state.avatar = url.trim();
+  const img = document.getElementById('avatar-preview-img');
+  const placeholder = document.getElementById('avatar-placeholder');
+  
+  if (state.avatar) {
+    placeholder.style.display = 'none';
     img.src = state.avatar;
     img.style.display = 'block';
-    renderSig();
-    scheduleHeightCheck();
-  };
-  reader.readAsDataURL(file);
+  } else {
+    placeholder.style.display = '';
+    img.src = ''; 
+    img.style.display = 'none';
+  }
+  
+  checkLayoutWarning();
+  renderSig();
+  scheduleHeightCheck();
 }
 
 function clearAvatar() {
   state.avatar = null;
+  document.getElementById('inp-avatar-url').value = '';
   document.getElementById('avatar-placeholder').style.display = '';
   const img = document.getElementById('avatar-preview-img');
-  img.src = ''; img.style.display = 'none';
-  document.getElementById('avatar-file').value = '';
+  img.src = ''; 
+  img.style.display = 'none';
+  
+  checkLayoutWarning();
   renderSig();
+  scheduleHeightCheck();
 }
 
 /* ==================================================
@@ -877,7 +999,7 @@ function syncInputs() {
    ================================================== */
 
 function avatarHTML(size, round, center = false) {
-  if (!state.avatar) return '';
+  if (!state.avatar || !document.getElementById('avatar-toggle').checked) return '';
   const r = round ? '50%' : '6px';
   const margin = center ? 'margin:0 auto;' : '';
   return `<img src="${state.avatar}" width="${size}" height="${size}" alt="avatar"
@@ -917,10 +1039,11 @@ function getBgWrapper(c, content) {
 }
 
 function sigClassic(c) {
+  const hasAvatar = state.avatar && document.getElementById('avatar-toggle').checked;
   const content = `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;">
   <tr>
-    ${state.avatar ? `<td style="padding-right:14px;vertical-align:top;">${avatarHTML(70, true, false)}</td>` : ''}
+    ${hasAvatar ? `<td style="padding-right:14px;vertical-align:top;">${avatarHTML(70, true, false)}</td>` : ''}
     <td style="padding-right:14px;vertical-align:middle;">${accentBar(c)}</td>
     <td style="vertical-align:top;">
       ${detailsHTML(c)}
@@ -932,9 +1055,10 @@ function sigClassic(c) {
 }
 
 function sigCentered(c) {
+  const hasAvatar = state.avatar && document.getElementById('avatar-toggle').checked;
   const content = `
 <table cellpadding="0" cellspacing="0" border="0" align="center" style="font-family:Arial,sans-serif;text-align:center;">
-  ${state.avatar ? `<tr><td align="center" style="padding-bottom:10px;">${avatarHTML(70, true, true)}</td></tr>` : ''}
+  ${hasAvatar ? `<tr><td align="center" style="padding-bottom:10px;">${avatarHTML(70, true, true)}</td></tr>` : ''}
   <tr><td>
     ${detailsHTML(c).replace(/style="/g, 'style="text-align:center;')}
     ${socialsHTML()}
@@ -959,12 +1083,13 @@ function sigMinimal(c) {
 }
 
 function sigBanner(c) {
+  const hasAvatar = state.avatar && document.getElementById('avatar-toggle').checked;
   const bgFill = c.bg === 'transparent' ? '#f4f6fb' : c.bg;
   return `
 <table cellpadding="0" cellspacing="0" border="0"
   style="font-family:Arial,sans-serif;background:${bgFill};border-radius:8px;padding:14px 18px;width:100%;max-width:520px;">
   <tr>
-    ${state.avatar ? `<td style="padding-right:14px;vertical-align:middle;">${avatarHTML(60, true, false)}</td>` : ''}
+    ${hasAvatar ? `<td style="padding-right:14px;vertical-align:middle;">${avatarHTML(60, true, false)}</td>` : ''}
     <td style="vertical-align:middle;">
       ${detailsHTML(c)}
     </td>
@@ -976,10 +1101,11 @@ function sigBanner(c) {
 }
 
 function sigCard(c) {
+  const hasAvatar = state.avatar && document.getElementById('avatar-toggle').checked;
   return `
 <table cellpadding="0" cellspacing="0" border="0" align="center"
   style="font-family:Arial,sans-serif;border:1px solid #dde0e7;border-radius:10px;padding:18px 22px;text-align:center;max-width:260px;background:${c.bg};">
-  ${state.avatar ? `<tr><td align="center" style="padding-bottom:10px;">${avatarHTML(64, true, true)}</td></tr>` : ''}
+  ${hasAvatar ? `<tr><td align="center" style="padding-bottom:10px;">${avatarHTML(64, true, true)}</td></tr>` : ''}
   <tr><td>
     ${detailsHTML(c).replace(/style="/g, 'style="text-align:center;')}
   </td></tr>
@@ -1095,6 +1221,7 @@ window.addEventListener('load', () => {
     // to prevent race condition.
     buildThemePicker();
     buildSocialGrid();
+    checkLayoutWarning();
     renderSig();
     
     // ===== SEND INITIAL HEIGHT =====
