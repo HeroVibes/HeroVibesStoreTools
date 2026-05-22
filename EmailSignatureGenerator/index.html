@@ -194,6 +194,37 @@
       align-items: center;
     }
 
+    /* ===== COLOUR THEME PICKER ===== */
+    .theme-grid {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .theme-swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .theme-swatch .dot-row {
+      display: flex;
+      gap: 3px;
+    }
+    .theme-swatch .dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .theme-swatch span { font-size: 11px; color: var(--muted); }
+    .theme-swatch.selected span { color: var(--accent); }
+    .theme-swatch.selected .dot-row, 
+    .theme-swatch.selected > .dot { 
+      outline: 2px solid var(--accent); 
+      border-radius: 20px; 
+      outline-offset: 2px; 
+    }
+
     /* ===== LAYOUT PRESET PICKER ===== */
     .layout-grid {
       display: grid;
@@ -421,7 +452,7 @@
   <div class="preview-outer" id="sec-preview">
     <div class="preview-label">
       <span>Live Preview</span>
-      <span style="color:var(--accent);font-size:11px;">Updates automatically</span>
+      <span style="color:var(--accent);font-size:11px;">Version 1.0.1</span>
     </div>
     <div class="preview-email-chrome">
       <div class="email-chrome-bar">
@@ -521,25 +552,31 @@
     </div>
     <div class="card-content-wrapper" id="body-sec-colors">
       <div class="card-body">
-        <div class="grid-2">
-          <label><span>Text Colour</span>
-            <input type="color" id="color-text" value="#111111" oninput="updateColors()" />
-          </label>
-          <label><span>Accent Colour</span>
-            <input type="color" id="color-accent" value="#87A9FF" oninput="updateColors()" />
-          </label>
-          <label><span>Muted Text Colour</span>
-            <input type="color" id="color-muted" value="#666666" oninput="updateColors()" />
-          </label>
-          <label><span>Background Colour</span>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <input type="color" id="color-bg" value="#ffffff" oninput="updateColors()" disabled />
-              <label style="flex-direction:row;align-items:center;cursor:pointer;margin:0;">
-                <input type="checkbox" id="bg-transparent" checked onchange="updateColors()"> Transparent
-              </label>
-            </div>
-          </label>
+        
+        <div class="theme-grid" id="theme-picker"></div>
+        
+        <div id="custom-colors-wrap" style="display:none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--outline);">
+          <div class="grid-2">
+            <label><span>Text Colour</span>
+              <input type="color" id="color-text" value="#111111" oninput="updateCustomColors()" />
+            </label>
+            <label><span>Accent Colour</span>
+              <input type="color" id="color-accent" value="#87A9FF" oninput="updateCustomColors()" />
+            </label>
+            <label><span>Muted Text Colour</span>
+              <input type="color" id="color-muted" value="#666666" oninput="updateCustomColors()" />
+            </label>
+            <label><span>Background Colour</span>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input type="color" id="color-bg" value="#ffffff" oninput="updateCustomColors()" disabled />
+                <label style="flex-direction:row;align-items:center;cursor:pointer;margin:0;">
+                  <input type="checkbox" id="bg-transparent" checked onchange="updateCustomColors()"> Transparent
+                </label>
+              </div>
+            </label>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -651,10 +688,22 @@
    GMAIL SIGNATURE CREATOR — MAIN SCRIPT
    ================================================== */
 
+/* ---- THEMES ---- */
+const THEMES = [
+  { id:'navy',   label:'Navy',   accent:'#4A7FE5', text:'#1a1a2e', muted:'#555577', bg:'transparent' },
+  { id:'slate',  label:'Slate',  accent:'#64748b', text:'#1e293b', muted:'#64748b', bg:'transparent' },
+  { id:'teal',   label:'Teal',   accent:'#0d9488', text:'#134e4a', muted:'#5eead4', bg:'transparent' },
+  { id:'rose',   label:'Rose',   accent:'#e11d48', text:'#1a0a10', muted:'#888', bg:'transparent' },
+  { id:'amber',  label:'Amber',  accent:'#d97706', text:'#1c1008', muted:'#888', bg:'transparent' },
+  { id:'mono',   label:'Mono',   accent:'#555555', text:'#111111', muted:'#888888', bg:'transparent' },
+  { id:'custom', label:'Custom', accent:'conic-gradient(red, yellow, green, cyan, blue, magenta, red)', text:'#111', muted:'#666', bg:'transparent', isCustom: true }
+];
+
 /* ---- STATE ---- */
 let state = {
   layout:  'classic',
-  colors: {
+  theme:   'navy',
+  customColors: {
     text: '#111111',
     accent: '#87A9FF',
     muted: '#666666',
@@ -685,26 +734,64 @@ const PLATFORMS = [
 ];
 
 /* ==================================================
-   INIT
+   COLORS & THEMES
    ================================================== */
-(function init() {
-  buildSocialGrid();
-  renderSig();
-})();
+function buildThemePicker() {
+  const wrap = document.getElementById('theme-picker');
+  wrap.innerHTML = '';
+  THEMES.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'theme-swatch' + (t.id === state.theme ? ' selected' : '');
+    
+    let dotsHTML = '';
+    if (t.isCustom) {
+      dotsHTML = `<div class="dot" style="background:${t.accent}; width: 16px; height: 16px;"></div>`;
+    } else {
+      dotsHTML = `
+        <div class="dot-row">
+          <div class="dot" style="background:${t.text}"></div>
+          <div class="dot" style="background:${t.accent}"></div>
+          <div class="dot" style="background:${t.muted}"></div>
+        </div>`;
+    }
 
-/* ==================================================
-   COLORS
-   ================================================== */
-function updateColors() {
-  state.colors.text = document.getElementById('color-text').value;
-  state.colors.accent = document.getElementById('color-accent').value;
-  state.colors.muted = document.getElementById('color-muted').value;
+    el.innerHTML = `
+      ${dotsHTML}
+      <span>${t.label}</span>`;
+    
+    el.onclick = () => setTheme(t.id);
+    wrap.appendChild(el);
+  });
+  
+  document.getElementById('custom-colors-wrap').style.display = (state.theme === 'custom') ? 'block' : 'none';
+}
+
+function setTheme(id) {
+  state.theme = id;
+  buildThemePicker();
+  renderSig();
+  scheduleHeightCheck();
+}
+
+function updateCustomColors() {
+  if (state.theme !== 'custom') {
+    state.theme = 'custom';
+    buildThemePicker();
+  }
+  state.customColors.text = document.getElementById('color-text').value;
+  state.customColors.accent = document.getElementById('color-accent').value;
+  state.customColors.muted = document.getElementById('color-muted').value;
   
   const isTransparent = document.getElementById('bg-transparent').checked;
   document.getElementById('color-bg').disabled = isTransparent;
-  state.colors.bg = isTransparent ? 'transparent' : document.getElementById('color-bg').value;
+  state.customColors.bg = isTransparent ? 'transparent' : document.getElementById('color-bg').value;
   
   renderSig();
+}
+
+function getColors() {
+  if (state.theme === 'custom') return state.customColors;
+  return THEMES.find(t => t.id === state.theme) || THEMES[0];
 }
 
 /* ==================================================
@@ -842,8 +929,8 @@ function accentBar(c) {
 }
 
 /* ---- LAYOUTS ---- */
-function getBgWrapper(content) {
-    return `<table cellpadding="0" cellspacing="0" border="0" style="background:${state.colors.bg};width:100%;max-width:520px;"><tr><td>${content}</td></tr></table>`;
+function getBgWrapper(c, content) {
+    return `<table cellpadding="0" cellspacing="0" border="0" style="background:${c.bg};width:100%;max-width:520px;"><tr><td>${content}</td></tr></table>`;
 }
 
 function sigClassic(c) {
@@ -858,7 +945,7 @@ function sigClassic(c) {
     </td>
   </tr>
 </table>`;
-  return getBgWrapper(content);
+  return getBgWrapper(c, content);
 }
 
 function sigCentered(c) {
@@ -870,7 +957,7 @@ function sigCentered(c) {
     ${socialsHTML()}
   </td></tr>
 </table>`;
-  return getBgWrapper(content);
+  return getBgWrapper(c, content);
 }
 
 function sigMinimal(c) {
@@ -885,11 +972,11 @@ function sigMinimal(c) {
     ${links ? `<div style="margin-top:8px;">${links}</div>` : ''}
   </td></tr>
 </table>`;
-  return getBgWrapper(content);
+  return getBgWrapper(c, content);
 }
 
 function sigBanner(c) {
-  const bgFill = state.colors.bg === 'transparent' ? '#f4f6fb' : state.colors.bg;
+  const bgFill = c.bg === 'transparent' ? '#f4f6fb' : c.bg;
   return `
 <table cellpadding="0" cellspacing="0" border="0"
   style="font-family:Arial,sans-serif;background:${bgFill};border-radius:8px;padding:14px 18px;width:100%;max-width:520px;">
@@ -908,7 +995,7 @@ function sigBanner(c) {
 function sigCard(c) {
   return `
 <table cellpadding="0" cellspacing="0" border="0" align="center"
-  style="font-family:Arial,sans-serif;border:1px solid #dde0e7;border-radius:10px;padding:18px 22px;text-align:center;max-width:260px;background:${state.colors.bg};">
+  style="font-family:Arial,sans-serif;border:1px solid #dde0e7;border-radius:10px;padding:18px 22px;text-align:center;max-width:260px;background:${c.bg};">
   ${state.avatar ? `<tr><td style="padding-bottom:10px;">${avatarHTML(64, true)}</td></tr>` : ''}
   <tr><td>
     ${detailsHTML(c).replace(/style="/g, 'style="text-align:center;')}
@@ -925,7 +1012,7 @@ function sigCard(c) {
    ================================================== */
 function renderSig() {
   syncInputs();
-  const c = state.colors;
+  const c = getColors();
   let html = '';
   switch(state.layout) {
     case 'classic':  html = sigClassic(c);  break;
@@ -986,7 +1073,9 @@ function toggleCard(id) {
   scheduleHeightCheck();
 }
 
+// ============================================
 // ===== FOURTHWALL SCROLLBAR FIX =====
+// ============================================
 let lastHeight = 0;
 let resizeTimer;
 
@@ -995,10 +1084,9 @@ let resizeTimer;
  * This is the *only* function that should send a postMessage.
  */
 function sendHeight() {
-  // Use scrollHeight for content height
   const height = document.body.scrollHeight;
   
-  // Only send message if height has *actually* changed 
+  // Only send message if height has *actually* changed
   if (height !== lastHeight) {
     lastHeight = height;
     window.parent.postMessage({ frameHeight: height }, '*');
@@ -1012,13 +1100,22 @@ function sendHeight() {
 function scheduleHeightCheck() {
     // Clear any pending checks
     clearTimeout(resizeTimer);
-    // Schedule a new check after 150ms
+    // Schedule a new check
     resizeTimer = setTimeout(sendHeight, 150);
 }
 
 // Send height on initial load (with a slight delay)
 // This fixes the "Content Cut-Off" race condition.
 window.addEventListener('load', () => {
+    // ===== INITIALIZE TOOL =====
+    // Run all initialization *after* page has loaded
+    // to prevent race condition.
+    buildThemePicker();
+    buildSocialGrid();
+    renderSig();
+    
+    // ===== SEND INITIAL HEIGHT =====
+    // Now send the height after a brief delay
     setTimeout(sendHeight, 100);
 });
 
