@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Email Signature Generator</title>
   <style>
-    /* ===== #DESIGN TOKENS ===== */
+    /* ===== DESIGN TOKENS ===== */
     :root {
       --bg:         #191919;
       --card:       #1F1F1F;
@@ -18,22 +18,24 @@
       --radius-lg:  12px;
     }
 
-    /* ===== #RESET & BASE ===== */
+    /* ===== RESET & BASE ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: transparent; /* Made transparent by default */
+      background: transparent; 
       color: var(--text);
       font-family: system-ui, sans-serif;
       font-size: 14px;
       line-height: 1.5;
+      margin: 0;
+      padding: 1px 0; /* Prevents margin collapse for accurate iframe height calculation */
     }
 
-    /* ===== #LAYOUT ===== */
+    /* ===== LAYOUT ===== */
     /* TOOL WRAPPER */
     .tool-wrap {
       max-width: 960px;
       margin: 0 auto;
-      padding: 24px 16px;
+      padding: 24px 16px 48px 16px; /* Extended bottom padding to prevent iframe cut-off */
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -70,13 +72,28 @@
       transition: transform .25s ease;
     }
     .card-chevron.open { transform: rotate(180deg); }
+    
+    /* COLLAPSIBLE HEIGHT FIX */
+    .card-content-wrapper {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.3s ease;
+    }
+    .card-content-wrapper.collapsed {
+      grid-template-rows: 0fr;
+    }
     .card-body {
+      overflow: hidden;
       padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 16px;
+      transition: padding 0.3s ease;
     }
-    .card-body.collapsed { display: none; }
+    .card-content-wrapper.collapsed .card-body {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
 
     /* TWO-COL GRID */
     .grid-2 {
@@ -86,7 +103,7 @@
     }
     @media (max-width: 540px) { .grid-2 { grid-template-columns: 1fr; } }
 
-    /* ===== #FORM ELEMENTS ===== */
+    /* ===== FORM ELEMENTS ===== */
     label {
       display: flex;
       flex-direction: column;
@@ -135,7 +152,7 @@
     input::placeholder { color: var(--muted); }
     select option { background: var(--card); }
 
-    /* ===== #BUTTON ===== */
+    /* ===== BUTTON ===== */
     .btn {
       position: relative;
       padding: 10px 16px;
@@ -177,7 +194,7 @@
       align-items: center;
     }
 
-    /* ===== #LAYOUT PRESET PICKER ===== */
+    /* ===== LAYOUT PRESET PICKER ===== */
     .layout-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -205,7 +222,7 @@
     .layout-card.selected { border-color: var(--accent); color: var(--accent); background: rgba(135,169,255,0.06); }
     .layout-icon { width: 48px; height: 34px; }
 
-    /* ===== #SOCIAL ICON PICKER ===== */
+    /* ===== SOCIAL ICON PICKER ===== */
     .social-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -247,7 +264,7 @@
     .social-url-row .si { width: 20px; height: 20px; flex-shrink: 0; display:flex; align-items:center; }
     .social-url-row input { flex: 1; }
 
-    /* ===== #AVATAR UPLOADER ===== */
+    /* ===== AVATAR UPLOADER ===== */
     .avatar-area {
       display: flex;
       align-items: center;
@@ -271,7 +288,7 @@
     .avatar-controls { display: flex; flex-direction: column; gap: 8px; }
     #avatar-file { display: none; }
 
-    /* ===== #PREVIEW PANEL ===== */
+    /* ===== PREVIEW PANEL ===== */
     .preview-outer {
       background: var(--card);
       border: 1px solid var(--outline);
@@ -318,7 +335,7 @@
 
     #sig-render { font-family: Arial, sans-serif; }
 
-    /* ===== #COPY AREA ===== */
+    /* ===== COPY AREA ===== */
     .copy-section {
       display: flex;
       flex-direction: column;
@@ -384,7 +401,7 @@
 
     #sig-source { display: none; }
 
-    /* ===== #SECTION DIVIDER ===== */
+    /* ===== SECTION DIVIDER ===== */
     .section-label {
       font-size: 12px;
       color: var(--muted);
@@ -397,10 +414,10 @@
 </head>
 <body>
 
-<!-- ==================== #TOOL WRAPPER ==================== -->
+<!-- ==================== TOOL WRAPPER ==================== -->
 <div class="tool-wrap">
 
-  <!-- ===== #LIVE PREVIEW (top) ===== -->
+  <!-- ===== LIVE PREVIEW (top) ===== -->
   <div class="preview-outer" id="sec-preview">
     <div class="preview-label">
       <span>Live Preview</span>
@@ -420,7 +437,7 @@
     </div>
   </div>
 
-  <!-- ===== #LAYOUT PRESETS ===== -->
+  <!-- ===== LAYOUT PRESETS ===== -->
   <div class="card" id="sec-layout">
     <div class="card-header" onclick="toggleCard('sec-layout')">
       <div class="card-title">
@@ -429,69 +446,71 @@
       </div>
       <svg class="card-chevron open" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
     </div>
-    <div class="card-body" id="body-sec-layout">
-      <div class="layout-grid">
-        <!-- Classic -->
-        <div class="layout-card selected" data-layout="classic" onclick="setLayout('classic')">
-          <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="10" cy="17" r="8" fill="#323232"/>
-            <rect x="22" y="9" width="22" height="3" rx="1.5" fill="#555"/>
-            <rect x="22" y="15" width="16" height="2" rx="1" fill="#404040"/>
-            <rect x="22" y="20" width="18" height="2" rx="1" fill="#404040"/>
-            <rect x="22" y="26" width="10" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
-          </svg>
-          Classic
-        </div>
-        <!-- Centered -->
-        <div class="layout-card" data-layout="centered" onclick="setLayout('centered')">
-          <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="24" cy="9" r="6" fill="#323232"/>
-            <rect x="12" y="18" width="24" height="3" rx="1.5" fill="#555"/>
-            <rect x="16" y="24" width="16" height="2" rx="1" fill="#404040"/>
-            <rect x="19" y="29" width="10" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
-          </svg>
-          Centered
-        </div>
-        <!-- Minimal -->
-        <div class="layout-card" data-layout="minimal" onclick="setLayout('minimal')">
-          <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="4" y="8" width="28" height="3" rx="1.5" fill="#555"/>
-            <rect x="4" y="14" width="20" height="2" rx="1" fill="#404040"/>
-            <rect x="4" y="19" width="22" height="2" rx="1" fill="#404040"/>
-            <rect x="4" y="26" width="8" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
-            <rect x="14" y="26" width="8" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
-            <rect x="24" y="26" width="8" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
-          </svg>
-          Minimal
-        </div>
-        <!-- Banner -->
-        <div class="layout-card" data-layout="banner" onclick="setLayout('banner')">
-          <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="8" width="44" height="18" rx="2" fill="#252525"/>
-            <circle cx="10" cy="17" r="5" fill="#323232"/>
-            <rect x="18" y="13" width="16" height="2.5" rx="1.2" fill="#555"/>
-            <rect x="18" y="18" width="10" height="2" rx="1" fill="#404040"/>
-            <rect x="37" y="13" width="5" height="5" rx="1" fill="#87A9FF" opacity=".5"/>
-          </svg>
-          Banner
-        </div>
-        <!-- Card -->
-        <div class="layout-card" data-layout="card" onclick="setLayout('card')">
-          <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="8" y="2" width="32" height="30" rx="3" fill="#252525"/>
-            <circle cx="24" cy="11" r="5" fill="#323232"/>
-            <rect x="14" y="19" width="20" height="2.5" rx="1.2" fill="#555"/>
-            <rect x="17" y="24" width="14" height="2" rx="1" fill="#404040"/>
-            <rect x="16" y="29" width="5" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
-            <rect x="23" y="29" width="5" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
-          </svg>
-          Card
+    <div class="card-content-wrapper" id="body-sec-layout">
+      <div class="card-body">
+        <div class="layout-grid">
+          <!-- Classic -->
+          <div class="layout-card selected" data-layout="classic" onclick="setLayout('classic')">
+            <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="10" cy="17" r="8" fill="#323232"/>
+              <rect x="22" y="9" width="22" height="3" rx="1.5" fill="#555"/>
+              <rect x="22" y="15" width="16" height="2" rx="1" fill="#404040"/>
+              <rect x="22" y="20" width="18" height="2" rx="1" fill="#404040"/>
+              <rect x="22" y="26" width="10" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+            </svg>
+            Classic
+          </div>
+          <!-- Centered -->
+          <div class="layout-card" data-layout="centered" onclick="setLayout('centered')">
+            <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="9" r="6" fill="#323232"/>
+              <rect x="12" y="18" width="24" height="3" rx="1.5" fill="#555"/>
+              <rect x="16" y="24" width="16" height="2" rx="1" fill="#404040"/>
+              <rect x="19" y="29" width="10" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+            </svg>
+            Centered
+          </div>
+          <!-- Minimal -->
+          <div class="layout-card" data-layout="minimal" onclick="setLayout('minimal')">
+            <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="8" width="28" height="3" rx="1.5" fill="#555"/>
+              <rect x="4" y="14" width="20" height="2" rx="1" fill="#404040"/>
+              <rect x="4" y="19" width="22" height="2" rx="1" fill="#404040"/>
+              <rect x="4" y="26" width="8" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+              <rect x="14" y="26" width="8" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+              <rect x="24" y="26" width="8" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+            </svg>
+            Minimal
+          </div>
+          <!-- Banner -->
+          <div class="layout-card" data-layout="banner" onclick="setLayout('banner')">
+            <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="8" width="44" height="18" rx="2" fill="#252525"/>
+              <circle cx="10" cy="17" r="5" fill="#323232"/>
+              <rect x="18" y="13" width="16" height="2.5" rx="1.2" fill="#555"/>
+              <rect x="18" y="18" width="10" height="2" rx="1" fill="#404040"/>
+              <rect x="37" y="13" width="5" height="5" rx="1" fill="#87A9FF" opacity=".5"/>
+            </svg>
+            Banner
+          </div>
+          <!-- Card -->
+          <div class="layout-card" data-layout="card" onclick="setLayout('card')">
+            <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="8" y="2" width="32" height="30" rx="3" fill="#252525"/>
+              <circle cx="24" cy="11" r="5" fill="#323232"/>
+              <rect x="14" y="19" width="20" height="2.5" rx="1.2" fill="#555"/>
+              <rect x="17" y="24" width="14" height="2" rx="1" fill="#404040"/>
+              <rect x="16" y="29" width="5" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+              <rect x="23" y="29" width="5" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+            </svg>
+            Card
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== #SIGNATURE COLOURS ===== -->
+  <!-- ===== SIGNATURE COLOURS ===== -->
   <div class="card" id="sec-colors">
     <div class="card-header" onclick="toggleCard('sec-colors')">
       <div class="card-title">
@@ -500,30 +519,32 @@
       </div>
       <svg class="card-chevron open" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
     </div>
-    <div class="card-body" id="body-sec-colors">
-      <div class="grid-2">
-        <label><span>Text Colour</span>
-          <input type="color" id="color-text" value="#111111" oninput="updateColors()" />
-        </label>
-        <label><span>Accent Colour</span>
-          <input type="color" id="color-accent" value="#87A9FF" oninput="updateColors()" />
-        </label>
-        <label><span>Muted Text Colour</span>
-          <input type="color" id="color-muted" value="#666666" oninput="updateColors()" />
-        </label>
-        <label><span>Background Colour</span>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input type="color" id="color-bg" value="#ffffff" oninput="updateColors()" disabled />
-            <label style="flex-direction:row;align-items:center;cursor:pointer;margin:0;">
-              <input type="checkbox" id="bg-transparent" checked onchange="updateColors()"> Transparent
-            </label>
-          </div>
-        </label>
+    <div class="card-content-wrapper" id="body-sec-colors">
+      <div class="card-body">
+        <div class="grid-2">
+          <label><span>Text Colour</span>
+            <input type="color" id="color-text" value="#111111" oninput="updateColors()" />
+          </label>
+          <label><span>Accent Colour</span>
+            <input type="color" id="color-accent" value="#87A9FF" oninput="updateColors()" />
+          </label>
+          <label><span>Muted Text Colour</span>
+            <input type="color" id="color-muted" value="#666666" oninput="updateColors()" />
+          </label>
+          <label><span>Background Colour</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="color" id="color-bg" value="#ffffff" oninput="updateColors()" disabled />
+              <label style="flex-direction:row;align-items:center;cursor:pointer;margin:0;">
+                <input type="checkbox" id="bg-transparent" checked onchange="updateColors()"> Transparent
+              </label>
+            </div>
+          </label>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== #PROFILE INFO ===== -->
+  <!-- ===== PROFILE INFO ===== -->
   <div class="card" id="sec-info">
     <div class="card-header" onclick="toggleCard('sec-info')">
       <div class="card-title">
@@ -532,41 +553,43 @@
       </div>
       <svg class="card-chevron open" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
     </div>
-    <div class="card-body" id="body-sec-info">
+    <div class="card-content-wrapper" id="body-sec-info">
+      <div class="card-body">
 
-      <!-- AVATAR UPLOADER -->
-      <div class="section-label">Profile Picture</div>
-      <div class="avatar-area">
-        <div class="avatar-preview" id="avatar-preview-wrap">
-          <span class="avatar-placeholder" id="avatar-placeholder">👤</span>
-          <img id="avatar-preview-img" src="" alt="avatar" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+        <!-- AVATAR UPLOADER -->
+        <div class="section-label">Profile Picture</div>
+        <div class="avatar-area">
+          <div class="avatar-preview" id="avatar-preview-wrap">
+            <span class="avatar-placeholder" id="avatar-placeholder">👤</span>
+            <img id="avatar-preview-img" src="" alt="avatar" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+          </div>
+          <div class="avatar-controls">
+            <button class="btn" onclick="document.getElementById('avatar-file').click()">Upload Photo</button>
+            <button class="btn" onclick="clearAvatar()" style="font-size:12px;color:var(--muted);">Remove</button>
+          </div>
+          <input type="file" id="avatar-file" accept="image/*" onchange="handleAvatar(event)" />
         </div>
-        <div class="avatar-controls">
-          <button class="btn" onclick="document.getElementById('avatar-file').click()">Upload Photo</button>
-          <button class="btn" onclick="clearAvatar()" style="font-size:12px;color:var(--muted);">Remove</button>
+
+        <!-- NAME & TITLE -->
+        <div class="section-label" style="margin-top:4px;">Details</div>
+        <div class="grid-2">
+          <label><span>Full Name</span><input type="text" id="inp-name" placeholder="Jane Smith" oninput="renderSig()" /></label>
+          <label><span>Job Title</span><input type="text" id="inp-title" placeholder="Content Creator" oninput="renderSig()" /></label>
         </div>
-        <input type="file" id="avatar-file" accept="image/*" onchange="handleAvatar(event)" />
-      </div>
+        <div class="grid-2">
+          <label><span>Company / Brand</span><input type="text" id="inp-company" placeholder="HeroVibes" oninput="renderSig()" /></label>
+          <label><span>Email Address</span><input type="email" id="inp-email" placeholder="jane@example.com" oninput="renderSig()" /></label>
+        </div>
+        <div class="grid-2">
+          <label><span>Phone (optional)</span><input type="tel" id="inp-phone" placeholder="+44 7700 000000" oninput="renderSig()" /></label>
+          <label><span>Website (optional)</span><input type="url" id="inp-website" placeholder="https://yoursite.com" oninput="renderSig()" /></label>
+        </div>
 
-      <!-- NAME & TITLE -->
-      <div class="section-label" style="margin-top:4px;">Details</div>
-      <div class="grid-2">
-        <label><span>Full Name</span><input type="text" id="inp-name" placeholder="Jane Smith" oninput="renderSig()" /></label>
-        <label><span>Job Title</span><input type="text" id="inp-title" placeholder="Content Creator" oninput="renderSig()" /></label>
       </div>
-      <div class="grid-2">
-        <label><span>Company / Brand</span><input type="text" id="inp-company" placeholder="HeroVibes" oninput="renderSig()" /></label>
-        <label><span>Email Address</span><input type="email" id="inp-email" placeholder="jane@example.com" oninput="renderSig()" /></label>
-      </div>
-      <div class="grid-2">
-        <label><span>Phone (optional)</span><input type="tel" id="inp-phone" placeholder="+44 7700 000000" oninput="renderSig()" /></label>
-        <label><span>Website (optional)</span><input type="url" id="inp-website" placeholder="https://yoursite.com" oninput="renderSig()" /></label>
-      </div>
-
     </div>
   </div>
 
-  <!-- ===== #SOCIAL LINKS ===== -->
+  <!-- ===== SOCIAL LINKS ===== -->
   <div class="card" id="sec-social">
     <div class="card-header" onclick="toggleCard('sec-social')">
       <div class="card-title">
@@ -575,14 +598,16 @@
       </div>
       <svg class="card-chevron open" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
     </div>
-    <div class="card-body" id="body-sec-social">
-      <p style="font-size:12px;color:var(--muted);">Select the platforms you want to include, then add your URLs below.</p>
-      <div class="social-grid" id="social-toggle-grid"></div>
-      <div class="social-urls" id="social-url-fields"></div>
+    <div class="card-content-wrapper" id="body-sec-social">
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--muted);">Select the platforms you want to include, then add your URLs below.</p>
+        <div class="social-grid" id="social-toggle-grid"></div>
+        <div class="social-urls" id="social-url-fields"></div>
+      </div>
     </div>
   </div>
 
-  <!-- ===== #COPY TO GMAIL ===== -->
+  <!-- ===== COPY TO GMAIL ===== -->
   <div class="card" id="sec-copy">
     <div class="card-header" onclick="toggleCard('sec-copy')">
       <div class="card-title">
@@ -591,22 +616,24 @@
       </div>
       <svg class="card-chevron open" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
     </div>
-    <div class="card-body" id="body-sec-copy">
-      <div class="copy-section">
-        <div class="btn-row">
-          <button class="btn accent" onclick="copySignature()">📋 Copy Signature</button>
-          <a class="btn" href="https://mail.google.com/mail/u/0/#settings/general" target="_blank" rel="noopener">Open Gmail Settings ↗</a>
+    <div class="card-content-wrapper" id="body-sec-copy">
+      <div class="card-body">
+        <div class="copy-section">
+          <div class="btn-row">
+            <button class="btn accent" onclick="copySignature()">📋 Copy Signature</button>
+            <a class="btn" href="https://mail.google.com/mail/u/0/#settings/general" target="_blank" rel="noopener">Open Gmail Settings ↗</a>
+          </div>
+          <div class="copy-hint">
+            <strong>How to add your signature to Gmail:</strong>
+          </div>
+          <ol class="copy-steps">
+            <li><span>Click <strong>Copy Signature</strong> above.</span></li>
+            <li><span>Click <strong>Open Gmail Settings</strong> above, or go to Gmail → Settings (⚙️) → <strong>See all settings</strong>.</span></li>
+            <li><span>Scroll to the <strong>Signature</strong> section → click <strong>Create new</strong>.</span></li>
+            <li><span>In the signature editor, press <strong>Ctrl+V</strong> (or Cmd+V on Mac) to paste.</span></li>
+            <li><span>Scroll to the bottom and click <strong>Save Changes</strong>.</span></li>
+          </ol>
         </div>
-        <div class="copy-hint">
-          <strong>How to add your signature to Gmail:</strong>
-        </div>
-        <ol class="copy-steps">
-          <li><span>Click <strong>Copy Signature</strong> above.</span></li>
-          <li><span>Click <strong>Open Gmail Settings</strong> above, or go to Gmail → Settings (⚙️) → <strong>See all settings</strong>.</span></li>
-          <li><span>Scroll to the <strong>Signature</strong> section → click <strong>Create new</strong>.</span></li>
-          <li><span>In the signature editor, press <strong>Ctrl+V</strong> (or Cmd+V on Mac) to paste.</span></li>
-          <li><span>Scroll to the bottom and click <strong>Save Changes</strong>.</span></li>
-        </ol>
       </div>
     </div>
   </div>
@@ -621,7 +648,7 @@
 
 <script>
 /* ==================================================
-   #GMAIL SIGNATURE CREATOR — MAIN SCRIPT
+   GMAIL SIGNATURE CREATOR — MAIN SCRIPT
    ================================================== */
 
 /* ---- STATE ---- */
@@ -658,7 +685,7 @@ const PLATFORMS = [
 ];
 
 /* ==================================================
-   #INIT
+   INIT
    ================================================== */
 (function init() {
   buildSocialGrid();
@@ -666,7 +693,7 @@ const PLATFORMS = [
 })();
 
 /* ==================================================
-   #COLORS
+   COLORS
    ================================================== */
 function updateColors() {
   state.colors.text = document.getElementById('color-text').value;
@@ -681,7 +708,7 @@ function updateColors() {
 }
 
 /* ==================================================
-   #LAYOUT SETTER
+   LAYOUT SETTER
    ================================================== */
 function setLayout(layout) {
   state.layout = layout;
@@ -693,7 +720,7 @@ function setLayout(layout) {
 }
 
 /* ==================================================
-   #SOCIAL GRID
+   SOCIAL GRID
    ================================================== */
 function buildSocialGrid() {
   const grid   = document.getElementById('social-toggle-grid');
@@ -737,7 +764,7 @@ function toggleSocial(id) {
 }
 
 /* ==================================================
-   #AVATAR UPLOAD
+   AVATAR UPLOAD
    ================================================== */
 function handleAvatar(evt) {
   const file = evt.target.files[0];
@@ -765,7 +792,7 @@ function clearAvatar() {
 }
 
 /* ==================================================
-   #READ INPUTS INTO STATE
+   READ INPUTS INTO STATE
    ================================================== */
 function syncInputs() {
   state.name    = document.getElementById('inp-name').value.trim();
@@ -777,7 +804,7 @@ function syncInputs() {
 }
 
 /* ==================================================
-   #SIGNATURE HTML GENERATORS
+   SIGNATURE HTML GENERATORS
    ================================================== */
 
 function avatarHTML(size, round) {
@@ -894,7 +921,7 @@ function sigCard(c) {
 }
 
 /* ==================================================
-   #RENDER SIGNATURE
+   RENDER SIGNATURE
    ================================================== */
 function renderSig() {
   syncInputs();
@@ -914,7 +941,7 @@ function renderSig() {
 }
 
 /* ==================================================
-   #COPY SIGNATURE TO CLIPBOARD
+   COPY SIGNATURE TO CLIPBOARD
    ================================================== */
 async function copySignature() {
   const html = document.getElementById('sig-source').innerHTML;
@@ -949,7 +976,7 @@ function showToast(msg) {
 }
 
 /* ==================================================
-   #COLLAPSIBLE CARDS
+   COLLAPSIBLE CARDS
    ================================================== */
 function toggleCard(id) {
   const body    = document.getElementById('body-' + id);
@@ -968,9 +995,10 @@ let resizeTimer;
  * This is the *only* function that should send a postMessage.
  */
 function sendHeight() {
+  // Use scrollHeight for content height
   const height = document.body.scrollHeight;
   
-  // Only send message if height has *actually* changed
+  // Only send message if height has *actually* changed 
   if (height !== lastHeight) {
     lastHeight = height;
     window.parent.postMessage({ frameHeight: height }, '*');
@@ -984,11 +1012,12 @@ function sendHeight() {
 function scheduleHeightCheck() {
     // Clear any pending checks
     clearTimeout(resizeTimer);
-    // Schedule a new check
+    // Schedule a new check after 150ms
     resizeTimer = setTimeout(sendHeight, 150);
 }
 
 // Send height on initial load (with a slight delay)
+// This fixes the "Content Cut-Off" race condition.
 window.addEventListener('load', () => {
     setTimeout(sendHeight, 100);
 });
