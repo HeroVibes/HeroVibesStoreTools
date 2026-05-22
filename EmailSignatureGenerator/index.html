@@ -516,7 +516,7 @@
   <div class="preview-outer" id="sec-preview">
     <div class="preview-label">
       <span>Live Preview</span>
-      <span style="color:var(--accent);font-size:11px;">Version 1.0.3</span>
+      <span style="color:var(--accent);font-size:11px;">Version 1.0.4</span>
     </div>
     <div class="preview-email-chrome">
       <div class="email-chrome-bar">
@@ -676,8 +676,13 @@
               <img id="avatar-preview-img" src="" alt="avatar" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
             </div>
             <div class="avatar-controls">
-              <input type="url" id="inp-avatar-url" placeholder="Paste Image URL here (e.g., from LinkedIn)..." oninput="handleAvatarUrl(this.value)" />
-              <button class="btn" onclick="clearAvatar()" style="font-size:12px;color:var(--muted);padding:4px 8px;align-self:flex-start;">Clear Image</button>
+              <label><span>Image Source URL (Required)</span>
+                <input type="url" id="inp-avatar-url" placeholder="Paste Image URL here (e.g., from LinkedIn)..." oninput="handleAvatarUrl(this.value)" />
+              </label>
+              <label><span>Click Link (Optional)</span>
+                <input type="url" id="inp-avatar-link" placeholder="Where should the image link to?" oninput="handleAvatarLink(this.value)" />
+              </label>
+              <button class="btn" onclick="clearAvatar()" style="font-size:12px;color:var(--muted);padding:4px 8px;align-self:flex-start;margin-top:4px;">Clear Image</button>
             </div>
           </div>
         </div>
@@ -784,6 +789,7 @@ let state = {
   phone:   '',
   website: '',
   avatar:  null,
+  avatarLink: '',
   socials: {}
 };
 
@@ -969,9 +975,17 @@ function handleAvatarUrl(url) {
   scheduleHeightCheck();
 }
 
+function handleAvatarLink(url) {
+  state.avatarLink = url.trim();
+  renderSig();
+  scheduleHeightCheck();
+}
+
 function clearAvatar() {
   state.avatar = null;
+  state.avatarLink = '';
   document.getElementById('inp-avatar-url').value = '';
+  document.getElementById('inp-avatar-link').value = '';
   document.getElementById('avatar-placeholder').style.display = '';
   const img = document.getElementById('avatar-preview-img');
   img.src = ''; 
@@ -1001,9 +1015,17 @@ function syncInputs() {
 function avatarHTML(size, round, center = false) {
   if (!state.avatar || !document.getElementById('avatar-toggle').checked) return '';
   const r = round ? '50%' : '6px';
-  const margin = center ? 'margin:0 auto;' : '';
-  return `<img src="${state.avatar}" width="${size}" height="${size}" alt="avatar"
-    style="width:${size}px;height:${size}px;border-radius:${r};object-fit:cover;display:block;${margin}" />`;
+  const margin = (center && !state.avatarLink) ? 'margin:0 auto;' : '';
+  
+  const imgHTML = `<img src="${state.avatar}" width="${size}" height="${size}" alt="avatar" style="width:${size}px;height:${size}px;border-radius:${r};object-fit:cover;display:block;${margin}border:none;" />`;
+  
+  if (state.avatarLink) {
+    // For center alignment inside a <td align="center">, inline-block centers perfectly
+    const aStyle = center ? 'display:inline-block;' : 'display:block;';
+    return `<a href="${state.avatarLink}" target="_blank" rel="noopener" style="${aStyle}text-decoration:none;">${imgHTML}</a>`;
+  }
+  
+  return imgHTML;
 }
 
 function detailsHTML(c) {
@@ -1110,9 +1132,6 @@ function sigCard(c) {
     ${detailsHTML(c).replace(/style="/g, 'style="text-align:center;')}
   </td></tr>
   <tr><td style="padding-top:4px;text-align:center;">${socialsHTML()}</td></tr>
-  <tr><td style="padding-top:10px;border-top:1px solid #eee;text-align:center;">
-    ${state.website ? `<a href="${state.website}" style="font-size:11px;color:${c.accent};text-decoration:none;">${state.website.replace(/^https?:\/\//,'')}</a>` : ''}
-  </td></tr>
 </table>`;
 }
 
