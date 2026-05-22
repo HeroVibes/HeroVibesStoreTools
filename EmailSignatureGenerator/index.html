@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Signature Generator</title>
+  <style>
+    /* ===== #DESIGN TOKENS ===== */
+    :root {
+      --bg:         #191919;
+      --card:       #1F1F1F;
+      --hover:      #323232;
+      --outline:    #323232;
+      --accent:     #87A9FF;
+      --text:       #D4D4D4;
+      --muted:      #8C8C8C;
+      --radius:     8px;
+      --radius-lg:  12px;
+    }
+
+    /* ===== #RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: transparent; /* Made transparent by default */
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ===== #LAYOUT ===== */
+    /* TOOL WRAPPER */
+    .tool-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* SECTION CARD */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--outline);
+      cursor: pointer;
+      user-select: none;
+    }
+    .card-header:hover { background: var(--hover); }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title svg { color: var(--accent); flex-shrink: 0; }
+    .card-chevron {
+      color: var(--muted);
+      transition: transform .25s ease;
+    }
+    .card-chevron.open { transform: rotate(180deg); }
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .card-body.collapsed { display: none; }
+
+    /* TWO-COL GRID */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 540px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* ===== #FORM ELEMENTS ===== */
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    label span { color: var(--text); font-size: 12px; }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="url"],
+    input[type="tel"],
+    select {
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 14px;
+      padding: 9px 12px;
+      width: 100%;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input[type="color"] {
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 2px;
+      width: 100%;
+      height: 40px;
+      cursor: pointer;
+      outline: none;
+    }
+    input[type="color"]:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    input::placeholder { color: var(--muted); }
+    select option { background: var(--card); }
+
+    /* ===== #BUTTON ===== */
+    .btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: background .2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 75%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left .7s ease-in-out;
+    }
+    .btn:hover::before { left: 125%; }
+    .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(135,169,255,0.12); }
+    .btn.accent {
+      background: var(--accent);
+      color: #0d0d0d;
+      font-weight: 600;
+      border-color: transparent;
+    }
+    .btn.accent::before { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent); }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* ===== #LAYOUT PRESET PICKER ===== */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 600px) { .layout-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 380px)  { .layout-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .layout-card {
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 12px 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      transition: border-color .2s, color .2s;
+    }
+    .layout-card:hover { border-color: var(--accent); color: var(--text); }
+    .layout-card.selected { border-color: var(--accent); color: var(--accent); background: rgba(135,169,255,0.06); }
+    .layout-icon { width: 48px; height: 34px; }
+
+    /* ===== #SOCIAL ICON PICKER ===== */
+    .social-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    @media (max-width: 480px) { .social-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .social-toggle {
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 10px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--muted);
+      transition: border-color .2s, color .2s;
+      position: relative;
+    }
+    .social-toggle:hover { border-color: var(--hover); color: var(--text); }
+    .social-toggle.active { border-color: var(--accent); color: var(--accent); background: rgba(135,169,255,0.06); }
+
+    .social-toggle .si {
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* social URL inputs */
+    .social-urls { display: flex; flex-direction: column; gap: 10px; }
+    .social-url-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .social-url-row .si { width: 20px; height: 20px; flex-shrink: 0; display:flex; align-items:center; }
+    .social-url-row input { flex: 1; }
+
+    /* ===== #AVATAR UPLOADER ===== */
+    .avatar-area {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .avatar-preview {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      border: 1px solid var(--outline);
+      object-fit: cover;
+      background: var(--bg);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-placeholder { color: var(--muted); font-size: 28px; }
+    .avatar-controls { display: flex; flex-direction: column; gap: 8px; }
+    #avatar-file { display: none; }
+
+    /* ===== #PREVIEW PANEL ===== */
+    .preview-outer {
+      background: var(--card);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+    .preview-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .preview-email-chrome {
+      background: #111;
+      border-radius: var(--radius);
+      border: 1px solid #2a2a2a;
+      overflow: hidden;
+    }
+    .email-chrome-bar {
+      background: #161616;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .email-chrome-row {
+      font-size: 12px;
+      color: #555;
+      display: flex;
+      gap: 8px;
+    }
+    .email-chrome-row strong { color: #888; }
+    .email-body {
+      padding: 20px;
+      color: #ccc;
+      font-size: 13px;
+      background: #ffffff; /* Simulates a standard white email background */
+    }
+    .email-body-text { margin-bottom: 18px; color: #666; font-size: 12px; font-style: italic; }
+    .email-divider { border: none; border-top: 1px solid #e0e0e0; margin-bottom: 18px; }
+
+    #sig-render { font-family: Arial, sans-serif; }
+
+    /* ===== #COPY AREA ===== */
+    .copy-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .copy-hint {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .copy-hint strong { color: var(--text); }
+    .copy-steps {
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 2;
+      counter-reset: steps;
+      list-style: none;
+    }
+    .copy-steps li {
+      list-style: none;
+      counter-increment: steps;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .copy-steps li::before {
+      content: counter(steps);
+      background: var(--hover);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 50%;
+      width: 18px; height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .copy-steps li span { color: var(--text); }
+    .copy-steps a { color: var(--accent); }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: #0d0d0d;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s, transform .3s;
+      z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    #sig-source { display: none; }
+
+    /* ===== #SECTION DIVIDER ===== */
+    .section-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--outline);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==================== #TOOL WRAPPER ==================== -->
+<div class="tool-wrap">
+
+  <!-- ===== #LIVE PREVIEW (top) ===== -->
+  <div class="preview-outer" id="sec-preview">
+    <div class="preview-label">
+      <span>Live Preview</span>
+      <span style="color:var(--accent);font-size:11px;">Updates automatically</span>
+    </div>
+    <div class="preview-email-chrome">
+      <div class="email-chrome-bar">
+        <div class="email-chrome-row"><strong>From:</strong> your@email.com</div>
+        <div class="email-chrome-row"><strong>To:</strong> recipient@example.com</div>
+        <div class="email-chrome-row"><strong>Subject:</strong> Checking in 👋</div>
+      </div>
+      <div class="email-body">
+        <p class="email-body-text">Hi there, hope you're doing well! Just wanted to follow up on our conversation from last week...</p>
+        <hr class="email-divider" />
+        <div id="sig-render"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== #LAYOUT PRESETS ===== -->
+  <div class="card" id="sec-layout">
+    <div class="card-header" onclick="toggleCard('sec-layout')">
+      <div class="card-title">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Layout
+      </div>
+      <svg class="card-chevron open" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body" id="body-sec-layout">
+      <div class="layout-grid">
+        <!-- Classic -->
+        <div class="layout-card selected" data-layout="classic" onclick="setLayout('classic')">
+          <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="10" cy="17" r="8" fill="#323232"/>
+            <rect x="22" y="9" width="22" height="3" rx="1.5" fill="#555"/>
+            <rect x="22" y="15" width="16" height="2" rx="1" fill="#404040"/>
+            <rect x="22" y="20" width="18" height="2" rx="1" fill="#404040"/>
+            <rect x="22" y="26" width="10" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+          </svg>
+          Classic
+        </div>
+        <!-- Centered -->
+        <div class="layout-card" data-layout="centered" onclick="setLayout('centered')">
+          <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="9" r="6" fill="#323232"/>
+            <rect x="12" y="18" width="24" height="3" rx="1.5" fill="#555"/>
+            <rect x="16" y="24" width="16" height="2" rx="1" fill="#404040"/>
+            <rect x="19" y="29" width="10" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+          </svg>
+          Centered
+        </div>
+        <!-- Minimal -->
+        <div class="layout-card" data-layout="minimal" onclick="setLayout('minimal')">
+          <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="8" width="28" height="3" rx="1.5" fill="#555"/>
+            <rect x="4" y="14" width="20" height="2" rx="1" fill="#404040"/>
+            <rect x="4" y="19" width="22" height="2" rx="1" fill="#404040"/>
+            <rect x="4" y="26" width="8" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+            <rect x="14" y="26" width="8" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+            <rect x="24" y="26" width="8" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+          </svg>
+          Minimal
+        </div>
+        <!-- Banner -->
+        <div class="layout-card" data-layout="banner" onclick="setLayout('banner')">
+          <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="8" width="44" height="18" rx="2" fill="#252525"/>
+            <circle cx="10" cy="17" r="5" fill="#323232"/>
+            <rect x="18" y="13" width="16" height="2.5" rx="1.2" fill="#555"/>
+            <rect x="18" y="18" width="10" height="2" rx="1" fill="#404040"/>
+            <rect x="37" y="13" width="5" height="5" rx="1" fill="#87A9FF" opacity=".5"/>
+          </svg>
+          Banner
+        </div>
+        <!-- Card -->
+        <div class="layout-card" data-layout="card" onclick="setLayout('card')">
+          <svg class="layout-icon" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="2" width="32" height="30" rx="3" fill="#252525"/>
+            <circle cx="24" cy="11" r="5" fill="#323232"/>
+            <rect x="14" y="19" width="20" height="2.5" rx="1.2" fill="#555"/>
+            <rect x="17" y="24" width="14" height="2" rx="1" fill="#404040"/>
+            <rect x="16" y="29" width="5" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+            <rect x="23" y="29" width="5" height="2" rx="1" fill="#87A9FF" opacity=".7"/>
+          </svg>
+          Card
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== #SIGNATURE COLOURS ===== -->
+  <div class="card" id="sec-colors">
+    <div class="card-header" onclick="toggleCard('sec-colors')">
+      <div class="card-title">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/><path d="M2 12h20"/></svg>
+        Signature Colours
+      </div>
+      <svg class="card-chevron open" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body" id="body-sec-colors">
+      <div class="grid-2">
+        <label><span>Text Colour</span>
+          <input type="color" id="color-text" value="#111111" oninput="updateColors()" />
+        </label>
+        <label><span>Accent Colour</span>
+          <input type="color" id="color-accent" value="#87A9FF" oninput="updateColors()" />
+        </label>
+        <label><span>Muted Text Colour</span>
+          <input type="color" id="color-muted" value="#666666" oninput="updateColors()" />
+        </label>
+        <label><span>Background Colour</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="color" id="color-bg" value="#ffffff" oninput="updateColors()" disabled />
+            <label style="flex-direction:row;align-items:center;cursor:pointer;margin:0;">
+              <input type="checkbox" id="bg-transparent" checked onchange="updateColors()"> Transparent
+            </label>
+          </div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== #PROFILE INFO ===== -->
+  <div class="card" id="sec-info">
+    <div class="card-header" onclick="toggleCard('sec-info')">
+      <div class="card-title">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile Info
+      </div>
+      <svg class="card-chevron open" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body" id="body-sec-info">
+
+      <!-- AVATAR UPLOADER -->
+      <div class="section-label">Profile Picture</div>
+      <div class="avatar-area">
+        <div class="avatar-preview" id="avatar-preview-wrap">
+          <span class="avatar-placeholder" id="avatar-placeholder">👤</span>
+          <img id="avatar-preview-img" src="" alt="avatar" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+        </div>
+        <div class="avatar-controls">
+          <button class="btn" onclick="document.getElementById('avatar-file').click()">Upload Photo</button>
+          <button class="btn" onclick="clearAvatar()" style="font-size:12px;color:var(--muted);">Remove</button>
+        </div>
+        <input type="file" id="avatar-file" accept="image/*" onchange="handleAvatar(event)" />
+      </div>
+
+      <!-- NAME & TITLE -->
+      <div class="section-label" style="margin-top:4px;">Details</div>
+      <div class="grid-2">
+        <label><span>Full Name</span><input type="text" id="inp-name" placeholder="Jane Smith" oninput="renderSig()" /></label>
+        <label><span>Job Title</span><input type="text" id="inp-title" placeholder="Content Creator" oninput="renderSig()" /></label>
+      </div>
+      <div class="grid-2">
+        <label><span>Company / Brand</span><input type="text" id="inp-company" placeholder="HeroVibes" oninput="renderSig()" /></label>
+        <label><span>Email Address</span><input type="email" id="inp-email" placeholder="jane@example.com" oninput="renderSig()" /></label>
+      </div>
+      <div class="grid-2">
+        <label><span>Phone (optional)</span><input type="tel" id="inp-phone" placeholder="+44 7700 000000" oninput="renderSig()" /></label>
+        <label><span>Website (optional)</span><input type="url" id="inp-website" placeholder="https://yoursite.com" oninput="renderSig()" /></label>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== #SOCIAL LINKS ===== -->
+  <div class="card" id="sec-social">
+    <div class="card-header" onclick="toggleCard('sec-social')">
+      <div class="card-title">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+        Social Links
+      </div>
+      <svg class="card-chevron open" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body" id="body-sec-social">
+      <p style="font-size:12px;color:var(--muted);">Select the platforms you want to include, then add your URLs below.</p>
+      <div class="social-grid" id="social-toggle-grid"></div>
+      <div class="social-urls" id="social-url-fields"></div>
+    </div>
+  </div>
+
+  <!-- ===== #COPY TO GMAIL ===== -->
+  <div class="card" id="sec-copy">
+    <div class="card-header" onclick="toggleCard('sec-copy')">
+      <div class="card-title">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Copy to Gmail
+      </div>
+      <svg class="card-chevron open" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body" id="body-sec-copy">
+      <div class="copy-section">
+        <div class="btn-row">
+          <button class="btn accent" onclick="copySignature()">📋 Copy Signature</button>
+          <a class="btn" href="https://mail.google.com/mail/u/0/#settings/general" target="_blank" rel="noopener">Open Gmail Settings ↗</a>
+        </div>
+        <div class="copy-hint">
+          <strong>How to add your signature to Gmail:</strong>
+        </div>
+        <ol class="copy-steps">
+          <li><span>Click <strong>Copy Signature</strong> above.</span></li>
+          <li><span>Click <strong>Open Gmail Settings</strong> above, or go to Gmail → Settings (⚙️) → <strong>See all settings</strong>.</span></li>
+          <li><span>Scroll to the <strong>Signature</strong> section → click <strong>Create new</strong>.</span></li>
+          <li><span>In the signature editor, press <strong>Ctrl+V</strong> (or Cmd+V on Mac) to paste.</span></li>
+          <li><span>Scroll to the bottom and click <strong>Save Changes</strong>.</span></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end tool-wrap -->
+
+<!-- HIDDEN SIGNATURE SOURCE (for clipboard copy) -->
+<div id="sig-source" aria-hidden="true"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✓ Signature copied to clipboard!</div>
+
+<script>
+/* ==================================================
+   #GMAIL SIGNATURE CREATOR — MAIN SCRIPT
+   ================================================== */
+
+/* ---- STATE ---- */
+let state = {
+  layout:  'classic',
+  colors: {
+    text: '#111111',
+    accent: '#87A9FF',
+    muted: '#666666',
+    bg: 'transparent'
+  },
+  name:    '',
+  jobTitle:'',
+  company: '',
+  email:   '',
+  phone:   '',
+  website: '',
+  avatar:  null,
+  socials: {}
+};
+
+/* ---- SOCIAL PLATFORMS ---- */
+const PLATFORMS = [
+  { id:'youtube',   label:'YouTube',    icon:'https://herovibes.github.io/HeroVibesStoreTools/EmailSignatureGenerator/Images/YouTube.png',   base:'https://youtube.com/@' },
+  { id:'twitter',   label:'X / Twitter',icon:'https://herovibes.github.io/HeroVibesStoreTools/EmailSignatureGenerator/Images/X.png',         base:'https://x.com/' },
+  { id:'instagram', label:'Instagram',  icon:'https://herovibes.github.io/HeroVibesStoreTools/EmailSignatureGenerator/Images/Instagram.png', base:'https://instagram.com/' },
+  { id:'tiktok',    label:'TikTok',     icon:'https://herovibes.github.io/HeroVibesStoreTools/EmailSignatureGenerator/Images/TikTok.png',    base:'https://tiktok.com/@' },
+  { id:'linkedin',  label:'LinkedIn',   icon:'https://herovibes.github.io/HeroVibesStoreTools/EmailSignatureGenerator/Images/LinkedIn.png',  base:'https://linkedin.com/in/' },
+  { id:'facebook',  label:'Facebook',   icon:'https://herovibes.github.io/HeroVibesStoreTools/EmailSignatureGenerator/Images/Facebook.png',  base:'https://facebook.com/' },
+  { id:'twitch',    label:'Twitch',     icon:'https://herovibes.github.io/HeroVibesStoreTools/EmailSignatureGenerator/Images/Twitch.png',    base:'https://twitch.tv/' },
+  { id:'discord',   label:'Discord',    icon:'https://herovibes.github.io/HeroVibesStoreTools/EmailSignatureGenerator/Images/Discord.png',   base:'https://discord.gg/' },
+  { id:'github',    label:'GitHub',     icon:'https://herovibes.github.io/HeroVibesStoreTools/EmailSignatureGenerator/Images/Github.png',    base:'https://github.com/' },
+  { id:'website',   label:'Website',    icon:'https://herovibes.github.io/HeroVibesStoreTools/EmailSignatureGenerator/Images/Website.png',   base:'https://' },
+];
+
+/* ==================================================
+   #INIT
+   ================================================== */
+(function init() {
+  buildSocialGrid();
+  renderSig();
+})();
+
+/* ==================================================
+   #COLORS
+   ================================================== */
+function updateColors() {
+  state.colors.text = document.getElementById('color-text').value;
+  state.colors.accent = document.getElementById('color-accent').value;
+  state.colors.muted = document.getElementById('color-muted').value;
+  
+  const isTransparent = document.getElementById('bg-transparent').checked;
+  document.getElementById('color-bg').disabled = isTransparent;
+  state.colors.bg = isTransparent ? 'transparent' : document.getElementById('color-bg').value;
+  
+  renderSig();
+}
+
+/* ==================================================
+   #LAYOUT SETTER
+   ================================================== */
+function setLayout(layout) {
+  state.layout = layout;
+  document.querySelectorAll('.layout-card').forEach(el => {
+    el.classList.toggle('selected', el.dataset.layout === layout);
+  });
+  renderSig();
+  scheduleHeightCheck();
+}
+
+/* ==================================================
+   #SOCIAL GRID
+   ================================================== */
+function buildSocialGrid() {
+  const grid   = document.getElementById('social-toggle-grid');
+  const fields = document.getElementById('social-url-fields');
+  grid.innerHTML = ''; fields.innerHTML = '';
+
+  PLATFORMS.forEach(p => {
+    // TOGGLE BUTTON
+    const btn = document.createElement('div');
+    btn.className = 'social-toggle' + (state.socials[p.id] !== undefined ? ' active' : '');
+    btn.id = 'stoggle-' + p.id;
+    btn.innerHTML = `<div class="si"><img src="${p.icon}" alt="${p.label}" style="width:100%;height:100%;object-fit:contain;"></div><span>${p.label}</span>`;
+    btn.onclick = () => toggleSocial(p.id);
+    grid.appendChild(btn);
+
+    // URL INPUT ROW
+    const row = document.createElement('div');
+    row.className = 'social-url-row';
+    row.id = 'srow-' + p.id;
+    row.style.display = state.socials[p.id] !== undefined ? 'flex' : 'none';
+    row.innerHTML = `
+      <div class="si"><img src="${p.icon}" alt="${p.label}" style="width:100%;height:100%;object-fit:contain;"></div>
+      <input type="url" placeholder="${p.base}username" value="${state.socials[p.id] || ''}"
+        oninput="state.socials['${p.id}']=this.value;renderSig();" />`;
+    fields.appendChild(row);
+  });
+}
+
+function toggleSocial(id) {
+  if (state.socials[id] !== undefined) {
+    delete state.socials[id];
+  } else {
+    state.socials[id] = '';
+  }
+  const btn = document.getElementById('stoggle-' + id);
+  const row = document.getElementById('srow-'    + id);
+  btn.classList.toggle('active', state.socials[id] !== undefined);
+  row.style.display = state.socials[id] !== undefined ? 'flex' : 'none';
+  renderSig();
+  scheduleHeightCheck();
+}
+
+/* ==================================================
+   #AVATAR UPLOAD
+   ================================================== */
+function handleAvatar(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.avatar = e.target.result;
+    document.getElementById('avatar-placeholder').style.display = 'none';
+    const img = document.getElementById('avatar-preview-img');
+    img.src = state.avatar;
+    img.style.display = 'block';
+    renderSig();
+    scheduleHeightCheck();
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearAvatar() {
+  state.avatar = null;
+  document.getElementById('avatar-placeholder').style.display = '';
+  const img = document.getElementById('avatar-preview-img');
+  img.src = ''; img.style.display = 'none';
+  document.getElementById('avatar-file').value = '';
+  renderSig();
+}
+
+/* ==================================================
+   #READ INPUTS INTO STATE
+   ================================================== */
+function syncInputs() {
+  state.name    = document.getElementById('inp-name').value.trim();
+  state.jobTitle= document.getElementById('inp-title').value.trim();
+  state.company = document.getElementById('inp-company').value.trim();
+  state.email   = document.getElementById('inp-email').value.trim();
+  state.phone   = document.getElementById('inp-phone').value.trim();
+  state.website = document.getElementById('inp-website').value.trim();
+}
+
+/* ==================================================
+   #SIGNATURE HTML GENERATORS
+   ================================================== */
+
+function avatarHTML(size, round) {
+  if (!state.avatar) return '';
+  const r = round ? '50%' : '6px';
+  return `<img src="${state.avatar}" width="${size}" height="${size}" alt="avatar"
+    style="width:${size}px;height:${size}px;border-radius:${r};object-fit:cover;display:block;" />`;
+}
+
+function detailsHTML(c) {
+  const parts = [];
+  if (state.name)     parts.push(`<div style="font-size:16px;font-weight:700;color:${c.text};margin:0 0 2px;">${state.name}</div>`);
+  if (state.jobTitle) parts.push(`<div style="font-size:12px;color:${c.muted};margin:0 0 1px;">${state.jobTitle}${state.company ? ' · ' + state.company : ''}</div>`);
+  else if (state.company) parts.push(`<div style="font-size:12px;color:${c.muted};margin:0 0 1px;">${state.company}</div>`);
+  if (state.email)    parts.push(`<div style="font-size:12px;margin:4px 0 0;"><a href="mailto:${state.email}" style="color:${c.accent};text-decoration:none;">${state.email}</a></div>`);
+  if (state.phone)    parts.push(`<div style="font-size:12px;color:${c.muted};margin:1px 0 0;">${state.phone}</div>`);
+  if (state.website)  parts.push(`<div style="font-size:12px;margin:1px 0 0;"><a href="${state.website}" style="color:${c.accent};text-decoration:none;">${state.website.replace(/^https?:\/\//, '')}</a></div>`);
+  return parts.join('');
+}
+
+function socialsHTML(iconSize) {
+  const active = PLATFORMS.filter(p => state.socials[p.id] !== undefined && state.socials[p.id]);
+  if (!active.length) return '';
+  const sz = iconSize || 20;
+  const icons = active.map(p =>
+    `<a href="${state.socials[p.id]}" target="_blank" rel="noopener" style="display:inline-block;margin-right:6px;vertical-align:middle;">
+      <img src="${p.icon}" width="${sz}" height="${sz}" alt="${p.label}"
+        style="width:${sz}px;height:${sz}px;display:inline-block;vertical-align:middle;border:none;" />
+    </a>`).join('');
+  return `<div style="margin-top:8px;">${icons}</div>`;
+}
+
+function accentBar(c) {
+  return `<div style="width:3px;background:${c.accent};border-radius:3px;flex-shrink:0;"></div>`;
+}
+
+/* ---- LAYOUTS ---- */
+function getBgWrapper(content) {
+    return `<table cellpadding="0" cellspacing="0" border="0" style="background:${state.colors.bg};width:100%;max-width:520px;"><tr><td>${content}</td></tr></table>`;
+}
+
+function sigClassic(c) {
+  const content = `
+<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;">
+  <tr>
+    ${state.avatar ? `<td style="padding-right:14px;vertical-align:top;">${avatarHTML(70, true)}</td>` : ''}
+    <td style="padding-right:14px;vertical-align:middle;">${accentBar(c)}</td>
+    <td style="vertical-align:top;">
+      ${detailsHTML(c)}
+      ${socialsHTML()}
+    </td>
+  </tr>
+</table>`;
+  return getBgWrapper(content);
+}
+
+function sigCentered(c) {
+  const content = `
+<table cellpadding="0" cellspacing="0" border="0" align="center" style="font-family:Arial,sans-serif;text-align:center;">
+  ${state.avatar ? `<tr><td style="padding-bottom:10px;">${avatarHTML(70, true)}</td></tr>` : ''}
+  <tr><td>
+    ${detailsHTML(c).replace(/style="/g, 'style="text-align:center;')}
+    ${socialsHTML()}
+  </td></tr>
+</table>`;
+  return getBgWrapper(content);
+}
+
+function sigMinimal(c) {
+  const active = PLATFORMS.filter(p => state.socials[p.id] && state.socials[p.id]);
+  const links = active.map(p =>
+    `<a href="${state.socials[p.id]}" target="_blank" rel="noopener"
+      style="font-size:11px;color:${c.accent};text-decoration:none;margin-right:10px;">${p.label}</a>`).join('');
+  const content = `
+<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;">
+  <tr><td style="border-top:1px solid #ddd;padding-top:10px;">
+    ${detailsHTML(c)}
+    ${links ? `<div style="margin-top:8px;">${links}</div>` : ''}
+  </td></tr>
+</table>`;
+  return getBgWrapper(content);
+}
+
+function sigBanner(c) {
+  const bgFill = state.colors.bg === 'transparent' ? '#f4f6fb' : state.colors.bg;
+  return `
+<table cellpadding="0" cellspacing="0" border="0"
+  style="font-family:Arial,sans-serif;background:${bgFill};border-radius:8px;padding:14px 18px;width:100%;max-width:520px;">
+  <tr>
+    ${state.avatar ? `<td style="padding-right:14px;vertical-align:middle;">${avatarHTML(60, true)}</td>` : ''}
+    <td style="vertical-align:middle;">
+      ${detailsHTML(c)}
+    </td>
+    <td style="padding-left:14px;vertical-align:middle;text-align:right;">
+      ${socialsHTML(22)}
+    </td>
+  </tr>
+</table>`;
+}
+
+function sigCard(c) {
+  return `
+<table cellpadding="0" cellspacing="0" border="0" align="center"
+  style="font-family:Arial,sans-serif;border:1px solid #dde0e7;border-radius:10px;padding:18px 22px;text-align:center;max-width:260px;background:${state.colors.bg};">
+  ${state.avatar ? `<tr><td style="padding-bottom:10px;">${avatarHTML(64, true)}</td></tr>` : ''}
+  <tr><td>
+    ${detailsHTML(c).replace(/style="/g, 'style="text-align:center;')}
+  </td></tr>
+  <tr><td style="padding-top:4px;text-align:center;">${socialsHTML()}</td></tr>
+  <tr><td style="padding-top:10px;border-top:1px solid #eee;text-align:center;">
+    ${state.website ? `<a href="${state.website}" style="font-size:11px;color:${c.accent};text-decoration:none;">${state.website.replace(/^https?:\/\//,'')}</a>` : ''}
+  </td></tr>
+</table>`;
+}
+
+/* ==================================================
+   #RENDER SIGNATURE
+   ================================================== */
+function renderSig() {
+  syncInputs();
+  const c = state.colors;
+  let html = '';
+  switch(state.layout) {
+    case 'classic':  html = sigClassic(c);  break;
+    case 'centered': html = sigCentered(c); break;
+    case 'minimal':  html = sigMinimal(c);  break;
+    case 'banner':   html = sigBanner(c);   break;
+    case 'card':     html = sigCard(c);     break;
+    default:         html = sigClassic(c);
+  }
+  document.getElementById('sig-render').innerHTML = html;
+  document.getElementById('sig-source').innerHTML = html;
+  scheduleHeightCheck();
+}
+
+/* ==================================================
+   #COPY SIGNATURE TO CLIPBOARD
+   ================================================== */
+async function copySignature() {
+  const html = document.getElementById('sig-source').innerHTML;
+  if (!html.trim()) { showToast('Nothing to copy yet!'); return; }
+
+  try {
+    const blob = new Blob([html], { type: 'text/html' });
+    const data = [new ClipboardItem({ 'text/html': blob })];
+    await navigator.clipboard.write(data);
+    showToast('✓ Signature copied — paste it into Gmail!');
+  } catch(e) {
+    // Fallback: execCommand select
+    const el = document.getElementById('sig-source');
+    el.style.display = 'block';
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand('copy');
+    sel.removeAllRanges();
+    el.style.display = 'none';
+    showToast('✓ Copied — paste into Gmail!');
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ==================================================
+   #COLLAPSIBLE CARDS
+   ================================================== */
+function toggleCard(id) {
+  const body    = document.getElementById('body-' + id);
+  const chevron = document.querySelector('#' + id + ' .card-chevron');
+  const collapsed = body.classList.toggle('collapsed');
+  chevron.classList.toggle('open', !collapsed);
+  scheduleHeightCheck();
+}
+
+// ===== FOURTHWALL SCROLLBAR FIX =====
+let lastHeight = 0;
+let resizeTimer;
+
+/**
+ * Sends the current scrollHeight to the parent window if it has changed.
+ * This is the *only* function that should send a postMessage.
+ */
+function sendHeight() {
+  const height = document.body.scrollHeight;
+  
+  // Only send message if height has *actually* changed
+  if (height !== lastHeight) {
+    lastHeight = height;
+    window.parent.postMessage({ frameHeight: height }, '*');
+  }
+}
+
+/**
+ * A debounced version of sendHeight() to be called on content changes.
+ * This ensures we don't spam messages during rapid changes.
+ */
+function scheduleHeightCheck() {
+    // Clear any pending checks
+    clearTimeout(resizeTimer);
+    // Schedule a new check
+    resizeTimer = setTimeout(sendHeight, 150);
+}
+
+// Send height on initial load (with a slight delay)
+window.addEventListener('load', () => {
+    setTimeout(sendHeight, 100);
+});
+
+// Send height on window resize (debounced)
+window.addEventListener('resize', () => {
+    // Use scheduleHeightCheck for built-in debounce
+    scheduleHeightCheck();
+});
+
+// ===== END OF SCROLLBAR FIX =====
+</script>
+</body>
+</html>
