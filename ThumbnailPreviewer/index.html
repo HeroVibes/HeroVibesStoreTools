@@ -1,11 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* #DESIGN SYSTEM CONFIGURATION */
+    /* #DESIGN SYSTEM & THEME CONFIGURATION */
     :root {
+      /* Dark Theme (Default) */
       --bg-primary: #191919;
       --bg-secondary: #1F1F1F;
       --color-hover: #323232;
@@ -13,7 +14,32 @@
       --color-accent: #87A9FF;
       --text-primary: #D4D4D4;
       --text-secondary: #8C8C8C;
+      
+      /* YouTube Mockup Specific (Dark) */
+      --yt-bg: #0F0F0F;
+      --yt-text-primary: #F1F1F1;
+      --yt-text-secondary: #AAAAAA;
+      --yt-icon-verified: #AAAAAA;
+      --yt-vignette: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.85) 100%);
       --radius: 8px;
+    }
+
+    [data-theme="light"] {
+      /* Light Theme */
+      --bg-primary: #F9F9F9;
+      --bg-secondary: #FFFFFF;
+      --color-hover: #E5E5E5;
+      --color-outline: #D4D4D4;
+      --color-accent: #065FD4;
+      --text-primary: #0F0F0F;
+      --text-secondary: #606060;
+
+      /* YouTube Mockup Specific (Light) */
+      --yt-bg: #FFFFFF;
+      --yt-text-primary: #0F0F0F;
+      --yt-text-secondary: #606060;
+      --yt-icon-verified: #606060;
+      --yt-vignette: radial-gradient(circle at center, transparent 40%, rgba(255,255,255,0.95) 100%);
     }
 
     body {
@@ -22,14 +48,15 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: var(--text-primary);
       padding: 24px 16px;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     /* #LAYOUT WRAPPERS */
     .tool-layout {
       display: flex;
       flex-direction: column;
-      gap: 24px;
-      max-width: 1400px; /* Widened for the 5x5 grid */
+      gap: 20px;
+      max-width: 1400px; 
       margin: 0 auto;
     }
 
@@ -39,6 +66,16 @@
       border-radius: var(--radius);
       padding: 24px 16px;
       box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+
+    /* #TOP BAR CONTROLS */
+    .top-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 8px;
     }
 
     /* INPUT GRID */
@@ -46,6 +83,23 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 16px;
+    }
+
+    /* Transition helper for hiding settings */
+    .collapsible-settings {
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.4s ease;
+      max-height: 1000px;
+      opacity: 1;
+    }
+    
+    .collapsible-settings.hidden {
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      border: none;
+      opacity: 0;
+      margin: 0;
     }
 
     /* #TYPOGRAPHY */
@@ -65,11 +119,8 @@
     }
 
     /* #FORM CONTROLS */
-    .input-group {
-      display: flex;
-      flex-direction: column;
-    }
-
+    .input-group { display: flex; flex-direction: column; }
+    
     .label {
       display: block;
       font-size: 12px;
@@ -88,7 +139,7 @@
       color: var(--text-primary);
       font-size: 12px;
       box-sizing: border-box;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.2s ease, background-color 0.3s ease;
     }
 
     .field-input:focus {
@@ -96,10 +147,7 @@
       border-color: var(--color-accent);
     }
 
-    .file-input-wrapper {
-      display: flex;
-      gap: 8px;
-    }
+    .file-input-wrapper { display: flex; gap: 8px; }
 
     /* #BUTTONS */
     .btn {
@@ -108,31 +156,50 @@
       border-radius: var(--radius);
       background: var(--bg-primary);
       color: var(--text-primary);
-      border: 1px solid rgba(255,255,255,0.06);
+      border: 1px solid var(--color-outline);
       cursor: pointer;
-      overflow: hidden;
-      font-size: 14px;
+      font-size: 13px;
+      font-weight: 500;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       white-space: nowrap;
+      transition: all 0.2s;
     }
 
     .btn:hover { background: var(--color-hover); }
+    .btn.active { 
+      background: var(--color-accent); 
+      color: #FFF; 
+      border-color: var(--color-accent); 
+    }
 
     /* #YOUTUBE HOMEPAGE MOCKUP GRID */
     .yt-mock-container {
-      background: #0F0F0F;
+      background: var(--yt-bg);
       border-radius: var(--radius);
       padding: 24px;
-      overflow-x: auto; /* Allows scrolling if screen is too narrow for 5 columns */
+      overflow-x: auto; 
+      position: relative; /* For Vignette */
+      transition: background-color 0.3s ease;
+    }
+
+    /* Vignette Overlay */
+    .vignette-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      background: var(--yt-vignette);
+      z-index: 10;
+      border-radius: var(--radius);
+      transition: background 0.3s ease;
     }
 
     .yt-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 16px 16px;
-      min-width: 1200px; /* Forces grid to maintain readable proportions */
+      min-width: 1200px; 
     }
 
     .yt-card {
@@ -142,17 +209,19 @@
       cursor: pointer;
       text-decoration: none;
       color: inherit;
+      position: relative;
+      z-index: 1; /* Underneath vignette */
     }
 
-    /* Custom Highlight for Center Card */
-    .yt-card.custom-card {
-      position: relative;
+    /* Custom Highlight for Center Card (Toggled Class) */
+    .yt-card.custom-card.highlight-active {
+      z-index: 11; /* Pop above vignette slightly if desired, or keep under */
     }
     
-    .yt-card.custom-card::before {
-      content: 'YOUR CUSTOM VIDEO';
+    .yt-card.custom-card.highlight-active::before {
+      content: 'CUSTOM TARGET';
       position: absolute;
-      top: -24px;
+      top: -22px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 10px;
@@ -162,13 +231,14 @@
       white-space: nowrap;
     }
 
-    .yt-card.custom-card::after {
+    .yt-card.custom-card.highlight-active::after {
       content: '';
       position: absolute;
-      top: -8px; left: -8px; right: -8px; bottom: -8px;
-      border: 2px dashed rgba(135, 169, 255, 0.4);
+      top: -6px; left: -6px; right: -6px; bottom: -6px;
+      border: 2px dashed var(--color-accent);
       border-radius: 16px;
       pointer-events: none;
+      opacity: 0.6;
     }
 
     .yt-thumbnail-wrapper {
@@ -189,9 +259,7 @@
       transition: transform 0.2s;
     }
 
-    .yt-card:hover .yt-thumbnail {
-      transform: scale(1.02);
-    }
+    .yt-card:hover .yt-thumbnail { transform: scale(1.02); }
 
     .yt-duration {
       position: absolute;
@@ -218,21 +286,14 @@
       flex-shrink: 0;
     }
 
-    .yt-avatar {
-      width: 100%; height: 100%;
-      object-fit: cover;
-    }
+    .yt-avatar { width: 100%; height: 100%; object-fit: cover; }
 
-    .yt-info {
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-    }
+    .yt-info { display: flex; flex-direction: column; flex-grow: 1; }
 
     .yt-title {
       font-size: 16px;
       font-weight: 600;
-      color: #F1F1F1;
+      color: var(--yt-text-primary);
       line-height: 22px;
       margin: 0 0 4px 0;
       display: -webkit-box;
@@ -240,43 +301,38 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
+      transition: color 0.3s ease;
     }
 
     .yt-metadata {
       font-size: 14px;
-      color: #AAAAAA;
+      color: var(--yt-text-secondary);
       line-height: 20px;
+      transition: color 0.3s ease;
     }
 
-    .yt-channel {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .yt-channel:hover { color: #FFFFFF; }
+    .yt-channel { display: flex; align-items: center; gap: 4px; }
+    .yt-channel:hover { color: var(--yt-text-primary); }
 
     .yt-verified-icon {
-      fill: #AAAAAA;
+      fill: var(--yt-icon-verified);
       width: 14px; height: 14px;
+      transition: fill 0.3s ease;
     }
-
-    /* #SYSTEM LOGS */
-    .system-logs-panel { margin-top: 24px; }
-    .logs-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    .logs-content { height: 0; overflow: hidden; padding: 0; transition: all 0.2s ease-in-out; }
-    .logs-content.active { height: auto; padding: 12px 0; margin-top: 12px; }
-    .log-line { font-family: monospace; font-size: 12px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02); display: flex; justify-content: space-between; }
-    .log-success { color: #A3E635; }
-    .log-info { color: var(--color-accent); }
   </style>
 </head>
 <body>
 
   <div class="tool-layout">
     
-    <div class="panel-card" id="INPUT_AREA">
-      <h2 class="header-bold">2026 YouTube Studio Interface</h2>
+    <div class="top-controls">
+      <button class="btn" id="btn-theme">🌙 Dark Mode</button>
+      <button class="btn" id="btn-settings-toggle">⚙️ Hide Settings</button>
+      <button class="btn" id="btn-highlight">🎯 Toggle Highlight</button>
+    </div>
+
+    <div class="panel-card collapsible-settings" id="INPUT_AREA">
+      <h2 class="header-bold">Studio Customization</h2>
       <div class="input-grid">
         
         <div class="input-group">
@@ -312,9 +368,15 @@
           <input type="text" id="inp-duration" class="field-input" value="14:25">
         </div>
 
-        <div class="input-group">
-          <label class="label">Video Metrics & Time</label>
-          <input type="text" id="inp-metrics" class="field-input" value="12K views • 2 hours ago">
+        <div class="input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div>
+            <label class="label">Views</label>
+            <input type="text" id="inp-views" class="field-input" value="12K">
+          </div>
+          <div>
+            <label class="label">Time Uploaded</label>
+            <input type="text" id="inp-time" class="field-input" value="2 hours ago">
+          </div>
         </div>
 
       </div>
@@ -322,18 +384,9 @@
 
     <div class="panel-card" id="PREVIEW_DISPLAY" style="padding: 0; border: none; background: transparent;">
       <div class="yt-mock-container">
+        <div class="vignette-overlay"></div>
         <div class="yt-grid" id="yt-grid-target">
           </div>
-      </div>
-    </div>
-
-    <div class="panel-card system-logs-panel">
-      <div class="logs-header" onclick="toggleLogsPanel()">
-        <div class="title-text" style="margin: 0;">System Diagnostic Console</div>
-        <button class="btn" style="padding: 4px 10px; font-size: 12px;">Toggle Logs</button>
-      </div>
-      <div class="logs-content" id="diagnostic-logs">
-        <div class="log-line"><span class="log-info">[SYSTEM] 5x5 Grid Rendered</span><span class="text-secondary">OK</span></div>
       </div>
     </div>
 
@@ -349,28 +402,24 @@
       "My Brain-Computer Interface Setup", "Cyberpunk 2077 in Real Life?",
       "AI vs Pro Gamer - Starcraft 3", "Deep Sea City Tour (Aquatica)",
       "Flying Taxi Commute VLOG", "How to code in Web 4.0",
-      "Teleportation: Fact or Fiction?", "The First AI President?",
-      "Bio-hacking your sleep cycle", "Reviewing the Apple Glass Pro Max",
-      "Living off-grid on Mars", "Asteroid Mining Explained",
-      "Robot Olympics 2026 Highlights", "Uploading consciousness - The Science",
-      "Virtual Real Estate Investing", "The End of Smartphones?"
+      "Teleportation: Fact or Fiction?"
     ];
     const fakeChannels = ["TechVision", "FutureNow", "MarsVlog", "AI_Daily", "QuantumGeek", "SpaceX_Fan", "CyberLife", "HoloGaming", "BioHacker", "RoboTech"];
     const fakeViews = ["1.2M", "45K", "890K", "2.1M", "10K", "340K", "5.5M", "120K", "99K", "670K"];
     const fakeTimes = ["2 hours ago", "1 day ago", "3 weeks ago", "4 hours ago", "10 mins ago", "5 days ago", "1 month ago"];
     
-    // Pick deterministic random based on index to keep grid stable on re-renders if needed
     const getFake = (arr, index) => arr[index % arr.length];
 
-    // --- 2. RENDER THE 5x5 GRID ---
+    // --- 2. RENDER THE 3x5 GRID (15 ITEMS) ---
     const gridTarget = document.getElementById('yt-grid-target');
     let gridHTML = '';
 
-    for (let i = 0; i < 25; i++) {
-      if (i === 12) {
-        // The 13th Card (Center of 5x5) is our Customizable Target
+    // Loop 15 times for a 3x5 grid
+    for (let i = 0; i < 15; i++) {
+      // The Custom Card is index 7 (Row 2, Column 3)
+      if (i === 7) {
         gridHTML += `
-          <div class="yt-card custom-card">
+          <div id="target-custom-card" class="yt-card custom-card">
             <div class="yt-thumbnail-wrapper">
               <img id="yt-thumb-img" class="yt-thumbnail" src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=600" alt="Thumbnail">
               <div id="yt-duration-badge" class="yt-duration">14:25</div>
@@ -401,9 +450,8 @@
         const minutes = (i % 20) + 2;
         const seconds = (i % 50) + 10;
         
-        // Using Picsum with a seed to get consistent placeholder images
-        const thumbUrl = `https://picsum.photos/seed/${i + 100}/600/337`;
-        const avatarUrl = `https://picsum.photos/seed/avatar${i}/150/150`;
+        const thumbUrl = `https://picsum.photos/seed/${i + 200}/600/337`;
+        const avatarUrl = `https://picsum.photos/seed/avatar${i+50}/150/150`;
 
         gridHTML += `
           <div class="yt-card">
@@ -431,7 +479,6 @@
       }
     }
     
-    // Inject HTML
     gridTarget.innerHTML = gridHTML;
 
     // --- 3. BIND CUSTOM CONTROLS TO CENTER CARD ---
@@ -444,9 +491,10 @@
     const inpAvatarUrl = document.getElementById('inp-avatar-url');
     const fileAvatar = document.getElementById('file-avatar');
     const inpDuration = document.getElementById('inp-duration');
-    const inpMetrics = document.getElementById('inp-metrics');
+    const inpViews = document.getElementById('inp-views');
+    const inpTime = document.getElementById('inp-time');
 
-    // Targets (now existing in the DOM after grid generation)
+    // Targets
     const ytTitle = document.getElementById('yt-title-text');
     const ytChannel = document.getElementById('yt-channel-name');
     const ytThumb = document.getElementById('yt-thumb-img');
@@ -454,78 +502,85 @@
     const ytDuration = document.getElementById('yt-duration-badge');
     const ytMetrics = document.getElementById('yt-metrics-text');
 
-    // Logging helper
-    function appendDiagnosticLog(message, type = 'info') {
-      const logsBox = document.getElementById('diagnostic-logs');
-      const line = document.createElement('div');
-      line.className = 'log-line';
-      line.innerHTML = `<span class="log-${type}">${message}</span><span>${new Date().toLocaleTimeString()}</span>`;
-      logsBox.appendChild(line);
-      scheduleHeightCheck();
-    }
+    // Update Metrics Function
+    const updateMetrics = () => {
+      const views = inpViews.value || '0';
+      const time = inpTime.value || 'Just now';
+      ytMetrics.textContent = `${views} views • ${time}`;
+    };
 
-    // Dynamic Engine Sync Controls
-    inpTitle.addEventListener('input', () => {
-      ytTitle.textContent = inpTitle.value || 'Untitled Video';
-      scheduleHeightCheck();
-    });
-
-    inpChannel.addEventListener('input', () => {
-      ytChannel.textContent = inpChannel.value || 'Channel Name';
-    });
-
-    inpDuration.addEventListener('input', () => {
-      ytDuration.textContent = inpDuration.value || '0:00';
-    });
-
-    inpMetrics.addEventListener('input', () => {
-      ytMetrics.textContent = inpMetrics.value || '0 views • 0 minutes ago';
-    });
+    // Dynamic Sync Controls
+    inpTitle.addEventListener('input', () => { ytTitle.textContent = inpTitle.value || 'Untitled Video'; scheduleHeightCheck(); });
+    inpChannel.addEventListener('input', () => { ytChannel.textContent = inpChannel.value || 'Channel Name'; });
+    inpDuration.addEventListener('input', () => { ytDuration.textContent = inpDuration.value || '0:00'; });
+    inpViews.addEventListener('input', updateMetrics);
+    inpTime.addEventListener('input', updateMetrics);
 
     // Asset Management: Thumbnails
     inpThumbUrl.addEventListener('input', () => {
-      if(inpThumbUrl.value.trim() !== "") {
-        ytThumb.src = inpThumbUrl.value;
-        appendDiagnosticLog('[ASSET] Custom thumbnail updated via URL', 'success');
-      }
+      if(inpThumbUrl.value.trim() !== "") ytThumb.src = inpThumbUrl.value;
     });
 
     fileThumb.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
-        const localUrl = URL.createObjectURL(file);
-        ytThumb.src = localUrl;
+        ytThumb.src = URL.createObjectURL(file);
         inpThumbUrl.value = file.name;
-        appendDiagnosticLog(`[FILE] Local thumbnail uploaded: ${file.name}`, 'success');
       }
     });
 
     // Asset Management: Avatars
     inpAvatarUrl.addEventListener('input', () => {
-      if(inpAvatarUrl.value.trim() !== "") {
-        ytAvatar.src = inpAvatarUrl.value;
-        appendDiagnosticLog('[ASSET] Custom avatar updated via URL', 'success');
-      }
+      if(inpAvatarUrl.value.trim() !== "") ytAvatar.src = inpAvatarUrl.value;
     });
 
     fileAvatar.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
-        const localUrl = URL.createObjectURL(file);
-        ytAvatar.src = localUrl;
+        ytAvatar.src = URL.createObjectURL(file);
         inpAvatarUrl.value = file.name;
-        appendDiagnosticLog(`[FILE] Local profile avatar uploaded: ${file.name}`, 'success');
       }
     });
 
-    // Layout Section Toggling
-    function toggleLogsPanel() {
-      const logs = document.getElementById('diagnostic-logs');
-      logs.classList.toggle('active');
-      scheduleHeightCheck();
-    }
+    // --- 4. GLOBAL TOGGLE FUNCTIONALITY ---
+    
+    // Theme Toggle
+    const btnTheme = document.getElementById('btn-theme');
+    btnTheme.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        btnTheme.textContent = '☀️ Light Mode';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        btnTheme.textContent = '🌙 Dark Mode';
+      }
+    });
 
-    // Scroll slightly to center the grid container on load for narrow screens
+    // Hide Settings Toggle
+    const btnSettings = document.getElementById('btn-settings-toggle');
+    const inputArea = document.getElementById('INPUT_AREA');
+    btnSettings.addEventListener('click', () => {
+      inputArea.classList.toggle('hidden');
+      if (inputArea.classList.contains('hidden')) {
+        btnSettings.textContent = '⚙️ Show Settings';
+        btnSettings.classList.remove('active');
+      } else {
+        btnSettings.textContent = '⚙️ Hide Settings';
+        btnSettings.classList.add('active');
+      }
+      setTimeout(scheduleHeightCheck, 400); // Trigger resize fix after css transition
+    });
+
+    // Highlight Toggle
+    const btnHighlight = document.getElementById('btn-highlight');
+    const customCard = document.getElementById('target-custom-card');
+    btnHighlight.addEventListener('click', () => {
+      customCard.classList.toggle('highlight-active');
+      btnHighlight.classList.toggle('active');
+    });
+
+    // Center scroll position on load for narrow screens
     window.addEventListener('load', () => {
        const mockContainer = document.querySelector('.yt-mock-container');
        if (mockContainer.scrollWidth > mockContainer.clientWidth) {
