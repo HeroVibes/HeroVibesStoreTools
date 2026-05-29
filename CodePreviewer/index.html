@@ -409,7 +409,6 @@ iframe{
 
 <div id="hero-code-viewer">
 
-  <!-- HEADER -->
   <div class="hero-toolbar">
 
     <div>
@@ -456,10 +455,8 @@ iframe{
 
   </div>
 
-  <!-- MAIN -->
   <div class="hero-layout">
 
-    <!-- LEFT -->
     <div class="hero-panel">
 
       <div class="hero-panel-header">
@@ -537,10 +534,8 @@ function hello(){
 
     </div>
 
-    <!-- DIVIDER -->
     <div class="hero-divider"></div>
 
-    <!-- RIGHT -->
     <div class="hero-panel">
 
       <div class="hero-panel-header">
@@ -569,7 +564,6 @@ function hello(){
 
   </div>
 
-  <!-- STATUS -->
   <div class="hero-status">
 
     <div class="hero-status-left">
@@ -624,13 +618,13 @@ const defaultTemplate =
 /* =========================
    UPDATE PREVIEW
 ========================= */
-let debounce;
+let debouncePreview;
 
 function updatePreview(){
 
-  clearTimeout(debounce);
+  clearTimeout(debouncePreview);
 
-  debounce = setTimeout(() => {
+  debouncePreview = setTimeout(() => {
 
     try{
 
@@ -749,34 +743,48 @@ editor.addEventListener(
 ========================= */
 updatePreview();
 
-/* =========================
-   FORCE HEIGHT FIX
-   FOR FOURTHWALL
-========================= */
-function forceHeight(){
+// ===== FOURTHWALL SCROLLBAR FIX =====
+let lastHeight = 0;
+let resizeTimer;
 
-  const tool =
-    document.getElementById(
-      "hero-code-viewer"
-    );
-
-  tool.style.height = "auto";
-
-  const totalHeight =
-    tool.scrollHeight;
-
-  tool.style.minHeight =
-    totalHeight + "px";
+/**
+ * Sends the current scrollHeight to the parent window if it has changed.
+ * This is the *only* function that should send a postMessage.
+ */
+function sendHeight() {
+  // Use scrollHeight for content height
+  const height = document.body.scrollHeight;
+  
+  // Only send message if height has *actually* changed 
+  if (height !== lastHeight) {
+    lastHeight = height;
+    window.parent.postMessage({ frameHeight: height }, '*');
+  }
 }
 
-setTimeout(forceHeight, 100);
-setTimeout(forceHeight, 500);
-setTimeout(forceHeight, 1000);
+/**
+ * A debounced version of sendHeight() to be called on content changes.
+ * This ensures we don't spam messages during rapid changes.
+ */
+function scheduleHeightCheck() {
+    // Clear any pending checks
+    clearTimeout(resizeTimer);
+    // Schedule a new check after 150ms
+    resizeTimer = setTimeout(sendHeight, 150);
+}
 
-window.addEventListener(
-  "resize",
-  forceHeight
-);
+// Send height on initial load (with a slight delay)
+// This fixes the "Content Cut-Off" race condition.
+window.addEventListener('load', () => {
+    setTimeout(sendHeight, 100);
+});
+
+// Send height on window resize (debounced)
+window.addEventListener('resize', () => {
+    // Use scheduleHeightCheck for built-in debounce
+    scheduleHeightCheck();
+});
+// ===== END OF SCROLLBAR FIX =====
 </script>
 
 </body>
