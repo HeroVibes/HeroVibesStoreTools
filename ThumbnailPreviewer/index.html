@@ -1,11 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    /* #DESIGN SYSTEM & THEME CONFIGURATION */
     :root {
-      /* HeroVibes Brand Colors */
+      /* Dark Theme (Default) */
       --bg-primary: #191919;
       --bg-secondary: #1F1F1F;
       --color-hover: #323232;
@@ -13,410 +14,603 @@
       --color-accent: #87A9FF;
       --text-primary: #D4D4D4;
       --text-secondary: #8C8C8C;
+      
+      /* YouTube Mockup Specific (Dark) */
       --yt-bg: #0F0F0F;
+      --yt-text-primary: #F1F1F1;
+      --yt-text-secondary: #AAAAAA;
+      --yt-icon-verified: #AAAAAA;
       --yt-vignette: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.85) 100%);
       --radius: 8px;
     }
 
-    /* GLOBAL BOX SIZING FIX: Prevents inputs from overflowing */
-    *, *::before, *::after {
-      box-sizing: border-box;
+    [data-theme="light"] {
+      /* Light Theme */
+      --bg-primary: #F9F9F9;
+      --bg-secondary: #FFFFFF;
+      --color-hover: #E5E5E5;
+      --color-outline: #D4D4D4;
+      --color-accent: #065FD4;
+      --text-primary: #0F0F0F;
+      --text-secondary: #606060;
+
+      /* YouTube Mockup Specific (Light) */
+      --yt-bg: #FFFFFF;
+      --yt-text-primary: #0F0F0F;
+      --yt-text-secondary: #606060;
+      --yt-icon-verified: #606060;
+      --yt-vignette: radial-gradient(circle at center, transparent 40%, rgba(255,255,255,0.95) 100%);
     }
 
     body {
       margin: 0;
       background: var(--bg-primary);
-      font-family: system-ui, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: var(--text-primary);
       padding: 24px 16px;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* #LAYOUT_CONTAINER */
+    /* #LAYOUT WRAPPERS */
     .tool-layout {
-      max-width: 1200px;
-      margin: auto;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
+      max-width: 1400px; 
+      margin: 0 auto;
     }
 
-    /* #SETTINGS_PANEL */
     .panel-card {
       background: var(--bg-secondary);
       border: 1px solid var(--color-outline);
       border-radius: var(--radius);
       padding: 24px 16px;
-      position: relative;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
     }
 
-    /* #CONTROLS_HEADER */
+    /* #TOP BAR CONTROLS */
     .top-controls {
       display: flex;
+      gap: 12px;
       flex-wrap: wrap;
-      gap: 10px;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    /* INPUT GRID */
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    /* Transition helper for hiding settings */
+    .collapsible-settings {
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.4s ease;
+      max-height: 1000px;
+      opacity: 1;
+    }
+    
+    .collapsible-settings.hidden {
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      border: none;
+      opacity: 0;
+      margin: 0;
+    }
+
+    /* #TYPOGRAPHY */
+    .header-bold {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 0;
       margin-bottom: 16px;
     }
 
-    /* #SHIMMER_BUTTON_TEMPLATE */
+    .title-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    /* #FORM CONTROLS */
+    .input-group { display: flex; flex-direction: column; }
+    
+    .label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .field-input {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--color-outline);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      color: var(--text-primary);
+      font-size: 12px;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease, background-color 0.3s ease;
+    }
+
+    .field-input:focus {
+      outline: none;
+      border-color: var(--color-accent);
+    }
+
+    .file-input-wrapper { display: flex; gap: 8px; }
+
+    /* #BUTTONS */
     .btn {
       position: relative;
       padding: 10px 16px;
       border-radius: var(--radius);
       background: var(--bg-primary);
       color: var(--text-primary);
-      border: 1px solid rgba(255,255,255,0.06);
-      cursor: pointer;
-      overflow: hidden;
-      font-size: 14px;
-      transition: background 0.2s ease;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 75%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-      transform: skewX(-25deg);
-      transition: left .7s ease-in-out;
-    }
-
-    .btn:hover::before { left: 125%; }
-    .btn:hover { background: var(--color-hover); }
-    .btn:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
-    }
-    .btn.active {
-      background: var(--color-accent);
-      color: #000;
-    }
-
-    .close-settings {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: transparent;
       border: 1px solid var(--color-outline);
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
       cursor: pointer;
-      color: var(--text-secondary);
-      display: flex;
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-    }
-    
-    .close-settings:hover {
-      background: var(--color-hover);
-      color: var(--text-primary);
+      white-space: nowrap;
+      transition: all 0.2s;
     }
 
-    /* #COLLAPSIBLE_GRID_ANIMATION */
-    .collapsible-wrapper {
-      display: grid;
-      grid-template-rows: 1fr;
-      transition: grid-template-rows 0.3s ease;
+    .btn:hover { background: var(--color-hover); }
+    .btn.active { 
+      background: var(--color-accent); 
+      color: #FFF; 
+      border-color: var(--color-accent); 
     }
 
-    .collapsible-wrapper.hidden {
-      grid-template-rows: 0fr;
-    }
-
-    .collapsible-settings {
-      overflow: hidden;
-    }
-
-    /* #INPUT_GRID */
-    .input-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      padding-top: 8px;
-    }
-
-    .label {
-      font-size: 11px;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-      display: block;
-      font-weight: bold;
-    }
-
-    .field-input {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: var(--radius);
-      border: 1px solid var(--color-outline);
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s ease;
-    }
-
-    .field-input:focus {
-      border-color: var(--color-accent);
-    }
-
-    /* #PREVIEW_AREA */
+    /* #YOUTUBE HOMEPAGE MOCKUP GRID */
     .yt-mock-container {
       background: var(--yt-bg);
       border-radius: var(--radius);
-      border: 1px solid var(--color-outline);
-      padding: 24px 16px;
-      position: relative;
-      overflow: hidden;
+      padding: 24px;
+      overflow-x: auto; 
+      position: relative; /* For Vignette */
+      transition: background-color 0.3s ease;
     }
 
+    /* Vignette Overlay */
     .vignette-overlay {
       position: absolute;
-      inset: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       pointer-events: none;
       background: var(--yt-vignette);
-      z-index: 5;
+      z-index: 10;
       border-radius: var(--radius);
-      transition: opacity .3s ease;
-    }
-
-    .vignette-overlay.hidden {
-      opacity: 0;
+      transition: background 0.3s ease;
     }
 
     .yt-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px 16px;
+      min-width: 1200px; 
     }
 
     .yt-card {
+      width: 100%;
       display: flex;
       flex-direction: column;
       cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      z-index: 1; /* Underneath vignette */
+    }
+
+    /* Custom Highlight for Center Card (Toggled Class) */
+    .yt-card.custom-card.highlight-active {
+      z-index: 11; /* Pop above vignette slightly if desired, or keep under */
+    }
+    
+    .yt-card.custom-card.highlight-active::before {
+      content: 'CUSTOM TARGET';
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--color-accent);
+      font-weight: bold;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    .yt-card.custom-card.highlight-active::after {
+      content: '';
+      position: absolute;
+      top: -6px; left: -6px; right: -6px; bottom: -6px;
+      border: 2px dashed var(--color-accent);
+      border-radius: 16px;
+      pointer-events: none;
+      opacity: 0.6;
     }
 
     .yt-thumbnail-wrapper {
       position: relative;
-      padding-top: 56.25%;
-      border-radius: 10px;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+      background: #212121;
+      border-radius: 12px;
       overflow: hidden;
-      background: #222;
-      border: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 12px;
     }
 
     .yt-thumbnail {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       object-fit: cover;
+      transition: transform 0.2s;
     }
+
+    .yt-card:hover .yt-thumbnail { transform: scale(1.02); }
+
+    .yt-duration {
+      position: absolute;
+      bottom: 8px; right: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #FFFFFF;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .yt-details {
+      display: flex;
+      gap: 12px;
+      padding-right: 24px;
+    }
+
+    .yt-avatar-wrapper {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #313131;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .yt-avatar { width: 100%; height: 100%; object-fit: cover; }
+
+    .yt-info { display: flex; flex-direction: column; flex-grow: 1; }
 
     .yt-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--yt-text-primary);
+      line-height: 22px;
+      margin: 0 0 4px 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color 0.3s ease;
+    }
+
+    .yt-metadata {
       font-size: 14px;
-      font-weight: bold;
-      margin: 8px 0 4px;
-      color: var(--text-primary);
-      line-height: 1.3;
+      color: var(--yt-text-secondary);
+      line-height: 20px;
+      transition: color 0.3s ease;
     }
 
-    .yt-meta {
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
+    .yt-channel { display: flex; align-items: center; gap: 4px; }
+    .yt-channel:hover { color: var(--yt-text-primary); }
 
-    /* #MOBILE_OPTIMISATION */
-    @media (max-width: 768px) {
-      .yt-grid {
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      }
+    .yt-verified-icon {
+      fill: var(--yt-icon-verified);
+      width: 14px; height: 14px;
+      transition: fill 0.3s ease;
     }
   </style>
 </head>
 <body>
 
-<div class="tool-layout">
-
-  <div class="panel-card">
-    <button class="close-settings" id="close-settings" title="Close Settings">×</button>
-
+  <div class="tool-layout">
+    
     <div class="top-controls">
-      <button class="btn" id="toggle-vignette" type="button">Toggle Vignette</button>
-      <button class="btn active" id="toggle-settings" type="button">Toggle Settings</button>
+      <button class="btn" id="btn-theme">🌙 Dark Mode</button>
+      <button class="btn" id="btn-settings-toggle">⚙️ Hide Settings</button>
+      <button class="btn" id="btn-highlight">🎯 Toggle Highlight</button>
     </div>
 
-    <div class="collapsible-wrapper" id="settings-wrapper">
-      <div class="collapsible-settings">
-        <div class="input-grid">
-          <div>
-            <label class="label">TITLE</label>
-            <input class="field-input" id="input-title" value="How To Master Content Creation">
-          </div>
-          <div>
-            <label class="label">CHANNEL</label>
-            <input class="field-input" id="input-channel" value="HeroVibes">
-          </div>
-          <div>
-            <label class="label">VIEWS</label>
-            <input class="field-input" id="input-views" value="12K">
-          </div>
-          <div>
-            <label class="label">TIME</label>
-            <input class="field-input" id="input-time" value="2 hours ago">
+    <div class="panel-card collapsible-settings" id="INPUT_AREA">
+      <h2 class="header-bold">Studio Customization</h2>
+      <div class="input-grid">
+        
+        <div class="input-group">
+          <label class="label">Video Title</label>
+          <input type="text" id="inp-title" class="field-input" value="How To Master Content Creation in 2026 (Step-by-Step Guide)">
+        </div>
+        
+        <div class="input-group">
+          <label class="label">Channel Name</label>
+          <input type="text" id="inp-channel" class="field-input" value="HeroVibes">
+        </div>
+
+        <div class="input-group">
+          <label class="label">Video Thumbnail</label>
+          <div class="file-input-wrapper">
+            <input type="text" id="inp-thumb-url" class="field-input" placeholder="Paste image URL...">
+            <button type="button" class="btn" onclick="document.getElementById('file-thumb').click()">Upload</button>
+            <input type="file" id="file-thumb" accept="image/*" style="display:none">
           </div>
         </div>
+
+        <div class="input-group">
+          <label class="label">Channel Avatar</label>
+          <div class="file-input-wrapper">
+            <input type="text" id="inp-avatar-url" class="field-input" placeholder="Paste avatar URL...">
+            <button type="button" class="btn" onclick="document.getElementById('file-avatar').click()">Upload</button>
+            <input type="file" id="file-avatar" accept="image/*" style="display:none">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="label">Video Duration</label>
+          <input type="text" id="inp-duration" class="field-input" value="14:25">
+        </div>
+
+        <div class="input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div>
+            <label class="label">Views</label>
+            <input type="text" id="inp-views" class="field-input" value="12K">
+          </div>
+          <div>
+            <label class="label">Time Uploaded</label>
+            <input type="text" id="inp-time" class="field-input" value="2 hours ago">
+          </div>
+        </div>
+
       </div>
     </div>
-  </div>
 
-  <div class="yt-mock-container">
-    <div class="vignette-overlay hidden" id="vignette"></div>
-    <div class="yt-grid" id="grid"></div>
-  </div>
-
-</div>
-
-<script>
-  // #USER_INPUTS
-  const inputTitle = document.getElementById('input-title');
-  const inputChannel = document.getElementById('input-channel');
-  const inputViews = document.getElementById('input-views');
-  const inputTime = document.getElementById('input-time');
-
-  // #UI_ELEMENTS
-  const settingsWrapper = document.getElementById('settings-wrapper');
-  const toggleSettingsBtn = document.getElementById('toggle-settings');
-  const closeSettingsBtn = document.getElementById('close-settings');
-  const vignette = document.getElementById('vignette');
-  const toggleVignetteBtn = document.getElementById('toggle-vignette');
-  const grid = document.getElementById('grid');
-
-  // #FUNCTIONS
-  function updatePreview() {
-    // Generate initial grid with the first card tied to user input
-    let gridHTML = `
-      <div class="yt-card">
-        <div class="yt-thumbnail-wrapper">
-          <img src="https://picsum.photos/400/225?0" class="yt-thumbnail" alt="Thumbnail">
-        </div>
-        <div class="yt-title" id="preview-title">${inputTitle.value || 'Video Title'}</div>
-        <div class="yt-meta"><span id="preview-channel">${inputChannel.value || 'Channel'}</span> • <span id="preview-views">${inputViews.value || '0'}</span> views • <span id="preview-time">${inputTime.value || 'Just now'}</span></div>
-      </div>
-    `;
-
-    // Generate remaining dummy cards
-    for (let i = 1; i < 12; i++) {
-      gridHTML += `
-        <div class="yt-card">
-          <div class="yt-thumbnail-wrapper">
-            <img src="https://picsum.photos/400/225?${i}" class="yt-thumbnail" alt="Thumbnail">
+    <div class="panel-card" id="PREVIEW_DISPLAY" style="padding: 0; border: none; background: transparent;">
+      <div class="yt-mock-container">
+        <div class="vignette-overlay"></div>
+        <div class="yt-grid" id="yt-grid-target">
           </div>
-          <div class="yt-title">Sample Video Title ${i+1}</div>
-          <div class="yt-meta">Sample Channel • ${Math.floor(Math.random() * 100) + 1}K views • ${i} days ago</div>
-        </div>
-      `;
-    }
-    grid.innerHTML = gridHTML;
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- 1. DUMMY DATA FOR 2026 CONTEXT ---
+    const fakeTitles = [
+      "Exploring the Martian Surface in VR 🔴", "I asked an AI to build a house...",
+      "Top 10 Hoverboard Tricks 2026", "Quantum Computing for Beginners",
+      "Neuralink Update: What's New?", "Tour of the New Moon Base 🌙",
+      "Synthesizing Food at Home", "Holographic Gaming is HERE",
+      "My Brain-Computer Interface Setup", "Cyberpunk 2077 in Real Life?",
+      "AI vs Pro Gamer - Starcraft 3", "Deep Sea City Tour (Aquatica)",
+      "Flying Taxi Commute VLOG", "How to code in Web 4.0",
+      "Teleportation: Fact or Fiction?"
+    ];
+    const fakeChannels = ["TechVision", "FutureNow", "MarsVlog", "AI_Daily", "QuantumGeek", "SpaceX_Fan", "CyberLife", "HoloGaming", "BioHacker", "RoboTech"];
+    const fakeViews = ["1.2M", "45K", "890K", "2.1M", "10K", "340K", "5.5M", "120K", "99K", "670K"];
+    const fakeTimes = ["2 hours ago", "1 day ago", "3 weeks ago", "4 hours ago", "10 mins ago", "5 days ago", "1 month ago"];
     
-    // Notify iframe parent of possible height change
-    if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
-  }
+    const getFake = (arr, index) => arr[index % arr.length];
 
-  function toggleSettings() {
-    settingsWrapper.classList.toggle('hidden');
-    toggleSettingsBtn.classList.toggle('active');
-    
-    if(typeof scheduleHeightCheck === 'function') {
-      scheduleHeightCheck();
-      // Ensure we check again right after the CSS transition (0.3s) finishes
-      setTimeout(scheduleHeightCheck, 350); 
+    // --- 2. RENDER THE 3x5 GRID (15 ITEMS) ---
+    const gridTarget = document.getElementById('yt-grid-target');
+    let gridHTML = '';
+
+    // Loop 15 times for a 3x5 grid
+    for (let i = 0; i < 15; i++) {
+      // The Custom Card is index 7 (Row 2, Column 3)
+      if (i === 7) {
+        gridHTML += `
+          <div id="target-custom-card" class="yt-card custom-card">
+            <div class="yt-thumbnail-wrapper">
+              <img id="yt-thumb-img" class="yt-thumbnail" src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=600" alt="Thumbnail">
+              <div id="yt-duration-badge" class="yt-duration">14:25</div>
+            </div>
+            <div class="yt-details">
+              <div class="yt-avatar-wrapper">
+                <img id="yt-avatar-img" class="yt-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150" alt="Avatar">
+              </div>
+              <div class="yt-info">
+                <h3 id="yt-title-text" class="yt-title">How To Master Content Creation in 2026 (Step-by-Step Guide)</h3>
+                <div class="yt-metadata">
+                  <div class="yt-channel">
+                    <span id="yt-channel-name">HeroVibes</span>
+                    <svg class="yt-verified-icon" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  </div>
+                  <div id="yt-metrics-text">12K views • 2 hours ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        // Static Placeholder Cards
+        const title = getFake(fakeTitles, i * 7);
+        const channel = getFake(fakeChannels, i * 3);
+        const views = getFake(fakeViews, i * 5);
+        const time = getFake(fakeTimes, i * 2);
+        const minutes = (i % 20) + 2;
+        const seconds = (i % 50) + 10;
+        
+        const thumbUrl = `https://picsum.photos/seed/${i + 200}/600/337`;
+        const avatarUrl = `https://picsum.photos/seed/avatar${i+50}/150/150`;
+
+        gridHTML += `
+          <div class="yt-card">
+            <div class="yt-thumbnail-wrapper">
+              <img class="yt-thumbnail" src="${thumbUrl}" alt="Thumbnail">
+              <div class="yt-duration">${minutes}:${seconds}</div>
+            </div>
+            <div class="yt-details">
+              <div class="yt-avatar-wrapper">
+                <img class="yt-avatar" src="${avatarUrl}" alt="Avatar">
+              </div>
+              <div class="yt-info">
+                <h3 class="yt-title">${title}</h3>
+                <div class="yt-metadata">
+                  <div class="yt-channel">
+                    <span>${channel}</span>
+                    ${i % 3 === 0 ? '<svg class="yt-verified-icon" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' : ''}
+                  </div>
+                  <div>${views} views • ${time}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
     }
-  }
-
-  // #EVENT_LISTENERS
-  
-  // Wait for the collapse animation to end, then force a final height check
-  settingsWrapper.addEventListener('transitionend', () => {
-    if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
-  });
-
-  toggleSettingsBtn.addEventListener('click', toggleSettings);
-  closeSettingsBtn.addEventListener('click', () => {
-    settingsWrapper.classList.add('hidden');
-    toggleSettingsBtn.classList.remove('active');
     
-    if(typeof scheduleHeightCheck === 'function') {
-      scheduleHeightCheck();
-      setTimeout(scheduleHeightCheck, 350);
-    }
-  });
+    gridTarget.innerHTML = gridHTML;
 
-  toggleVignetteBtn.addEventListener('click', () => {
-    vignette.classList.toggle('hidden');
-    toggleVignetteBtn.classList.toggle('active');
-  });
+    // --- 3. BIND CUSTOM CONTROLS TO CENTER CARD ---
+    
+    // Inputs
+    const inpTitle = document.getElementById('inp-title');
+    const inpChannel = document.getElementById('inp-channel');
+    const inpThumbUrl = document.getElementById('inp-thumb-url');
+    const fileThumb = document.getElementById('file-thumb');
+    const inpAvatarUrl = document.getElementById('inp-avatar-url');
+    const fileAvatar = document.getElementById('file-avatar');
+    const inpDuration = document.getElementById('inp-duration');
+    const inpViews = document.getElementById('inp-views');
+    const inpTime = document.getElementById('inp-time');
 
-  // Real-time updates
-  [inputTitle, inputChannel, inputViews, inputTime].forEach(input => {
-    input.addEventListener('input', () => {
-      document.getElementById('preview-title').textContent = inputTitle.value || 'Video Title';
-      document.getElementById('preview-channel').textContent = inputChannel.value || 'Channel';
-      document.getElementById('preview-views').textContent = inputViews.value || '0';
-      document.getElementById('preview-time').textContent = inputTime.value || 'Just now';
-      if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
+    // Targets
+    const ytTitle = document.getElementById('yt-title-text');
+    const ytChannel = document.getElementById('yt-channel-name');
+    const ytThumb = document.getElementById('yt-thumb-img');
+    const ytAvatar = document.getElementById('yt-avatar-img');
+    const ytDuration = document.getElementById('yt-duration-badge');
+    const ytMetrics = document.getElementById('yt-metrics-text');
+
+    // Update Metrics Function
+    const updateMetrics = () => {
+      const views = inpViews.value || '0';
+      const time = inpTime.value || 'Just now';
+      ytMetrics.textContent = `${views} views • ${time}`;
+    };
+
+    // Dynamic Sync Controls
+    inpTitle.addEventListener('input', () => { ytTitle.textContent = inpTitle.value || 'Untitled Video'; scheduleHeightCheck(); });
+    inpChannel.addEventListener('input', () => { ytChannel.textContent = inpChannel.value || 'Channel Name'; });
+    inpDuration.addEventListener('input', () => { ytDuration.textContent = inpDuration.value || '0:00'; });
+    inpViews.addEventListener('input', updateMetrics);
+    inpTime.addEventListener('input', updateMetrics);
+
+    // Asset Management: Thumbnails
+    inpThumbUrl.addEventListener('input', () => {
+      if(inpThumbUrl.value.trim() !== "") ytThumb.src = inpThumbUrl.value;
     });
-  });
 
-  // Initialize Tool
-  updatePreview();
+    fileThumb.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        ytThumb.src = URL.createObjectURL(file);
+        inpThumbUrl.value = file.name;
+      }
+    });
 
-  // ===== FOURTHWALL SCROLLBAR FIX =====
-  let lastHeight = 0;
-  let resizeTimer;
+    // Asset Management: Avatars
+    inpAvatarUrl.addEventListener('input', () => {
+      if(inpAvatarUrl.value.trim() !== "") ytAvatar.src = inpAvatarUrl.value;
+    });
 
-  /**
-   * Sends the current scrollHeight to the parent window if it has changed.
-   * This is the *only* function that should send a postMessage.
-   */
-  function sendHeight() {
-    // Use scrollHeight for content height
-    const height = document.body.scrollHeight;
+    fileAvatar.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        ytAvatar.src = URL.createObjectURL(file);
+        inpAvatarUrl.value = file.name;
+      }
+    });
+
+    // --- 4. GLOBAL TOGGLE FUNCTIONALITY ---
     
-    // Only send message if height has *actually* changed 
-    if (height !== lastHeight) {
-      lastHeight = height;
-      window.parent.postMessage({ frameHeight: height }, '*');
+    // Theme Toggle
+    const btnTheme = document.getElementById('btn-theme');
+    btnTheme.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        btnTheme.textContent = '☀️ Light Mode';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        btnTheme.textContent = '🌙 Dark Mode';
+      }
+    });
+
+    // Hide Settings Toggle
+    const btnSettings = document.getElementById('btn-settings-toggle');
+    const inputArea = document.getElementById('INPUT_AREA');
+    btnSettings.addEventListener('click', () => {
+      inputArea.classList.toggle('hidden');
+      if (inputArea.classList.contains('hidden')) {
+        btnSettings.textContent = '⚙️ Show Settings';
+        btnSettings.classList.remove('active');
+      } else {
+        btnSettings.textContent = '⚙️ Hide Settings';
+        btnSettings.classList.add('active');
+      }
+      setTimeout(scheduleHeightCheck, 400); // Trigger resize fix after css transition
+    });
+
+    // Highlight Toggle
+    const btnHighlight = document.getElementById('btn-highlight');
+    const customCard = document.getElementById('target-custom-card');
+    btnHighlight.addEventListener('click', () => {
+      customCard.classList.toggle('highlight-active');
+      btnHighlight.classList.toggle('active');
+    });
+
+    // Center scroll position on load for narrow screens
+    window.addEventListener('load', () => {
+       const mockContainer = document.querySelector('.yt-mock-container');
+       if (mockContainer.scrollWidth > mockContainer.clientWidth) {
+           mockContainer.scrollLeft = (mockContainer.scrollWidth - mockContainer.clientWidth) / 2;
+       }
+    });
+
+  </script>
+
+  <script>
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
     }
-  }
 
-  /**
-   * A debounced version of sendHeight() to be called on content changes.
-   * This ensures we don't spam messages during rapid changes.
-   */
-  function scheduleHeightCheck() {
-      // Clear any pending checks
-      clearTimeout(resizeTimer);
-      // Schedule a new check after 150ms
-      resizeTimer = setTimeout(sendHeight, 150);
-  }
+    function scheduleHeightCheck() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
 
-  // Send height on initial load (with a slight delay)
-  // This fixes the "Content Cut-Off" race condition.
-  window.addEventListener('load', () => {
-      setTimeout(sendHeight, 100);
-  });
-
-  // Send height on window resize (debounced)
-  window.addEventListener('resize', () => {
-      // Use scheduleHeightCheck for built-in debounce
-      scheduleHeightCheck();
-  });
-  // ===== END OF SCROLLBAR FIX =====
-
-</script>
+    window.addEventListener('load', () => setTimeout(sendHeight, 100));
+    window.addEventListener('resize', () => scheduleHeightCheck());
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
 </body>
 </html>
