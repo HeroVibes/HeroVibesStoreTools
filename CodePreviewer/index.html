@@ -181,8 +181,10 @@ body{
 
   display:grid;
 
+  /* FIX: 3 columns to account for the center divider */
   grid-template-columns:
     minmax(0,1fr)
+    1px
     minmax(0,1fr);
 
   overflow:hidden;
@@ -513,7 +515,7 @@ button{
 <body>
 
 <div class="card">
-  <h1>Hello Hero 👋</h1>
+  <h1>Hey, You! 👋</h1>
   <p>Your code updates live.</p>
 
   <button onclick="hello()">
