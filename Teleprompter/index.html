@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Creator Teleprompter - Media Pro</title>
+  <style>
+    /* =========================================
+       #DESIGN SYSTEM & VARIABLES
+       ========================================= */
+    :root {
+      --bg: #191919;
+      --card-bg: #1F1F1F;
+      --hover: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --radius: 8px;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: system-ui, sans-serif;
+      color: var(--text-primary);
+      padding: 16px;
+      box-sizing: border-box;
+      overscroll-behavior: none;
+    }
+
+    * { box-sizing: border-box; }
+
+    /* =========================================
+       #PROMPTER APP CONTAINER
+       ========================================= */
+    #PROMPTER_APP {
+      position: relative;
+      width: 100%;
+      height: 85vh; 
+      min-height: 500px;
+      background: #000;
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      overscroll-behavior-y: none; 
+    }
+
+    #PROMPTER_APP.focus-mode {
+      height: 100vh;
+      border: none;
+      border-radius: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      z-index: 9999;
+    }
+
+    /* =========================================
+       #SCROLL AREA & TEXT EDITOR
+       ========================================= */
+    #SCROLL_AREA {
+      position: relative;
+      z-index: 2;
+      flex-grow: 1;
+      overflow-y: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      padding: 0 16px;
+      scroll-behavior: auto;
+      overscroll-behavior-y: none; 
+    }
+    #SCROLL_AREA::-webkit-scrollbar { display: none; }
+
+    .spacer { width: 100%; pointer-events: none; }
+    .top-spacer { height: 40vh; }
+    .bottom-spacer { height: 80vh; }
+
+    #EDITOR {
+      color: #FFF;
+      font-size: 32px;
+      line-height: 1.5;
+      text-align: center; 
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      outline: none;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.9), 0px 0px 10px rgba(0,0,0,0.8);
+      transform-origin: center center;
+      min-height: 50px;
+      padding-bottom: 20px;
+    }
+
+    #EDITOR[contenteditable="true"]:empty::before {
+      content: attr(placeholder);
+      color: rgba(255, 255, 255, 0.4);
+      pointer-events: none;
+    }
+
+    .focus-marker {
+      position: absolute;
+      top: 40%;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: linear-gradient(180deg, rgba(135,169,255,0.1) 0%, rgba(135,169,255,0) 100%);
+      border-top: 2px solid var(--accent);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* =========================================
+       #PICTURE IN PICTURE CAMERA
+       ========================================= */
+    #PIP_CONTAINER {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      width: 240px;
+      aspect-ratio: 16/9;
+      background: #000;
+      border: 2px solid var(--outline);
+      border-radius: var(--radius);
+      overflow: hidden;
+      z-index: 20;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    #PIP_CONTAINER.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
+    }
+
+    #CAMERA_PREVIEW {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .pip-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .pip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Live & Mic Indicators */
+    .indicator-badge {
+      background: rgba(0,0,0,0.6);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(4px);
+    }
+
+    .dot-live {
+      width: 8px; height: 8px;
+      background: #ff6b6b;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #ff6b6b;
+      animation: pulse 2s infinite;
+    }
+
+    .dot-mic {
+      width: 8px; height: 8px;
+      background: #4cd137;
+      border-radius: 50%;
+      transition: transform 0.1s ease-out;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    .btn-pip-settings {
+      pointer-events: auto;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #FFF;
+      border-radius: var(--radius);
+      padding: 6px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: background 0.2s;
+    }
+    .btn-pip-settings:hover { background: rgba(0,0,0,0.8); }
+
+    /* =========================================
+       #FLOATING TOOLBAR
+       ========================================= */
+    #TOOLBAR {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: rgba(31, 31, 31, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: calc(100% - 32px);
+      max-width: 800px;
+      transition: opacity 0.3s ease;
+    }
+
+    #PROMPTER_APP.is-playing #TOOLBAR { opacity: 0.1; }
+    #PROMPTER_APP.is-playing #TOOLBAR:hover { opacity: 1; }
+
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .control-cluster {
+      display: flex;
+      align-items: center;
+      background: rgba(0,0,0,0.3);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 2px;
+    }
+
+    .val-display {
+      font-size: 12px;
+      color: var(--text-primary);
+      min-width: 40px;
+      text-align: center;
+      font-family: monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    /* =========================================
+       #BUTTON TEMPLATE (SHIMMER)
+       ========================================= */
+    .btn {
+      position: relative;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid transparent;
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .btn.outlined {
+      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(255,255,255,0.05);
+    }
+    .btn.accent {
+      color: var(--accent);
+      border-color: rgba(135, 169, 255, 0.3);
+      background: rgba(135, 169, 255, 0.1);
+    }
+    .btn.danger {
+      color: #ff6b6b;
+      border-color: rgba(255, 107, 107, 0.3);
+      background: rgba(255, 107, 107, 0.1);
+    }
+    .btn.warning {
+      color: #feca57;
+      border-color: rgba(254, 202, 87, 0.3);
+      background: rgba(254, 202, 87, 0.1);
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 75%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease-in-out;
+    }
+    .btn:hover::before { left: 125%; }
+    .btn:hover { background: rgba(255,255,255,0.1); }
+    .btn:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(135, 169, 255, 0.4); }
+
+    /* =========================================
+       #MODALS (HOTKEYS & SETTINGS)
+       ========================================= */
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px;
+      width: 90%;
+      max-width: 400px;
+      color: var(--text-primary);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.5);
+    }
+    .modal-card h3 { margin-top: 0; margin-bottom: 16px; font-size: 16px; color: var(--accent); }
+    .modal-card ul { padding-left: 20px; margin-bottom: 24px; font-size: 14px; }
+    .modal-card li { margin-bottom: 8px; color: var(--text-secondary); }
+    .modal-card strong { color: var(--text-primary); }
+    
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-size: 12px; margin-bottom: 6px; color: var(--text-secondary); }
+    .input-group select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      color: var(--text-primary);
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div id="PROMPTER_APP">
+    
+    <div class="focus-marker"></div>
+
+    <div id="SCROLL_AREA">
+      <div class="spacer top-spacer"></div>
+      <div id="EDITOR" contenteditable="true" spellcheck="false" placeholder="Click here to type or paste your script..."></div>
+      <div class="spacer bottom-spacer"></div>
+    </div>
+
+    <div id="PIP_CONTAINER" class="hidden">
+      <video id="CAMERA_PREVIEW" autoplay muted playsinline></video>
+      <div class="pip-overlay">
+        <div class="pip-header">
+          <div class="indicator-badge">
+            <div class="dot-live"></div> LIVE
+            <div class="dot-mic" id="MIC_DOT"></div>
+          </div>
+          <button class="btn-pip-settings" id="BTN_OPEN_SETTINGS" title="Camera Settings">⚙️</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="TOOLBAR">
+      
+      <div class="toolbar-row">
+        <button class="btn outlined accent" id="BTN_PLAY_PAUSE" title="Start/Pause (Spacebar)">▶ PLAY</button>
+        <button class="btn outlined" id="BTN_RESET" title="Reset to Top">⏮ RESET</button>
+        
+        <div class="control-cluster">
+          <button class="btn" id="BTN_SIZE_DEC" title="Decrease Size">T-</button>
+          <span class="val-display" id="VAL_SIZE">32</span>
+          <button class="btn" id="BTN_SIZE_INC" title="Increase Size">T+</button>
+        </div>
+
+        <div class="control-cluster">
+          <button class="btn" id="BTN_PAD_DEC" title="Decrease Padding">P-</button>
+          <span class="val-display" id="VAL_PAD">16</span>
+          <button class="btn" id="BTN_PAD_INC" title="Increase Padding">P+</button>
+        </div>
+
+        <div class="control-cluster">
+          <button class="btn" id="BTN_SPD_DEC" title="Decrease Speed">S-</button>
+          <span class="val-display" id="VAL_SPD">5</span>
+          <button class="btn" id="BTN_SPD_INC" title="Increase Speed">S+</button>
+        </div>
+      </div>
+
+      <div class="toolbar-row">
+        <button class="btn outlined" id="BTN_IMPORT">Import</button>
+        <button class="btn outlined" id="BTN_EXPORT">Export</button>
+        <button class="btn outlined" id="BTN_SHOW_HOTKEYS">Hotkeys</button>
+        <button class="btn outlined" id="BTN_FOCUS" title="Toggle Fullscreen">Focus</button>
+      </div>
+
+      <div class="toolbar-row">
+        <button class="btn outlined" id="BTN_CAM">Toggle Cam / Mic</button>
+        <button class="btn outlined hidden danger" id="BTN_REC">⏺ Record</button>
+        <button class="btn outlined hidden warning" id="BTN_PAUSE_REC">⏸ Pause Rec</button>
+        <button class="btn outlined hidden" id="BTN_STOP_REC">⏹ Save</button>
+      </div>
+
+      <input type="file" id="FILE_UPLOADER" accept=".txt" class="hidden" />
+    </div>
+
+    <div class="modal-overlay" id="MODAL_HOTKEYS">
+      <div class="modal-card">
+        <h3>Keyboard Shortcuts</h3>
+        <ul>
+          <li><strong>Spacebar:</strong> Play / Pause Scrolling</li>
+          <li><strong>Arrow Up:</strong> Manually jog scroll up</li>
+          <li><strong>Arrow Down:</strong> Manually jog scroll down</li>
+          <li><strong>Esc:</strong> Exit Focus / Fullscreen Mode</li>
+        </ul>
+        <div class="modal-actions">
+          <button class="btn outlined accent" id="BTN_CLOSE_HOTKEYS">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="MODAL_SETTINGS">
+      <div class="modal-card">
+        <h3>Media Settings</h3>
+        <div class="input-group">
+          <label>Camera</label>
+          <select id="SELECT_VIDEO"></select>
+        </div>
+        <div class="input-group">
+          <label>Microphone</label>
+          <select id="SELECT_AUDIO"></select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn outlined" id="BTN_CLOSE_SETTINGS">Cancel</button>
+          <button class="btn outlined accent" id="BTN_APPLY_SETTINGS">Apply Devices</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      /* =========================================
+         #DOM ELEMENTS
+         ========================================= */
+      const app = document.getElementById('PROMPTER_APP');
+      const scrollArea = document.getElementById('SCROLL_AREA');
+      const editor = document.getElementById('EDITOR');
+      const pipContainer = document.getElementById('PIP_CONTAINER');
+      const cameraPreview = document.getElementById('CAMERA_PREVIEW');
+      const micDot = document.getElementById('MIC_DOT');
+      const fileUploader = document.getElementById('FILE_UPLOADER');
+
+      // Buttons
+      const btnPlayPause = document.getElementById('BTN_PLAY_PAUSE');
+      const btnReset = document.getElementById('BTN_RESET');
+      const btnFocus = document.getElementById('BTN_FOCUS');
+      const btnCam = document.getElementById('BTN_CAM');
+      const btnRec = document.getElementById('BTN_REC');
+      const btnPauseRec = document.getElementById('BTN_PAUSE_REC');
+      const btnStopRec = document.getElementById('BTN_STOP_REC');
+
+      // Modals
+      const modalHotkeys = document.getElementById('MODAL_HOTKEYS');
+      const modalSettings = document.getElementById('MODAL_SETTINGS');
+      const selectVideo = document.getElementById('SELECT_VIDEO');
+      const selectAudio = document.getElementById('SELECT_AUDIO');
+
+      /* =========================================
+         #STATE VARIABLES
+         ========================================= */
+      let isPlaying = false;
+      let scrollSpeed = 5;
+      let textSize = 32;
+      let textPad = 16;
+      let exactScrollY = 0; 
+      let animationFrameId;
+
+      // Media State
+      let mediaStream = null;
+      let mediaRecorder = null;
+      let recordedChunks = [];
+      let isRecordingPaused = false;
+      
+      // Audio Analysis State
+      let audioContext, analyser, microphoneNode, audioDataArray;
+      let audioAnimFrame;
+
+      /* =========================================
+         #CORE SCROLLING LOGIC
+         ========================================= */
+      editor.addEventListener('input', () => scheduleHeightCheck());
+      editor.addEventListener('focus', () => { if (isPlaying) togglePlayState(false); });
+
+      function scrollTick() {
+        if (!isPlaying) return;
+        const moveAmount = scrollSpeed * 0.1; 
+        exactScrollY += moveAmount;
+        scrollArea.scrollTop = exactScrollY;
+
+        if (Math.ceil(scrollArea.scrollTop + scrollArea.clientHeight) >= scrollArea.scrollHeight) {
+          togglePlayState(false);
+        } else {
+          animationFrameId = requestAnimationFrame(scrollTick);
+        }
+      }
+
+      function togglePlayState(forceState) {
+        isPlaying = forceState !== undefined ? forceState : !isPlaying;
+        if (isPlaying) {
+          btnPlayPause.innerHTML = "⏸ PAUSE";
+          btnPlayPause.classList.remove('accent');
+          app.classList.add('is-playing');
+          editor.blur();
+          exactScrollY = scrollArea.scrollTop;
+          cancelAnimationFrame(animationFrameId); 
+          animationFrameId = requestAnimationFrame(scrollTick);
+        } else {
+          btnPlayPause.innerHTML = "▶ PLAY";
+          btnPlayPause.classList.add('accent');
+          app.classList.remove('is-playing');
+          cancelAnimationFrame(animationFrameId);
+        }
+      }
+
+      scrollArea.addEventListener('scroll', () => { if (!isPlaying) exactScrollY = scrollArea.scrollTop; });
+      scrollArea.addEventListener('wheel', () => togglePlayState(false), { passive: true });
+      scrollArea.addEventListener('touchstart', () => togglePlayState(false), { passive: true });
+
+      // Hotkeys
+      document.addEventListener('keydown', (e) => {
+        if (document.activeElement === editor) return;
+        if (e.code === 'Space') {
+          e.preventDefault();
+          togglePlayState();
+        } else if (e.code === 'ArrowUp') {
+          e.preventDefault();
+          togglePlayState(false);
+          scrollArea.scrollTop -= 40;
+        } else if (e.code === 'ArrowDown') {
+          e.preventDefault();
+          togglePlayState(false);
+          scrollArea.scrollTop += 40;
+        }
+      });
+
+      btnPlayPause.addEventListener('click', () => togglePlayState());
+      btnReset.addEventListener('click', () => {
+        togglePlayState(false);
+        exactScrollY = 0;
+        scrollArea.scrollTop = 0;
+      });
+
+      /* =========================================
+         #UI CONTROLS (SIZE/SPEED/PADDING)
+         ========================================= */
+      document.getElementById('BTN_SIZE_DEC').addEventListener('click', () => {
+        if (textSize > 16) textSize -= 4;
+        editor.style.fontSize = `${textSize}px`;
+        document.getElementById('VAL_SIZE').textContent = textSize;
+        scheduleHeightCheck();
+      });
+      document.getElementById('BTN_SIZE_INC').addEventListener('click', () => {
+        if (textSize < 120) textSize += 4;
+        editor.style.fontSize = `${textSize}px`;
+        document.getElementById('VAL_SIZE').textContent = textSize;
+        scheduleHeightCheck();
+      });
+
+      document.getElementById('BTN_SPD_DEC').addEventListener('click', () => {
+        if (scrollSpeed > 1) scrollSpeed -= 1;
+        document.getElementById('VAL_SPD').textContent = scrollSpeed;
+      });
+      document.getElementById('BTN_SPD_INC').addEventListener('click', () => {
+        if (scrollSpeed < 30) scrollSpeed += 1;
+        document.getElementById('VAL_SPD').textContent = scrollSpeed;
+      });
+
+      document.getElementById('BTN_PAD_DEC').addEventListener('click', () => {
+        if (textPad > 0) textPad -= 16;
+        scrollArea.style.paddingLeft = `${textPad}px`;
+        scrollArea.style.paddingRight = `${textPad}px`;
+        document.getElementById('VAL_PAD').textContent = textPad;
+      });
+      document.getElementById('BTN_PAD_INC').addEventListener('click', () => {
+        if (textPad < 200) textPad += 16;
+        scrollArea.style.paddingLeft = `${textPad}px`;
+        scrollArea.style.paddingRight = `${textPad}px`;
+        document.getElementById('VAL_PAD').textContent = textPad;
+      });
+
+      /* =========================================
+         #FILE & MODAL CONTROLS
+         ========================================= */
+      document.getElementById('BTN_SHOW_HOTKEYS').addEventListener('click', () => modalHotkeys.classList.add('active'));
+      document.getElementById('BTN_CLOSE_HOTKEYS').addEventListener('click', () => modalHotkeys.classList.remove('active'));
+      
+      document.getElementById('BTN_OPEN_SETTINGS').addEventListener('click', async () => {
+        await populateDeviceLists();
+        modalSettings.classList.add('active');
+      });
+      document.getElementById('BTN_CLOSE_SETTINGS').addEventListener('click', () => modalSettings.classList.remove('active'));
+
+      document.getElementById('BTN_IMPORT').addEventListener('click', () => fileUploader.click());
+      fileUploader.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) { editor.innerText = evt.target.result; scheduleHeightCheck(); };
+        reader.readAsText(file);
+        e.target.value = ''; 
+      });
+
+      document.getElementById('BTN_EXPORT').addEventListener('click', () => {
+        const textToSave = editor.innerText;
+        if (!textToSave.trim()) return;
+        const blob = new Blob([textToSave], { type: "text/plain" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "Teleprompter_Script.txt";
+        a.click();
+      });
+
+      /* =========================================
+         #FOCUS / FULLSCREEN (BUG FIXED)
+         ========================================= */
+      btnFocus.addEventListener('click', () => {
+        app.classList.toggle('focus-mode');
+        
+        if (app.classList.contains('focus-mode')) {
+          btnFocus.classList.add('accent');
+          // Request fullscreen specifically on the APP element to keep buttons clickable
+          if (app.requestFullscreen) app.requestFullscreen().catch(e => console.log(e));
+          else if (app.webkitRequestFullscreen) app.webkitRequestFullscreen();
+        } else {
+          btnFocus.classList.remove('accent');
+          if (document.fullscreenElement || document.webkitFullscreenElement) {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+          }
+        }
+        setTimeout(scheduleHeightCheck, 300);
+      });
+
+      /* =========================================
+         #MEDIA & RECORDING MODULE
+         ========================================= */
+      async function startMedia(constraints = { video: true, audio: true }) {
+        try {
+          if (mediaStream) stopMedia();
+          mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+          cameraPreview.srcObject = mediaStream;
+          pipContainer.classList.remove('hidden');
+          btnCam.classList.add('accent');
+          btnRec.classList.remove('hidden');
+          
+          initAudioVisualizer();
+        } catch (err) {
+          alert('Camera/Mic access denied. Check browser permissions and iframe allow tags.');
+          console.error(err);
+        }
+      }
+
+      function stopMedia() {
+        if (mediaStream) {
+          mediaStream.getTracks().forEach(track => track.stop());
+          mediaStream = null;
+        }
+        if (audioContext) {
+          audioContext.close();
+          cancelAnimationFrame(audioAnimFrame);
+        }
+        pipContainer.classList.add('hidden');
+        btnCam.classList.remove('accent');
+        btnRec.classList.add('hidden');
+        resetRecordUI();
+      }
+
+      function initAudioVisualizer() {
+        // Build a DOM based mic indicator (no canvas!)
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        const audioSource = audioContext.createMediaStreamSource(mediaStream);
+        audioSource.connect(analyser);
+        audioDataArray = new Uint8Array(analyser.frequencyBinCount);
+        
+        function drawMicLevel() {
+          if (!mediaStream) return;
+          analyser.getByteFrequencyData(audioDataArray);
+          let sum = 0;
+          for(let i = 0; i < audioDataArray.length; i++) sum += audioDataArray[i];
+          let avg = sum / audioDataArray.length;
+          
+          // Scale the green dot based on volume (min 1, max 1.8)
+          let scale = 1 + (avg / 128); 
+          micDot.style.transform = `scale(${Math.min(scale, 1.8)})`;
+          
+          audioAnimFrame = requestAnimationFrame(drawMicLevel);
+        }
+        drawMicLevel();
+      }
+
+      async function populateDeviceLists() {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        selectVideo.innerHTML = '';
+        selectAudio.innerHTML = '';
+        
+        devices.forEach(device => {
+          const option = document.createElement('option');
+          option.value = device.deviceId;
+          if (device.kind === 'videoinput') {
+            option.text = device.label || `Camera ${selectVideo.length + 1}`;
+            selectVideo.appendChild(option);
+          } else if (device.kind === 'audioinput') {
+            option.text = device.label || `Microphone ${selectAudio.length + 1}`;
+            selectAudio.appendChild(option);
+          }
+        });
+      }
+
+      // Settings Apply
+      document.getElementById('BTN_APPLY_SETTINGS').addEventListener('click', () => {
+        modalSettings.classList.remove('active');
+        const vId = selectVideo.value;
+        const aId = selectAudio.value;
+        startMedia({
+          video: vId ? { deviceId: { exact: vId } } : true,
+          audio: aId ? { deviceId: { exact: aId } } : true
+        });
+      });
+
+      btnCam.addEventListener('click', () => {
+        if (!mediaStream) startMedia();
+        else stopMedia();
+      });
+
+      // Recording Logic
+      function resetRecordUI() {
+        btnRec.classList.remove('hidden');
+        btnPauseRec.classList.add('hidden');
+        btnStopRec.classList.add('hidden');
+        btnPauseRec.innerHTML = "⏸ Pause Rec";
+        isRecordingPaused = false;
+      }
+
+      btnRec.addEventListener('click', () => {
+        if (!mediaStream) return;
+        recordedChunks = [];
+        const options = { mimeType: 'video/webm; codecs=vp9,opus' };
+        try { mediaRecorder = new MediaRecorder(mediaStream, options); } 
+        catch (e) { mediaRecorder = new MediaRecorder(mediaStream); }
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) recordedChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = `Prompter_Recording_${new Date().getTime()}.webm`;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 100);
+          resetRecordUI();
+        };
+
+        mediaRecorder.start();
+        btnRec.classList.add('hidden');
+        btnPauseRec.classList.remove('hidden');
+        btnStopRec.classList.remove('hidden');
+      });
+
+      btnPauseRec.addEventListener('click', () => {
+        if (!mediaRecorder) return;
+        if (isRecordingPaused) {
+          mediaRecorder.resume();
+          btnPauseRec.innerHTML = "⏸ Pause Rec";
+          isRecordingPaused = false;
+        } else {
+          mediaRecorder.pause();
+          btnPauseRec.innerHTML = "▶ Resume Rec";
+          isRecordingPaused = true;
+        }
+      });
+
+      btnStopRec.addEventListener('click', () => {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+      });
+
+      /* =========================================
+         #FOURTHWALL SCROLLBAR FIX 
+         ========================================= */
+      let lastHeight = 0;
+      let resizeTimer;
+      function sendHeight() {
+        const height = document.body.scrollHeight;
+        if (height !== lastHeight) {
+          lastHeight = height;
+          window.parent.postMessage({ frameHeight: height }, '*');
+        }
+      }
+      function scheduleHeightCheck() {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(sendHeight, 150);
+      }
+      window.addEventListener('load', () => setTimeout(sendHeight, 100));
+      window.addEventListener('resize', scheduleHeightCheck);
+    });
+  </script>
+</body>
+</html>
