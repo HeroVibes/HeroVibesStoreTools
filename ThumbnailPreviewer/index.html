@@ -69,13 +69,21 @@
       transition: all 0.3s ease;
     }
 
-    /* #TOP BAR CONTROLS */
+    /* #SETTINGS HEADER & CONTROLS */
+    .settings-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
     .top-controls {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 8px;
+      justify-content: flex-end;
     }
 
     /* INPUT GRID */
@@ -107,8 +115,7 @@
       font-size: 20px;
       font-weight: 700;
       color: var(--text-primary);
-      margin-top: 0;
-      margin-bottom: 16px;
+      margin: 0; /* Reset margin since it's now in the flex header */
     }
 
     .title-text {
@@ -192,7 +199,12 @@
       background: var(--yt-vignette);
       z-index: 10;
       border-radius: var(--radius);
-      transition: background 0.3s ease;
+      transition: background 0.3s ease, opacity 0.3s ease;
+      opacity: 1;
+    }
+
+    .vignette-overlay.hidden {
+      opacity: 0;
     }
 
     .yt-grid {
@@ -325,66 +337,71 @@
 
   <div class="tool-layout">
     
-    <div class="top-controls">
-      <button class="btn" id="btn-theme">🌙 Dark Mode</button>
-      <button class="btn" id="btn-settings-toggle">⚙️ Hide Settings</button>
-      <button class="btn" id="btn-highlight">🎯 Toggle Highlight</button>
-    </div>
-
-    <div class="panel-card collapsible-settings" id="INPUT_AREA">
-      <h2 class="header-bold">Studio Customization</h2>
-      <div class="input-grid">
-        
-        <div class="input-group">
-          <label class="label">Video Title</label>
-          <input type="text" id="inp-title" class="field-input" value="How To Master Content Creation in 2026 (Step-by-Step Guide)">
+    <div class="panel-card">
+      <div class="settings-header">
+        <h2 class="header-bold">Studio Customization</h2>
+        <div class="top-controls">
+          <button class="btn" id="btn-theme">Dark Mode</button>
+          <button class="btn" id="btn-highlight">Toggle Highlight</button>
+          <button class="btn active" id="btn-vignette">Toggle Vignette</button>
+          <button class="btn" id="btn-settings-toggle">Hide Settings</button>
         </div>
-        
-        <div class="input-group">
-          <label class="label">Channel Name</label>
-          <input type="text" id="inp-channel" class="field-input" value="HeroVibes">
-        </div>
+      </div>
 
-        <div class="input-group">
-          <label class="label">Video Thumbnail</label>
-          <div class="file-input-wrapper">
-            <input type="text" id="inp-thumb-url" class="field-input" placeholder="Paste image URL...">
-            <button type="button" class="btn" onclick="document.getElementById('file-thumb').click()">Upload</button>
-            <input type="file" id="file-thumb" accept="image/*" style="display:none">
+      <div class="collapsible-settings" id="INPUT_AREA">
+        <div class="input-grid">
+          
+          <div class="input-group">
+            <label class="label">Video Title</label>
+            <input type="text" id="inp-title" class="field-input" value="How To Master Content Creation in 2026 (Step-by-Step Guide)">
           </div>
-        </div>
-
-        <div class="input-group">
-          <label class="label">Channel Avatar</label>
-          <div class="file-input-wrapper">
-            <input type="text" id="inp-avatar-url" class="field-input" placeholder="Paste avatar URL...">
-            <button type="button" class="btn" onclick="document.getElementById('file-avatar').click()">Upload</button>
-            <input type="file" id="file-avatar" accept="image/*" style="display:none">
+          
+          <div class="input-group">
+            <label class="label">Channel Name</label>
+            <input type="text" id="inp-channel" class="field-input" value="HeroVibes">
           </div>
-        </div>
 
-        <div class="input-group">
-          <label class="label">Video Duration</label>
-          <input type="text" id="inp-duration" class="field-input" value="14:25">
-        </div>
-
-        <div class="input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <div>
-            <label class="label">Views</label>
-            <input type="text" id="inp-views" class="field-input" value="12K">
+          <div class="input-group">
+            <label class="label">Video Thumbnail</label>
+            <div class="file-input-wrapper">
+              <input type="text" id="inp-thumb-url" class="field-input" placeholder="Paste image URL...">
+              <button type="button" class="btn" onclick="document.getElementById('file-thumb').click()">Upload</button>
+              <input type="file" id="file-thumb" accept="image/*" style="display:none">
+            </div>
           </div>
-          <div>
-            <label class="label">Time Uploaded</label>
-            <input type="text" id="inp-time" class="field-input" value="2 hours ago">
-          </div>
-        </div>
 
+          <div class="input-group">
+            <label class="label">Channel Avatar</label>
+            <div class="file-input-wrapper">
+              <input type="text" id="inp-avatar-url" class="field-input" placeholder="Paste avatar URL...">
+              <button type="button" class="btn" onclick="document.getElementById('file-avatar').click()">Upload</button>
+              <input type="file" id="file-avatar" accept="image/*" style="display:none">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="label">Video Duration</label>
+            <input type="text" id="inp-duration" class="field-input" value="14:25">
+          </div>
+
+          <div class="input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>
+              <label class="label">Views</label>
+              <input type="text" id="inp-views" class="field-input" value="12K">
+            </div>
+            <div>
+              <label class="label">Time Uploaded</label>
+              <input type="text" id="inp-time" class="field-input" value="2 hours ago">
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
 
     <div class="panel-card" id="PREVIEW_DISPLAY" style="padding: 0; border: none; background: transparent;">
       <div class="yt-mock-container">
-        <div class="vignette-overlay"></div>
+        <div class="vignette-overlay" id="vignette-target"></div>
         <div class="yt-grid" id="yt-grid-target">
           </div>
       </div>
@@ -550,10 +567,10 @@
       const currentTheme = document.documentElement.getAttribute('data-theme');
       if (currentTheme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'light');
-        btnTheme.textContent = '☀️ Light Mode';
+        btnTheme.textContent = 'Light Mode';
       } else {
         document.documentElement.setAttribute('data-theme', 'dark');
-        btnTheme.textContent = '🌙 Dark Mode';
+        btnTheme.textContent = 'Dark Mode';
       }
     });
 
@@ -563,10 +580,10 @@
     btnSettings.addEventListener('click', () => {
       inputArea.classList.toggle('hidden');
       if (inputArea.classList.contains('hidden')) {
-        btnSettings.textContent = '⚙️ Show Settings';
+        btnSettings.textContent = 'Show Settings';
         btnSettings.classList.remove('active');
       } else {
-        btnSettings.textContent = '⚙️ Hide Settings';
+        btnSettings.textContent = 'Hide Settings';
         btnSettings.classList.add('active');
       }
       setTimeout(scheduleHeightCheck, 400); // Trigger resize fix after css transition
@@ -578,6 +595,14 @@
     btnHighlight.addEventListener('click', () => {
       customCard.classList.toggle('highlight-active');
       btnHighlight.classList.toggle('active');
+    });
+
+    // Vignette Toggle
+    const btnVignette = document.getElementById('btn-vignette');
+    const vignetteTarget = document.getElementById('vignette-target');
+    btnVignette.addEventListener('click', () => {
+      vignetteTarget.classList.toggle('hidden');
+      btnVignette.classList.toggle('active');
     });
 
     // Center scroll position on load for narrow screens
