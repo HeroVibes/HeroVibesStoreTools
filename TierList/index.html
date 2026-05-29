@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tier List Maker</title>
   <style>
     :root {
       --bg: #191919;
@@ -23,7 +24,8 @@
 
     body {
       margin: 0;
-      padding: 24px 16px;
+      /* Reduced body padding */
+      padding: 12px 8px;
       background: var(--bg);
       font-family: system-ui, sans-serif;
       color: var(--text-primary);
@@ -31,7 +33,7 @@
 
     /* ===== MAIN CONTAINER ===== */
     .container {
-      max-width: 1200px;
+      max-width: 1000px; /* Tightened max-width */
       margin: 0 auto;
     }
 
@@ -40,8 +42,9 @@
       background: var(--card-bg);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
-      padding: 24px 16px;
-      margin-bottom: 16px;
+      /* Reduced padding and margins */
+      padding: 12px 16px;
+      margin-bottom: 12px;
     }
 
     .control-group {
@@ -61,7 +64,7 @@
       color: var(--text-primary);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
-      padding: 10px 16px;
+      padding: 8px 12px; /* Slimmer inputs */
       font-size: 14px;
       cursor: pointer;
       flex: 1;
@@ -79,7 +82,7 @@
     /* ===== BUTTONS ===== */
     .btn {
       position: relative;
-      padding: 10px 16px;
+      padding: 8px 16px; /* Slimmer buttons */
       border-radius: var(--radius);
       background: var(--card-bg);
       color: var(--text-primary);
@@ -121,27 +124,32 @@
       background: var(--card-bg);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 16px;
+      padding: 12px; /* Reduced padding */
+      margin-bottom: 12px;
     }
 
     /* ===== TIER ROW ===== */
     .tier-row {
       display: flex;
-      margin-bottom: 8px;
+      margin-bottom: 4px; /* Tighter rows */
       border: 1px solid var(--outline);
       border-radius: var(--radius);
       overflow: hidden;
       background: var(--bg);
+    }
+    
+    /* Remove bottom margin from last row */
+    .tier-row:last-child {
+      margin-bottom: 0;
     }
 
     .tier-label {
       background: var(--card-bg);
       color: var(--text-primary);
       font-weight: bold;
-      font-size: 20px;
-      width: 60px;
-      min-width: 60px;
+      font-size: 16px; /* Smaller font */
+      width: 50px; /* Slimmer label box */
+      min-width: 50px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -160,9 +168,9 @@
       display: flex;
       flex-wrap: wrap;
       flex: 1;
-      padding: 4px;
-      gap: 4px;
-      min-height: 116px; /* Adjusted to fit the new 2:3 height */
+      padding: 2px; /* Tighter padding */
+      gap: 2px; /* Tighter gap */
+      min-height: 82px; /* Adjusted to fit the smaller 2:3 height */
       align-content: flex-start;
     }
 
@@ -170,14 +178,14 @@
       background: var(--hover);
     }
 
-    /* ===== TIER ITEM (2:3 RATIO) ===== */
+    /* ===== TIER ITEM (COMPACT 2:3 RATIO) ===== */
     .tier-item {
-      width: 72px;
-      height: 108px; /* 2:3 Aspect Ratio */
+      width: 52px; /* Scaled down width */
+      height: 78px; /* Scaled down height (2:3 Aspect Ratio) */
       border-radius: 4px;
       overflow: hidden;
       cursor: grab;
-      border: 2px solid var(--outline);
+      border: 1px solid var(--outline); /* Thinner border */
       background: var(--card-bg);
       flex-shrink: 0;
     }
@@ -202,23 +210,23 @@
       background: var(--card-bg);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 16px;
+      padding: 12px;
+      margin-bottom: 12px;
     }
 
     .unranked-header {
       font-size: 14px;
       font-weight: bold;
-      margin-bottom: 12px;
+      margin-bottom: 8px; /* Tighter margin */
       color: var(--text-secondary);
     }
 
     .unranked-items {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
-      min-height: 116px;
-      padding: 4px;
+      gap: 2px; /* Tighter gap */
+      min-height: 82px; /* Matches row min-height */
+      padding: 2px;
       background: var(--bg);
       border: 1px solid var(--outline);
       border-radius: var(--radius);
@@ -237,14 +245,6 @@
 
     /* ===== MOBILE RESPONSIVENESS ===== */
     @media (max-width: 768px) {
-      body {
-        padding: 16px 8px;
-      }
-
-      .controls {
-        padding: 16px 12px;
-      }
-
       .control-group {
         flex-direction: column;
         align-items: stretch;
@@ -256,31 +256,18 @@
       }
 
       .tier-label {
-        width: 50px;
-        min-width: 50px;
-        font-size: 16px;
-      }
-
-      .tier-item {
-        width: 60px;
-        height: 90px; /* 2:3 Aspect Ratio for mobile */
-      }
-
-      #tierListContainer, .unranked-section {
-        padding: 12px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .tier-item {
-        width: 50px;
-        height: 75px; /* 2:3 Aspect Ratio for small mobile */
-      }
-
-      .tier-label {
         width: 40px;
         min-width: 40px;
         font-size: 14px;
+      }
+
+      .tier-item {
+        width: 44px; /* Even smaller for mobile */
+        height: 66px; /* 2:3 Aspect Ratio */
+      }
+      
+      .tier-items, .unranked-items {
+        min-height: 70px;
       }
     }
   </style>
