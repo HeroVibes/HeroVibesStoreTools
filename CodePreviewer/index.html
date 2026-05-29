@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#0f172a;
+  color:white;
+  font-family:Arial,sans-serif;
+}
+
+.card{
+  padding:40px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(12px);
+  text-align:center;
+  box-shadow:0 10px 40px rgba(0,0,0,0.35);
+}
+
+button{
+  margin-top:16px;
+  padding:12px 18px;
+  border:none;
+  border-radius:10px;
+  background:#87A9FF;
+  color:#111;
+  cursor:pointer;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>Hello, Hero 👋</h1>
+  <p>Your live preview updates in real-time.</p>
+
+  <button onclick="showMessage()">
+    Click Me
+  </button>
+</div>
+
+<script>
+function showMessage(){
+  alert("Your JavaScript works!");
+}
+</script>
+
+</body>
+</html>
