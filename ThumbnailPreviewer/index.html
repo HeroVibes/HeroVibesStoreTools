@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    /* #DESIGN SYSTEM CONFIGURATION */
     :root {
-      /* HeroVibes Brand Colors */
       --bg-primary: #191919;
       --bg-secondary: #1F1F1F;
       --color-hover: #323232;
@@ -13,52 +13,109 @@
       --color-accent: #87A9FF;
       --text-primary: #D4D4D4;
       --text-secondary: #8C8C8C;
-      --yt-bg: #0F0F0F;
-      --yt-vignette: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.85) 100%);
       --radius: 8px;
-    }
-
-    /* GLOBAL BOX SIZING FIX: Prevents inputs from overflowing */
-    *, *::before, *::after {
-      box-sizing: border-box;
     }
 
     body {
       margin: 0;
       background: var(--bg-primary);
-      font-family: system-ui, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: var(--text-primary);
-      padding: 24px 16px; /* Default padding per design guide */
-      /* Removed min-height: 100vh per bugfix guide */
     }
 
-    /* #LAYOUT_CONTAINER */
-    .tool-layout {
-      max-width: 1200px;
-      margin: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+    /* #LAYOUT WRAPPERS */
+    .app-wrapper {
+      padding: 24px 16px;
+      box-sizing: border-box;
     }
 
-    /* #SETTINGS_PANEL */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 768px) {
+      .tool-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
     .panel-card {
       background: var(--bg-secondary);
       border: 1px solid var(--color-outline);
       border-radius: var(--radius);
       padding: 24px 16px;
-      position: relative;
+      box-sizing: border-box;
     }
 
-    /* #CONTROLS_HEADER */
-    .top-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+    /* #TYPOGRAPHY */
+    .header-bold {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 0;
       margin-bottom: 16px;
     }
 
-    /* #SHIMMER_BUTTON_TEMPLATE */
+    .title-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .body-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* #FORM CONTROLS */
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .field-input {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--color-outline);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      color: var(--text-primary);
+      font-size: 12px;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease;
+    }
+
+    .field-input:focus {
+      outline: none;
+      border-color: var(--color-accent);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* #DEFAULT BUTTON TEMPLATE IMPLEMENTATION */
     .btn {
       position: relative;
       padding: 10px 16px;
@@ -69,7 +126,10 @@
       cursor: pointer;
       overflow: hidden;
       font-size: 14px;
-      transition: background 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
     }
 
     .btn::before {
@@ -84,116 +144,33 @@
       transition: left .7s ease-in-out;
     }
 
-    .btn:hover::before { left: 125%; }
-    .btn:hover { background: var(--color-hover); }
+    .btn:hover::before { 
+      left: 125%; 
+    }
+
     .btn:focus-visible {
       outline: none;
       box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
     }
-    .btn.active {
-      background: var(--color-accent);
-      color: #000;
+
+    .btn-secondary {
+      background: var(--color-hover);
     }
 
-    .close-settings {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: transparent;
-      border: 1px solid var(--color-outline);
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      cursor: pointer;
-      color: var(--text-secondary);
+    /* #YOUTUBE HOMEPAGE MOCKUP CARD */
+    .yt-mock-container {
+      background: #0F0F0F;
+      border-radius: var(--radius);
+      padding: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-    
-    .close-settings:hover {
-      background: var(--color-hover);
-      color: var(--text-primary);
-    }
-
-    /* #COLLAPSIBLE_GRID_ANIMATION */
-    .collapsible-wrapper {
-      display: grid;
-      grid-template-rows: 1fr;
-      transition: grid-template-rows 0.3s ease;
-    }
-
-    .collapsible-wrapper.hidden {
-      grid-template-rows: 0fr;
-    }
-
-    .collapsible-settings {
-      overflow: hidden;
-    }
-
-    /* #INPUT_GRID */
-    .input-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      padding-top: 8px; /* Padding inside the hidden area to prevent jumpiness */
-    }
-
-    .label {
-      font-size: 11px;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-      display: block;
-      font-weight: bold;
-    }
-
-    .field-input {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: var(--radius);
-      border: 1px solid var(--color-outline);
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s ease;
-    }
-
-    .field-input:focus {
-      border-color: var(--color-accent);
-    }
-
-    /* #PREVIEW_AREA */
-    .yt-mock-container {
-      background: var(--yt-bg);
-      border-radius: var(--radius);
-      border: 1px solid var(--color-outline);
-      padding: 24px 16px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .vignette-overlay {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: var(--yt-vignette);
-      z-index: 5;
-      border-radius: var(--radius);
-      transition: opacity .3s ease;
-    }
-
-    .vignette-overlay.hidden {
-      opacity: 0;
-    }
-
-    .yt-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
+      min-height: 280px;
     }
 
     .yt-card {
+      width: 100%;
+      max-width: 360px;
       display: flex;
       flex-direction: column;
       cursor: pointer;
@@ -201,11 +178,12 @@
 
     .yt-thumbnail-wrapper {
       position: relative;
-      padding-top: 56.25%;
-      border-radius: 10px;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+      background: #212121;
+      border-radius: 12px;
       overflow: hidden;
-      background: #222;
-      border: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 12px;
     }
 
     .yt-thumbnail {
@@ -217,193 +195,348 @@
       object-fit: cover;
     }
 
+    .yt-duration {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #FFFFFF;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .yt-details {
+      display: flex;
+      gap: 12px;
+    }
+
+    .yt-avatar-wrapper {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #313131;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .yt-avatar {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .yt-info {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
     .yt-title {
       font-size: 14px;
-      font-weight: bold;
-      margin: 8px 0 4px;
-      color: var(--text-primary);
-      line-height: 1.3;
+      font-weight: 600;
+      color: #F1F1F1;
+      line-height: 20px;
+      margin: 0 0 4px 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .yt-meta {
+    .yt-metadata {
       font-size: 12px;
-      color: var(--text-secondary);
+      color: #AAAAAA;
+      line-height: 18px;
     }
 
-    /* #MOBILE_OPTIMISATION */
-    @media (max-width: 768px) {
-      .yt-grid {
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      }
+    .yt-channel {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
+
+    .yt-verified-icon {
+      fill: #AAAAAA;
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+    }
+
+    /* #TROUBLESHOOTING & SYSTEM LOGS */
+    .system-logs-panel {
+      margin-top: 24px;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .logs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .logs-content {
+      height: 0;
+      overflow: hidden;
+      padding: 0;
+      transition: all 0.1s ease-in-out; /* Reduced complexity to ensure stable iframe resize */
+    }
+
+    .logs-content.active {
+      height: auto;
+      padding: 12px 20px;
+      margin-top: 12px;
+    }
+
+    .log-line {
+      font-family: monospace;
+      font-size: 12px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .log-success { color: #A3E635; }
+    .log-info { color: var(--color-accent); }
   </style>
 </head>
 <body>
 
-<div class="tool-layout">
+  <div class="app-wrapper">
+    <div class="tool-grid">
+      
+      <div class="panel-card" id="INPUT_AREA">
+        <div class="input-group">
+          <label class="label">Video Title</label>
+          <input type="text" id="inp-title" class="field-input" value="How To Master Content Creation in 2026 (Step-by-Step Guide)">
+        </div>
+        
+        <div class="input-group">
+          <label class="label">Channel Name</label>
+          <input type="text" id="inp-channel" class="field-input" value="HeroVibes">
+        </div>
 
-  <div class="panel-card">
-    <button class="close-settings" id="close-settings" title="Close Settings">×</button>
-
-    <div class="top-controls">
-      <button class="btn" id="toggle-vignette" type="button">Toggle Vignette</button>
-      <button class="btn active" id="toggle-settings" type="button">Toggle Settings</button>
-    </div>
-
-    <div class="collapsible-wrapper" id="settings-wrapper">
-      <div class="collapsible-settings">
-        <div class="input-grid">
-          <div>
-            <label class="label">TITLE</label>
-            <input class="field-input" id="input-title" value="How To Master Content Creation">
-          </div>
-          <div>
-            <label class="label">CHANNEL</label>
-            <input class="field-input" id="input-channel" value="HeroVibes">
-          </div>
-          <div>
-            <label class="label">VIEWS</label>
-            <input class="field-input" id="input-views" value="12K">
-          </div>
-          <div>
-            <label class="label">TIME</label>
-            <input class="field-input" id="input-time" value="2 hours ago">
+        <div class="input-group">
+          <label class="label">Video Thumbnail</label>
+          <div class="file-input-wrapper">
+            <input type="text" id="inp-thumb-url" class="field-input" placeholder="Paste image URL...">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-thumb').click()">Browse</button>
+            <input type="file" id="file-thumb" accept="image/*" style="display:none">
           </div>
         </div>
+
+        <div class="input-group">
+          <label class="label">Channel Avatar</label>
+          <div class="file-input-wrapper">
+            <input type="text" id="inp-avatar-url" class="field-input" placeholder="Paste avatar URL...">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-avatar').click()">Browse</button>
+            <input type="file" id="file-avatar" accept="image/*" style="display:none">
+          </div>
+        </div>
+
+        <div class="input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label class="label">Video Duration</label>
+            <input type="text" id="inp-duration" class="field-input" value="14:25">
+          </div>
+          <div>
+            <label class="label">Video Metrics & Time</label>
+            <input type="text" id="inp-metrics" class="field-input" value="12K views • 2 hours ago">
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-card" id="PREVIEW_DISPLAY">
+        <div class="yt-mock-container">
+          <div class="yt-card">
+            
+            <div class="yt-thumbnail-wrapper">
+              <img id="yt-thumb-img" class="yt-thumbnail" src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=600" alt="Thumbnail">
+              <div id="yt-duration-badge" class="yt-duration">14:25</div>
+            </div>
+
+            <div class="yt-details">
+              <div class="yt-avatar-wrapper">
+                <img id="yt-avatar-img" class="yt-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150" alt="Avatar">
+              </div>
+              <div class="yt-info">
+                <h3 id="yt-title-text" class="yt-title">How To Master Content Creation in 2026 (Step-by-Step Guide)</h3>
+                <div class="yt-metadata">
+                  <div class="yt-channel">
+                    <span id="yt-channel-name">HeroVibes</span>
+                    <svg class="yt-verified-icon" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  </div>
+                  <div id="yt-metrics-text">12K views • 2 hours ago</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="panel-card system-logs-panel" id="TROUBLESHOOTING_AREA">
+      <div class="logs-header" onclick="toggleLogsPanel()">
+        <div class="title-text" style="margin: 0;">System Diagnostic Console</div>
+        <button class="btn" style="padding: 4px 10px; font-size: 12px;">Toggle Logs</button>
+      </div>
+      <div class="logs-content" id="diagnostic-logs">
+        <div class="log-line"><span class="log-info">[SYSTEM] Initializing YouTube 2026 Engine Core...</span><span class="text-secondary">OK</span></div>
+        <div class="log-line"><span class="log-info">[RENDER] Clean Layout Node Tree Parsed</span><span class="text-secondary">OK</span></div>
+        <div class="log-line"><span id="log-thumb-status" class="log-success">[ASSET] Default video thumbnail loaded safely</span><span>READY</span></div>
+        <div class="log-line"><span id="log-avatar-status" class="log-success">[ASSET] Default channel profile avatar active</span><span>READY</span></div>
       </div>
     </div>
   </div>
 
-  <div class="yt-mock-container">
-    <div class="vignette-overlay hidden" id="vignette"></div>
-    <div class="yt-grid" id="grid"></div>
-  </div>
+  <script>
+    const inpTitle = document.getElementById('inp-title');
+    const inpChannel = document.getElementById('inp-channel');
+    const inpThumbUrl = document.getElementById('inp-thumb-url');
+    const fileThumb = document.getElementById('file-thumb');
+    const inpAvatarUrl = document.getElementById('inp-avatar-url');
+    const fileAvatar = document.getElementById('file-avatar');
+    const inpDuration = document.getElementById('inp-duration');
+    const inpMetrics = document.getElementById('inp-metrics');
 
-</div>
+    const ytTitle = document.getElementById('yt-title-text');
+    const ytChannel = document.getElementById('yt-channel-name');
+    const ytThumb = document.getElementById('yt-thumb-img');
+    const ytAvatar = document.getElementById('yt-avatar-img');
+    const ytDuration = document.getElementById('yt-duration-badge');
+    const ytMetrics = document.getElementById('yt-metrics-text');
 
-<script>
-  // #USER_INPUTS
-  const inputTitle = document.getElementById('input-title');
-  const inputChannel = document.getElementById('input-channel');
-  const inputViews = document.getElementById('input-views');
-  const inputTime = document.getElementById('input-time');
+    const logThumbStatus = document.getElementById('log-thumb-status');
+    const logAvatarStatus = document.getElementById('log-avatar-status');
 
-  // #UI_ELEMENTS
-  const settingsWrapper = document.getElementById('settings-wrapper');
-  const toggleSettingsBtn = document.getElementById('toggle-settings');
-  const closeSettingsBtn = document.getElementById('close-settings');
-  const vignette = document.getElementById('vignette');
-  const toggleVignetteBtn = document.getElementById('toggle-vignette');
-  const grid = document.getElementById('grid');
-
-  // #FUNCTIONS
-  function updatePreview() {
-    // Generate initial grid with the first card tied to user input
-    let gridHTML = `
-      <div class="yt-card">
-        <div class="yt-thumbnail-wrapper">
-          <img src="https://picsum.photos/400/225?0" class="yt-thumbnail" alt="Thumbnail">
-        </div>
-        <div class="yt-title" id="preview-title">${inputTitle.value || 'Video Title'}</div>
-        <div class="yt-meta"><span id="preview-channel">${inputChannel.value || 'Channel'}</span> • <span id="preview-views">${inputViews.value || '0'}</span> views • <span id="preview-time">${inputTime.value || 'Just now'}</span></div>
-      </div>
-    `;
-
-    // Generate remaining dummy cards
-    for (let i = 1; i < 12; i++) {
-      gridHTML += `
-        <div class="yt-card">
-          <div class="yt-thumbnail-wrapper">
-            <img src="https://picsum.photos/400/225?${i}" class="yt-thumbnail" alt="Thumbnail">
-          </div>
-          <div class="yt-title">Sample Video Title ${i+1}</div>
-          <div class="yt-meta">Sample Channel • ${Math.floor(Math.random() * 100) + 1}K views • ${i} days ago</div>
-        </div>
-      `;
-    }
-    grid.innerHTML = gridHTML;
-    
-    // Notify iframe parent of possible height change
-    if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
-  }
-
-  function toggleSettings() {
-    settingsWrapper.classList.toggle('hidden');
-    toggleSettingsBtn.classList.toggle('active');
-    // Ensure parent iframe adjusts height dynamically when expanding/collapsing
-    if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
-  }
-
-  // #EVENT_LISTENERS
-  toggleSettingsBtn.addEventListener('click', toggleSettings);
-  closeSettingsBtn.addEventListener('click', () => {
-    settingsWrapper.classList.add('hidden');
-    toggleSettingsBtn.classList.remove('active');
-    if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
-  });
-
-  toggleVignetteBtn.addEventListener('click', () => {
-    vignette.classList.toggle('hidden');
-    toggleVignetteBtn.classList.toggle('active');
-  });
-
-  // Real-time updates
-  [inputTitle, inputChannel, inputViews, inputTime].forEach(input => {
-    input.addEventListener('input', () => {
-      document.getElementById('preview-title').textContent = inputTitle.value || 'Video Title';
-      document.getElementById('preview-channel').textContent = inputChannel.value || 'Channel';
-      document.getElementById('preview-views').textContent = inputViews.value || '0';
-      document.getElementById('preview-time').textContent = inputTime.value || 'Just now';
-      if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
-    });
-  });
-
-  // Initialize Tool
-  updatePreview();
-
-  // ===== FOURTHWALL SCROLLBAR FIX =====
-  let lastHeight = 0;
-  let resizeTimer;
-
-  /**
-   * Sends the current scrollHeight to the parent window if it has changed.
-   * This is the *only* function that should send a postMessage.
-   */
-  function sendHeight() {
-    // Use scrollHeight for content height
-    const height = document.body.scrollHeight;
-    
-    // Only send message if height has *actually* changed 
-    if (height !== lastHeight) {
-      lastHeight = height;
-      window.parent.postMessage({ frameHeight: height }, '*');
-    }
-  }
-
-  /**
-   * A debounced version of sendHeight() to be called on content changes.
-   * This ensures we don't spam messages during rapid changes.
-   */
-  function scheduleHeightCheck() {
-      // Clear any pending checks
-      clearTimeout(resizeTimer);
-      // Schedule a new check after 150ms
-      resizeTimer = setTimeout(sendHeight, 150);
-  }
-
-  // Send height on initial load (with a slight delay)
-  // This fixes the "Content Cut-Off" race condition.
-  window.addEventListener('load', () => {
-      setTimeout(sendHeight, 100);
-  });
-
-  // Send height on window resize (debounced)
-  window.addEventListener('resize', () => {
-      // Use scheduleHeightCheck for built-in debounce
+    function appendDiagnosticLog(message, type = 'info') {
+      const logsBox = document.getElementById('diagnostic-logs');
+      const line = document.createElement('div');
+      line.className = 'log-line';
+      line.innerHTML = `<span class="log-${type}">${message}</span><span>${new Date().toLocaleTimeString()}</span>`;
+      logsBox.appendChild(line);
       scheduleHeightCheck();
-  });
-  // ===== END OF SCROLLBAR FIX =====
+    }
 
-</script>
+    // Dynamic Engine Sync Controls
+    inpTitle.addEventListener('input', () => {
+      ytTitle.textContent = inpTitle.value || 'Untitled Video';
+      scheduleHeightCheck();
+    });
+
+    inpChannel.addEventListener('input', () => {
+      ytChannel.textContent = inpChannel.value || 'Channel Name';
+      scheduleHeightCheck(); // Added to notify iframe on wrap
+    });
+
+    inpDuration.addEventListener('input', () => {
+      ytDuration.textContent = inpDuration.value || '0:00';
+      scheduleHeightCheck(); // Added to notify iframe on wrap
+    });
+
+    inpMetrics.addEventListener('input', () => {
+      ytMetrics.textContent = inpMetrics.value || '0 views • 0 minutes ago';
+      scheduleHeightCheck(); // Added to notify iframe on wrap
+    });
+
+    // Asset Management: Thumbnails
+    inpThumbUrl.addEventListener('input', () => {
+      if(inpThumbUrl.value.trim() !== "") {
+        ytThumb.src = inpThumbUrl.value;
+        logThumbStatus.className = 'log-success';
+        logThumbStatus.textContent = '[ASSET] Thumbnail updated via external URL string';
+        scheduleHeightCheck(); // Inform iframe of layout check
+      }
+    });
+
+    fileThumb.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const localUrl = URL.createObjectURL(file);
+        ytThumb.src = localUrl;
+        inpThumbUrl.value = file.name;
+        appendDiagnosticLog(`[FILE] Local thumbnail uploaded: ${file.name}`, 'success');
+      }
+    });
+
+    // Asset Management: Avatars
+    inpAvatarUrl.addEventListener('input', () => {
+      if(inpAvatarUrl.value.trim() !== "") {
+        ytAvatar.src = inpAvatarUrl.value;
+        logAvatarStatus.className = 'log-success';
+        logAvatarStatus.textContent = '[ASSET] Channel avatar updated via external URL string';
+        scheduleHeightCheck(); // Inform iframe of layout check
+      }
+    });
+
+    fileAvatar.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const localUrl = URL.createObjectURL(file);
+        ytAvatar.src = localUrl;
+        inpAvatarUrl.value = file.name;
+        appendDiagnosticLog(`[FILE] Local profile avatar uploaded: ${file.name}`, 'success');
+      }
+    });
+
+    // Layout Section Toggling
+    function toggleLogsPanel() {
+      const logs = document.getElementById('diagnostic-logs');
+      logs.classList.toggle('active');
+      scheduleHeightCheck();
+    }
+  </script>
+
+  <script>
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      
+      // Only send message if height has *actually* changed
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes.
+     */
+    function scheduleHeightCheck() {
+        // Clear any pending checks
+        clearTimeout(resizeTimer);
+        // Schedule a new check
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    // Send height on initial load (with a slight delay)
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    // Send height on window resize (debounced)
+    window.addEventListener('resize', () => {
+        // Use scheduleHeightCheck for built-in debounce
+        scheduleHeightCheck();
+    });
+    
+    // ===== END OF SCROLLBAR FIX =====
+  </script>
 </body>
 </html>
