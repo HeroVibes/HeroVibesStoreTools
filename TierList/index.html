@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tier List Maker</title>
   <style>
     :root {
       --bg: #191919;
@@ -163,7 +162,7 @@
       flex: 1;
       padding: 4px;
       gap: 4px;
-      min-height: 80px;
+      min-height: 116px; /* Adjusted to fit the new 2:3 height */
       align-content: flex-start;
     }
 
@@ -171,10 +170,10 @@
       background: var(--hover);
     }
 
-    /* ===== TIER ITEM ===== */
+    /* ===== TIER ITEM (2:3 RATIO) ===== */
     .tier-item {
       width: 72px;
-      height: 72px;
+      height: 108px; /* 2:3 Aspect Ratio */
       border-radius: 4px;
       overflow: hidden;
       cursor: grab;
@@ -218,7 +217,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 4px;
-      min-height: 80px;
+      min-height: 116px;
       padding: 4px;
       background: var(--bg);
       border: 1px solid var(--outline);
@@ -264,7 +263,7 @@
 
       .tier-item {
         width: 60px;
-        height: 60px;
+        height: 90px; /* 2:3 Aspect Ratio for mobile */
       }
 
       #tierListContainer, .unranked-section {
@@ -275,7 +274,7 @@
     @media (max-width: 480px) {
       .tier-item {
         width: 50px;
-        height: 50px;
+        height: 75px; /* 2:3 Aspect Ratio for small mobile */
       }
 
       .tier-label {
@@ -397,9 +396,7 @@
         clearAllItems();
         
         data.forEach(file => {
-          // Check if file is an image (webp, png, jpg, etc.)
           if (file.type === "file" && file.name.match(/\.(webp|png|jpg|jpeg|gif)$/i)) {
-             // Link directly to the GitHub pages URL to save API requests and load properly
              const imageUrl = `${GITHUB_PAGES_BASE}/${folderName}/${file.name}`;
              createTierItem(imageUrl);
           }
@@ -430,7 +427,6 @@
         };
         reader.readAsDataURL(file);
       });
-      // Reset preset to Custom if a user manually uploads
       presetSelect.value = "";
       this.value = '';
     });
@@ -443,6 +439,8 @@
       item.dataset.id = itemIdCounter++;
       
       const img = document.createElement('img');
+      // CRITICAL: Prevent CORS errors when generating the final canvas image
+      img.crossOrigin = "anonymous"; 
       img.src = imageSrc;
       img.alt = 'Tier item';
       
@@ -515,35 +513,48 @@
 
     // ===== DOWNLOAD TIER LIST =====
     downloadBtn.addEventListener('click', async function() {
+      // Prevent rapid clicking
+      downloadBtn.disabled = true;
+      downloadBtn.textContent = 'Generating...';
+      
       const tierListContainer = document.getElementById('tierListContainer');
       
       try {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-        document.head.appendChild(script);
-        
-        script.onload = async function() {
-          const canvas = await html2canvas(tierListContainer, {
-            backgroundColor: '#1F1F1F',
-            scale: 2,
-            logging: false,
-            useCORS: true, // Necessary for cross-origin Github Page images
-            allowTaint: true
+        // Dynamically load html2canvas if not present
+        if (typeof html2canvas === 'undefined') {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
           });
-          
-          const link = document.createElement('a');
-          link.download = 'tier-list.png';
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-        };
+        }
+        
+        // Ensure image loading is complete before capturing
+        const canvas = await html2canvas(tierListContainer, {
+          backgroundColor: '#1F1F1F', // Matches CARD/INNER CONTAINER BACKGROUND 
+          scale: 2,
+          logging: false,
+          useCORS: true // Essential for rendering GitHub pages images
+        });
+        
+        const link = document.createElement('a');
+        link.download = 'tier-list.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
       } catch (error) {
-        alert('Download feature requires internet connection for the first use.');
+        console.error("Screenshot Error:", error);
+        alert('There was an error generating your image. Ensure you are connected to the internet.');
+      } finally {
+        downloadBtn.disabled = false;
+        downloadBtn.textContent = 'Download Tier List';
       }
     });
 
     // ===== INITIALIZATION =====
     window.addEventListener('load', function() {
-      // Start with blank template and fetch available presets
       fetchFolders();
     });
 
@@ -551,6 +562,10 @@
     let lastHeight = 0;
     let resizeTimer;
 
+    /**
+     * Sends the current scrollHeight to the parent window if it has changed.
+     * This is the *only* function that should send a postMessage.
+     */
     function sendHeight() {
       const height = document.body.scrollHeight;
       
@@ -560,15 +575,22 @@
       }
     }
 
+    /**
+     * A debounced version of sendHeight() to be called on content changes.
+     * This ensures we don't spam messages during rapid changes. 
+     */
     function scheduleHeightCheck() {
-      clearTimeout(resizeTimer);
+      clearTimeout(resizeTimer); 
       resizeTimer = setTimeout(sendHeight, 150);
     }
 
+    // Send height on initial load (with a slight delay) 
+    // This fixes the "Content Cut-Off" race condition.
     window.addEventListener('load', () => {
       setTimeout(sendHeight, 100);
     });
 
+    // Send height on window resize (debounced) 
     window.addEventListener('resize', () => {
       scheduleHeightCheck();
     });
