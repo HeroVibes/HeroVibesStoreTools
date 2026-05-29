@@ -313,13 +313,13 @@
     <div id="upload-zone" class="upload-zone">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2M13 9V3.5L18.5 9H13M11 16H8V14H11V11L15 15L11 19V16Z"/></svg>
       <p class="upload-text">Click or drag files to upload</p>
-      <p class="upload-subtext">Images (JPG, PNG, GIF...) & Text (TXT, PDF, DOC...)</p>
-      <input type="file" id="file-input" hidden multiple accept="image/*, text/*, .csv, .html, .json, .pdf, .doc, .docx, .rtf" />
+      <p class="upload-subtext">Currently supports Native Images & Text formats</p>
+      <input type="file" id="file-input" hidden multiple accept="image/*, text/*, .csv, .html, .json" />
     </div>
 
     <div id="mixed-error" class="alert-box alert-danger">
       <strong>Format Mismatch!</strong><br>
-      You are uploading multiple formats (e.g. Photos and Text Files). Please clear the list and convert one "Type" at a time. Multiple formats of the <em>same</em> type are allowed.
+      You are uploading multiple formats (e.g. Photos and Text Files). Please clear the list and convert one "Type" at a time. Multiple files of the <em>same</em> type are allowed.
     </div>
 
     <div id="controls-area" class="controls-area">
@@ -344,8 +344,7 @@
         <h4>Troubleshooting & Tips</h4>
         <ul>
           <li><strong>Pop-ups Blocked:</strong> When converting multiple files, your browser may ask for permission to "download multiple files". Please click Allow.</li>
-          <li><strong>Complex Formats:</strong> Because this tool runs instantly in your browser, advanced formats like PDF, DOC, RTF, GIF, and ICO use basic data encoding. If a converted file doesn't open correctly in your specific software, try standard formats like TXT, JPG or PNG.</li>
-          <li><strong>Formatting Changes:</strong> Converting between formats like HTML to TXT will intentionally strip visual styles to preserve readability.</li>
+          <li><strong>Text Formatting:</strong> Converting between formats like HTML to TXT will intentionally strip visual styles to preserve pure text readability.</li>
         </ul>
       </div>
 
@@ -366,30 +365,25 @@
     
     let activeFiles = []; 
 
-    // Supported global formats mapping
+    // Supported native formats mapping
     const formats = {
       image: [
         { value: 'image/jpeg', label: 'JPG' },
         { value: 'image/png', label: 'PNG' },
-        { value: 'image/webp', label: 'WEBP' },
-        { value: 'image/gif', label: 'GIF' },
-        { value: 'image/x-icon', label: 'ICO' }
+        { value: 'image/webp', label: 'WEBP' }
       ],
       text: [
         { value: 'text/plain', label: 'TXT' },
         { value: 'text/html', label: 'HTML' },
         { value: 'text/csv', label: 'CSV' },
-        { value: 'application/json', label: 'JSON' },
-        { value: 'application/pdf', label: 'PDF' },
-        { value: 'application/msword', label: 'DOC' },
-        { value: 'application/rtf', label: 'RTF' }
+        { value: 'application/json', label: 'JSON' }
       ]
     };
 
     // Helper to determine File Group
     function getFileGroup(file) {
       if (file.type.startsWith('image/')) return 'image';
-      if (file.type.startsWith('text/') || file.name.match(/\.(json|csv|pdf|doc|docx|rtf)$/i)) return 'text';
+      if (file.type.startsWith('text/') || file.name.match(/\.(json|csv)$/i)) return 'text';
       return 'unknown';
     }
 
@@ -479,7 +473,7 @@
 
         const statusSpan = document.createElement('span');
         statusSpan.className = 'status-text';
-        fileObj.statusEl = statusSpan; // Store reference
+        fileObj.statusEl = statusSpan; 
 
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-btn';
@@ -520,7 +514,6 @@
       });
     }
 
-    // Helper to allow the browser to paint new DOM elements before calculating height
     function triggerRepaintAndHeightCheck() {
       setTimeout(() => {
         if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
@@ -537,26 +530,22 @@
 
       const targetMime = globalDropdown.value;
       
-      // Determine new extension
       let targetExt = targetMime.split('/')[1];
       if (targetExt === 'jpeg') targetExt = 'jpg';
       if (targetExt === 'plain') targetExt = 'txt';
-      if (targetExt === 'x-icon') targetExt = 'ico';
-      if (targetExt === 'msword') targetExt = 'doc';
 
       // Process files sequentially
       for (const fileObj of activeFiles) {
         fileObj.statusEl.style.display = 'block';
         fileObj.statusEl.style.color = 'var(--text-secondary)';
-        fileObj.statusEl.textContent = 'Converting...';
+        fileObj.statusEl.textContent = 'Processing...';
 
         try {
-          // If trying to convert a file to its EXACT same format, just download the original
           if (fileObj.file.type === targetMime) {
              downloadBlob(fileObj.file, fileObj.file.name, targetExt);
              fileObj.statusEl.textContent = 'Complete ✓';
              fileObj.statusEl.style.color = 'var(--accent)';
-             await new Promise(r => setTimeout(r, 300)); // Pause to prevent browser block
+             await new Promise(r => setTimeout(r, 300));
              continue;
           }
 
@@ -583,7 +572,6 @@
         convertBtn.textContent = 'Convert & Download';
         convertBtn.disabled = false;
         clearAllBtn.style.display = 'block';
-        // Hide success messages after a bit
         activeFiles.forEach(f => {
            if(f.statusEl.textContent.includes('Complete')) f.statusEl.style.display = 'none';
         });
@@ -602,19 +590,14 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0);
             
-            // Note: canvas.toBlob natively supports PNG, JPEG, WEBP.
-            // If target is GIF/ICO, toBlob often falls back to PNG internally depending on the browser.
-            // We force the MIME type on the resulting blob to satisfy the OS file extension check.
             canvas.toBlob((blob) => {
               if (blob) {
-                // If it's a fallback format, wrap it in the exact requested MIME
-                const finalBlob = new Blob([blob], { type: targetMime });
-                downloadBlob(finalBlob, file.name, targetExt);
+                downloadBlob(blob, file.name, targetExt);
                 resolve();
               } else {
                 reject(new Error("Canvas toBlob failed"));
               }
-            }, (targetMime === 'image/gif' || targetMime === 'image/x-icon') ? 'image/png' : targetMime, 1.0);
+            }, targetMime, 1.0);
           };
           img.onerror = reject;
           img.src = e.target.result;
@@ -631,7 +614,6 @@
           let content = e.target.result;
           const currentType = file.type || '';
 
-          // Basic formatting string manipulation for text types
           if (currentType === 'text/html' && targetMime === 'text/plain') {
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = content;
@@ -640,8 +622,6 @@
             content = content.split('\n').filter(line => line.trim() !== '').map(line => `<p>${line}</p>`).join('\n');
           }
 
-          // Create blob with new MIME type. 
-          // Note: Client-side PDF/DOC generation this way relies on OS fallback rendering.
           const blob = new Blob([content], { type: targetMime });
           downloadBlob(blob, file.name, targetExt);
           resolve();
