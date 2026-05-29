@@ -2,13 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+/>
 
 <title>Hero Code Viewer</title>
 
 <style>
 /* =========================
-   HERO TOOL VARIABLES
+   ROOT
 ========================= */
 :root{
   --bg:#191919;
@@ -17,57 +20,55 @@
   --outline:#323232;
   --accent:#87A9FF;
   --text:#D4D4D4;
-  --subtext:#8C8C8C;
-  --danger:#ff5f5f;
+  --sub:#8C8C8C;
 
-  --radius:14px;
-  --paddingY:24px;
-  --paddingX:16px;
-
-  --font:Arial, Helvetica, sans-serif;
+  --radius:16px;
 }
 
 /* =========================
-   GLOBAL RESET
+   RESET
 ========================= */
-*{
+#hero-code-viewer,
+#hero-code-viewer *{
   box-sizing:border-box;
 }
 
 html,
 body{
-  margin:0;
-  padding:0;
+  margin:0 !important;
+  padding:0 !important;
+  width:100%;
+  min-width:0;
   background:transparent;
-  color:var(--text);
-  font-family:var(--font);
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
-}
-
-/* Prevent host page conflicts */
-#hero-code-viewer *,
-#hero-code-viewer *::before,
-#hero-code-viewer *::after{
-  box-sizing:border-box;
+  overflow-x:hidden;
+  font-family:Arial, Helvetica, sans-serif;
 }
 
 /* =========================
-   MAIN TOOL WRAPPER
+   MAIN WRAPPER
 ========================= */
 #hero-code-viewer{
   width:100%;
-  max-width:1600px;
-  margin:0 auto;
+  max-width:100%;
+  overflow:hidden;
+
   background:var(--bg);
   border:1px solid var(--outline);
   border-radius:20px;
-  overflow:hidden;
+
+  color:var(--text);
+
+  position:relative;
   isolation:isolate;
 
-  /* Protect against host styles */
-  position:relative;
-  z-index:1;
+  /* Critical Fourthwall fixes */
+  display:flex;
+  flex-direction:column;
+
+  min-height:900px;
+
+  transform:none !important;
+  contain:none !important;
 }
 
 /* =========================
@@ -78,14 +79,15 @@ body{
   align-items:center;
   justify-content:space-between;
   gap:16px;
-  padding:18px 20px;
-  border-bottom:1px solid var(--outline);
-  background:rgba(255,255,255,0.01);
 
-  backdrop-filter:blur(10px);
+  padding:18px 18px;
+
+  border-bottom:1px solid var(--outline);
+
+  flex-wrap:wrap;
 }
 
-.hero-title-group{
+.hero-title-wrap{
   display:flex;
   flex-direction:column;
   gap:4px;
@@ -94,12 +96,11 @@ body{
 .hero-title{
   font-size:20px;
   font-weight:700;
-  color:var(--text);
 }
 
-.hero-subtitle{
+.hero-sub{
   font-size:12px;
-  color:var(--subtext);
+  color:var(--sub);
 }
 
 /* =========================
@@ -113,123 +114,146 @@ body{
 
 .hero-btn{
   position:relative;
+
   padding:10px 16px;
+
   border-radius:10px;
+  border:1px solid rgba(255,255,255,0.06);
+
   background:var(--card);
   color:var(--text);
-  border:1px solid rgba(255,255,255,0.06);
+
   cursor:pointer;
+
   overflow:hidden;
-  font-size:14px;
+
   transition:
-    transform .15s ease,
     background .2s ease,
-    border-color .2s ease;
+    transform .15s ease;
 }
 
 .hero-btn:hover{
   background:var(--hover);
-  border-color:rgba(255,255,255,0.12);
 }
 
 .hero-btn:active{
-  transform:scale(0.98);
+  transform:scale(.98);
 }
 
 .hero-btn::before{
   content:'';
+
   position:absolute;
   top:0;
   left:-100%;
+
   width:75%;
   height:100%;
-  background:linear-gradient(
-    90deg,
-    transparent,
-    rgba(255,255,255,0.15),
-    transparent
-  );
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,0.12),
+      transparent
+    );
+
   transform:skewX(-25deg);
-  transition:left .7s ease-in-out;
+
+  transition:left .7s ease;
 }
 
 .hero-btn:hover::before{
   left:125%;
 }
 
-.hero-btn:focus-visible{
-  outline:none;
-  box-shadow:0 0 0 3px rgba(135,169,255,0.12);
-}
-
 .hero-btn.primary{
-  border-color:rgba(135,169,255,0.25);
   color:var(--accent);
 }
 
 /* =========================
-   EDITOR LAYOUT
+   LAYOUT
 ========================= */
 .hero-layout{
   display:grid;
-  grid-template-columns:1fr 1fr;
-  min-height:720px;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+
+  width:100%;
+  flex:1;
+
+  min-height:0;
 }
 
 /* =========================
-   EDITOR PANEL
+   PANELS
 ========================= */
 .hero-panel{
   display:flex;
   flex-direction:column;
+
   min-width:0;
+  overflow:hidden;
+}
+
+.hero-divider{
+  width:1px;
+  background:var(--outline);
 }
 
 .hero-panel-header{
   display:flex;
   align-items:center;
   justify-content:space-between;
+
+  gap:10px;
+
   padding:14px 16px;
+
   border-bottom:1px solid var(--outline);
+
   background:rgba(255,255,255,0.015);
 }
 
 .hero-panel-title{
   font-size:14px;
-  font-weight:600;
+  font-weight:700;
 }
 
 .hero-panel-note{
   font-size:11px;
-  color:var(--subtext);
+  color:var(--sub);
 }
 
 /* =========================
-   CODE AREA
+   EDITOR
 ========================= */
 .hero-editor-wrap{
-  position:relative;
   flex:1;
-  min-height:0;
+
+  min-height:700px;
+
   background:#151515;
+
+  overflow:hidden;
 }
 
 .hero-editor{
   width:100%;
   height:100%;
-  min-height:640px;
+  min-height:700px;
 
   padding:20px;
 
-  background:#151515;
-  color:#e6e6e6;
-
   border:none;
   outline:none;
-  resize:none;
+  resize:vertical;
+
+  background:#151515;
+  color:#EAEAEA;
 
   font-size:14px;
   line-height:1.7;
+
   font-family:
     ui-monospace,
     SFMono-Regular,
@@ -238,40 +262,40 @@ body{
     Consolas,
     monospace;
 
-  tab-size:2;
-  white-space:pre;
+  /* CRITICAL FIXES */
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
 
-  /* Prevent host interference */
   appearance:none;
   -webkit-appearance:none;
+
+  overflow:auto;
+
+  z-index:2;
+  position:relative;
 }
 
 /* =========================
    PREVIEW
 ========================= */
 .hero-preview-wrap{
-  position:relative;
   flex:1;
+
+  min-height:700px;
+
   background:#fff;
 }
 
 .hero-preview{
   width:100%;
   height:100%;
-  min-height:640px;
+  min-height:700px;
+
   border:none;
   background:#fff;
 
-  /* Strong isolation */
-  isolation:isolate;
-}
-
-/* =========================
-   DIVIDER
-========================= */
-.hero-divider{
-  width:1px;
-  background:var(--outline);
+  display:block;
 }
 
 /* =========================
@@ -281,39 +305,41 @@ body{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:16px;
+  gap:12px;
 
   padding:12px 16px;
+
   border-top:1px solid var(--outline);
 
-  background:rgba(255,255,255,0.015);
-
+  color:var(--sub);
   font-size:12px;
-  color:var(--subtext);
+
+  flex-wrap:wrap;
 }
 
 .hero-status-left{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:10px;
 }
 
 .hero-dot{
   width:8px;
   height:8px;
   border-radius:50%;
-  background:#3ddc84;
-  box-shadow:0 0 10px rgba(61,220,132,.5);
-}
 
-.hero-error{
-  color:var(--danger);
+  background:#3ddc84;
+  box-shadow:0 0 10px rgba(61,220,132,.45);
 }
 
 /* =========================
    MOBILE
 ========================= */
-@media (max-width: 980px){
+@media (max-width: 900px){
+
+  #hero-code-viewer{
+    min-height:auto;
+  }
 
   .hero-layout{
     grid-template-columns:1fr;
@@ -324,9 +350,11 @@ body{
     height:1px;
   }
 
-  .hero-toolbar{
-    flex-direction:column;
-    align-items:flex-start;
+  .hero-editor-wrap,
+  .hero-preview-wrap,
+  .hero-editor,
+  .hero-preview{
+    min-height:480px;
   }
 
   .hero-actions{
@@ -335,54 +363,82 @@ body{
 
   .hero-btn{
     flex:1;
-  }
-
-  .hero-editor,
-  .hero-preview{
-    min-height:420px;
+    min-width:120px;
   }
 }
 
 /* =========================
-   FOURTHWALL / EMBED FIXES
+   FOURTHWALL SAFETY FIXES
 ========================= */
 
-/* Avoid inherited transforms */
-#hero-code-viewer{
-  transform:none !important;
+/* Prevent host styles */
+textarea{
+  all:unset;
+
+  width:100%;
+  height:100%;
+
+  padding:20px;
+
+  background:#151515;
+  color:#EAEAEA;
+
+  font-size:14px;
+  line-height:1.7;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
+  overflow:auto;
+
+  display:block !important;
+
+  border:none;
+  outline:none;
+
+  white-space:pre;
+
+  box-sizing:border-box;
 }
 
-/* Avoid strange iframe scaling */
+/* Prevent collapsed iframe children */
 iframe{
+  display:block;
   max-width:100%;
 }
 
-/* Prevent host CSS from altering form controls */
-textarea,
-button{
-  font-family:inherit;
+/* Prevent invisible editor issue */
+.hero-editor,
+textarea{
+  pointer-events:auto !important;
+  user-select:text !important;
 }
 
-/* Keep tool self-contained */
-#hero-code-viewer{
-  contain:layout style paint;
+/* Prevent Fourthwall transforms */
+#hero-code-viewer *{
+  transform-style:flat;
 }
 </style>
 </head>
 <body>
 
-<!-- =========================
-     HERO CODE VIEWER
-========================= -->
 <div id="hero-code-viewer">
 
-  <!-- TOOL HEADER -->
+  <!-- HEADER -->
   <div class="hero-toolbar">
 
-    <div class="hero-title-group">
-      <div class="hero-title">Live HTML/CSS/JS Viewer</div>
-      <div class="hero-subtitle">
-        Write code on the left, see the live result instantly on the right.
+    <div class="hero-title-wrap">
+      <div class="hero-title">
+        Live HTML/CSS/JS Viewer
+      </div>
+
+      <div class="hero-sub">
+        Write code on the left, preview instantly on the right.
       </div>
     </div>
 
@@ -392,40 +448,39 @@ button{
         Run Code
       </button>
 
+      <button class="hero-btn" id="copyBtn">
+        Copy
+      </button>
+
       <button class="hero-btn" id="clearBtn">
         Clear
       </button>
 
-      <button class="hero-btn" id="copyBtn">
-        Copy Code
-      </button>
-
       <button class="hero-btn" id="resetBtn">
-        Reset Example
+        Reset
       </button>
 
     </div>
 
   </div>
 
-  <!-- MAIN LAYOUT -->
+  <!-- LAYOUT -->
   <div class="hero-layout">
 
-    <!-- =========================
-         LEFT SIDE - EDITOR
-    ========================== -->
+    <!-- LEFT -->
     <div class="hero-panel">
 
       <div class="hero-panel-header">
-        <div class="hero-panel-title">Code Editor</div>
-        <div class="hero-panel-note">
-          HTML, CSS & JavaScript
-        </div>
+        <div class="hero-panel-title">Editor</div>
+        <div class="hero-panel-note">HTML + CSS + JS</div>
       </div>
 
       <div class="hero-editor-wrap">
 
-<textarea class="hero-editor" id="editor"><!DOCTYPE html>
+<textarea
+  id="editor"
+  class="hero-editor"
+><!DOCTYPE html>
 <html>
 <head>
 <style>
@@ -444,20 +499,17 @@ body{
   padding:40px;
   border-radius:20px;
   background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(12px);
+  backdrop-filter:blur(10px);
   text-align:center;
-  box-shadow:0 10px 40px rgba(0,0,0,0.35);
 }
 
 button{
-  margin-top:16px;
+  margin-top:12px;
   padding:12px 18px;
   border:none;
   border-radius:10px;
   background:#87A9FF;
-  color:#111;
   cursor:pointer;
-  font-weight:bold;
 }
 </style>
 </head>
@@ -465,17 +517,17 @@ button{
 <body>
 
 <div class="card">
-  <h1>Hello, Hero 👋</h1>
-  <p>Your live preview updates in real-time.</p>
+  <h1>Hello Hero 👋</h1>
+  <p>Your code updates live.</p>
 
-  <button onclick="showMessage()">
+  <button onclick="hello()">
     Click Me
   </button>
 </div>
 
 <script>
-function showMessage(){
-  alert("Your JavaScript works!");
+function hello(){
+  alert("JavaScript works!");
 }
 </script>
 
@@ -489,26 +541,21 @@ function showMessage(){
     <!-- DIVIDER -->
     <div class="hero-divider"></div>
 
-    <!-- =========================
-         RIGHT SIDE - PREVIEW
-    ========================== -->
+    <!-- RIGHT -->
     <div class="hero-panel">
 
       <div class="hero-panel-header">
-        <div class="hero-panel-title">Live Preview</div>
-        <div class="hero-panel-note">
-          Sandboxed isolated output
-        </div>
+        <div class="hero-panel-title">Preview</div>
+        <div class="hero-panel-note">Sandboxed Output</div>
       </div>
 
       <div class="hero-preview-wrap">
 
-        <iframe
-          id="preview"
-          class="hero-preview"
-          sandbox="allow-scripts allow-modals"
-          referrerpolicy="no-referrer"
-        ></iframe>
+<iframe
+  id="preview"
+  class="hero-preview"
+  sandbox="allow-scripts allow-modals"
+></iframe>
 
       </div>
 
@@ -516,7 +563,7 @@ function showMessage(){
 
   </div>
 
-  <!-- STATUS BAR -->
+  <!-- STATUS -->
   <div class="hero-status">
 
     <div class="hero-status-left">
@@ -525,7 +572,7 @@ function showMessage(){
     </div>
 
     <div id="statusText">
-      Waiting for input...
+      Ready
     </div>
 
   </div>
@@ -534,18 +581,17 @@ function showMessage(){
 
 <script>
 /* =========================
-   HERO CODE VIEWER LOGIC
+   ELEMENTS
 ========================= */
+const editor = document.getElementById("editor");
+const preview = document.getElementById("preview");
 
-const editor = document.getElementById('editor');
-const preview = document.getElementById('preview');
+const runBtn = document.getElementById("runBtn");
+const copyBtn = document.getElementById("copyBtn");
+const clearBtn = document.getElementById("clearBtn");
+const resetBtn = document.getElementById("resetBtn");
 
-const runBtn = document.getElementById('runBtn');
-const clearBtn = document.getElementById('clearBtn');
-const copyBtn = document.getElementById('copyBtn');
-const resetBtn = document.getElementById('resetBtn');
-
-const statusText = document.getElementById('statusText');
+const statusText = document.getElementById("statusText");
 
 /* =========================
    DEFAULT TEMPLATE
@@ -553,86 +599,83 @@ const statusText = document.getElementById('statusText');
 const defaultTemplate = editor.value;
 
 /* =========================
-   LIVE UPDATE
+   UPDATE PREVIEW
 ========================= */
-let updateTimeout;
+let debounce;
 
 function updatePreview(){
 
-  clearTimeout(updateTimeout);
+  clearTimeout(debounce);
 
-  updateTimeout = setTimeout(() => {
+  debounce = setTimeout(() => {
 
     try{
 
-      const code = editor.value;
+      preview.srcdoc = editor.value;
 
-      /* 
-         Using srcdoc keeps everything isolated,
-         avoiding Fourthwall/iFrame interference.
-      */
-      preview.srcdoc = code;
-
-      statusText.textContent = "Preview updated successfully";
+      statusText.textContent =
+        "Preview updated";
 
     }catch(error){
 
       console.error(error);
 
-      statusText.innerHTML =
-        '<span class="hero-error">Preview error detected</span>';
+      statusText.textContent =
+        "Preview error";
     }
 
-  }, 120);
+  }, 100);
 }
 
 /* =========================
    BUTTONS
 ========================= */
+runBtn.addEventListener("click", updatePreview);
 
-runBtn.addEventListener('click', () => {
-  updatePreview();
-});
+clearBtn.addEventListener("click", () => {
 
-clearBtn.addEventListener('click', () => {
-
-  editor.value = '';
+  editor.value = "";
 
   updatePreview();
 
-  statusText.textContent = "Editor cleared";
+  statusText.textContent =
+    "Editor cleared";
 });
 
-copyBtn.addEventListener('click', async () => {
-
-  try{
-
-    await navigator.clipboard.writeText(editor.value);
-
-    statusText.textContent = "Code copied to clipboard";
-
-  }catch(error){
-
-    statusText.innerHTML =
-      '<span class="hero-error">Clipboard blocked by browser</span>';
-  }
-});
-
-resetBtn.addEventListener('click', () => {
+resetBtn.addEventListener("click", () => {
 
   editor.value = defaultTemplate;
 
   updatePreview();
 
-  statusText.textContent = "Example restored";
+  statusText.textContent =
+    "Template restored";
+});
+
+copyBtn.addEventListener("click", async () => {
+
+  try{
+
+    await navigator.clipboard.writeText(
+      editor.value
+    );
+
+    statusText.textContent =
+      "Copied to clipboard";
+
+  }catch(err){
+
+    statusText.textContent =
+      "Clipboard blocked";
+  }
 });
 
 /* =========================
    TAB SUPPORT
 ========================= */
-editor.addEventListener('keydown', (e) => {
+editor.addEventListener("keydown", (e) => {
 
-  if(e.key === 'Tab'){
+  if(e.key === "Tab"){
 
     e.preventDefault();
 
@@ -641,7 +684,7 @@ editor.addEventListener('keydown', (e) => {
 
     editor.value =
       editor.value.substring(0, start)
-      + '  '
+      + "  "
       + editor.value.substring(end);
 
     editor.selectionStart =
@@ -651,14 +694,33 @@ editor.addEventListener('keydown', (e) => {
 });
 
 /* =========================
-   REAL-TIME PREVIEW
+   LIVE UPDATE
 ========================= */
-editor.addEventListener('input', updatePreview);
+editor.addEventListener(
+  "input",
+  updatePreview
+);
 
 /* =========================
    INITIAL LOAD
 ========================= */
 updatePreview();
+
+/* =========================
+   FORCE RENDER FIX
+   (Fourthwall/iFrame bug)
+========================= */
+setTimeout(() => {
+
+  editor.style.display = "none";
+
+  requestAnimationFrame(() => {
+
+    editor.style.display = "block";
+
+  });
+
+}, 50);
 </script>
 
 </body>
