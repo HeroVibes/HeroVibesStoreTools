@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+
 <meta
   name="viewport"
-  content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  content="width=device-width, initial-scale=1.0"
 />
 
 <title>Hero Code Viewer</title>
@@ -21,76 +22,72 @@
   --accent:#87A9FF;
   --text:#D4D4D4;
   --sub:#8C8C8C;
-
-  --radius:16px;
 }
 
 /* =========================
-   RESET
+   HARD RESET
 ========================= */
+html,
+body{
+  margin:0 !important;
+  padding:0 !important;
+  width:100% !important;
+  max-width:100% !important;
+
+  overflow-x:hidden !important;
+
+  background:transparent;
+
+  font-family:Arial, Helvetica, sans-serif;
+}
+
 #hero-code-viewer,
 #hero-code-viewer *{
   box-sizing:border-box;
 }
 
-html,
-body{
-  margin:0 !important;
-  padding:0 !important;
-  width:100%;
-  min-width:0;
-  background:transparent;
-  overflow-x:hidden;
-  font-family:Arial, Helvetica, sans-serif;
-}
-
 /* =========================
-   MAIN WRAPPER
+   MAIN TOOL
 ========================= */
 #hero-code-viewer{
+
+  /* THIS FIXES FOURTHWALL CUTTING */
   width:100%;
   max-width:100%;
-  overflow:hidden;
+
+  display:flex;
+  flex-direction:column;
 
   background:var(--bg);
+
   border:1px solid var(--outline);
   border-radius:20px;
 
   color:var(--text);
 
+  overflow:hidden;
+
+  /* CRITICAL */
+  min-height:auto !important;
+  height:auto !important;
+
   position:relative;
-  isolation:isolate;
-
-  /* Critical Fourthwall fixes */
-  display:flex;
-  flex-direction:column;
-
-  min-height:900px;
-
-  transform:none !important;
-  contain:none !important;
 }
 
 /* =========================
-   HEADER
+   TOOLBAR
 ========================= */
 .hero-toolbar{
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
   gap:16px;
 
-  padding:18px 18px;
+  padding:18px;
 
   border-bottom:1px solid var(--outline);
 
   flex-wrap:wrap;
-}
-
-.hero-title-wrap{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
 }
 
 .hero-title{
@@ -101,23 +98,25 @@ body{
 .hero-sub{
   font-size:12px;
   color:var(--sub);
+  margin-top:4px;
 }
 
-/* =========================
-   BUTTONS
-========================= */
 .hero-actions{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
 }
 
+/* =========================
+   BUTTON
+========================= */
 .hero-btn{
   position:relative;
 
   padding:10px 16px;
 
   border-radius:10px;
+
   border:1px solid rgba(255,255,255,0.06);
 
   background:var(--card);
@@ -154,7 +153,7 @@ body{
     linear-gradient(
       90deg,
       transparent,
-      rgba(255,255,255,0.12),
+      rgba(255,255,255,.12),
       transparent
     );
 
@@ -172,16 +171,21 @@ body{
 }
 
 /* =========================
-   LAYOUT
+   MAIN LAYOUT
 ========================= */
 .hero-layout{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
 
+  /* IMPORTANT */
   width:100%;
-  flex:1;
+  max-width:100%;
 
-  min-height:0;
+  display:grid;
+
+  grid-template-columns:
+    minmax(0,1fr)
+    minmax(0,1fr);
+
+  overflow:hidden;
 }
 
 /* =========================
@@ -192,7 +196,6 @@ body{
   flex-direction:column;
 
   min-width:0;
-  overflow:hidden;
 }
 
 .hero-divider{
@@ -202,8 +205,8 @@ body{
 
 .hero-panel-header{
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
 
   gap:10px;
 
@@ -211,7 +214,7 @@ body{
 
   border-bottom:1px solid var(--outline);
 
-  background:rgba(255,255,255,0.015);
+  background:rgba(255,255,255,.015);
 }
 
 .hero-panel-title{
@@ -228,28 +231,31 @@ body{
    EDITOR
 ========================= */
 .hero-editor-wrap{
-  flex:1;
 
-  min-height:700px;
+  /* THIS FIXES COLLAPSING */
+  height:700px;
 
   background:#151515;
 
-  overflow:hidden;
+  overflow:auto;
 }
 
 .hero-editor{
+
   width:100%;
   height:100%;
-  min-height:700px;
 
-  padding:20px;
+  min-height:700px;
 
   border:none;
   outline:none;
+
   resize:vertical;
 
+  padding:20px;
+
   background:#151515;
-  color:#EAEAEA;
+  color:#ECECEC;
 
   font-size:14px;
   line-height:1.7;
@@ -262,27 +268,23 @@ body{
     Consolas,
     monospace;
 
-  /* CRITICAL FIXES */
-  display:block !important;
-  visibility:visible !important;
-  opacity:1 !important;
-
-  appearance:none;
-  -webkit-appearance:none;
+  white-space:pre;
 
   overflow:auto;
 
-  z-index:2;
-  position:relative;
+  display:block !important;
+
+  appearance:none;
+  -webkit-appearance:none;
 }
 
 /* =========================
    PREVIEW
 ========================= */
 .hero-preview-wrap{
-  flex:1;
 
-  min-height:700px;
+  /* THIS FIXES CROPPING */
+  height:700px;
 
   background:#fff;
 }
@@ -290,9 +292,9 @@ body{
 .hero-preview{
   width:100%;
   height:100%;
-  min-height:700px;
 
   border:none;
+
   background:#fff;
 
   display:block;
@@ -303,8 +305,9 @@ body{
 ========================= */
 .hero-status{
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
+
   gap:12px;
 
   padding:12px 16px;
@@ -312,6 +315,7 @@ body{
   border-top:1px solid var(--outline);
 
   color:var(--sub);
+
   font-size:12px;
 
   flex-wrap:wrap;
@@ -326,20 +330,16 @@ body{
 .hero-dot{
   width:8px;
   height:8px;
+
   border-radius:50%;
 
   background:#3ddc84;
-  box-shadow:0 0 10px rgba(61,220,132,.45);
 }
 
 /* =========================
    MOBILE
 ========================= */
 @media (max-width: 900px){
-
-  #hero-code-viewer{
-    min-height:auto;
-  }
 
   .hero-layout{
     grid-template-columns:1fr;
@@ -351,10 +351,12 @@ body{
   }
 
   .hero-editor-wrap,
-  .hero-preview-wrap,
-  .hero-editor,
-  .hero-preview{
-    min-height:480px;
+  .hero-preview-wrap{
+    height:500px;
+  }
+
+  .hero-editor{
+    min-height:500px;
   }
 
   .hero-actions{
@@ -363,63 +365,41 @@ body{
 
   .hero-btn{
     flex:1;
-    min-width:120px;
   }
 }
 
 /* =========================
-   FOURTHWALL SAFETY FIXES
+   FOURTHWALL FIXES
 ========================= */
 
-/* Prevent host styles */
+/* Prevent hidden textarea */
 textarea{
-  all:unset;
+  opacity:1 !important;
+  visibility:visible !important;
 
-  width:100%;
-  height:100%;
-
-  padding:20px;
-
-  background:#151515;
-  color:#EAEAEA;
-
-  font-size:14px;
-  line-height:1.7;
-
-  font-family:
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
-    monospace;
-
-  overflow:auto;
-
-  display:block !important;
-
-  border:none;
-  outline:none;
-
-  white-space:pre;
-
-  box-sizing:border-box;
+  pointer-events:auto !important;
 }
 
-/* Prevent collapsed iframe children */
+/* Prevent parent clipping */
+#hero-code-viewer,
+.hero-layout,
+.hero-panel,
+.hero-editor-wrap,
+.hero-preview-wrap{
+  overflow:visible;
+}
+
+/* But keep iframe clean */
+.hero-preview-wrap{
+  overflow:hidden;
+}
+
+/* Prevent weird scaling */
 iframe{
-  display:block;
   max-width:100%;
 }
 
-/* Prevent invisible editor issue */
-.hero-editor,
-textarea{
-  pointer-events:auto !important;
-  user-select:text !important;
-}
-
-/* Prevent Fourthwall transforms */
+/* Prevent inherited transforms */
 #hero-code-viewer *{
   transform-style:flat;
 }
@@ -432,31 +412,43 @@ textarea{
   <!-- HEADER -->
   <div class="hero-toolbar">
 
-    <div class="hero-title-wrap">
+    <div>
       <div class="hero-title">
         Live HTML/CSS/JS Viewer
       </div>
 
       <div class="hero-sub">
-        Write code on the left, preview instantly on the right.
+        Real-time live code preview
       </div>
     </div>
 
     <div class="hero-actions">
 
-      <button class="hero-btn primary" id="runBtn">
-        Run Code
+      <button
+        class="hero-btn primary"
+        id="runBtn"
+      >
+        Run
       </button>
 
-      <button class="hero-btn" id="copyBtn">
+      <button
+        class="hero-btn"
+        id="copyBtn"
+      >
         Copy
       </button>
 
-      <button class="hero-btn" id="clearBtn">
+      <button
+        class="hero-btn"
+        id="clearBtn"
+      >
         Clear
       </button>
 
-      <button class="hero-btn" id="resetBtn">
+      <button
+        class="hero-btn"
+        id="resetBtn"
+      >
         Reset
       </button>
 
@@ -464,22 +456,29 @@ textarea{
 
   </div>
 
-  <!-- LAYOUT -->
+  <!-- MAIN -->
   <div class="hero-layout">
 
     <!-- LEFT -->
     <div class="hero-panel">
 
       <div class="hero-panel-header">
-        <div class="hero-panel-title">Editor</div>
-        <div class="hero-panel-note">HTML + CSS + JS</div>
+
+        <div class="hero-panel-title">
+          Code Editor
+        </div>
+
+        <div class="hero-panel-note">
+          HTML + CSS + JS
+        </div>
+
       </div>
 
       <div class="hero-editor-wrap">
 
 <textarea
-  id="editor"
-  class="hero-editor"
+id="editor"
+class="hero-editor"
 ><!DOCTYPE html>
 <html>
 <head>
@@ -498,8 +497,8 @@ body{
 .card{
   padding:40px;
   border-radius:20px;
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(10px);
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(12px);
   text-align:center;
 }
 
@@ -545,8 +544,15 @@ function hello(){
     <div class="hero-panel">
 
       <div class="hero-panel-header">
-        <div class="hero-panel-title">Preview</div>
-        <div class="hero-panel-note">Sandboxed Output</div>
+
+        <div class="hero-panel-title">
+          Live Preview
+        </div>
+
+        <div class="hero-panel-note">
+          Sandboxed iframe
+        </div>
+
       </div>
 
       <div class="hero-preview-wrap">
@@ -567,8 +573,13 @@ function hello(){
   <div class="hero-status">
 
     <div class="hero-status-left">
+
       <div class="hero-dot"></div>
-      <span>Live Preview Enabled</span>
+
+      <span>
+        Live Preview Enabled
+      </span>
+
     </div>
 
     <div id="statusText">
@@ -583,20 +594,32 @@ function hello(){
 /* =========================
    ELEMENTS
 ========================= */
-const editor = document.getElementById("editor");
-const preview = document.getElementById("preview");
+const editor =
+  document.getElementById("editor");
 
-const runBtn = document.getElementById("runBtn");
-const copyBtn = document.getElementById("copyBtn");
-const clearBtn = document.getElementById("clearBtn");
-const resetBtn = document.getElementById("resetBtn");
+const preview =
+  document.getElementById("preview");
 
-const statusText = document.getElementById("statusText");
+const runBtn =
+  document.getElementById("runBtn");
+
+const copyBtn =
+  document.getElementById("copyBtn");
+
+const clearBtn =
+  document.getElementById("clearBtn");
+
+const resetBtn =
+  document.getElementById("resetBtn");
+
+const statusText =
+  document.getElementById("statusText");
 
 /* =========================
    DEFAULT TEMPLATE
 ========================= */
-const defaultTemplate = editor.value;
+const defaultTemplate =
+  editor.value;
 
 /* =========================
    UPDATE PREVIEW
@@ -611,14 +634,15 @@ function updatePreview(){
 
     try{
 
-      preview.srcdoc = editor.value;
+      preview.srcdoc =
+        editor.value;
 
       statusText.textContent =
         "Preview updated";
 
-    }catch(error){
+    }catch(err){
 
-      console.error(error);
+      console.error(err);
 
       statusText.textContent =
         "Preview error";
@@ -630,68 +654,87 @@ function updatePreview(){
 /* =========================
    BUTTONS
 ========================= */
-runBtn.addEventListener("click", updatePreview);
+runBtn.addEventListener(
+  "click",
+  updatePreview
+);
 
-clearBtn.addEventListener("click", () => {
+clearBtn.addEventListener(
+  "click",
+  () => {
 
-  editor.value = "";
+    editor.value = "";
 
-  updatePreview();
-
-  statusText.textContent =
-    "Editor cleared";
-});
-
-resetBtn.addEventListener("click", () => {
-
-  editor.value = defaultTemplate;
-
-  updatePreview();
-
-  statusText.textContent =
-    "Template restored";
-});
-
-copyBtn.addEventListener("click", async () => {
-
-  try{
-
-    await navigator.clipboard.writeText(
-      editor.value
-    );
+    updatePreview();
 
     statusText.textContent =
-      "Copied to clipboard";
-
-  }catch(err){
-
-    statusText.textContent =
-      "Clipboard blocked";
+      "Editor cleared";
   }
-});
+);
+
+resetBtn.addEventListener(
+  "click",
+  () => {
+
+    editor.value =
+      defaultTemplate;
+
+    updatePreview();
+
+    statusText.textContent =
+      "Template restored";
+  }
+);
+
+copyBtn.addEventListener(
+  "click",
+  async () => {
+
+    try{
+
+      await navigator.clipboard.writeText(
+        editor.value
+      );
+
+      statusText.textContent =
+        "Copied";
+
+    }catch(err){
+
+      statusText.textContent =
+        "Clipboard blocked";
+    }
+  }
+);
 
 /* =========================
    TAB SUPPORT
 ========================= */
-editor.addEventListener("keydown", (e) => {
+editor.addEventListener(
+  "keydown",
+  (e) => {
 
-  if(e.key === "Tab"){
+    if(e.key === "Tab"){
 
-    e.preventDefault();
+      e.preventDefault();
 
-    const start = editor.selectionStart;
-    const end = editor.selectionEnd;
+      const start =
+        editor.selectionStart;
 
-    editor.value =
-      editor.value.substring(0, start)
-      + "  "
-      + editor.value.substring(end);
+      const end =
+        editor.selectionEnd;
 
-    editor.selectionStart =
-    editor.selectionEnd =
-      start + 2;
+      editor.value =
+        editor.value.substring(0, start)
+        + "  "
+        + editor.value.substring(end);
+
+      editor.selectionStart =
+      editor.selectionEnd =
+        start + 2;
+    }
   }
-});
+);
 
 /* =========================
    LIVE UPDATE
@@ -702,25 +745,38 @@ editor.addEventListener(
 );
 
 /* =========================
-   INITIAL LOAD
+   INITIAL
 ========================= */
 updatePreview();
 
 /* =========================
-   FORCE RENDER FIX
-   (Fourthwall/iFrame bug)
+   FORCE HEIGHT FIX
+   FOR FOURTHWALL
 ========================= */
-setTimeout(() => {
+function forceHeight(){
 
-  editor.style.display = "none";
+  const tool =
+    document.getElementById(
+      "hero-code-viewer"
+    );
 
-  requestAnimationFrame(() => {
+  tool.style.height = "auto";
 
-    editor.style.display = "block";
+  const totalHeight =
+    tool.scrollHeight;
 
-  });
+  tool.style.minHeight =
+    totalHeight + "px";
+}
 
-}, 50);
+setTimeout(forceHeight, 100);
+setTimeout(forceHeight, 500);
+setTimeout(forceHeight, 1000);
+
+window.addEventListener(
+  "resize",
+  forceHeight
+);
 </script>
 
 </body>
