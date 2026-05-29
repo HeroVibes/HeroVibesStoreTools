@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    /* ===== CSS VARIABLES & GLOBALS ===== */
+    :root {
+      --bg: #191919;
+      --card-bg: #1F1F1F;
+      --hover-color: #323232;
+      --outline: #323232;
+      --accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --warning: #eab308;
+      --warning-bg: rgba(234, 179, 8, 0.1);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.1);
+      --radius: 8px;
+    }
+    
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: system-ui, sans-serif;
+      color: var(--text-primary);
+      padding: 24px 16px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ===== #MAIN CONTAINER ===== */
+    .converter-card {
+      background: var(--card-bg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      width: 100%;
+      max-width: 600px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ===== #UPLOAD ZONE ===== */
+    .upload-zone {
+      border: 2px dashed var(--outline);
+      border-radius: var(--radius);
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.3s ease, border-color 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .upload-zone:hover, .upload-zone.dragover {
+      background: var(--hover-color);
+      border-color: var(--accent);
+    }
+
+    .upload-zone svg {
+      width: 48px;
+      height: 48px;
+      fill: var(--accent);
+    }
+
+    .upload-text {
+      font-size: 14px;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .upload-subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    /* ===== #ALERTS & ERRORS ===== */
+    .alert-box {
+      display: none;
+      padding: 16px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .alert-danger {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger);
+      color: #fca5a5;
+    }
+
+    /* ===== #CONTROLS AREA ===== */
+    .controls-area {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ===== #FILE LIST ===== */
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    
+    /* Custom Scrollbar for file list */
+    .file-list::-webkit-scrollbar { width: 6px; }
+    .file-list::-webkit-scrollbar-track { background: var(--bg); border-radius: 4px; }
+    .file-list::-webkit-scrollbar-thumb { background: var(--outline); border-radius: 4px; }
+    .file-list::-webkit-scrollbar-thumb:hover { background: var(--hover-color); }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg);
+      border: 1px solid var(--outline);
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      gap: 12px;
+    }
+
+    .file-details {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .file-name {
+      font-size: 14px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-meta {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .file-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-text {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+
+    .remove-btn:hover { color: var(--danger); }
+    .remove-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+    /* ===== #CONVERSION SETTINGS ===== */
+    .conversion-settings {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--bg);
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--outline);
+    }
+
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .conversion-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .clear-all-btn {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 0;
+    }
+    
+    .clear-all-btn:hover { text-decoration: underline; }
+
+    .dropdown {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      outline: none;
+    }
+    
+    .dropdown:focus { border-color: var(--accent); }
+
+    /* ===== #SHIMMER BUTTON TEMPLATE ===== */
+    .btn {
+      position: relative;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      font-weight: bold;
+      width: 100%;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left .7s ease-in-out;
+    }
+    
+    .btn:hover::before { left: 125%; }
+    
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ===== #TROUBLESHOOTING ===== */
+    .troubleshooting {
+      margin-top: 8px;
+      padding-top: 16px;
+      border-top: 1px solid var(--outline);
+    }
+
+    .troubleshooting h4 {
+      margin: 0 0 12px 0;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .troubleshooting ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    
+    .troubleshooting li {
+      margin-bottom: 8px;
+    }
+    
+    .troubleshooting strong {
+      color: var(--text-primary);
+    }
+
+    /* MOBILE OPTIMIZATION */
+    @media (max-width: 500px) {
+      .file-item { flex-direction: column; align-items: stretch; }
+      .file-actions { justify-content: space-between; margin-top: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="converter-card">
+    
+    <div id="upload-zone" class="upload-zone">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2M13 9V3.5L18.5 9H13M11 16H8V14H11V11L15 15L11 19V16Z"/></svg>
+      <p class="upload-text">Click or drag files to upload</p>
+      <p class="upload-subtext">Images (JPG, PNG, GIF...) & Text (TXT, PDF, DOC...)</p>
+      <input type="file" id="file-input" hidden multiple accept="image/*, text/*, .csv, .html, .json, .pdf, .doc, .docx, .rtf" />
+    </div>
+
+    <div id="mixed-error" class="alert-box alert-danger">
+      <strong>Format Mismatch!</strong><br>
+      You are uploading multiple formats (e.g. Photos and Text Files). Please clear the list and convert one "Type" at a time. Multiple formats of the <em>same</em> type are allowed.
+    </div>
+
+    <div id="controls-area" class="controls-area">
+      
+      <div id="file-list" class="file-list">
+        </div>
+
+      <div id="action-wrapper">
+        <div class="conversion-settings">
+          <div class="settings-header">
+            <label class="conversion-label">Convert All To:</label>
+            <button id="clear-all-btn" class="clear-all-btn">Clear All</button>
+          </div>
+          <select id="global-dropdown" class="dropdown">
+            </select>
+        </div>
+
+        <button id="convert-btn" class="btn" type="button" style="margin-top: 16px;">Convert & Download</button>
+      </div>
+      
+      <div class="troubleshooting">
+        <h4>Troubleshooting & Tips</h4>
+        <ul>
+          <li><strong>Pop-ups Blocked:</strong> When converting multiple files, your browser may ask for permission to "download multiple files". Please click Allow.</li>
+          <li><strong>Complex Formats:</strong> Because this tool runs instantly in your browser, advanced formats like PDF, DOC, RTF, GIF, and ICO use basic data encoding. If a converted file doesn't open correctly in your specific software, try standard formats like TXT, JPG or PNG.</li>
+          <li><strong>Formatting Changes:</strong> Converting between formats like HTML to TXT will intentionally strip visual styles to preserve readability.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // #VARIABLES
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
+    const controlsArea = document.getElementById('controls-area');
+    const fileListContainer = document.getElementById('file-list');
+    const convertBtn = document.getElementById('convert-btn');
+    const globalDropdown = document.getElementById('global-dropdown');
+    const mixedError = document.getElementById('mixed-error');
+    const actionWrapper = document.getElementById('action-wrapper');
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    
+    let activeFiles = []; 
+
+    // Supported global formats mapping
+    const formats = {
+      image: [
+        { value: 'image/jpeg', label: 'JPG' },
+        { value: 'image/png', label: 'PNG' },
+        { value: 'image/webp', label: 'WEBP' },
+        { value: 'image/gif', label: 'GIF' },
+        { value: 'image/x-icon', label: 'ICO' }
+      ],
+      text: [
+        { value: 'text/plain', label: 'TXT' },
+        { value: 'text/html', label: 'HTML' },
+        { value: 'text/csv', label: 'CSV' },
+        { value: 'application/json', label: 'JSON' },
+        { value: 'application/pdf', label: 'PDF' },
+        { value: 'application/msword', label: 'DOC' },
+        { value: 'application/rtf', label: 'RTF' }
+      ]
+    };
+
+    // Helper to determine File Group
+    function getFileGroup(file) {
+      if (file.type.startsWith('image/')) return 'image';
+      if (file.type.startsWith('text/') || file.name.match(/\.(json|csv|pdf|doc|docx|rtf)$/i)) return 'text';
+      return 'unknown';
+    }
+
+    // #EVENT LISTENERS: UPLOAD ZONE
+    uploadZone.addEventListener('click', (e) => {
+      if (e.target !== fileInput) fileInput.click();
+    });
+    
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFiles(e.dataTransfer.files);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleFiles(e.target.files);
+      }
+      fileInput.value = ''; 
+    });
+
+    clearAllBtn.addEventListener('click', () => {
+      activeFiles = [];
+      renderFileList();
+    });
+
+    // #FILE HANDLING LOGIC
+    function handleFiles(files) {
+      Array.from(files).forEach(file => {
+        const id = 'file_' + Math.random().toString(36).substr(2, 9);
+        const group = getFileGroup(file);
+        activeFiles.push({ id, file, group, statusEl: null });
+      });
+      renderFileList();
+    }
+
+    function removeFile(id) {
+      activeFiles = activeFiles.filter(f => f.id !== id);
+      renderFileList();
+    }
+
+    function renderFileList() {
+      fileListContainer.innerHTML = '';
+
+      if (activeFiles.length === 0) {
+        controlsArea.style.display = 'none';
+        mixedError.style.display = 'none';
+        triggerRepaintAndHeightCheck();
+        return;
+      }
+
+      controlsArea.style.display = 'flex';
+
+      // Check for mixed groups
+      let currentGroup = null;
+      let isMixed = false;
+
+      activeFiles.forEach(fileObj => {
+        if (!currentGroup) currentGroup = fileObj.group;
+        else if (currentGroup !== fileObj.group) isMixed = true;
+
+        // Build UI Item
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'file-item';
+        itemDiv.id = fileObj.id;
+
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'file-details';
+        detailsDiv.innerHTML = `
+          <div class="file-name" title="${fileObj.file.name}">${fileObj.file.name}</div>
+          <div class="file-meta">${(fileObj.file.size / 1024).toFixed(1)} KB</div>
+        `;
+
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'file-actions';
+
+        const statusSpan = document.createElement('span');
+        statusSpan.className = 'status-text';
+        fileObj.statusEl = statusSpan; // Store reference
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.title = "Remove file";
+        removeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>`;
+        removeBtn.onclick = () => removeFile(fileObj.id);
+
+        actionsDiv.appendChild(statusSpan);
+        actionsDiv.appendChild(removeBtn);
+        
+        itemDiv.appendChild(detailsDiv);
+        itemDiv.appendChild(actionsDiv);
+        fileListContainer.appendChild(itemDiv);
+      });
+
+      // Handle UI State based on mixed status
+      if (isMixed || currentGroup === 'unknown') {
+        mixedError.style.display = 'block';
+        actionWrapper.style.display = 'none';
+      } else {
+        mixedError.style.display = 'none';
+        actionWrapper.style.display = 'block';
+        populateGlobalDropdown(currentGroup);
+      }
+
+      triggerRepaintAndHeightCheck();
+    }
+
+    function populateGlobalDropdown(group) {
+      globalDropdown.innerHTML = '';
+      const options = formats[group] || [];
+      
+      options.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.value;
+        opt.textContent = f.label;
+        globalDropdown.appendChild(opt);
+      });
+    }
+
+    // Helper to allow the browser to paint new DOM elements before calculating height
+    function triggerRepaintAndHeightCheck() {
+      setTimeout(() => {
+        if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
+      }, 50);
+    }
+
+    // #CONVERSION LOGIC
+    convertBtn.addEventListener('click', async () => {
+      if (activeFiles.length === 0) return;
+
+      convertBtn.disabled = true;
+      convertBtn.textContent = 'Processing...';
+      clearAllBtn.style.display = 'none';
+
+      const targetMime = globalDropdown.value;
+      
+      // Determine new extension
+      let targetExt = targetMime.split('/')[1];
+      if (targetExt === 'jpeg') targetExt = 'jpg';
+      if (targetExt === 'plain') targetExt = 'txt';
+      if (targetExt === 'x-icon') targetExt = 'ico';
+      if (targetExt === 'msword') targetExt = 'doc';
+
+      // Process files sequentially
+      for (const fileObj of activeFiles) {
+        fileObj.statusEl.style.display = 'block';
+        fileObj.statusEl.style.color = 'var(--text-secondary)';
+        fileObj.statusEl.textContent = 'Converting...';
+
+        try {
+          // If trying to convert a file to its EXACT same format, just download the original
+          if (fileObj.file.type === targetMime) {
+             downloadBlob(fileObj.file, fileObj.file.name, targetExt);
+             fileObj.statusEl.textContent = 'Complete ✓';
+             fileObj.statusEl.style.color = 'var(--accent)';
+             await new Promise(r => setTimeout(r, 300)); // Pause to prevent browser block
+             continue;
+          }
+
+          if (fileObj.group === 'image') {
+            await convertImage(fileObj.file, targetMime, targetExt);
+          } else {
+            await convertText(fileObj.file, targetMime, targetExt);
+          }
+          
+          fileObj.statusEl.textContent = 'Complete ✓';
+          fileObj.statusEl.style.color = 'var(--accent)';
+        } catch (error) {
+          fileObj.statusEl.textContent = 'Error';
+          fileObj.statusEl.style.color = 'var(--danger)';
+          console.error(`Error converting ${fileObj.file.name}:`, error);
+        }
+        
+        // Small delay between downloads to prevent browser spam protection
+        await new Promise(r => setTimeout(r, 400));
+      }
+      
+      convertBtn.textContent = 'All Conversions Finished';
+      setTimeout(() => {
+        convertBtn.textContent = 'Convert & Download';
+        convertBtn.disabled = false;
+        clearAllBtn.style.display = 'block';
+        // Hide success messages after a bit
+        activeFiles.forEach(f => {
+           if(f.statusEl.textContent.includes('Complete')) f.statusEl.style.display = 'none';
+        });
+      }, 3000);
+    });
+
+    function convertImage(file, targetMime, targetExt) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            
+            // Note: canvas.toBlob natively supports PNG, JPEG, WEBP.
+            // If target is GIF/ICO, toBlob often falls back to PNG internally depending on the browser.
+            // We force the MIME type on the resulting blob to satisfy the OS file extension check.
+            canvas.toBlob((blob) => {
+              if (blob) {
+                // If it's a fallback format, wrap it in the exact requested MIME
+                const finalBlob = new Blob([blob], { type: targetMime });
+                downloadBlob(finalBlob, file.name, targetExt);
+                resolve();
+              } else {
+                reject(new Error("Canvas toBlob failed"));
+              }
+            }, (targetMime === 'image/gif' || targetMime === 'image/x-icon') ? 'image/png' : targetMime, 1.0);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function convertText(file, targetMime, targetExt) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          let content = e.target.result;
+          const currentType = file.type || '';
+
+          // Basic formatting string manipulation for text types
+          if (currentType === 'text/html' && targetMime === 'text/plain') {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            content = tempDiv.textContent || tempDiv.innerText || "";
+          } else if (targetMime === 'text/html' && !content.trim().startsWith('<')) {
+            content = content.split('\n').filter(line => line.trim() !== '').map(line => `<p>${line}</p>`).join('\n');
+          }
+
+          // Create blob with new MIME type. 
+          // Note: Client-side PDF/DOC generation this way relies on OS fallback rendering.
+          const blob = new Blob([content], { type: targetMime });
+          downloadBlob(blob, file.name, targetExt);
+          resolve();
+        };
+        reader.onerror = reject;
+        reader.readAsText(file);
+      });
+    }
+
+    function downloadBlob(blob, originalName, newExt) {
+      const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.')) || originalName;
+      const finalName = `${nameWithoutExt}.${newExt}`;
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = finalName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== FOURTHWALL SCROLLBAR FIX =====
+    let lastHeight = 0;
+    let resizeTimer;
+
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.parent.postMessage({ frameHeight: height }, '*');
+      }
+    }
+
+    function scheduleHeightCheck() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(sendHeight, 150);
+    }
+
+    window.addEventListener('load', () => {
+        setTimeout(sendHeight, 100);
+    });
+
+    window.addEventListener('resize', () => {
+        scheduleHeightCheck();
+    });
+    // ===== END OF SCROLLBAR FIX =====
+
+  </script>
+</body>
+</html>
