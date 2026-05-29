@@ -1,301 +1,409 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      /* HeroVibes Brand Colors */
+      --bg-primary: #191919;
+      --bg-secondary: #1F1F1F;
+      --color-hover: #323232;
+      --color-outline: #323232;
+      --color-accent: #87A9FF;
+      --text-primary: #D4D4D4;
+      --text-secondary: #8C8C8C;
+      --yt-bg: #0F0F0F;
+      --yt-vignette: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.85) 100%);
+      --radius: 8px;
+    }
 
-<style>
-:root {
-  --bg-primary: #191919;
-  --bg-secondary: #1F1F1F;
-  --color-hover: #323232;
-  --color-outline: #323232;
-  --color-accent: #87A9FF;
-  --text-primary: #D4D4D4;
-  --text-secondary: #8C8C8C;
-  --yt-bg: #0F0F0F;
-  --yt-text-primary: #F1F1F1;
-  --yt-text-secondary: #AAAAAA;
-  --yt-vignette: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.85) 100%);
-  --radius: 8px;
-}
+    /* GLOBAL BOX SIZING FIX: Prevents inputs from overflowing */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
 
-body {
-  margin: 0;
-  background: var(--bg-primary);
-  font-family: system-ui, sans-serif;
-  color: var(--text-primary);
-  padding: 20px 12px;
-}
+    body {
+      margin: 0;
+      background: var(--bg-primary);
+      font-family: system-ui, sans-serif;
+      color: var(--text-primary);
+      padding: 24px 16px; /* Default padding per design guide */
+      /* Removed min-height: 100vh per bugfix guide */
+    }
 
-/* LAYOUT */
-.tool-layout {
-  max-width: 1200px;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+    /* #LAYOUT_CONTAINER */
+    .tool-layout {
+      max-width: 1200px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 
-/* PANEL */
-.panel-card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--color-outline);
-  border-radius: var(--radius);
-  padding: 18px 14px;
-  position: relative;
-}
+    /* #SETTINGS_PANEL */
+    .panel-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--color-outline);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      position: relative;
+    }
 
-/* COLLAPSE */
-.collapsible-settings {
-  max-height: 2000px;
-  overflow: hidden;
-  transition: all .35s ease;
-}
+    /* #CONTROLS_HEADER */
+    .top-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
 
-.collapsible-settings.hidden {
-  max-height: 0;
-  padding: 0;
-  opacity: 0;
-  border: none;
-}
+    /* #SHIMMER_BUTTON_TEMPLATE */
+    .btn {
+      position: relative;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      overflow: hidden;
+      font-size: 14px;
+      transition: background 0.2s ease;
+    }
 
-/* TOP CONTROLS MOVED INSIDE PANEL */
-.top-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 14px;
-}
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 75%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+      transition: left .7s ease-in-out;
+    }
 
-/* BUTTONS */
-.btn {
-  padding: 9px 12px;
-  border-radius: var(--radius);
-  background: var(--bg-primary);
-  border: 1px solid var(--color-outline);
-  color: var(--text-primary);
-  cursor: pointer;
-  font-size: 13px;
-}
+    .btn:hover::before { left: 125%; }
+    .btn:hover { background: var(--color-hover); }
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(135,169,255,0.12);
+    }
+    .btn.active {
+      background: var(--color-accent);
+      color: #000;
+    }
 
-.btn:hover { background: var(--color-hover); }
-.btn.active { background: var(--color-accent); color: #000; }
+    .close-settings {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: transparent;
+      border: 1px solid var(--color-outline);
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .close-settings:hover {
+      background: var(--color-hover);
+      color: var(--text-primary);
+    }
 
-/* CLOSE BUTTON */
-.close-settings {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: transparent;
-  border: 1px solid var(--color-outline);
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  cursor: pointer;
-  color: var(--text-secondary);
-}
+    /* #COLLAPSIBLE_GRID_ANIMATION */
+    .collapsible-wrapper {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.3s ease;
+    }
 
-/* INPUT GRID */
-.input-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-}
+    .collapsible-wrapper.hidden {
+      grid-template-rows: 0fr;
+    }
 
-.label {
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-bottom: 4px;
-  display: block;
-}
+    .collapsible-settings {
+      overflow: hidden;
+    }
 
-.field-input {
-  width: 100%;
-  padding: 9px;
-  border-radius: var(--radius);
-  border: 1px solid var(--color-outline);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-size: 12px;
-}
+    /* #INPUT_GRID */
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      padding-top: 8px; /* Padding inside the hidden area to prevent jumpiness */
+    }
 
-/* PREVIEW */
-.yt-mock-container {
-  background: var(--yt-bg);
-  border-radius: var(--radius);
-  padding: 16px;
-  position: relative;
-  overflow: hidden;
-}
+    .label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      display: block;
+      font-weight: bold;
+    }
 
-/* VIGNETTE FIXED */
-.vignette-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: var(--yt-vignette);
-  z-index: 5;
-  border-radius: var(--radius);
-  transition: opacity .3s ease;
-}
+    .field-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--color-outline);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
 
-.vignette-overlay.hidden {
-  opacity: 0;
-}
+    .field-input:focus {
+      border-color: var(--color-accent);
+    }
 
-/* GRID RESPONSIVE FIX */
-.yt-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-}
+    /* #PREVIEW_AREA */
+    .yt-mock-container {
+      background: var(--yt-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--color-outline);
+      padding: 24px 16px;
+      position: relative;
+      overflow: hidden;
+    }
 
-/* CARD */
-.yt-card {
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-}
+    .vignette-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: var(--yt-vignette);
+      z-index: 5;
+      border-radius: var(--radius);
+      transition: opacity .3s ease;
+    }
 
-/* THUMB */
-.yt-thumbnail-wrapper {
-  position: relative;
-  padding-top: 56.25%;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #222;
-}
+    .vignette-overlay.hidden {
+      opacity: 0;
+    }
 
-.yt-thumbnail {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+    .yt-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
 
-/* DETAILS */
-.yt-title {
-  font-size: 13px;
-  margin: 6px 0 4px;
-}
+    .yt-card {
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
 
-.yt-meta {
-  font-size: 11px;
-  color: var(--text-secondary);
-}
+    .yt-thumbnail-wrapper {
+      position: relative;
+      padding-top: 56.25%;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #222;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
 
-/* MOBILE FIXES */
-@media (max-width: 768px) {
-  body { padding: 12px; }
+    .yt-thumbnail {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-  .yt-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+    .yt-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin: 8px 0 4px;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
 
-  .panel-card {
-    padding: 14px 10px;
-  }
-}
-</style>
+    .yt-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* #MOBILE_OPTIMISATION */
+    @media (max-width: 768px) {
+      .yt-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      }
+    }
+  </style>
 </head>
-
 <body>
 
 <div class="tool-layout">
 
-  <!-- SETTINGS -->
   <div class="panel-card">
-
-    <button class="close-settings" id="close-settings">×</button>
+    <button class="close-settings" id="close-settings" title="Close Settings">×</button>
 
     <div class="top-controls">
-      <button class="btn" id="theme">Theme</button>
-      <button class="btn" id="toggle-vignette">Vignette</button>
-      <button class="btn" id="toggle-settings">Settings</button>
+      <button class="btn" id="toggle-vignette" type="button">Toggle Vignette</button>
+      <button class="btn active" id="toggle-settings" type="button">Toggle Settings</button>
     </div>
 
-    <div class="collapsible-settings" id="settings">
-
-      <div class="input-grid">
-
-        <div>
-          <label class="label">Title</label>
-          <input class="field-input" id="title" value="How To Master Content Creation">
+    <div class="collapsible-wrapper" id="settings-wrapper">
+      <div class="collapsible-settings">
+        <div class="input-grid">
+          <div>
+            <label class="label">TITLE</label>
+            <input class="field-input" id="input-title" value="How To Master Content Creation">
+          </div>
+          <div>
+            <label class="label">CHANNEL</label>
+            <input class="field-input" id="input-channel" value="HeroVibes">
+          </div>
+          <div>
+            <label class="label">VIEWS</label>
+            <input class="field-input" id="input-views" value="12K">
+          </div>
+          <div>
+            <label class="label">TIME</label>
+            <input class="field-input" id="input-time" value="2 hours ago">
+          </div>
         </div>
-
-        <div>
-          <label class="label">Channel</label>
-          <input class="field-input" id="channel" value="HeroVibes">
-        </div>
-
-        <div>
-          <label class="label">Views</label>
-          <input class="field-input" id="views" value="12K">
-        </div>
-
-        <div>
-          <label class="label">Time</label>
-          <input class="field-input" id="time" value="2 hours ago">
-        </div>
-
       </div>
     </div>
-
   </div>
 
-  <!-- PREVIEW -->
   <div class="yt-mock-container">
-
-    <div class="vignette-overlay" id="vignette"></div>
-
+    <div class="vignette-overlay hidden" id="vignette"></div>
     <div class="yt-grid" id="grid"></div>
-
   </div>
 
 </div>
 
 <script>
+  // #USER_INPUTS
+  const inputTitle = document.getElementById('input-title');
+  const inputChannel = document.getElementById('input-channel');
+  const inputViews = document.getElementById('input-views');
+  const inputTime = document.getElementById('input-time');
 
-// SETTINGS TOGGLE
-const settings = document.getElementById('settings');
-document.getElementById('toggle-settings').onclick = () => {
-  settings.classList.toggle('hidden');
-};
+  // #UI_ELEMENTS
+  const settingsWrapper = document.getElementById('settings-wrapper');
+  const toggleSettingsBtn = document.getElementById('toggle-settings');
+  const closeSettingsBtn = document.getElementById('close-settings');
+  const vignette = document.getElementById('vignette');
+  const toggleVignetteBtn = document.getElementById('toggle-vignette');
+  const grid = document.getElementById('grid');
 
-// CLOSE BUTTON
-document.getElementById('close-settings').onclick = () => {
-  settings.classList.add('hidden');
-};
-
-// VIGNETTE TOGGLE
-const vignette = document.getElementById('vignette');
-document.getElementById('toggle-vignette').onclick = () => {
-  vignette.classList.toggle('hidden');
-};
-
-// THEME TOGGLE
-document.getElementById('theme').onclick = () => {
-  document.documentElement.dataset.theme =
-    document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-};
-
-// GRID GENERATION
-const grid = document.getElementById('grid');
-
-for (let i = 0; i < 18; i++) {
-  grid.innerHTML += `
-    <div class="yt-card">
-      <div class="yt-thumbnail-wrapper">
-        <img src="https://picsum.photos/300/170?${i}" class="yt-thumbnail">
+  // #FUNCTIONS
+  function updatePreview() {
+    // Generate initial grid with the first card tied to user input
+    let gridHTML = `
+      <div class="yt-card">
+        <div class="yt-thumbnail-wrapper">
+          <img src="https://picsum.photos/400/225?0" class="yt-thumbnail" alt="Thumbnail">
+        </div>
+        <div class="yt-title" id="preview-title">${inputTitle.value || 'Video Title'}</div>
+        <div class="yt-meta"><span id="preview-channel">${inputChannel.value || 'Channel'}</span> • <span id="preview-views">${inputViews.value || '0'}</span> views • <span id="preview-time">${inputTime.value || 'Just now'}</span></div>
       </div>
-      <div class="yt-title">Sample Video Title ${i+1}</div>
-      <div class="yt-meta">12K views • 2 hours ago</div>
-    </div>
-  `;
-}
+    `;
+
+    // Generate remaining dummy cards
+    for (let i = 1; i < 12; i++) {
+      gridHTML += `
+        <div class="yt-card">
+          <div class="yt-thumbnail-wrapper">
+            <img src="https://picsum.photos/400/225?${i}" class="yt-thumbnail" alt="Thumbnail">
+          </div>
+          <div class="yt-title">Sample Video Title ${i+1}</div>
+          <div class="yt-meta">Sample Channel • ${Math.floor(Math.random() * 100) + 1}K views • ${i} days ago</div>
+        </div>
+      `;
+    }
+    grid.innerHTML = gridHTML;
+    
+    // Notify iframe parent of possible height change
+    if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
+  }
+
+  function toggleSettings() {
+    settingsWrapper.classList.toggle('hidden');
+    toggleSettingsBtn.classList.toggle('active');
+    // Ensure parent iframe adjusts height dynamically when expanding/collapsing
+    if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
+  }
+
+  // #EVENT_LISTENERS
+  toggleSettingsBtn.addEventListener('click', toggleSettings);
+  closeSettingsBtn.addEventListener('click', () => {
+    settingsWrapper.classList.add('hidden');
+    toggleSettingsBtn.classList.remove('active');
+    if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
+  });
+
+  toggleVignetteBtn.addEventListener('click', () => {
+    vignette.classList.toggle('hidden');
+    toggleVignetteBtn.classList.toggle('active');
+  });
+
+  // Real-time updates
+  [inputTitle, inputChannel, inputViews, inputTime].forEach(input => {
+    input.addEventListener('input', () => {
+      document.getElementById('preview-title').textContent = inputTitle.value || 'Video Title';
+      document.getElementById('preview-channel').textContent = inputChannel.value || 'Channel';
+      document.getElementById('preview-views').textContent = inputViews.value || '0';
+      document.getElementById('preview-time').textContent = inputTime.value || 'Just now';
+      if(typeof scheduleHeightCheck === 'function') scheduleHeightCheck();
+    });
+  });
+
+  // Initialize Tool
+  updatePreview();
+
+  // ===== FOURTHWALL SCROLLBAR FIX =====
+  let lastHeight = 0;
+  let resizeTimer;
+
+  /**
+   * Sends the current scrollHeight to the parent window if it has changed.
+   * This is the *only* function that should send a postMessage.
+   */
+  function sendHeight() {
+    // Use scrollHeight for content height
+    const height = document.body.scrollHeight;
+    
+    // Only send message if height has *actually* changed 
+    if (height !== lastHeight) {
+      lastHeight = height;
+      window.parent.postMessage({ frameHeight: height }, '*');
+    }
+  }
+
+  /**
+   * A debounced version of sendHeight() to be called on content changes.
+   * This ensures we don't spam messages during rapid changes.
+   */
+  function scheduleHeightCheck() {
+      // Clear any pending checks
+      clearTimeout(resizeTimer);
+      // Schedule a new check after 150ms
+      resizeTimer = setTimeout(sendHeight, 150);
+  }
+
+  // Send height on initial load (with a slight delay)
+  // This fixes the "Content Cut-Off" race condition.
+  window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100);
+  });
+
+  // Send height on window resize (debounced)
+  window.addEventListener('resize', () => {
+      // Use scheduleHeightCheck for built-in debounce
+      scheduleHeightCheck();
+  });
+  // ===== END OF SCROLLBAR FIX =====
 
 </script>
-
 </body>
 </html>
