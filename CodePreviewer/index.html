@@ -1,4 +1,431 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Hero Code Viewer</title>
+
+<style>
+/* =========================
+   HERO TOOL VARIABLES
+========================= */
+:root{
+  --bg:#191919;
+  --card:#1F1F1F;
+  --hover:#323232;
+  --outline:#323232;
+  --accent:#87A9FF;
+  --text:#D4D4D4;
+  --subtext:#8C8C8C;
+  --danger:#ff5f5f;
+
+  --radius:14px;
+  --paddingY:24px;
+  --paddingX:16px;
+
+  --font:Arial, Helvetica, sans-serif;
+}
+
+/* =========================
+   GLOBAL RESET
+========================= */
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  padding:0;
+  background:transparent;
+  color:var(--text);
+  font-family:var(--font);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* Prevent host page conflicts */
+#hero-code-viewer *,
+#hero-code-viewer *::before,
+#hero-code-viewer *::after{
+  box-sizing:border-box;
+}
+
+/* =========================
+   MAIN TOOL WRAPPER
+========================= */
+#hero-code-viewer{
+  width:100%;
+  max-width:1600px;
+  margin:0 auto;
+  background:var(--bg);
+  border:1px solid var(--outline);
+  border-radius:20px;
+  overflow:hidden;
+  isolation:isolate;
+
+  /* Protect against host styles */
+  position:relative;
+  z-index:1;
+}
+
+/* =========================
+   HEADER
+========================= */
+.hero-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:18px 20px;
+  border-bottom:1px solid var(--outline);
+  background:rgba(255,255,255,0.01);
+
+  backdrop-filter:blur(10px);
+}
+
+.hero-title-group{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.hero-title{
+  font-size:20px;
+  font-weight:700;
+  color:var(--text);
+}
+
+.hero-subtitle{
+  font-size:12px;
+  color:var(--subtext);
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.hero-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.hero-btn{
+  position:relative;
+  padding:10px 16px;
+  border-radius:10px;
+  background:var(--card);
+  color:var(--text);
+  border:1px solid rgba(255,255,255,0.06);
+  cursor:pointer;
+  overflow:hidden;
+  font-size:14px;
+  transition:
+    transform .15s ease,
+    background .2s ease,
+    border-color .2s ease;
+}
+
+.hero-btn:hover{
+  background:var(--hover);
+  border-color:rgba(255,255,255,0.12);
+}
+
+.hero-btn:active{
+  transform:scale(0.98);
+}
+
+.hero-btn::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:-100%;
+  width:75%;
+  height:100%;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.15),
+    transparent
+  );
+  transform:skewX(-25deg);
+  transition:left .7s ease-in-out;
+}
+
+.hero-btn:hover::before{
+  left:125%;
+}
+
+.hero-btn:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 3px rgba(135,169,255,0.12);
+}
+
+.hero-btn.primary{
+  border-color:rgba(135,169,255,0.25);
+  color:var(--accent);
+}
+
+/* =========================
+   EDITOR LAYOUT
+========================= */
+.hero-layout{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  min-height:720px;
+}
+
+/* =========================
+   EDITOR PANEL
+========================= */
+.hero-panel{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+
+.hero-panel-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  border-bottom:1px solid var(--outline);
+  background:rgba(255,255,255,0.015);
+}
+
+.hero-panel-title{
+  font-size:14px;
+  font-weight:600;
+}
+
+.hero-panel-note{
+  font-size:11px;
+  color:var(--subtext);
+}
+
+/* =========================
+   CODE AREA
+========================= */
+.hero-editor-wrap{
+  position:relative;
+  flex:1;
+  min-height:0;
+  background:#151515;
+}
+
+.hero-editor{
+  width:100%;
+  height:100%;
+  min-height:640px;
+
+  padding:20px;
+
+  background:#151515;
+  color:#e6e6e6;
+
+  border:none;
+  outline:none;
+  resize:none;
+
+  font-size:14px;
+  line-height:1.7;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
+  tab-size:2;
+  white-space:pre;
+
+  /* Prevent host interference */
+  appearance:none;
+  -webkit-appearance:none;
+}
+
+/* =========================
+   PREVIEW
+========================= */
+.hero-preview-wrap{
+  position:relative;
+  flex:1;
+  background:#fff;
+}
+
+.hero-preview{
+  width:100%;
+  height:100%;
+  min-height:640px;
+  border:none;
+  background:#fff;
+
+  /* Strong isolation */
+  isolation:isolate;
+}
+
+/* =========================
+   DIVIDER
+========================= */
+.hero-divider{
+  width:1px;
+  background:var(--outline);
+}
+
+/* =========================
+   STATUS BAR
+========================= */
+.hero-status{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+
+  padding:12px 16px;
+  border-top:1px solid var(--outline);
+
+  background:rgba(255,255,255,0.015);
+
+  font-size:12px;
+  color:var(--subtext);
+}
+
+.hero-status-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.hero-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#3ddc84;
+  box-shadow:0 0 10px rgba(61,220,132,.5);
+}
+
+.hero-error{
+  color:var(--danger);
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 980px){
+
+  .hero-layout{
+    grid-template-columns:1fr;
+  }
+
+  .hero-divider{
+    width:100%;
+    height:1px;
+  }
+
+  .hero-toolbar{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .hero-actions{
+    width:100%;
+  }
+
+  .hero-btn{
+    flex:1;
+  }
+
+  .hero-editor,
+  .hero-preview{
+    min-height:420px;
+  }
+}
+
+/* =========================
+   FOURTHWALL / EMBED FIXES
+========================= */
+
+/* Avoid inherited transforms */
+#hero-code-viewer{
+  transform:none !important;
+}
+
+/* Avoid strange iframe scaling */
+iframe{
+  max-width:100%;
+}
+
+/* Prevent host CSS from altering form controls */
+textarea,
+button{
+  font-family:inherit;
+}
+
+/* Keep tool self-contained */
+#hero-code-viewer{
+  contain:layout style paint;
+}
+</style>
+</head>
+<body>
+
+<!-- =========================
+     HERO CODE VIEWER
+========================= -->
+<div id="hero-code-viewer">
+
+  <!-- TOOL HEADER -->
+  <div class="hero-toolbar">
+
+    <div class="hero-title-group">
+      <div class="hero-title">Live HTML/CSS/JS Viewer</div>
+      <div class="hero-subtitle">
+        Write code on the left, see the live result instantly on the right.
+      </div>
+    </div>
+
+    <div class="hero-actions">
+
+      <button class="hero-btn primary" id="runBtn">
+        Run Code
+      </button>
+
+      <button class="hero-btn" id="clearBtn">
+        Clear
+      </button>
+
+      <button class="hero-btn" id="copyBtn">
+        Copy Code
+      </button>
+
+      <button class="hero-btn" id="resetBtn">
+        Reset Example
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="hero-layout">
+
+    <!-- =========================
+         LEFT SIDE - EDITOR
+    ========================== -->
+    <div class="hero-panel">
+
+      <div class="hero-panel-header">
+        <div class="hero-panel-title">Code Editor</div>
+        <div class="hero-panel-note">
+          HTML, CSS & JavaScript
+        </div>
+      </div>
+
+      <div class="hero-editor-wrap">
+
+<textarea class="hero-editor" id="editor"><!DOCTYPE html>
 <html>
 <head>
 <style>
@@ -50,6 +477,188 @@ button{
 function showMessage(){
   alert("Your JavaScript works!");
 }
+</script>
+
+</body>
+</html></textarea>
+
+      </div>
+
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="hero-divider"></div>
+
+    <!-- =========================
+         RIGHT SIDE - PREVIEW
+    ========================== -->
+    <div class="hero-panel">
+
+      <div class="hero-panel-header">
+        <div class="hero-panel-title">Live Preview</div>
+        <div class="hero-panel-note">
+          Sandboxed isolated output
+        </div>
+      </div>
+
+      <div class="hero-preview-wrap">
+
+        <iframe
+          id="preview"
+          class="hero-preview"
+          sandbox="allow-scripts allow-modals"
+          referrerpolicy="no-referrer"
+        ></iframe>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="hero-status">
+
+    <div class="hero-status-left">
+      <div class="hero-dot"></div>
+      <span>Live Preview Enabled</span>
+    </div>
+
+    <div id="statusText">
+      Waiting for input...
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+/* =========================
+   HERO CODE VIEWER LOGIC
+========================= */
+
+const editor = document.getElementById('editor');
+const preview = document.getElementById('preview');
+
+const runBtn = document.getElementById('runBtn');
+const clearBtn = document.getElementById('clearBtn');
+const copyBtn = document.getElementById('copyBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+const statusText = document.getElementById('statusText');
+
+/* =========================
+   DEFAULT TEMPLATE
+========================= */
+const defaultTemplate = editor.value;
+
+/* =========================
+   LIVE UPDATE
+========================= */
+let updateTimeout;
+
+function updatePreview(){
+
+  clearTimeout(updateTimeout);
+
+  updateTimeout = setTimeout(() => {
+
+    try{
+
+      const code = editor.value;
+
+      /* 
+         Using srcdoc keeps everything isolated,
+         avoiding Fourthwall/iFrame interference.
+      */
+      preview.srcdoc = code;
+
+      statusText.textContent = "Preview updated successfully";
+
+    }catch(error){
+
+      console.error(error);
+
+      statusText.innerHTML =
+        '<span class="hero-error">Preview error detected</span>';
+    }
+
+  }, 120);
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+runBtn.addEventListener('click', () => {
+  updatePreview();
+});
+
+clearBtn.addEventListener('click', () => {
+
+  editor.value = '';
+
+  updatePreview();
+
+  statusText.textContent = "Editor cleared";
+});
+
+copyBtn.addEventListener('click', async () => {
+
+  try{
+
+    await navigator.clipboard.writeText(editor.value);
+
+    statusText.textContent = "Code copied to clipboard";
+
+  }catch(error){
+
+    statusText.innerHTML =
+      '<span class="hero-error">Clipboard blocked by browser</span>';
+  }
+});
+
+resetBtn.addEventListener('click', () => {
+
+  editor.value = defaultTemplate;
+
+  updatePreview();
+
+  statusText.textContent = "Example restored";
+});
+
+/* =========================
+   TAB SUPPORT
+========================= */
+editor.addEventListener('keydown', (e) => {
+
+  if(e.key === 'Tab'){
+
+    e.preventDefault();
+
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+
+    editor.value =
+      editor.value.substring(0, start)
+      + '  '
+      + editor.value.substring(end);
+
+    editor.selectionStart =
+    editor.selectionEnd =
+      start + 2;
+  }
+});
+
+/* =========================
+   REAL-TIME PREVIEW
+========================= */
+editor.addEventListener('input', updatePreview);
+
+/* =========================
+   INITIAL LOAD
+========================= */
+updatePreview();
 </script>
 
 </body>
