@@ -403,6 +403,7 @@
             <div class="control-group">
                 <div class="category-filters" id="category-filters">
                     <button class="cat-btn active" data-cat="all" onclick="setCategory('all')">All</button>
+                    <button class="cat-btn" data-cat="alphabet" onclick="setCategory('alphabet')">Alphabet</button>
                     <button class="cat-btn" data-cat="arrow" onclick="setCategory('arrow')">Arrows</button>
                     <button class="cat-btn" data-cat="art" onclick="setCategory('art')">Art</button>
                     <button class="cat-btn" data-cat="brands" onclick="setCategory('brands')">Brands</button>
@@ -632,6 +633,32 @@
 <script>
 // ===== BUILT-IN ICON LIBRARY =====
 const builtInIcons = [
+    { id: 'alphabet-letter-a',                                 name: 'Letter A',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-A.svg' },
+    { id: 'alphabet-letter-b',                                 name: 'Letter B',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-B.svg' },
+    { id: 'alphabet-letter-c',                                 name: 'Letter C',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-C.svg' },
+    { id: 'alphabet-letter-d',                                 name: 'Letter D',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-D.svg' },
+    { id: 'alphabet-letter-e',                                 name: 'Letter E',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-E.svg' },
+    { id: 'alphabet-letter-f',                                 name: 'Letter F',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-F.svg' },
+    { id: 'alphabet-letter-g',                                 name: 'Letter G',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-G.svg' },
+    { id: 'alphabet-letter-h',                                 name: 'Letter H',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-H.svg' },
+    { id: 'alphabet-letter-i',                                 name: 'Letter I',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-I.svg' },
+    { id: 'alphabet-letter-j',                                 name: 'Letter J',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-J.svg' },
+    { id: 'alphabet-letter-k',                                 name: 'Letter K',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-K.svg' },
+    { id: 'alphabet-letter-l',                                 name: 'Letter L',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-L.svg' },
+    { id: 'alphabet-letter-m',                                 name: 'Letter M',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-M.svg' },
+    { id: 'alphabet-letter-n',                                 name: 'Letter N',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-N.svg' },
+    { id: 'alphabet-letter-o',                                 name: 'Letter O',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-O.svg' },
+    { id: 'alphabet-letter-p',                                 name: 'Letter P',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-P.svg' },
+    { id: 'alphabet-letter-q',                                 name: 'Letter Q',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-Q.svg' },
+    { id: 'alphabet-letter-r',                                 name: 'Letter R',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-R.svg' },
+    { id: 'alphabet-letter-s',                                 name: 'Letter S',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-S.svg' },
+    { id: 'alphabet-letter-t',                                 name: 'Letter T',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-T.svg' },
+    { id: 'alphabet-letter-u',                                 name: 'Letter U',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-U.svg' },
+    { id: 'alphabet-letter-v',                                 name: 'Letter V',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-V.svg' },
+    { id: 'alphabet-letter-w',                                 name: 'Letter W',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-W.svg' },
+    { id: 'alphabet-letter-x',                                 name: 'Letter X',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-X.svg' },
+    { id: 'alphabet-letter-y',                                 name: 'Letter Y',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-Y.svg' },
+    { id: 'alphabet-letter-z',                                 name: 'Letter Z',                            src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/Alphabet-Letter-Z.svg' },
     { id: 'arrow-down',                                        name: 'Arrow Down',                          src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-down.svg' },
     { id: 'arrow-left',                                        name: 'Arrow Left',                          src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-left.svg' },
     { id: 'arrow-right',                                       name: 'Arrow Right',                         src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/arrow-right.svg' },
@@ -753,8 +780,8 @@ const builtInIcons = [
     { id: 'ui-lock-unlock',                                    name: 'Lock / Unlock',                       src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/ui-lock-unlock.svg' },
     { id: 'ui-lock',                                           name: 'Lock',                                src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/ui-lock.svg' },
     { id: 'ui-mail-email-letter',                              name: 'Mail / Email',                        src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/ui-mail-email-letter.svg' },
-    { id: 'ui-menu-dots-horizontal',                           name: 'Menu Dots (Horizontal)',               src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/ui-menu-dots-horizontal.svg' },
-    { id: 'ui-menu-dots-vertical',                             name: 'Menu Dots (Vertical)',                 src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/ui-menu-dots-vertical.svg' },
+    { id: 'ui-menu-dots-horizontal',                           name: 'Menu Dots (Horizontal)',              src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/ui-menu-dots-horizontal.svg' },
+    { id: 'ui-menu-dots-vertical',                             name: 'Menu Dots (Vertical)',                src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/ui-menu-dots-vertical.svg' },
     { id: 'ui-menu-start-hamburger',                           name: 'Hamburger Menu',                      src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/ui-menu-start-hamburger.svg' },
     { id: 'ui-minus-subtract',                                 name: 'Minus / Subtract',                    src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/ui-minus-subtract.svg' },
     { id: 'ui-notes',                                          name: 'Notes',                               src: 'https://herovibes.github.io/HeroVibesStoreTools/StreamDeckBulkIconMaker/Images/ui-notes.svg' },
