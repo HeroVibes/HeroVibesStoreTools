@@ -1052,10 +1052,10 @@ function renderLibrary() {
             img.src = icon.dataSrc;
             div.appendChild(img);
         } else {
-            // Built-in — display as white ghost
+            // Built-in — display as perfectly white ghost using brightness(0) invert(1)
             const img = document.createElement('img');
             img.src = icon.src;
-            img.style.filter = 'invert(1) opacity(0.7)';
+            img.style.filter = 'brightness(0) invert(1) opacity(0.7)';
             div.appendChild(img);
         }
 
