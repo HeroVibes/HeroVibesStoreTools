@@ -876,8 +876,9 @@ function colouriseSvg(rawSvg, colour, strokeColour, strokeW, effectType) {
         ? `* { stroke: ${strokeColour} !important; stroke-width: ${strokeW}px !important; paint-order: stroke fill; } svg { overflow: visible !important; }`
         : '';
 
+    // Added !important rules to completely override stubborn pre-coded icon fill colours
     const styleTag = `<style>
-        svg, svg * { fill: ${colour}; color: ${colour}; }
+        svg, svg * { fill: ${colour} !important; color: ${colour} !important; }
         [fill="none"] { fill: none !important; }
         ${strokeRule}
     </style>`;
